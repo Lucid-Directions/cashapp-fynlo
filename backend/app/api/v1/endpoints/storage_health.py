@@ -1,7 +1,7 @@
 """
 Storage Health Check API endpoints
 Monitor DigitalOcean Spaces integration status
-"""
+"""TODO: Add docstring."""
 
 from fastapi import APIRouter, Depends
 from app.core.auth import get_current_user
@@ -17,7 +17,7 @@ async def storage_health_check(current_user: User = Depends(get_current_user)):
     """
     Check storage service health and configuration
     Requires authentication to prevent information disclosure
-    """
+    """TODO: Add docstring."""
     
     # Only allow platform owners to check health
     if current_user.role != "platform_owner":
@@ -54,7 +54,7 @@ async def get_file_count(
 ):
     """
     Get count of files in Spaces storage
-    """
+    """TODO: Add docstring."""
     
     # Only allow platform owners or restaurant owners
     if current_user.role not in ["platform_owner", "restaurant_owner"]:

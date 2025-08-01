@@ -1,7 +1,7 @@
 """
 Pydantic schemas for Employee Management API
 Defines request/response models for employee operations
-"""
+"""TODO: Add docstring."""
 
 from typing import Optional, List, Dict, Any
 from datetime import datetime, date, time

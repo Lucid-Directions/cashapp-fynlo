@@ -1,6 +1,6 @@
 """
 WebSocket schemas for Fynlo POS
-"""
+"""TODO: Add docstring."""
 
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List

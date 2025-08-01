@@ -1,11 +1,11 @@
 """
 Employee Management API endpoints for Fynlo POS Backend
 Handles employee CRUD operations, scheduling, time tracking, and performance metrics
-"""
+"""TODO: Add docstring."""
 
 from typing import List, Optional
 from datetime import datetime, date
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db, User
 from app.core.responses import APIResponseHelper

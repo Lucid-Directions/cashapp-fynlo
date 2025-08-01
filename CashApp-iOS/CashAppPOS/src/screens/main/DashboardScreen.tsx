@@ -38,6 +38,7 @@ const DashboardScreen: React.FC = () => {
   const restaurantDisplayName = useRestaurantDisplayName();
   const { theme } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const dynamicStyles = createDynamicStyles(theme);
 
   // Mock KPI data
   const kpiData: KPICardProps[] = [
@@ -110,7 +111,7 @@ const DashboardScreen: React.FC = () => {
   const KPICard: React.FC<KPICardProps> = ({ title, value, change, changeType, icon, color }) => (
     <View style={styles.kpiCard}>
       <View style={styles.kpiHeader}>
-        <View style={[styles.kpiIcon, { backgroundColor: color }]}>
+        <View style={[styles.kpiIcon, dynamicStyles.kpiIcon(color)]}>
           <Icon name={icon} size={24} color={theme.colors.white} />
         </View>
         <View style={styles.kpiContent}>
@@ -128,25 +129,12 @@ const DashboardScreen: React.FC = () => {
               : 'trending-flat'
           }
           size={16}
-          color={
-            changeType === 'positive'
-              ? theme.colors.success
-              : changeType === 'negative'
-              ? theme.colors.danger
-              : theme.colors.lightText
-          }
+          color={dynamicStyles.kpiChangeIcon(changeType).color}
         />
         <Text
           style={[
             styles.kpiChangeText,
-            {
-              color:
-                changeType === 'positive'
-                  ? theme.colors.success
-                  : changeType === 'negative'
-                  ? theme.colors.danger
-                  : theme.colors.lightText,
-            },
+            dynamicStyles.kpiChangeText(changeType),
           ]}
         >
           {change}
@@ -174,7 +162,7 @@ const DashboardScreen: React.FC = () => {
       </View>
       <View style={styles.goalProgress}>
         <View style={styles.goalProgressTrack}>
-          <View style={[styles.goalProgressFill, { width: `${Math.min(percentage, 100)}%` }]} />
+          <View style={[styles.goalProgressFill, dynamicStyles.goalProgressFill(percentage)]} />
         </View>
       </View>
       <View style={styles.goalValues}>
@@ -198,14 +186,7 @@ const DashboardScreen: React.FC = () => {
       <View
         style={[
           styles.alertIcon,
-          {
-            backgroundColor:
-              alert.type === 'warning'
-                ? theme.colors.warning
-                : alert.type === 'success'
-                ? theme.colors.success
-                : theme.colors.secondary,
-          },
+          dynamicStyles.alertIcon(alert.type),
         ]}
       >
         <Icon
@@ -328,6 +309,40 @@ const DashboardScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
+
+// Dynamic styles creator for conditional styling
+const createDynamicStyles = (theme: unknown) => ({
+  kpiIcon: (color: string) => ({
+    backgroundColor: color,
+  }),
+  kpiChangeText: (changeType: 'positive' | 'negative' | 'neutral') => ({
+    color:
+      changeType === 'positive'
+        ? theme.colors.success
+        : changeType === 'negative'
+        ? theme.colors.danger
+        : theme.colors.lightText,
+  }),
+  kpiChangeIcon: (changeType: 'positive' | 'negative' | 'neutral') => ({
+    color:
+      changeType === 'positive'
+        ? theme.colors.success
+        : changeType === 'negative'
+        ? theme.colors.danger
+        : theme.colors.lightText,
+  }),
+  goalProgressFill: (percentage: number) => ({
+    width: `${Math.min(percentage, 100)}%`,
+  }),
+  alertIcon: (type: 'warning' | 'info' | 'success') => ({
+    backgroundColor:
+      type === 'warning'
+        ? theme.colors.warning
+        : type === 'success'
+        ? theme.colors.success
+        : theme.colors.secondary,
+  }),
+});
 
 const createStyles = (theme: unknown) =>
   StyleSheet.create({

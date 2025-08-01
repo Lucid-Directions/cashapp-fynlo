@@ -1,7 +1,7 @@
 """
 Enhanced WebSocket API endpoints for Fynlo POS
 Implements heartbeat, reconnection, and improved connection management
-"""
+"""TODO: Add docstring."""
 
 import asyncio
 import json

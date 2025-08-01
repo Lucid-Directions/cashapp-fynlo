@@ -1,6 +1,6 @@
 """
 Dashboard API endpoints for Fynlo POS - Portal dashboard aggregation
-"""
+"""TODO: Add docstring."""
 
 from typing import Optional, List
 from datetime import datetime, date, timedelta

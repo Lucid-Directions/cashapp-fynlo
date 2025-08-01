@@ -214,6 +214,7 @@ export const Row: React.FC<RowProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
+  const styles = createStyles(theme);
   const currentSpacing = useResponsiveValue(spacingProp, 3);
   const spacingValue = theme.spacing[currentSpacing];
 
@@ -273,6 +274,43 @@ const createStyles = (theme: Theme) =>
     sectionSubtitle: {
       fontSize: theme.typography.fontSize.lg,
       color: theme.colors.neutral[600],
+    },
+    row: {
+      flexDirection: 'row',
+      flexWrap: 'nowrap',
+    },
+    rowWrap: {
+      flexWrap: 'wrap',
+    },
+    rowAlignStart: {
+      alignItems: 'flex-start',
+    },
+    rowAlignCenter: {
+      alignItems: 'center',
+    },
+    rowAlignEnd: {
+      alignItems: 'flex-end',
+    },
+    rowAlignStretch: {
+      alignItems: 'stretch',
+    },
+    rowJustifyStart: {
+      justifyContent: 'flex-start',
+    },
+    rowJustifyCenter: {
+      justifyContent: 'center',
+    },
+    rowJustifyEnd: {
+      justifyContent: 'flex-end',
+    },
+    rowJustifyBetween: {
+      justifyContent: 'space-between',
+    },
+    rowJustifyAround: {
+      justifyContent: 'space-around',
+    },
+    rowJustifyEvenly: {
+      justifyContent: 'space-evenly',
     },
   });
 

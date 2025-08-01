@@ -1,7 +1,7 @@
 """
 Two-Factor Authentication for Platform Owners
 Implements TOTP (Time-based One-Time Password) for Ryan and Arnaud
-"""
+"""TODO: Add docstring."""
 
 import pyotp
 import qrcode
@@ -9,7 +9,6 @@ import io
 import base64
 from datetime import datetime, timedelta
 from typing import Optional, Tuple
-from fastapi import status
 
 from app.core.redis_client import RedisClient
 from app.models import User
@@ -25,7 +24,7 @@ RECOVERY_CODE_LENGTH = 8
 class TwoFactorAuth:
     """
     Manages 2FA for platform owners
-    """
+    """TODO: Add docstring."""
     
     def __init__(self, redis_client: Optional[RedisClient] = None):
         self.redis = redis_client
@@ -117,7 +116,7 @@ class TwoFactorAuth:
         """
         if not self.redis:
             raise FynloException(
-                "2FA service unavailable", 
+                message="2FA service unavailable", 
                 status_code=503
             )
         
@@ -125,7 +124,7 @@ class TwoFactorAuth:
         setup_data = await self.redis.get(setup_key)
         if not setup_data:
             raise ValidationException(
-                detail="2FA setup expired or invalid"
+                message="2FA setup expired or invalid"
             )
         
         # Verify token
@@ -216,7 +215,7 @@ class TwoFactorAuth:
         valid, _ = await self.verify_2fa(user, current_token)
         if not valid:
             raise AuthenticationException(
-                detail="Invalid 2FA token"
+                message="Invalid 2FA token"
             )
                 if self.redis:
             user_2fa_key = f"2fa:user:{user.id}"
@@ -236,12 +235,12 @@ class TwoFactorAuth:
         valid, _ = await self.verify_2fa(user, current_token)
         if not valid:
             raise AuthenticationException(
-                detail="Invalid 2FA token"
+                message="Invalid 2FA token"
             )
         
         if not self.redis:
             raise FynloException(
-                "2FA service unavailable", 
+                message="2FA service unavailable", 
                 status_code=503
             )
         

@@ -1,7 +1,7 @@
 """
 Test script for Supabase authentication integration
 Run this after setting up your .env file with Supabase credentials
-"""
+"""TODO: Add docstring."""
 
 import asyncio
 import httpx

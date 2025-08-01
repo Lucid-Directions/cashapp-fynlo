@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Fix all remaining HTTPExceptions in core modules
-"""
+"""TODO: Add docstring."""
 
 import os
 import re

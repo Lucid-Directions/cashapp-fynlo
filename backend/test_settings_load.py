@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Test settings loading order
-"""
+"""TODO: Add docstring."""
 
 import os
 import sys

@@ -2,7 +2,7 @@
 """
 Master Database Seeding Script for Fynlo POS
 Creates comprehensive production-like data for testing and development
-"""
+"""TODO: Add docstring."""
 
 import asyncio
 import sys

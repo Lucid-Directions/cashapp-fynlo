@@ -3,7 +3,7 @@ Subscription schemas for API request/response validation
 
 This module contains Pydantic models for validating subscription-related
 API requests and responses.
-"""
+"""TODO: Add docstring."""
 
 from pydantic import BaseModel, validator
 from typing import Optional, Dict, Any

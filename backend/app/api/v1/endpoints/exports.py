@@ -1,11 +1,11 @@
 """
 Export API endpoints for Fynlo POS - Portal export functionality
 TEMPORARILY DISABLED DUE TO MISSING DEPENDENCIES
-"""
+"""TODO: Add docstring."""
 
 from typing import Optional
 from datetime import date
-from fastapi import APIRouter, Depends, Query, HTTPException, Request
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db, User

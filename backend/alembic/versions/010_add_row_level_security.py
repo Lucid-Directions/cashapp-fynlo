@@ -1,4 +1,5 @@
-"""Add row level security for multi-tenant isolation
+"""
+Add row level security for multi-tenant isolation
 
 Revision ID: add_row_level_security
 Revises: performance_indexes_20250117
@@ -22,7 +23,7 @@ def upgrade():
     """
     Enable Row Level Security on all tenant-specific tables
     Platform owners (Ryan and Arnaud) bypass all RLS policies
-    """
+    """TODO: Add docstring."""
     
     # Tables that need RLS
     tables_needing_rls = [
@@ -160,7 +161,7 @@ def upgrade():
 def downgrade():
     """
     Disable Row Level Security
-    """
+    """TODO: Add docstring."""
     
     tables_with_rls = [
         'orders', 'order_items', 'products', 'categories', 'customers',

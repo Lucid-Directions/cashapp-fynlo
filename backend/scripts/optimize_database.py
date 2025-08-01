@@ -2,7 +2,7 @@
 """
 Database Optimization Script for Fynlo POS
 Adds indexes, analyzes tables, and optimizes performance
-"""
+"""TODO: Add docstring."""
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -55,7 +55,7 @@ def analyze_table_sizes(cursor):
     WHERE schemaname = 'public'
     ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
     LIMIT 20;
-    """
+    """TODO: Add docstring."""
     
     cursor.execute(query)
     results = cursor.fetchall()
@@ -96,7 +96,7 @@ def check_missing_indexes(cursor):
                 AND indexdef LIKE '%' || kcu.column_name || '%'
         )
     ORDER BY tc.table_name, kcu.column_name;
-    """
+    """TODO: Add docstring."""
     
     cursor.execute(query)
     missing_fk_indexes = cursor.fetchall()
@@ -208,7 +208,7 @@ def analyze_slow_queries(cursor):
         AND mean_exec_time > 100  -- Queries averaging over 100ms
     ORDER BY mean_exec_time DESC
     LIMIT 10;
-    """
+    """TODO: Add docstring."""
     
     try:
         cursor.execute(query)

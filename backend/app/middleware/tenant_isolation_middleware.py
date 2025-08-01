@@ -2,7 +2,7 @@
 Tenant Isolation Middleware
 Ensures all API requests are properly isolated by restaurant
 Platform owners (Ryan and Arnaud) bypass all restrictions
-"""
+"""TODO: Add docstring."""
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class TenantIsolationMiddleware(BaseHTTPMiddleware):
     """
     Middleware to enforce tenant isolation across all API endpoints
-    """
+    """TODO: Add docstring."""
     
     def __init__(self, app: ASGIApp):
         super().__init__(app)
@@ -78,7 +78,7 @@ class TenantIsolationMiddleware(BaseHTTPMiddleware):
 class TenantValidationMiddleware:
     """
     Additional middleware to validate tenant access in request payloads
-    """
+    """TODO: Add docstring."""
     
     @staticmethod
     async def validate_request_body(request: Request) -> None:

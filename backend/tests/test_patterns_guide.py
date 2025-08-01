@@ -1,4 +1,5 @@
-"""Comprehensive Testing Patterns for FastAPI Backend
+"""
+Comprehensive Testing Patterns for FastAPI Backend
 
 This guide provides patterns for achieving 100% test coverage across all components:
 1. FastAPI endpoints with authentication
@@ -1399,7 +1400,7 @@ directory = htmlcov
 
 [xml]
 output = coverage.xml
-"""
+"""TODO: Add docstring."""
 
 # ============================================================================
 # PYTEST CONFIGURATION
@@ -1433,7 +1434,7 @@ markers =
     performance: marks performance tests
     
 asyncio_mode = auto
-"""
+"""TODO: Add docstring."""
 
 # ============================================================================
 # ADVANCED TESTING PATTERNS
@@ -1690,4 +1691,4 @@ coverage report
 
 # Show missing lines for specific file
 coverage report -m app/services/order_service.py
-"""
+"""TODO: Add docstring."""

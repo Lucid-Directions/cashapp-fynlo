@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Simple test server to diagnose network connectivity issues
-"""
+"""TODO: Add docstring."""
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

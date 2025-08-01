@@ -762,7 +762,7 @@ const _savedOrder = await orderService.saveOrder(orderData);
                   minValue={0}
                   decimalPlaces={2}
                   placeholder="5.00"
-                  style={styles.customTipInput}
+                  style={styles.tipInput}
                 />
               </View>
             )}
@@ -1022,6 +1022,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: Colors.primary,
+  },
+  tipInput: {
+    marginVertical: 8,
   },
   tipButtons: {
     flexDirection: 'row',

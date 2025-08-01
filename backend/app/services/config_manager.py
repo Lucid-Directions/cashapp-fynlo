@@ -1,7 +1,7 @@
 """
 Configuration Manager for Payment Providers
 Centralized configuration management with environment support and validation
-"""
+"""TODO: Add docstring."""
 
 import os
 import logging

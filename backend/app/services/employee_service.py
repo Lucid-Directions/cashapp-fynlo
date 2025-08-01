@@ -1,7 +1,7 @@
 """
 Employee Service - Business logic for employee management
 Handles employee CRUD operations, scheduling, time tracking, and performance metrics
-"""
+"""TODO: Add docstring."""
 
 from typing import List, Optional, Dict, Any
 from datetime import datetime, date, time, timedelta

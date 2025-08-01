@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Test production authentication endpoint
-"""
+"""TODO: Add docstring."""
 
 import requests
 import json

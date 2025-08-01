@@ -1,7 +1,7 @@
 """
 File Upload API endpoints for Fynlo POS
 iOS-optimized base64 image upload endpoints
-"""
+"""TODO: Add docstring."""
 
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Path, Query

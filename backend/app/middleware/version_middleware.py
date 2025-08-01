@@ -1,7 +1,7 @@
 """
 API Version Detection and Routing Middleware
 Provides automatic version detection and backward compatibility
-"""
+"""TODO: Add docstring."""
 
 from fastapi import Request, Response
 from fastapi.responses import RedirectResponse
@@ -20,7 +20,7 @@ class APIVersionMiddleware:
     - WebSocket path normalization
     - Version header detection
     - Graceful fallback mechanisms
-    """
+    """TODO: Add docstring."""
     
     def __init__(self, app):
         self.app = app
@@ -63,7 +63,7 @@ class APIVersionMiddleware:
         /api/products -> /api/v1/products
         /api/v1/products -> /api/v1/products (unchanged)
         /health -> /health (unchanged)
-        """
+        """TODO: Add docstring."""
         
         # Pattern for unversioned API calls
         unversioned_pattern = r'^/api/(?!v\d+/)(.+)$'
@@ -84,7 +84,7 @@ class APIVersionMiddleware:
         Examples:
         /ws/{restaurant_id} -> /api/v1/websocket/ws/{restaurant_id}
         /websocket/{restaurant_id} -> /api/v1/websocket/ws/{restaurant_id}
-        """
+        """TODO: Add docstring."""
         
         # Pattern for direct WebSocket paths
         ws_patterns = [
@@ -105,7 +105,7 @@ class APIVersionMiddleware:
         Checks for:
         - X-API-Version header
         - Accept header with version
-        """
+        """TODO: Add docstring."""
         
         # Check X-API-Version header
         api_version = request.headers.get("x-api-version")
@@ -124,7 +124,7 @@ class APIVersionMiddleware:
 def add_version_headers_to_response(request: Request, response: Response) -> Response:
     """
     Add version information to response headers
-    """
+    """TODO: Add docstring."""
     
     # Add current API version to response
     response.headers["X-API-Version"] = "1"
@@ -139,7 +139,7 @@ def add_version_headers_to_response(request: Request, response: Response) -> Res
 class WebSocketPathNormalizer:
     """
     Utility class for WebSocket path normalization
-    """
+    """TODO: Add docstring."""
     
     @staticmethod
     def normalize_ws_path(path: str, restaurant_id: str, connection_type: str = "general") -> str:
@@ -153,7 +153,7 @@ class WebSocketPathNormalizer:
             
         Returns:
             Normalized path
-        """
+        """TODO: Add docstring."""
         
         base_path = f"/api/v1/websocket/ws"
         
@@ -166,7 +166,7 @@ class WebSocketPathNormalizer:
     def extract_restaurant_id_from_path(path: str) -> Optional[str]:
         """
         Extract restaurant ID from WebSocket path
-        """
+        """TODO: Add docstring."""
         
         patterns = [
             r'/ws/([^/]+)',

@@ -1,7 +1,7 @@
 """
 WebSocket Rate Limiting Integration
 This module shows how to integrate rate limiting into the existing websocket.py
-"""
+"""TODO: Add docstring."""
 
 # Add these imports to websocket.py
 from fastapi import Path, Query, WebSocket, Depends

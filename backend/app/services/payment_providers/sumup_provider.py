@@ -1,6 +1,6 @@
 """
 SumUp Payment Provider Implementation
-"""
+"""TODO: Add docstring."""
 
 from decimal import Decimal
 from typing import Dict, Any, Optional

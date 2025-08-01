@@ -2,7 +2,7 @@
 """
 Standalone Database Optimization Script for Fynlo POS
 Works without app dependencies
-"""
+"""TODO: Add docstring."""
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -51,7 +51,7 @@ def analyze_table_sizes(cursor):
     WHERE schemaname = 'public'
     ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
     LIMIT 20;
-    """
+    """TODO: Add docstring."""
     
     cursor.execute(query)
     results = cursor.fetchall()
@@ -98,7 +98,7 @@ def check_existing_indexes(cursor):
     FROM pg_indexes
     WHERE schemaname = 'public'
     ORDER BY tablename, indexname;
-    """
+    """TODO: Add docstring."""
     
     cursor.execute(query)
     indexes = cursor.fetchall()

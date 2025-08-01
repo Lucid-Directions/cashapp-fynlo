@@ -1,7 +1,7 @@
 """
 Standardized API Response System for Fynlo POS
 iOS-friendly response wrapper for consistent mobile app integration
-"""
+"""TODO: Add docstring."""
 
 from typing import Any, Optional, Dict, List
 from datetime import datetime

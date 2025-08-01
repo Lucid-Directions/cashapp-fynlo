@@ -1,7 +1,7 @@
 """
 Platform administration endpoints for secure management
 Only accessible by existing platform owners with proper authentication
-"""
+"""TODO: Add docstring."""
 
 from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session

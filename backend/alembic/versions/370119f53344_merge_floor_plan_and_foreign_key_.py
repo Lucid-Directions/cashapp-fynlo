@@ -1,4 +1,5 @@
-"""Merge floor plan and foreign key constraints
+"""
+Merge floor plan and foreign key constraints
 
 Revision ID: 370119f53344
 Revises: 003_add_floor_plan_and_pos_tables, 006_add_foreign_key_constraints

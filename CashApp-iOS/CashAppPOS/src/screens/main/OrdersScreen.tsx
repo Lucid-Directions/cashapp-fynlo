@@ -17,6 +17,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import EmptyState from '../../components/common/EmptyState';
 import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
+import { logger } from '../../utils/logger';
 import OrderService from '../../services/OrderService';
 
 import type { Order } from '../../types';
@@ -39,6 +40,8 @@ const OrdersScreen: React.FC = () => {
     completed: theme.colors.lightText,
     cancelled: theme.colors.danger,
   };
+  
+  const dynamicStyles = createDynamicStyles(theme, statusColors);
 
   const statusIcons = {
     draft: 'edit',
@@ -137,7 +140,7 @@ const OrdersScreen: React.FC = () => {
             {formatTime(order.createdAt)} • {getTimeSince(order.createdAt)}
           </Text>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: statusColors[order.status] }]}>
+        <View style={[styles.statusBadge, dynamicStyles.statusBadge(order.status)]}>
           <Icon name={statusIcons[order.status]} size={16} color={theme.colors.white} />
           <Text style={styles.statusText}>{order.status.toUpperCase()}</Text>
         </View>
@@ -277,29 +280,18 @@ const OrdersScreen: React.FC = () => {
   );
 };
 
+// Dynamic styles creator for conditional styling
+const createDynamicStyles = (theme: unknown, statusColors: Record<string, string>) => ({
+  statusBadge: (status: string) => ({
+    backgroundColor: statusColors[status] || theme.colors.lightText,
+  }),
+});
+
 const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
-    },
-    header: {
-      backgroundColor: theme.colors.primary,
-      paddingHorizontal: 20,
-      paddingVertical: 15,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      elevation: 4,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-    },
-    headerTitle: {
-      color: theme.colors.white,
-      fontSize: 20,
-      fontWeight: 'bold',
     },
     searchButton: {
       padding: 8,

@@ -1,10 +1,10 @@
 """
 Enhanced Exception Handling for Fynlo POS
 iOS-friendly error management with detailed error information
-"""
+"""TODO: Add docstring."""
 
 from typing import Any, Dict, Optional, List
-from fastapi import HTTPException, Request
+from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
@@ -246,15 +246,19 @@ async def fynlo_exception_handler(request: Request, exc: FynloException) -> JSON
     )
 
 
-async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle FastAPI HTTP exceptions with standardized format"""
+    
+    # FastAPI exceptions have status_code and detail attributes
+    status_code = getattr(exc, 'status_code', 500)
+    detail = getattr(exc, 'detail', 'Internal server error')
     
     error_id = str(uuid.uuid4())
     logger.error(
-        f"HTTPException [{error_id}]: {exc.status_code} - {exc.detail}",
+        f"HTTP Exception [{error_id}]: {status_code} - {detail}",
         extra={
             "error_id": error_id,
-            "status_code": exc.status_code,
+            "status_code": status_code,
             "request_path": request.url.path,
             "request_method": request.method
         }
@@ -271,7 +275,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
         500: ErrorCodes.INTERNAL_ERROR
     }
     
-    error_code = error_code_mapping.get(exc.status_code, ErrorCodes.INTERNAL_ERROR)
+    error_code = error_code_mapping.get(status_code, ErrorCodes.INTERNAL_ERROR)
     
     generic_messages = {
         400: "Bad request.",
@@ -282,26 +286,26 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
         500: "Internal server error."
     }
 
-    response_message = str(exc.detail)
+    response_message = str(detail)
     response_details = {"error_id": error_id}
 
     if not settings.ERROR_DETAIL_ENABLED:
-        response_message = generic_messages.get(exc.status_code, "An error occurred.")
+        response_message = generic_messages.get(status_code, "An error occurred.")
         # For validation (422) or bad request (400) specifically,
         # we might want a slightly more indicative generic message if details are hidden.
-        if exc.status_code == 422:
+        if status_code == 422:
             response_message = "Request validation failed. Please check your input."
-        elif exc.status_code == 400:
+        elif status_code == 400:
              response_message = "Invalid request format or data."
-    elif isinstance(exc.detail, dict): # If detail is a dict, pass it along in debug mode
-        response_details.update(exc.detail)
+    elif isinstance(detail, dict): # If detail is a dict, pass it along in debug mode
+        response_details.update(detail)
 
 
     return APIResponseHelper.error(
         message=response_message,
         error_code=error_code,
         details=response_details,
-        status_code=exc.status_code
+        status_code=status_code
     )
 
 
@@ -381,8 +385,11 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
 def register_exception_handlers(app):
     """Register all exception handlers with the FastAPI app"""
     
+    # Import the FastAPI exception class here only for registration
+    from fastapi.exceptions import HTTPException as FastAPIHTTPException
+    
     app.add_exception_handler(FynloException, fynlo_exception_handler)
-    app.add_exception_handler(HTTPException, http_exception_handler)
+    app.add_exception_handler(FastAPIHTTPException, http_exception_handler)
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(Exception, general_exception_handler)
 

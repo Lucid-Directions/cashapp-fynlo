@@ -1,7 +1,7 @@
 """
 Enhanced WebSocket Security with TenantSecurity module
 Ensures proper isolation while maintaining platform owner access
-"""
+"""TODO: Add docstring."""
 
 from fastapi import WebSocket, WebSocketDisconnect, Path, Query, Depends
 from sqlalchemy.orm import Session
@@ -119,7 +119,7 @@ async def handle_websocket_message_secure(
 class SecureWebSocketManager:
     """
     Enhanced WebSocket manager with tenant isolation
-    """
+    """TODO: Add docstring."""
     
     @staticmethod
     async def broadcast_to_restaurant_secure(

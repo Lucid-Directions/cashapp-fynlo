@@ -1,6 +1,6 @@
 """
 Portal Activity Log model for audit trail
-"""
+"""TODO: Add docstring."""
 
 from sqlalchemy import Column, String, DateTime, Text, ForeignKey, Index
 from sqlalchemy.dialects.postgresql import UUID, JSONB

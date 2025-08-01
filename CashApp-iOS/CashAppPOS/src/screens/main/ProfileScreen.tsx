@@ -25,6 +25,7 @@ const ProfileScreenContent: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const dynamicStyles = useThemedStyles(createDynamicStyles);
   const { user, session } = useAppStore();
   const { updateUser } = useAuth();
 
@@ -294,14 +295,14 @@ const ProfileScreenContent: React.FC = () => {
 
               <View style={styles.modalActions}>
                 <TouchableOpacity
-                  style={[styles.modalButton, styles.cancelButton]}
+                  style={dynamicStyles.modalCancelButton}
                   onPress={() => setShowEditModal(false)}
                 >
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.modalButton, styles.saveButton]}
+                  style={dynamicStyles.modalSaveButton}
                   onPress={handleSaveProfile}
                 >
                   <Text style={styles.saveButtonText}>Save Changes</Text>
@@ -371,14 +372,14 @@ const ProfileScreenContent: React.FC = () => {
 
               <View style={styles.modalActions}>
                 <TouchableOpacity
-                  style={[styles.modalButton, styles.cancelButton]}
+                  style={dynamicStyles.modalCancelButton}
                   onPress={() => setShowPasswordModal(false)}
                 >
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.modalButton, styles.saveButton]}
+                  style={dynamicStyles.modalSaveButton}
                   onPress={handleSavePassword}
                 >
                   <Text style={styles.saveButtonText}>Change Password</Text>
@@ -391,6 +392,29 @@ const ProfileScreenContent: React.FC = () => {
     </SafeAreaView>
   );
 };
+
+// Dynamic styles creator for button combinations
+const createDynamicStyles = (theme: unknown) => 
+  StyleSheet.create({
+    modalCancelButton: {
+      flex: 1,
+      marginRight: 8,
+      backgroundColor: theme.colors.white,
+      borderRadius: 8,
+      paddingVertical: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    modalSaveButton: {
+      flex: 1,
+      marginLeft: 8,
+      backgroundColor: theme.colors.primary,
+      borderRadius: 8,
+      paddingVertical: 12,
+      alignItems: 'center',
+    },
+  });
 
 const createStyles = (theme: unknown) =>
   StyleSheet.create({
@@ -432,9 +456,6 @@ const createStyles = (theme: unknown) =>
     profileHeader: {
       alignItems: 'center',
       paddingVertical: 30,
-    },
-    profileLogo: {
-      marginBottom: 16,
     },
     avatar: {
       width: 100,
@@ -613,18 +634,6 @@ const createStyles = (theme: unknown) =>
       gap: 12,
       marginTop: 24,
       paddingBottom: 20,
-    },
-    modalButton: {
-      flex: 1,
-      paddingVertical: 14,
-      borderRadius: 8,
-      alignItems: 'center',
-    },
-    cancelButton: {
-      backgroundColor: theme.colors.lightGray,
-    },
-    saveButton: {
-      backgroundColor: theme.colors.primary,
     },
     cancelButtonText: {
       color: theme.colors.text,

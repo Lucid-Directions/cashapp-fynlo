@@ -1,7 +1,7 @@
 """
 Comprehensive security module for Fynlo POS backend.
 Handles environment filtering, input validation, password hashing, and security utilities.
-"""
+"""TODO: Add docstring."""
 
 import os
 import re
@@ -49,7 +49,7 @@ class SafeEnvironmentFilter:
     """
     Filters environment variables to prevent exposure of sensitive data.
     Only whitelisted variables are accessible through public endpoints.
-    """
+    """TODO: Add docstring."""
     
     # Safe environment variables that can be exposed in public endpoints
     PUBLIC_SAFE_VARS: Set[str] = {
@@ -156,7 +156,7 @@ class SafeEnvironmentFilter:
 class InputValidator:
     """
     Comprehensive input validation utilities to prevent injection attacks.
-    """
+    """TODO: Add docstring."""
     
     # Dangerous characters for different contexts
     SQL_DANGEROUS_CHARS = ["'", '"', ";", "--", "/*", "*/", "\\"]
@@ -255,7 +255,7 @@ class TokenEncryption:
     """
     Secure token encryption for storing sensitive tokens like API keys.
     Uses Fernet symmetric encryption with key derivation.
-    """
+    """TODO: Add docstring."""
     
     def __init__(self, master_key: Optional[str] = None):
         """
@@ -316,7 +316,7 @@ class TokenEncryption:
 class WebhookSecurity:
     """
     Webhook signature verification and security utilities.
-    """
+    """TODO: Add docstring."""
     
     @staticmethod
     def verify_signature(

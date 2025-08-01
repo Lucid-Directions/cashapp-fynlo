@@ -1,7 +1,7 @@
 """
 Enhanced Validation System for Fynlo POS
 Provides comprehensive business logic validation with iOS-friendly error messages
-"""
+"""TODO: Add docstring."""
 
 from typing import List, Dict, Any, Optional, Union
 from datetime import datetime, time
@@ -380,7 +380,7 @@ def validate_customer_or_raise(customer_data: dict):
 """
 Input validation schemas and helpers for Fynlo POS
 Provides JSON schema validation for all JSONB fields in database models
-"""
+"""TODO: Add docstring."""
 
 import re
 from typing import Any, Dict, List, Optional, Union

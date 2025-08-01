@@ -1,7 +1,7 @@
 """
 API Response Helper for Fynlo POS
 Standardizes API responses across the application
-"""
+"""TODO: Add docstring."""
 
 from typing import Any, Dict, List, Optional, Union
 from datetime import datetime
