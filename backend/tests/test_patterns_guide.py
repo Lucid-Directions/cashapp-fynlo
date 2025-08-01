@@ -34,9 +34,7 @@ from app.main import app
 from app.core.database import Base, get_db
 from app.core.security import create_access_token, verify_token
 from app.core.redis_client import get_redis_client
-from app.models.user import User
-from app.models.restaurant import Restaurant
-from app.models.order import Order
+from app.core.database import User, Restaurant, Order
 from app.services.redis_service import RedisService
 from app.services.external_api import ExternalAPIClient
 from app.services.background_tasks import process_order_async

@@ -22,10 +22,7 @@ from fastapi.testclient import TestClient
 import httpx
 import redis
 
-from app.models.user import User
-from app.models.restaurant import Restaurant
-from app.models.order import Order
-from app.models.menu_item import MenuItem
+from app.core.database import User, Restaurant, Order, Product as MenuItem
 from app.core.security import create_access_token
 
 

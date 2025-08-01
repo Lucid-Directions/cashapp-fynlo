@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 import redis
 import httpx
 
-from app.models.order import Order
+from app.core.database import Order
 from app.services.order_service import OrderService
 from app.api.endpoints.orders import router
 from tests.test_helpers import (
