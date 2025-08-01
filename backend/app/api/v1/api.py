@@ -2,8 +2,6 @@
 API Router for Fynlo POS Backend
 """
 
-
-"""
 from fastapi import APIRouter, Depends
 from app.middleware.rate_limit_middleware import limiter, DEFAULT_RATE
 
