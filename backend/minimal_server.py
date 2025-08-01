@@ -2,8 +2,9 @@
 """
 Minimal Backend Server for Fynlo POS Testing
 Provides essential endpoints without complex dependencies
-"""TODO: Add docstring."""
 
+
+"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import json

@@ -1,9 +1,9 @@
-"""TODO: Add docstring."""
+
 
 from app.core.exceptions import ServiceUnavailableError
 Redis client for caching, session management, and rate limiting.
 Connects to DigitalOcean Valkey (Redis compatible).
-"""TODO: Add docstring."""
+
 
 import json
 import logging

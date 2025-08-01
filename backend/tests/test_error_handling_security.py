@@ -1,8 +1,9 @@
 """
 Test suite for error handling security
 Ensures no sensitive information is exposed in production errors
-"""TODO: Add docstring."""
 
+
+"""
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

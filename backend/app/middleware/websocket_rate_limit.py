@@ -1,7 +1,7 @@
 """
 WebSocket Rate Limiting Module
 Implements rate limiting for WebSocket connections and messages to prevent DoS attacks
-"""TODO: Add docstring."""
+
 
 import logging
 import time
@@ -29,7 +29,7 @@ class WebSocketRateLimiter:
     """
     Rate limiter for WebSocket connections and messages
     Uses Redis for distributed rate limiting across multiple servers
-    """TODO: Add docstring."""
+    
     
     def __init__(self):
         # Connection limits

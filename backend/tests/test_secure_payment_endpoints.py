@@ -1,8 +1,9 @@
 """
 Test suite for Secure Payment API Endpoints
 Tests authentication, rate limiting, permissions, and payment flows
-"""TODO: Add docstring."""
 
+
+"""
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
 from decimal import Decimal

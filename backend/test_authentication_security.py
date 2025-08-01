@@ -2,8 +2,9 @@
 """
 Authentication Security Testing for Fynlo POS
 Tests security aspects of the authentication system
-"""TODO: Add docstring."""
 
+
+"""
 import asyncio
 import json
 import sys

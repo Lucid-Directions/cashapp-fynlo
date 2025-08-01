@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Test server startup and basic API endpoints
-"""TODO: Add docstring."""
 
+
+"""
 import asyncio
 import uvicorn
 import signal

@@ -1,7 +1,8 @@
 """
 Orders Management API endpoints for Fynlo POS
-"""TODO: Add docstring."""
 
+
+"""
 from typing import List, Optional
 from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session

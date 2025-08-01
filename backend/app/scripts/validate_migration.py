@@ -3,7 +3,7 @@
 Migration Validation Script
 Comprehensive validation of the platform settings migration
 Checks data integrity, API functionality, and configuration consistency
-"""TODO: Add docstring."""
+
 
 import os
 import sys
@@ -524,7 +524,7 @@ DATABASE STATISTICS:
 
 VALIDATION STATUS: {'PASSED' if self.validation_results['tests_failed'] == 0 else 'FAILED'}
 
-"""TODO: Add docstring."""
+
         
         if self.validation_results['errors']:
             report_content += "\nERRORS:\n"
@@ -548,7 +548,7 @@ Next Steps:
 5. Update documentation with new platform settings
 
 For support, contact the development team with this report.
-"""TODO: Add docstring."""
+
         
         with open(report_filename, 'w') as f:
             f.write(report_content)

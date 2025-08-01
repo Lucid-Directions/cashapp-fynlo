@@ -1,6 +1,6 @@
 """
 WebSocket endpoints for Fynlo Portal - Real-time updates for web dashboard
-"""TODO: Add docstring."""
+
 
 from typing import Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query, Path

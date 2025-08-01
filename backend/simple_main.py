@@ -1,8 +1,9 @@
 """
 Simplified Fynlo POS Backend for debugging DigitalOcean deployment
 Minimal version to isolate the health check issue
-"""TODO: Add docstring."""
 
+
+"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging

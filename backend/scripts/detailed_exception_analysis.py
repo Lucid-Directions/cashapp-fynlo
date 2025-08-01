@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Generate detailed exception usage analysis with file and line information
-"""TODO: Add docstring."""
 
+
+"""
 import os
 import re
 from collections import defaultdict

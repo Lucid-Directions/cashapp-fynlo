@@ -1,7 +1,8 @@
 """
 Tests for Redis fallback security - ensures fail-closed behavior
-"""TODO: Add docstring."""
 
+
+"""
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
 import time

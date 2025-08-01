@@ -1,8 +1,9 @@
 """
 WebSocket Manager for Fynlo POS
 Real-time communication for orders, payments, kitchen updates, and notifications
-"""TODO: Add docstring."""
 
+
+"""
 from typing import Dict, List, Optional, Any
 from fastapi import WebSocket, WebSocketDisconnect
 import json

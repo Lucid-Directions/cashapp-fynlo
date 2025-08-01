@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Test CORS parsing directly
-"""TODO: Add docstring."""
 
+
+"""
 import os
 import sys
 

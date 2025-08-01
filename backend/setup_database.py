@@ -2,8 +2,9 @@
 """
 Database Setup Script for Fynlo POS
 Automatically sets up PostgreSQL database with proper schema and sample data
-"""TODO: Add docstring."""
 
+
+"""
 import asyncio
 import os
 import sys

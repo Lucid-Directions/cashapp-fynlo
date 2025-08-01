@@ -2,7 +2,7 @@
 """
 Redis Optimization Script for Fynlo POS
 Configures eviction policies and monitors usage
-"""TODO: Add docstring."""
+
 
 import redis
 import json
@@ -246,7 +246,7 @@ tcp-keepalive 60
 rename-command FLUSHDB ""
 rename-command FLUSHALL ""
 rename-command CONFIG ""
-"""TODO: Add docstring."""
+
     
     print(config)
     

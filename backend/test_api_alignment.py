@@ -2,8 +2,9 @@
 """
 API Alignment Test Script
 Tests the newly implemented endpoints to ensure frontend compatibility
-"""TODO: Add docstring."""
 
+
+"""
 import requests
 import json
 from typing import Dict, Any

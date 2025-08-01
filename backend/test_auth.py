@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Test authentication endpoint with a sample Supabase token
-"""TODO: Add docstring."""
 
+
+"""
 import requests
 import json
 

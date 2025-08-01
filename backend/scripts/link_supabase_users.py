@@ -2,8 +2,9 @@
 """
 Script to link existing Supabase users to database records
 This ensures users can authenticate with Supabase while maintaining data integrity
-"""TODO: Add docstring."""
 
+
+"""
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

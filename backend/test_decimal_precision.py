@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Test script for Financial Data DECIMAL Precision verification
-"""TODO: Add docstring."""
+
 
 import asyncio
 import sys

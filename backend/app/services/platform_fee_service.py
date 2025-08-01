@@ -11,12 +11,13 @@ logger = logging.getLogger(__name__)
 class PlatformFeeService:
     """
     Calculates the platform's transaction fee and the final customer total.
-    """TODO: Add docstring."""
+    
 
     # PLATFORM_FEE_RATE should ideally be fetched from PlatformSettingsService
     # For example, as a config key like 'platform.transaction_fee.rate'
     PLATFORM_FEE_RATE = Decimal("0.01")  # 1%
 
+"""
     def __init__(
         self,
         payment_fee_calculator: PaymentFeeCalculator,

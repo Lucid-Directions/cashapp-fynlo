@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Script to check HTTPException usage and suggest FynloException replacements
-"""TODO: Add docstring."""
 
+
+"""
 import os
 import re
 from pathlib import Path

@@ -98,7 +98,7 @@ def fix_docstring_syntax(content: str) -> str:
                     elif re.match(r'^\s*"""\s*$', lin
                     """
             indent = len(line) - len(line.lstrip())
-            fixed_lines.append(' ' * indent + '"""TODO: Add docstring."""')
+            fixed_lines.append(' ' * indent + '')
             i += 1
         
         # Fix function/class docstrings

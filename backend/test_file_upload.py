@@ -2,8 +2,9 @@
 """
 Test script for File Upload System
 Tests base64 image upload functionality for iOS integration
-"""TODO: Add docstring."""
 
+
+"""
 import base64
 import requests
 import json

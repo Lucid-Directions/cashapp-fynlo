@@ -2,8 +2,9 @@
 """
 Seed Chucho Restaurant Menu Data
 Seeds the Chucho restaurant menu data into the production database
-"""TODO: Add docstring."""
 
+
+"""
 import sys
 import os
 import asyncio

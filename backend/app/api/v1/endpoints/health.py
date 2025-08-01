@@ -1,8 +1,9 @@
 """
 Health monitoring endpoints for tracking instance status and system health.
 Enhanced with security best practices and proper authentication.
-"""TODO: Add docstring."""
 
+
+"""
 from fastapi import APIRouter, Request, Depends, Query
 from datetime import datetime, timezone
 import os

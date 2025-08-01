@@ -1,7 +1,8 @@
 """
 Tests for enhanced WebSocket functionality including heartbeat and reconnection
-"""TODO: Add docstring."""
 
+
+"""
 import asyncio
 import json
 import pytest

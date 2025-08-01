@@ -1,7 +1,7 @@
 """
 Security Dependencies for FastAPI
 Reusable dependencies that enforce tenant isolation
-"""TODO: Add docstring."""
+
 
 from typing import Optional, Any
 from fastapi import Query, Depends
@@ -96,7 +96,7 @@ class TenantFilter:
             filters: dict = Depends(TenantFilter())
         ):
             # filters will include restaurant_id based on user access
-    """TODO: Add docstring."""
+    
     
     def __init__(self, allow_restaurant_override: bool = False):
         self.allow_restaurant_override = allow_restaurant_override
@@ -135,7 +135,7 @@ class SecureQuery:
             query = Depends(SecureQuery(Product))
         ):
             # query is already filtered by restaurant_id
-    """TODO: Add docstring."""
+    
     
     def __init__(self, model_class: Any):
         self.model_class = model_class

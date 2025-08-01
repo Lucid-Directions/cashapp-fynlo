@@ -2,7 +2,7 @@
 """
 Create Restaurant Script
 Creates a restaurant with proper configuration in the database
-"""TODO: Add docstring."""
+
 
 import os
 import sys

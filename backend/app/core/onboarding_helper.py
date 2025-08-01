@@ -1,8 +1,9 @@
 """
 Onboarding Helper for Fynlo POS
 Handles API responses for users without restaurants
-"""TODO: Add docstring."""
 
+
+"""
 from typing import Optional, Dict, Any
 from app.core.responses import APIResponseHelper
 from app.core.database import User

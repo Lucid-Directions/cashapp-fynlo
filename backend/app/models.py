@@ -1,7 +1,8 @@
 """
 Models module - imports all models from database.py for convenience
-"""TODO: Add docstring."""
 
+
+"""
 from app.core.database import (
     Platform,
     Restaurant,
