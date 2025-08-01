@@ -2,10 +2,7 @@
 """
 Minimal Backend Server for Fynlo POS Testing
 Provides essential endpoints without complex dependencies
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

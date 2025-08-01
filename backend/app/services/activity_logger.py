@@ -1,9 +1,6 @@
 """
 Activity logging service for Fynlo Portal - Audit trail for portal actions
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

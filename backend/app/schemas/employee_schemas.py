@@ -1,10 +1,7 @@
 """
 Pydantic schemas for Employee Management API
 Defines request/response models for employee operations
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

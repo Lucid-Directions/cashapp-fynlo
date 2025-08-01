@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 """
 Simple test server to diagnose network connectivity issues
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

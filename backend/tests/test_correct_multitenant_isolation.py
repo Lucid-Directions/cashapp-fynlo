@@ -2,10 +2,7 @@
 Correct Multi-tenant Isolation Test Suite
 Platform owners (Arno, Ryan) have full access - this is by design
 The vulnerability is between restaurants, not with platform owners
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

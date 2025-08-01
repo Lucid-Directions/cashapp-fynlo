@@ -1,10 +1,7 @@
 """
 Database Transaction Management for Fynlo POS
 Provides decorators and utilities for atomic operations and rollback handling.
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """
@@ -36,10 +33,7 @@ class TransactionManager:
     """
     Manages database transactions with retry logic, rollback handling,
     and atomic operation support.
-<<<<<<< HEAD
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     
 """
@@ -248,10 +242,7 @@ def optimistic_lock_retry(version_field: str = 'version', max_retries: int = 5):
 class BatchTransactionManager:
     """
     Manages batch operations with transaction boundaries and partial failure handling.
-<<<<<<< HEAD
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     
 """

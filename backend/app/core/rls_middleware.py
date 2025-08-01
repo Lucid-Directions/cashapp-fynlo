@@ -1,10 +1,6 @@
 """
 RLS Middleware for automatic session context management
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 from typing import Callable, Optional
 from fastapi import Request, Response
@@ -21,11 +17,7 @@ class RLSMiddleware(BaseHTTPMiddleware):
     """
     Middleware to automatically set and clear RLS session context
     for all authenticated requests
-<<<<<<< HEAD
-    
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """

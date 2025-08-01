@@ -1,10 +1,7 @@
 """
 WebSocket Security Test Suite for Fynlo POS
 Tests authentication, authorization, rate limiting, and multi-tenant isolation
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

@@ -2,10 +2,7 @@
 """
 Focused seed script for Orders and Customers
 Creates realistic historical transaction data for reports to function properly
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

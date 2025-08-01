@@ -92,11 +92,7 @@ class SecurePaymentProcessor:
     - Fee calculation and transparency
     - Security validation at every step
     - Database transaction management
-<<<<<<< HEAD
-    
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     def __init__(self, db: Session, request_context: Optional[Dict[str, Any]] = None):
         self.db = db

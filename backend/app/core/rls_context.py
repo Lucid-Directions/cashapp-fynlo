@@ -1,10 +1,7 @@
 """
 Row Level Security Context Manager
 Sets PostgreSQL session variables for RLS policies
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

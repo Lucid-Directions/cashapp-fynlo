@@ -1,11 +1,7 @@
 """
 Production Guard Utility
 Ensures test/debug code is not executed in production environment
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 from functools import wraps
 import asyncio

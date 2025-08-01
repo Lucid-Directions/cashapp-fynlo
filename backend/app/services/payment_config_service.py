@@ -12,11 +12,7 @@ class PaymentConfigService:
     """
     Service for managing payment method fee configurations.
     These settings determine how processor fees are handled (e.g., who pays, toggling).
-<<<<<<< HEAD
-    
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
     def __init__(self, db: Session):
         self.db = db

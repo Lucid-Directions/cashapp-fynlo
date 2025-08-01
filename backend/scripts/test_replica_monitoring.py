@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 """
 Test script for replica monitoring system.
-<<<<<<< HEAD
-=======
 Verifies that instance tracking and monitoring endpoints are working correctly.
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

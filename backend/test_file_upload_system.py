@@ -2,10 +2,7 @@
 """
 File Upload System Testing and Validation for Fynlo POS
 Tests all file upload functionality and dependency resolution
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

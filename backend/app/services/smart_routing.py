@@ -1,11 +1,7 @@
 """
 Smart Payment Routing Service
 Advanced algorithms for optimal payment provider selection based on multiple factors
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import logging
 from datetime import datetime, timedelta
@@ -100,11 +96,7 @@ class SmartRoutingService:
     ) -> RoutingDecision:
         """
         Make intelligent routing decision based on multiple factors
-<<<<<<< HEAD
-        
-=======
         """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
         
         if force_provider:
             return RoutingDecision(
@@ -138,11 +130,7 @@ class SmartRoutingService:
     ) -> Dict:
         """
         Get comprehensive routing recommendations for a restaurant
-<<<<<<< HEAD
-        
-=======
         """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
         
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=analysis_period_days)
@@ -190,11 +178,7 @@ class SmartRoutingService:
     ) -> Dict:
         """
         Simulate the impact of changing routing strategy
-<<<<<<< HEAD
-        
-=======
         """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
         
         # Get historical transactions
         end_date = datetime.utcnow()

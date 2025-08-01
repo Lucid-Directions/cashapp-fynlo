@@ -2,10 +2,7 @@
 """
 Test script for WebSocket Real-time Events Implementation
 Tests WebSocket connections, message broadcasting, and event handling
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

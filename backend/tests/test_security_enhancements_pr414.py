@@ -1,11 +1,7 @@
 """
 Comprehensive tests for PR #414 security enhancements.
 Tests the actual implementation of security features added to the Fynlo backend.
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import pytest
 from unittest.mock import Mock, patch, AsyncMock

@@ -18,11 +18,7 @@ def upgrade():
     """
     Enable Row Level Security on all tenant-specific tables
     Platform owners (Ryan and Arnaud) bypass all RLS policies
-<<<<<<< HEAD
-    
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     # Tables that need RLS
     tables_needing_rls = [
@@ -114,11 +110,7 @@ def upgrade():
 def downgrade():
     """
     Disable Row Level Security
-<<<<<<< HEAD
-    
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     tables_with_rls = [
         'orders', 'order_items', 'products', 'categories', 'customers',

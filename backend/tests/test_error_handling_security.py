@@ -1,10 +1,7 @@
 """
 Test suite for error handling security
 Ensures no sensitive information is exposed in production errors
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

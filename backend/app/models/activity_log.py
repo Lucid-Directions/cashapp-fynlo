@@ -1,9 +1,6 @@
 """
 Portal Activity Log model for audit trail
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

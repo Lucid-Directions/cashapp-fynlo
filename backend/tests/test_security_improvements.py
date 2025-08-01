@@ -4,11 +4,7 @@ Test suite for security improvements:
 - WebSocket rate limiting
 - Security monitoring
 - 2FA for platform owners
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import pytest
 import asyncio

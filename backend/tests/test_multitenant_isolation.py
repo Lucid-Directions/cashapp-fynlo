@@ -1,10 +1,7 @@
 """
 Multi-tenant Isolation Test Suite for Fynlo POS
 Tests data isolation between restaurants and prevents cross-tenant access
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

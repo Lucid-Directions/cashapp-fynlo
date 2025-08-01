@@ -1,10 +1,7 @@
 """
 Monitoring and Alerting Service for Payment System
 Tracks metrics, health, and sends alerts for payment-related issues
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

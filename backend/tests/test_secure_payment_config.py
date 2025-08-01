@@ -1,10 +1,7 @@
 """
 Test suite for Secure Payment Configuration Service
 Tests encryption, storage, and retrieval of payment provider credentials
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

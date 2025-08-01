@@ -1,9 +1,6 @@
 """
 Tests for Redis fallback security - ensures fail-closed behavior
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

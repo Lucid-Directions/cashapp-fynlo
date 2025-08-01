@@ -1,10 +1,7 @@
 """
 Platform Management Service for Fynlo POS
 Handles multi-tenant operations and platform owner features
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

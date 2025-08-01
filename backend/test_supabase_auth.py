@@ -1,10 +1,7 @@
 """
 Test script for Supabase authentication integration
 Run this after setting up your .env file with Supabase credentials
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

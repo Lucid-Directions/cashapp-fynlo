@@ -1,10 +1,7 @@
 """
 Notification Event Integration for Fynlo POS
 Connects backend services with push notification sending
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

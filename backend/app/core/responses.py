@@ -1,10 +1,7 @@
 """
 Standardized API Response System for Fynlo POS
 iOS-friendly response wrapper for consistent mobile app integration
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

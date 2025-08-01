@@ -1,10 +1,7 @@
 """
 Enhanced Exception Handling for Fynlo POS
 iOS-friendly error management with detailed error information
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

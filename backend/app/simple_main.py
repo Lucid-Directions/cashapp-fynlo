@@ -1,10 +1,7 @@
 """
 Minimal Fynlo Backend for Immediate Cross-Device Sync Testing
 This version starts with just PostgreSQL connection to prove the concept
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

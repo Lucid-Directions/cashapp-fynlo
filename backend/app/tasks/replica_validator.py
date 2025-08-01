@@ -1,11 +1,7 @@
 """
 Automated replica count validation service.
 Monitors instance counts and sends alerts for discrepancies.
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import asyncio
 import logging
@@ -29,11 +25,7 @@ class ReplicaValidator:
     - Active instance count from heartbeats
     - Configured replica count from DigitalOcean
     - Sends alerts when mismatches detected
-<<<<<<< HEAD
-    
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     def __init__(
         self, 
@@ -281,11 +273,7 @@ class ReplicaValidator:
             </ol>
             
             <p><small>Alert generated at: {alert_data['timestamp']}</small></p>
-<<<<<<< HEAD
-            
-=======
             """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
             
             await send_email(
                 to=settings.PLATFORM_OWNER_EMAIL,

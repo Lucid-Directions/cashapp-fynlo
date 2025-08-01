@@ -1,10 +1,7 @@
 """
 Simplified Fynlo POS Backend for debugging DigitalOcean deployment
 Minimal version to isolate the health check issue
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

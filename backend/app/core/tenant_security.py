@@ -4,10 +4,7 @@ Ensures proper multi-tenant isolation while maintaining platform owner access
 
 Platform Owners (Ryan and Arnaud) have FULL access to everything.
 All other users are restricted to their own restaurant's data.
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

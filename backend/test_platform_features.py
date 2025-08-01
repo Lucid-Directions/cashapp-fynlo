@@ -2,10 +2,7 @@
 """
 Test script for Multi-Tenant Platform Features
 Tests platform owner dashboard and multi-restaurant management
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """
