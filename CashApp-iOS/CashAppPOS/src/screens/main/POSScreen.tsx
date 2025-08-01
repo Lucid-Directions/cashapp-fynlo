@@ -805,7 +805,7 @@ const handlePaymentComplete = (result: unknown) => {
             {IS_DEV && (
               <TouchableOpacity
                 testID="dev-mode-toggle-button"
-                style={[styles.devButton, { marginRight: 8 }]}
+                style={styles.devButtonWithMargin}
                 onPress={() => {
                   setShowSumUpTest(!showSumUpTest);
                   logger.info('🧪 SumUp Test toggled:', !showSumUpTest);
@@ -913,7 +913,7 @@ const handlePaymentComplete = (result: unknown) => {
               style={styles.menuIcon}
             />
             <Text style={styles.loadingText}>Loading menu...</Text>
-            <Text style={[styles.loadingText, { fontSize: 14, opacity: 0.7, marginTop: 8 }]}>
+            <Text style={styles.loadingSubtext}>
               Connecting to backend...
             </Text>
           </View>
@@ -925,19 +925,19 @@ const handlePaymentComplete = (result: unknown) => {
               color={theme.colors.mediumGray}
               style={styles.menuIcon}
             />
-            <Text style={[styles.loadingText, { color: theme.colors.text }]}>
+            <Text style={styles.loadingTextDark}>
               No menu items available
             </Text>
             <Text
               style={[
                 styles.loadingText,
-                { fontSize: 14, opacity: 0.7, marginTop: 8, color: theme.colors.mediumGray },
+                styles.loadingSubtext,
               ]}
             >
               Please contact support to set up your menu
             </Text>
             <TouchableOpacity
-              style={[styles.retryButton, { backgroundColor: theme.colors.primary }]}
+              style={styles.retryButtonPrimary}
               onPress={async () => {
                 setMenuLoading(true);
                 // Reset states to ensure clean retry
@@ -985,12 +985,9 @@ const handlePaymentComplete = (result: unknown) => {
               color={theme.colors.mediumGray}
               style={styles.menuIcon}
             />
-            <Text style={[styles.loadingText, { color: theme.colors.text }]}>No items found</Text>
+            <Text style={styles.loadingTextDark}>No items found</Text>
             <Text
-              style={[
-                styles.loadingText,
-                { fontSize: 14, opacity: 0.7, marginTop: 8, color: theme.colors.mediumGray },
-              ]}
+              style={styles.loadingSubtext}
             >
               Try a different search or category
             </Text>
@@ -1057,7 +1054,7 @@ const handlePaymentComplete = (result: unknown) => {
                   data={cart}
                   renderItem={({ item }) => <CartItem item={item} />}
                   keyExtractor={(item) => item.id.toString()}
-                  contentContainerStyle={{ paddingBottom: 120 }} // Added padding for fixed footer
+                  contentContainerStyle={styles.menuListContent} // Added padding for fixed footer
                 />
 
                 {/* Fixed Footer */}
@@ -1439,6 +1436,12 @@ const createStyles = (theme: unknown) =>
       padding: 8,
       borderRadius: 8,
       backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    devButtonWithMargin: {
+      padding: 8,
+      borderRadius: 8,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      marginRight: 8,
     },
     mainContent: {
       flex: 1,
@@ -1971,6 +1974,30 @@ const createStyles = (theme: unknown) =>
     recommendedPaymentMethod: {
       borderColor: '#00D4AA',
       backgroundColor: 'rgba(0, 212, 170, 0.1)',
+    },
+    loadingSubtext: {
+      fontSize: 14,
+      opacity: 0.7,
+      marginTop: 8,
+      color: theme.colors.lightGray,
+      textAlign: 'center',
+    },
+    loadingTextDark: {
+      fontSize: 16,
+      color: theme.colors.text,
+      textAlign: 'center',
+    },
+    menuListContent: {
+      paddingBottom: 120,
+    },
+    retryButtonPrimary: {
+      marginTop: 20,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.primary,
     },
     recommendedBadge: {
       position: 'absolute',

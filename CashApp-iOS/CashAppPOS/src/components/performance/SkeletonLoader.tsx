@@ -80,19 +80,19 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
 // Pre-built skeleton components for common use cases
 export const MenuItemSkeleton: React.FC = () => (
   <View style={styles.menuItemSkeleton}>
-    <SkeletonLoader width="100%" height={120} borderRadius={8} style={{ marginBottom: 8 }} />
-    <SkeletonLoader width="80%" height={16} style={{ marginBottom: 4 }} />
-    <SkeletonLoader width="60%" height={14} style={{ marginBottom: 8 }} />
+    <SkeletonLoader width="100%" height={120} borderRadius={8} style={styles.skeletonMarginBottom8} />
+    <SkeletonLoader width="80%" height={16} style={styles.skeletonMarginBottom4} />
+    <SkeletonLoader width="60%" height={14} style={styles.skeletonMarginBottom8} />
     <SkeletonLoader width="40%" height={18} />
   </View>
 );
 
 export const OrderItemSkeleton: React.FC = () => (
   <View style={styles.orderItemSkeleton}>
-    <SkeletonLoader width={50} height={50} borderRadius={25} style={{ marginRight: 12 }} />
+    <SkeletonLoader width={50} height={50} borderRadius={25} style={styles.skeletonMarginRight12} />
     <View style={styles.orderItemContent}>
-      <SkeletonLoader width="70%" height={16} style={{ marginBottom: 4 }} />
-      <SkeletonLoader width="50%" height={14} style={{ marginBottom: 4 }} />
+      <SkeletonLoader width="70%" height={16} style={styles.skeletonMarginBottom4} />
+      <SkeletonLoader width="50%" height={14} style={styles.skeletonMarginBottom4} />
       <SkeletonLoader width="30%" height={16} />
     </View>
   </View>
@@ -100,16 +100,16 @@ export const OrderItemSkeleton: React.FC = () => (
 
 export const TableSkeleton: React.FC = () => (
   <View style={styles.tableSkeleton}>
-    <SkeletonLoader width={60} height={60} borderRadius={30} style={{ marginBottom: 8 }} />
-    <SkeletonLoader width="80%" height={14} style={{ marginBottom: 4 }} />
+    <SkeletonLoader width={60} height={60} borderRadius={30} style={styles.skeletonMarginBottom8} />
+    <SkeletonLoader width="80%" height={14} style={styles.skeletonMarginBottom4} />
     <SkeletonLoader width="60%" height={12} />
   </View>
 );
 
 export const ReportCardSkeleton: React.FC = () => (
   <View style={styles.reportCardSkeleton}>
-    <SkeletonLoader width="100%" height={16} style={{ marginBottom: 8 }} />
-    <SkeletonLoader width="40%" height={24} style={{ marginBottom: 8 }} />
+    <SkeletonLoader width="100%" height={16} style={styles.skeletonMarginBottom8} />
+    <SkeletonLoader width="40%" height={24} style={styles.skeletonMarginBottom8} />
     <SkeletonLoader width="60%" height={14} />
   </View>
 );
@@ -166,6 +166,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: Colors.border,
+  },
+  skeletonMarginBottom4: {
+    marginBottom: 4,
+  },
+  skeletonMarginBottom8: {
+    marginBottom: 8,
+  },
+  skeletonMarginRight12: {
+    marginRight: 12,
   },
 });
 

@@ -171,11 +171,13 @@ export const Spacer: React.FC<SpacerProps> = ({
   const currentSize = useResponsiveValue(size, 4);
   const spacingValue = theme.spacing[currentSize];
 
+  const spacerStyle = horizontal
+    ? { width: spacingValue }
+    : { height: spacingValue };
+
   return (
     <View
-      style={{
-        [horizontal ? 'width' : 'height']: spacingValue,
-      }}
+      style={spacerStyle}
     />
   );
 };
