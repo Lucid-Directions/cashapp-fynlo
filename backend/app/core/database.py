@@ -129,7 +129,7 @@ class Restaurant(Base):
         "applePay": {"enabled": True, "feePercentage": 2.9},
         "giftCard": {"enabled": True, "requiresAuth": True}
     })
-    # floor_plan_layout = Column(JSONB)  # Temporarily disabled until migration is applied in production
+    # floor_plan_layout field removed - migration pending in production
     # Subscription fields for Supabase integration
     subscription_plan = Column(String(50), default='alpha')  # alpha, beta, omega
     subscription_status = Column(String(50), default='trial')  # trial, active, cancelled, expired
@@ -141,6 +141,11 @@ class Restaurant(Base):
     
     # Relationships
     inventory_items = relationship("InventoryItem", back_populates="restaurant")
+    
+    # Exclude floor_plan_layout from queries if column doesn't exist
+    __mapper_args__ = {
+        'exclude_properties': ['floor_plan_layout']
+    }
 
 class User(Base):
     """Users with role-based access"""
