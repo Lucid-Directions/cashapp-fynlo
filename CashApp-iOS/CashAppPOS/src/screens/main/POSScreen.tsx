@@ -921,7 +921,7 @@ const handlePaymentComplete = (result: unknown) => {
             <Text
               style={[
                 styles.loadingText,
-                { fontSize: 14, opacity: 0.7, marginTop: 8, color: theme.colors.mediumGray },
+                styles.loadingSubtext,
               ]}
             >
               Please contact support to set up your menu
@@ -977,10 +977,7 @@ const handlePaymentComplete = (result: unknown) => {
             />
             <Text style={[styles.loadingText, dynamicStyles.loadingTextColored]}>No items found</Text>
             <Text
-              style={[
-                styles.loadingText,
-                { fontSize: 14, opacity: 0.7, marginTop: 8, color: theme.colors.mediumGray },
-              ]}
+              style={styles.loadingSubtext}
             >
               Try a different search or category
             </Text>
@@ -1047,7 +1044,7 @@ const handlePaymentComplete = (result: unknown) => {
                   data={cart}
                   renderItem={({ item }) => <CartItem item={item} />}
                   keyExtractor={(item) => item.id.toString()}
-                  contentContainerStyle={{ paddingBottom: 120 }} // Added padding for fixed footer
+                  contentContainerStyle={styles.menuListContent} // Added padding for fixed footer
                 />
 
                 {/* Fixed Footer */}
@@ -1854,6 +1851,30 @@ const createStyles = (theme: unknown) =>
       borderColor: '#00D4AA',
       backgroundColor: 'rgba(0, 212, 170, 0.1)',
     },
+    loadingSubtext: {
+      fontSize: 14,
+      opacity: 0.7,
+      marginTop: 8,
+      color: theme.colors.lightGray,
+      textAlign: 'center',
+    },
+    loadingTextDark: {
+      fontSize: 16,
+      color: theme.colors.text,
+      textAlign: 'center',
+    },
+    menuListContent: {
+      paddingBottom: 120,
+    },
+    retryButtonPrimary: {
+      marginTop: 20,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.primary,
+    },
     recommendedBadge: {
       position: 'absolute',
       top: -8,
@@ -1928,6 +1949,16 @@ const createStyles = (theme: unknown) =>
       borderRadius: 8,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    animatedDeleteView: {
+      // Base style for animated delete view
+    },
+    menuIcon: {
+      marginBottom: 16,
+    },
+    retryButtonText: {
+      color: theme.colors.white,
+      fontWeight: '600',
     },
   });
 

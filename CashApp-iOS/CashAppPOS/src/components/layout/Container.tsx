@@ -171,11 +171,13 @@ export const Spacer: React.FC<SpacerProps> = ({
   const currentSize = useResponsiveValue(size, 4);
   const spacingValue = theme.spacing[currentSize];
 
+  const spacerStyle = horizontal
+    ? { width: spacingValue }
+    : { height: spacingValue };
+
   return (
     <View
-      style={{
-        [horizontal ? 'width' : 'height']: spacingValue,
-      }}
+      style={spacerStyle}
     />
   );
 };
@@ -222,26 +224,22 @@ export const Row: React.FC<RowProps> = ({
     return (
       <React.Fragment key={index}>
         {child}
-        {!isLast && <View style={{ width: spacingValue }} />}
+        {!isLast && <View style={[styles.spacer, { width: spacingValue }]} />}
       </React.Fragment>
     );
   });
+
+  const dynamicRowStyle = {
+    alignItems: align,
+    justifyContent: justify,
+    flexWrap: wrap ? 'wrap' : 'nowrap',
+  } as ViewStyle;
 
   return (
     <View
       style={[
         styles.row,
-        wrap && styles.rowWrap,
-        align === 'flex-start' && styles.rowAlignStart,
-        align === 'center' && styles.rowAlignCenter,
-        align === 'flex-end' && styles.rowAlignEnd,
-        align === 'stretch' && styles.rowAlignStretch,
-        justify === 'flex-start' && styles.rowJustifyStart,
-        justify === 'center' && styles.rowJustifyCenter,
-        justify === 'flex-end' && styles.rowJustifyEnd,
-        justify === 'space-between' && styles.rowJustifyBetween,
-        justify === 'space-around' && styles.rowJustifyAround,
-        justify === 'space-evenly' && styles.rowJustifyEvenly,
+        dynamicRowStyle,
         style,
       ]}
     >
@@ -254,6 +252,12 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
       width: '100%',
+    },
+    row: {
+      flexDirection: 'row',
+    },
+    spacer: {
+      // Base spacer style - width will be set dynamically
     },
     section: {
       width: '100%',

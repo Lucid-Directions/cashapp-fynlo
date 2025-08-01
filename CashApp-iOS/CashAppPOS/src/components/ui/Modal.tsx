@@ -245,13 +245,13 @@ export const ModalAction: React.FC<ModalActionProps> = ({
     }
   };
 
-  const getTextColor = () => {
+  const getTextStyle = () => {
     switch (variant) {
       case 'primary':
       case 'danger':
-        return theme.colors.white;
+        return styles.actionTextLight;
       default:
-        return theme.colors.text;
+        return styles.actionTextDark;
     }
   };
 
@@ -261,7 +261,7 @@ export const ModalAction: React.FC<ModalActionProps> = ({
       onPress={onPress}
       disabled={disabled}
     >
-      <Text style={[styles.actionText, { color: getTextColor() }]}>{children}</Text>
+      <Text style={[styles.actionText, getTextStyle()]}>{children}</Text>
     </TouchableOpacity>
   );
 };
@@ -372,6 +372,12 @@ const createStyles = (theme: Theme) =>
     actionText: {
       fontSize: theme.typography.fontSize.base,
       fontWeight: theme.typography.fontWeight.medium,
+    },
+    actionTextLight: {
+      color: theme.colors.white,
+    },
+    actionTextDark: {
+      color: theme.colors.text,
     },
     disabledAction: {
       opacity: 0.5,

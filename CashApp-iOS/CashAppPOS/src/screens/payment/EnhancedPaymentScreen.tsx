@@ -838,7 +838,7 @@ const _savedOrder = await orderService.saveOrder(orderData);
                     minValue={0}
                     decimalPlaces={2}
                     placeholder="0.00"
-                    style={{ marginVertical: 4, flex: 1 }}
+                    style={styles.splitAmountInput}
                   />
                 </View>
               ))}
@@ -1602,6 +1602,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.lightText,
     marginLeft: 8,
+  },
+  customTipInput: {
+    marginVertical: 8,
+  },
+  splitAmountInput: {
+    marginVertical: 4,
+    flex: 1,
   },
 });
 

@@ -210,6 +210,9 @@ const ContactlessPaymentScreen: React.FC = () => {
       fontWeight: '600',
       color: theme.colors.text,
     },
+    headerSpacer: {
+      width: 24,
+    },
     content: {
       flex: 1,
       alignItems: 'center',
@@ -304,7 +307,7 @@ const ContactlessPaymentScreen: React.FC = () => {
           <Icon name="close" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Contactless Payment</Text>
-        <View style={{ width: 24 }} />
+        <View style={styles.headerSpacer} />
       </View>
 
       {/* Content */}

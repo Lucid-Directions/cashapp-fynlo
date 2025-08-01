@@ -6,6 +6,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme, _ColorTheme, colorThemeOptions } from '../../design-system/ThemeProvider';
+import { logger } from '../../utils/logger';
 
 import { logger } from '../../utils/logger';
 

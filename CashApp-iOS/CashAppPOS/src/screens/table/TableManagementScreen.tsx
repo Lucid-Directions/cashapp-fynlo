@@ -620,7 +620,7 @@ const _assignServer = (tableId: string, serverName: string) => {
             ))}
           </View>
           {editMode && (
-            <View style={{ marginTop: 8 }}>
+            <View style={styles.dragInstructionContainer}>
               <Text
                 style={[
                   styles.legendLabel,
@@ -990,6 +990,9 @@ const styles = StyleSheet.create({
   },
   legendLabel: {
     fontSize: 12,
+  },
+  dragInstructionContainer: {
+    marginTop: 8,
   },
   modalOverlay: {
     flex: 1,

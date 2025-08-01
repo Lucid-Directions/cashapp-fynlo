@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { View, Text, StyleSheet, TouchableOpacity, _Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 
 import QRCode from 'react-native-qrcode-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { logger } from '../../utils/logger';
 import PaymentService from '../../services/PaymentService';
+import { Colors } from '../../constants/Colors';
 
 import QRPaymentErrorBoundary from './QRPaymentErrorBoundary';
 
@@ -397,6 +398,26 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
     </QRPaymentErrorBoundary>
   );
 };
+
+// QR Wrapper component styles
+const qrWrapperStyles = StyleSheet.create({
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 180,
+    height: 180,
+  },
+  errorText: {
+    color: Colors.danger,
+    fontSize: 12,
+    marginTop: 8,
+  },
+  unavailableText: {
+    color: Colors.lightText,
+    fontSize: 12,
+    marginTop: 8,
+  },
+});
 
 const styles = StyleSheet.create({
   container: {

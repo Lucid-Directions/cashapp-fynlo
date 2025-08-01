@@ -236,7 +236,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
                   minValue={0.01}
                   decimalPlaces={2}
                   placeholder="5.00"
-                  style={{ marginVertical: 8 }}
+                  style={styles.decimalInputStyle}
                 />
               </View>
 
@@ -572,6 +572,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.white,
+  },
+  decimalInputStyle: {
+    marginVertical: 8,
   },
 });
 

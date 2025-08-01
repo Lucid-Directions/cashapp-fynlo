@@ -1,7 +1,7 @@
 import React from 'react';
 
 import type { ViewStyle, GestureResponderEvent } from 'react-native';
-import { View, Text, TouchableOpacity, StyleSheet, _TextStyle } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -171,31 +171,18 @@ const List: React.FC<ListProps> = ({
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
-  const getVariantStyles = (): ViewStyle => {
+  const getVariantStyle = () => {
     switch (variant) {
       case 'card':
-        return {
-          backgroundColor: theme.colors.white,
-          borderRadius: theme.borderRadius.xl,
-          ...theme.shadows.md,
-          overflow: 'hidden',
-        };
+        return styles.listVariantCard;
       case 'inset':
-        return {
-          backgroundColor: theme.colors.white,
-          marginHorizontal: theme.spacing[4],
-          borderRadius: theme.borderRadius.xl,
-          ...theme.shadows.sm,
-          overflow: 'hidden',
-        };
+        return styles.listVariantInset;
       default:
-        return {
-          backgroundColor: theme.colors.white,
-        };
+        return styles.listVariantDefault;
     }
   };
 
-  const variantStyles = getVariantStyles();
+  const variantStyle = getVariantStyle();
 
   // Add dividers between children if showDividers is true
   const childrenWithDividers = React.Children.map(children, (child, index) => {
@@ -210,7 +197,7 @@ const List: React.FC<ListProps> = ({
   });
 
   return (
-    <View style={[styles.list, variantStyles, style]} testID={testID}>
+    <View style={[styles.list, variantStyle, style]} testID={testID}>
       {childrenWithDividers}
     </View>
   );
@@ -220,6 +207,22 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     list: {
       // Base list styles
+    },
+    listVariantDefault: {
+      backgroundColor: theme.colors.white,
+    },
+    listVariantCard: {
+      backgroundColor: theme.colors.white,
+      borderRadius: theme.borderRadius.xl,
+      ...theme.shadows.md,
+      overflow: 'hidden',
+    },
+    listVariantInset: {
+      backgroundColor: theme.colors.white,
+      marginHorizontal: theme.spacing[4],
+      borderRadius: theme.borderRadius.xl,
+      ...theme.shadows.sm,
+      overflow: 'hidden',
     },
     listItem: {
       flexDirection: 'row',
