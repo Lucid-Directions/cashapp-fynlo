@@ -1,7 +1,7 @@
 """
 Security Monitoring and Audit Logging
 Tracks security events, access violations, and provides audit trail
-
+"""
 
 import json
 import logging
@@ -54,7 +54,7 @@ class SecurityEventType(str, Enum):
 class SecurityMonitor:
     """
     Central security monitoring and logging system
-    
+    """
     
     def __init__(self, redis_client: Optional[RedisClient] = None):
         self.redis = redis_client
