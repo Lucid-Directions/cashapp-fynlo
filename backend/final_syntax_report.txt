@@ -1,0 +1,297 @@
+<unknown>:159: SyntaxWarning: invalid escape sequence '\-'
+<unknown>:393: SyntaxWarning: invalid escape sequence '\-'
+<unknown>:493: SyntaxWarning: invalid escape sequence '\-'
+<unknown>:555: SyntaxWarning: invalid escape sequence '\-'
+<unknown>:557: SyntaxWarning: invalid escape sequence '\.'
+<unknown>:7: SyntaxWarning: invalid escape sequence '\ '
+Checking Python syntax in all files...
+============================================================
+❌ ./setup_chucho_restaurant.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./test_decimal_precision.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./fix_docstrings_properly.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./test_foreign_key_constraints.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./app/middleware/version_middleware.py
+   Error: unexpected indent (<unknown>, line 17)
+
+❌ ./app/middleware/sql_injection_waf.py
+   Error: unexpected indent (<unknown>, line 25)
+
+❌ ./app/middleware/websocket_rate_limit.py
+   Error: invalid syntax (<unknown>, line 22)
+
+❌ ./app/middleware/rls_middleware.py
+   Error: unexpected indent (<unknown>, line 21)
+
+❌ ./app/middleware/feature_gate.py
+   Error: invalid syntax (<unknown>, line 22)
+
+❌ ./app/middleware/tenant_isolation_middleware.py
+   Error: unexpected indent (<unknown>, line 21)
+
+❌ ./app/tasks/replica_validator.py
+   Error: unexpected indent (<unknown>, line 22)
+
+❌ ./app/core/rls_session_context.py
+   Error: unexpected indent (<unknown>, line 25)
+
+❌ ./app/core/production_guard.py
+   Error: unexpected indent (<unknown>, line 14)
+
+❌ ./app/core/database_security.py
+   Error: invalid syntax (<unknown>, line 16)
+
+❌ ./app/core/cache.py
+   Error: unexpected indent (<unknown>, line 18)
+
+❌ ./app/core/websocket_rate_limiter.py
+   Error: unexpected indent (<unknown>, line 21)
+
+❌ ./app/core/mobile_middleware.py
+   Error: unexpected indent (<unknown>, line 16)
+
+❌ ./app/core/rls_middleware.py
+   Error: unexpected indent (<unknown>, line 18)
+
+❌ ./app/core/redis_client.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./app/core/two_factor_auth.py
+   Error: unexpected indent (<unknown>, line 26)
+
+❌ ./app/core/rate_limit_config.py
+   Error: unexpected indent (<unknown>, line 74)
+
+❌ ./app/core/security_monitor.py
+   Error: invalid syntax (<unknown>, line 20)
+
+❌ ./app/core/logging_filters.py
+   Error: unexpected indent (<unknown>, line 57)
+
+❌ ./app/core/transaction_manager.py
+   Error: invalid syntax (<unknown>, line 20)
+
+❌ ./app/core/cache_service.py
+   Error: invalid syntax (<unknown>, line 20)
+
+❌ ./app/core/cache_warmer.py
+   Error: unterminated string literal (detected at line 259) (<unknown>, line 259)
+
+❌ ./app/core/mobile_id_mapping.py
+   Error: unexpected indent (<unknown>, line 20)
+
+❌ ./app/core/dependencies.py
+   Error: unexpected indent (<unknown>, line 24)
+
+❌ ./app/core/validation.py
+   Error: unterminated triple-quoted string literal (detected at line 753) (<unknown>, line 739)
+
+❌ ./app/models/subscription.py
+   Error: unexpected indent (<unknown>, line 19)
+
+❌ ./app/models/platform_config.py
+   Error: unexpected indent (<unknown>, line 14)
+
+❌ ./app/scripts/migrate_to_platform_settings.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./app/scripts/initialize_platform_defaults.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./app/scripts/validate_migration.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./app/api/v1/subscriptions.py
+   Error: unexpected indent (<unknown>, line 35)
+
+❌ ./app/api/v1/endpoints/secure_payment_provider_management.py
+   Error: unexpected indent (<unknown>, line 33)
+
+❌ ./app/api/v1/endpoints/storage_health.py
+   Error: unexpected indent (<unknown>, line 18)
+
+❌ ./app/api/v1/endpoints/websocket_secure.py
+   Error: unexpected indent (<unknown>, line 23)
+
+❌ ./app/api/v1/endpoints/rls_example.py
+   Error: unexpected indent (<unknown>, line 27)
+
+❌ ./app/api/v1/endpoints/websocket_portal.py
+   Error: unexpected indent (<unknown>, line 32)
+
+❌ ./app/api/v1/endpoints/monitoring.py
+   Error: unexpected indent (<unknown>, line 43)
+
+❌ ./app/api/v1/endpoints/restaurant_switch.py
+   Error: unexpected indent (<unknown>, line 29)
+
+❌ ./app/api/v1/endpoints/analytics.py
+   Error: unexpected indent (<unknown>, line 70)
+
+❌ ./app/api/v1/endpoints/products_secure.py
+   Error: unexpected indent (<unknown>, line 30)
+
+❌ ./app/api/v1/endpoints/websocket_rate_limit_patch.py
+   Error: unexpected indent (<unknown>, line 33)
+
+❌ ./app/api/v1/endpoints/restaurant_deletion.py
+   Error: unterminated string literal (detected at line 177) (<unknown>, line 177)
+
+❌ ./app/services/financial_records_service.py
+   Error: unexpected indent (<unknown>, line 14)
+
+❌ ./app/services/secure_payment_processor.py
+   Error: invalid syntax (<unknown>, line 24)
+
+❌ ./app/services/secure_payment_config.py
+   Error: invalid syntax (<unknown>, line 20)
+
+❌ ./app/services/payment_fee_calculator.py
+   Error: unexpected indent (<unknown>, line 13)
+
+❌ ./app/services/digitalocean_monitor.py
+   Error: invalid syntax (<unknown>, line 31)
+
+❌ ./app/services/payment_config_service.py
+   Error: unexpected indent (<unknown>, line 14)
+
+❌ ./app/services/instance_tracker.py
+   Error: unexpected indent (<unknown>, line 23)
+
+❌ ./app/services/smart_routing.py
+   Error: unmatched ')' (<unknown>, line 256)
+
+❌ ./tests/test_security_improvements.py
+   Error: invalid decimal literal (<unknown>, line 262)
+
+❌ ./tests/test_patterns_guide.py
+   Error: invalid syntax (<unknown>, line 50)
+
+❌ ./tests/test_security_enhancements_pr414.py
+   Error: invalid syntax (<unknown>, line 37)
+
+❌ ./tests/test_helpers.py
+   Error: invalid syntax (<unknown>, line 49)
+
+❌ ./tests/test_example_full_coverage.py
+   Error: unterminated triple-quoted string literal (detected at line 838) (<unknown>, line 795)
+
+❌ ./backend/backend/scripts/fix_docstring_syntax_app_only.py
+   Error: unterminated string literal (detected at line 27) (<unknown>, line 27)
+
+❌ ./backend/scripts/fix_docstring_syntax.py
+   Error: unterminated string literal (detected at line 37) (<unknown>, line 37)
+
+❌ ./scripts/fix_remaining_httpexceptions.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./scripts/seed_production_data.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./scripts/create_restaurant.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./scripts/optimize_redis.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./scripts/optimize_database_standalone.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./scripts/migrate_test_users.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./scripts/optimize_database.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./scripts/seed_menu.py
+   Error: invalid syntax (<unknown>, line 4)
+
+❌ ./alembic/versions/010_add_row_level_security.py
+   Error: unexpected indent (<unknown>, line 25)
+
+❌ ./alembic/versions/011_add_rls_session_variables.py
+   Error: unexpected indent (<unknown>, line 25)
+
+============================================================
+Total files checked: 353
+Files with errors: 71
+
+Summary of files with syntax errors:
+  - ./setup_chucho_restaurant.py
+  - ./test_decimal_precision.py
+  - ./fix_docstrings_properly.py
+  - ./test_foreign_key_constraints.py
+  - ./app/middleware/version_middleware.py
+  - ./app/middleware/sql_injection_waf.py
+  - ./app/middleware/websocket_rate_limit.py
+  - ./app/middleware/rls_middleware.py
+  - ./app/middleware/feature_gate.py
+  - ./app/middleware/tenant_isolation_middleware.py
+  - ./app/tasks/replica_validator.py
+  - ./app/core/rls_session_context.py
+  - ./app/core/production_guard.py
+  - ./app/core/database_security.py
+  - ./app/core/cache.py
+  - ./app/core/websocket_rate_limiter.py
+  - ./app/core/mobile_middleware.py
+  - ./app/core/rls_middleware.py
+  - ./app/core/redis_client.py
+  - ./app/core/two_factor_auth.py
+  - ./app/core/rate_limit_config.py
+  - ./app/core/security_monitor.py
+  - ./app/core/logging_filters.py
+  - ./app/core/transaction_manager.py
+  - ./app/core/cache_service.py
+  - ./app/core/cache_warmer.py
+  - ./app/core/mobile_id_mapping.py
+  - ./app/core/dependencies.py
+  - ./app/core/validation.py
+  - ./app/models/subscription.py
+  - ./app/models/platform_config.py
+  - ./app/scripts/migrate_to_platform_settings.py
+  - ./app/scripts/initialize_platform_defaults.py
+  - ./app/scripts/validate_migration.py
+  - ./app/api/v1/subscriptions.py
+  - ./app/api/v1/endpoints/secure_payment_provider_management.py
+  - ./app/api/v1/endpoints/storage_health.py
+  - ./app/api/v1/endpoints/websocket_secure.py
+  - ./app/api/v1/endpoints/rls_example.py
+  - ./app/api/v1/endpoints/websocket_portal.py
+  - ./app/api/v1/endpoints/monitoring.py
+  - ./app/api/v1/endpoints/restaurant_switch.py
+  - ./app/api/v1/endpoints/analytics.py
+  - ./app/api/v1/endpoints/products_secure.py
+  - ./app/api/v1/endpoints/websocket_rate_limit_patch.py
+  - ./app/api/v1/endpoints/restaurant_deletion.py
+  - ./app/services/financial_records_service.py
+  - ./app/services/secure_payment_processor.py
+  - ./app/services/secure_payment_config.py
+  - ./app/services/payment_fee_calculator.py
+  - ./app/services/digitalocean_monitor.py
+  - ./app/services/payment_config_service.py
+  - ./app/services/instance_tracker.py
+  - ./app/services/smart_routing.py
+  - ./tests/test_security_improvements.py
+  - ./tests/test_patterns_guide.py
+  - ./tests/test_security_enhancements_pr414.py
+  - ./tests/test_helpers.py
+  - ./tests/test_example_full_coverage.py
+  - ./backend/backend/scripts/fix_docstring_syntax_app_only.py
+  - ./backend/scripts/fix_docstring_syntax.py
+  - ./scripts/fix_remaining_httpexceptions.py
+  - ./scripts/seed_production_data.py
+  - ./scripts/create_restaurant.py
+  - ./scripts/optimize_redis.py
+  - ./scripts/optimize_database_standalone.py
+  - ./scripts/migrate_test_users.py
+  - ./scripts/optimize_database.py
+  - ./scripts/seed_menu.py
+  - ./alembic/versions/010_add_row_level_security.py
+  - ./alembic/versions/011_add_rls_session_variables.py
