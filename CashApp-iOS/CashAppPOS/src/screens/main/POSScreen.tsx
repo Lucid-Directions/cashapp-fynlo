@@ -730,7 +730,7 @@ const handlePaymentComplete = (result: unknown) => {
 
       return (
         <TouchableOpacity style={styles.deleteButton} onPress={() => removeFromCart(item.id)}>
-          <Animated.View style={{ transform: [{ scale }] }}>
+          <Animated.View style={[styles.animatedDeleteView, { transform: [{ scale }] }]}>
             <Icon name="delete" size={24} color={theme.colors.white} />
             <Text style={styles.deleteButtonText}>Delete</Text>
           </Animated.View>
@@ -910,7 +910,7 @@ const handlePaymentComplete = (result: unknown) => {
               name="restaurant-menu"
               size={48}
               color={theme.colors.primary}
-              style={{ marginBottom: 16 }}
+              style={styles.menuIcon}
             />
             <Text style={styles.loadingText}>Loading menu...</Text>
             <Text style={[styles.loadingText, { fontSize: 14, opacity: 0.7, marginTop: 8 }]}>
@@ -923,7 +923,7 @@ const handlePaymentComplete = (result: unknown) => {
               name="restaurant-menu"
               size={48}
               color={theme.colors.mediumGray}
-              style={{ marginBottom: 16 }}
+              style={styles.menuIcon}
             />
             <Text style={[styles.loadingText, { color: theme.colors.text }]}>
               No menu items available
@@ -974,7 +974,7 @@ const handlePaymentComplete = (result: unknown) => {
                 }
               }}
             >
-              <Text style={{ color: theme.colors.white, fontWeight: '600' }}>Retry</Text>
+              <Text style={styles.retryButtonText}>Retry</Text>
             </TouchableOpacity>
           </View>
         ) : filteredItems.length === 0 ? (
@@ -983,7 +983,7 @@ const handlePaymentComplete = (result: unknown) => {
               name="search-off"
               size={48}
               color={theme.colors.mediumGray}
-              style={{ marginBottom: 16 }}
+              style={styles.menuIcon}
             />
             <Text style={[styles.loadingText, { color: theme.colors.text }]}>No items found</Text>
             <Text
@@ -2065,6 +2065,16 @@ const createStyles = (theme: unknown) =>
       borderRadius: 8,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    animatedDeleteView: {
+      // Base style for animated delete view
+    },
+    menuIcon: {
+      marginBottom: 16,
+    },
+    retryButtonText: {
+      color: theme.colors.white,
+      fontWeight: '600',
     },
   });
 

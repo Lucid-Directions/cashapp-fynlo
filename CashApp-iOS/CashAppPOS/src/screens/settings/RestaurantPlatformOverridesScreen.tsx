@@ -330,7 +330,7 @@ const _userRole = 'restaurant_owner'; // This would come from auth context
                 { backgroundColor: theme.colors.primary, padding: 8, borderRadius: 4 },
               ]}
             >
-              <Text style={{ color: theme.colors.white }}>Retry</Text>
+              <Text style={styles.retryButtonText}>Retry</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -462,13 +462,15 @@ const _userRole = 'restaurant_owner'; // This would come from auth context
                             ]}
                           >
                             <Text
-                              style={{
-                                color:
-                                  setting.source === 'restaurant'
-                                    ? theme.colors.primary
-                                    : theme.colors.white,
-                                fontSize: 12,
-                              }}
+                              style={[
+                                styles.overrideButtonText,
+                                {
+                                  color:
+                                    setting.source === 'restaurant'
+                                      ? theme.colors.primary
+                                      : theme.colors.white,
+                                },
+                              ]}
                             >
                               {setting.source === 'restaurant'
                                 ? 'Modify Override'
@@ -553,6 +555,12 @@ const createStyles = (theme: unknown) =>
     },
     retryButton: {
       alignSelf: 'flex-start',
+    },
+    retryButtonText: {
+      color: theme.colors.white,
+    },
+    overrideButtonText: {
+      fontSize: 12,
     },
     infoCard: {
       marginTop: 16,

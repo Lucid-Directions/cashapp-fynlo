@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { View, Text, StyleSheet, TouchableOpacity, _Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 
 import QRCode from 'react-native-qrcode-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import PaymentService from '../../services/PaymentService';
+import { Colors } from '../../constants/Colors';
+import { logger } from '../../utils/logger';
 
 import QRPaymentErrorBoundary from './QRPaymentErrorBoundary';
 
@@ -22,9 +24,9 @@ const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
 
     if (hasError) {
       return (
-        <View style={{ alignItems: 'center', justifyContent: 'center', width: 180, height: 180 }}>
+        <View style={qrWrapperStyles.errorContainer}>
           <Icon name="error" size={60} color={Colors.danger} />
-          <Text style={{ color: Colors.danger, fontSize: 12, marginTop: 8 }}>QR Error</Text>
+          <Text style={qrWrapperStyles.errorText}>QR Error</Text>
         </View>
       );
     }
@@ -41,9 +43,9 @@ const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
   } catch (error) {
     logger.error('QR Code generation error:', error);
     return (
-      <View style={{ alignItems: 'center', justifyContent: 'center', width: 180, height: 180 }}>
+      <View style={qrWrapperStyles.errorContainer}>
         <Icon name="qr-code" size={60} color={Colors.lightText} />
-        <Text style={{ color: Colors.lightText, fontSize: 12, marginTop: 8 }}>QR Unavailable</Text>
+        <Text style={qrWrapperStyles.unavailableText}>QR Unavailable</Text>
       </View>
     );
   }
@@ -395,6 +397,26 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
     </QRPaymentErrorBoundary>
   );
 };
+
+// QR Wrapper component styles
+const qrWrapperStyles = StyleSheet.create({
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 180,
+    height: 180,
+  },
+  errorText: {
+    color: Colors.danger,
+    fontSize: 12,
+    marginTop: 8,
+  },
+  unavailableText: {
+    color: Colors.lightText,
+    fontSize: 12,
+    marginTop: 8,
+  },
+});
 
 const styles = StyleSheet.create({
   container: {

@@ -113,14 +113,14 @@ const RecipesScreen = () => {
       <View style={styles.recipeActions}>
         <TouchableOpacity onPress={() => handleEditRecipe(item)} style={styles.actionButton}>
           {/* <Icon name="edit" type="material" size={24} color="#007AFF" /> */}
-          <Text style={{ color: '#007AFF' }}>Edit</Text>
+          <Text style={styles.editButtonText}>Edit</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handleDeleteRecipe(item.item_id)}
           style={styles.actionButton}
         >
           {/* <Icon name="delete" type="material" size={24} color="#FF3B30" /> */}
-          <Text style={{ color: '#FF3B30' }}>Delete</Text>
+          <Text style={styles.deleteButtonText}>Delete</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -233,6 +233,12 @@ const styles = StyleSheet.create({
   actionButton: {
     padding: 8,
     marginLeft: 12,
+  },
+  editButtonText: {
+    color: '#007AFF',
+  },
+  deleteButtonText: {
+    color: '#FF3B30',
   },
   emptyText: {
     fontSize: 18,

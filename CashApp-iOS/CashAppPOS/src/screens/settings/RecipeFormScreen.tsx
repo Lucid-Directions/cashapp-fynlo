@@ -289,7 +289,7 @@ const RecipeFormScreen = () => {
           style={styles.removeButton}
         >
           {/* <Icon name="remove-circle-outline" type="material" size={24} color="#FF3B30" /> */}
-          <Text style={{ color: '#FF3B30' }}>Remove</Text>
+          <Text style={styles.removeButtonText}>Remove</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -493,6 +493,9 @@ const styles = StyleSheet.create({
   // End FormFieldNumber styles
   removeButton: {
     padding: 8,
+  },
+  removeButtonText: {
+    color: '#FF3B30',
   },
   saveButton: {
     backgroundColor: '#00A651', // Fynlo green

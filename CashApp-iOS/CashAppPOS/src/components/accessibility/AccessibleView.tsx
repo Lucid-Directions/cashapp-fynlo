@@ -6,7 +6,7 @@ import type {
   AccessibilityState,
   AccessibilityProps,
 } from 'react-native';
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 
 import { createAccessibilityState } from '../../utils/accessibility';
 
@@ -119,12 +119,7 @@ export const SkipLinks: React.FC<SkipLinksProps> = ({ links }) => {
       semanticRole="navigation"
       accessibilityLabel="Skip navigation"
       screenReaderOnly
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: 9999,
-      }}
+      style={styles.skipLinksContainer}
     >
       {links.map((link, index) => (
         <AccessibleView
@@ -133,12 +128,7 @@ export const SkipLinks: React.FC<SkipLinksProps> = ({ links }) => {
           accessibilityLabel={link.label}
           focusable
           onTouchEnd={link.onPress}
-          style={{
-            backgroundColor: '#000',
-            color: '#fff',
-            padding: 8,
-            textDecorationLine: 'underline',
-          }}
+          style={styles.skipLink}
         >
           {/* Skip link content would go here */}
         </AccessibleView>
@@ -231,5 +221,20 @@ export const FocusTrap: React.FC<FocusTrapProps> = ({ children, active, _onEscap
     </AccessibleView>
   );
 };
+
+const styles = StyleSheet.create({
+  skipLinksContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 9999,
+  },
+  skipLink: {
+    backgroundColor: '#000',
+    color: '#fff',
+    padding: 8,
+    textDecorationLine: 'underline',
+  },
+});
 
 export default AccessibleView;

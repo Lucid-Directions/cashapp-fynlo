@@ -221,20 +221,22 @@ export const Row: React.FC<RowProps> = ({
     return (
       <React.Fragment key={index}>
         {child}
-        {!isLast && <View style={{ width: spacingValue }} />}
+        {!isLast && <View style={[styles.spacer, { width: spacingValue }]} />}
       </React.Fragment>
     );
   });
 
+  const dynamicRowStyle = {
+    alignItems: align,
+    justifyContent: justify,
+    flexWrap: wrap ? 'wrap' : 'nowrap',
+  } as ViewStyle;
+
   return (
     <View
       style={[
-        {
-          flexDirection: 'row',
-          alignItems: align,
-          justifyContent: justify,
-          flexWrap: wrap ? 'wrap' : 'nowrap',
-        },
+        styles.row,
+        dynamicRowStyle,
         style,
       ]}
     >
@@ -247,6 +249,12 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
       width: '100%',
+    },
+    row: {
+      flexDirection: 'row',
+    },
+    spacer: {
+      // Base spacer style - width will be set dynamically
     },
     section: {
       width: '100%',

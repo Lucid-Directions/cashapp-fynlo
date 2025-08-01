@@ -768,7 +768,7 @@ const updateField = (field: keyof RestaurantFormData, value: unknown) => {
       />
 
       <View style={styles.inputRow}>
-        <View style={{ flex: 2 }}>
+        <View style={styles.flex2}>
           <FastInput
             label="City *"
             inputType="text"
@@ -779,7 +779,7 @@ const updateField = (field: keyof RestaurantFormData, value: unknown) => {
           />
         </View>
 
-        <View style={{ flex: 1, marginLeft: 12 }}>
+        <View style={styles.flex1WithMargin}>
           <FastInput
             label="Postcode *"
             inputType="text"
@@ -809,7 +809,7 @@ const updateField = (field: keyof RestaurantFormData, value: unknown) => {
       </View>
 
       <View style={styles.inputRow}>
-        <View style={{ flex: 1 }}>
+        <View style={styles.flex1}>
           <FastInput
             label="County/State"
             inputType="text"
@@ -819,7 +819,7 @@ const updateField = (field: keyof RestaurantFormData, value: unknown) => {
           />
         </View>
 
-        <View style={{ flex: 1, marginLeft: 12 }}>
+        <View style={styles.flex1WithMargin}>
           <FastInput
             label="Country"
             inputType="text"
@@ -954,7 +954,7 @@ const updateField = (field: keyof RestaurantFormData, value: unknown) => {
         <Text style={styles.sectionTitle}>Add New Employee</Text>
 
         <View style={styles.inputRow}>
-          <View style={{ flex: 2 }}>
+          <View style={styles.flex2}>
             <FastInput
               label="Full Name"
               inputType="text"
@@ -963,7 +963,7 @@ const updateField = (field: keyof RestaurantFormData, value: unknown) => {
               placeholder="John Smith"
             />
           </View>
-          <View style={{ flex: 1, marginLeft: 12 }}>
+          <View style={styles.flex1WithMargin}>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Role</Text>
               <ScrollView
@@ -1006,7 +1006,7 @@ const updateField = (field: keyof RestaurantFormData, value: unknown) => {
         </View>
 
         <View style={styles.inputRow}>
-          <View style={{ flex: 2 }}>
+          <View style={styles.flex2}>
             <FastInput
               label="Email"
               inputType="email"
@@ -1032,7 +1032,7 @@ const updateField = (field: keyof RestaurantFormData, value: unknown) => {
               error={fieldErrors.employeeEmail}
             />
           </View>
-          <View style={{ flex: 1, marginLeft: 12 }}>
+          <View style={styles.flex1WithMargin}>
             <FastInput
               label="Hourly Rate (£)"
               inputType="currency"
@@ -1542,6 +1542,16 @@ const updateField = (field: keyof RestaurantFormData, value: unknown) => {
     },
     inputRow: {
       flexDirection: 'row',
+    },
+    flex1: {
+      flex: 1,
+    },
+    flex2: {
+      flex: 2,
+    },
+    flex1WithMargin: {
+      flex: 1,
+      marginLeft: 12,
     },
     inputLabel: {
       fontSize: 16,
