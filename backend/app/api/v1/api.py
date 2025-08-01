@@ -1,6 +1,6 @@
 """
 API Router for Fynlo POS Backend
-"""
+"""TODO: Add docstring."""
 
 from fastapi import APIRouter, Depends
 from app.middleware.rate_limit_middleware import limiter, DEFAULT_RATE

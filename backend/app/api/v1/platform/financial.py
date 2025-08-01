@@ -1,6 +1,6 @@
 """
 Platform financial reporting endpoints.
-"""
+"""TODO: Add docstring."""
 
 from datetime import datetime, timedelta, date
 from typing import Optional

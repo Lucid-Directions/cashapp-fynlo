@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Setup Chucho Restaurant with correct name and menu
-"""
+"""TODO: Add docstring."""
 
 import os
 from sqlalchemy import create_engine, text

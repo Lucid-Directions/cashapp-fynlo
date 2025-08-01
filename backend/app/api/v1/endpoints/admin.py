@@ -1,6 +1,6 @@
 """
 Admin endpoints for payment provider management and analytics
-"""
+"""TODO: Add docstring."""
 
 from fastapi import APIRouter, Depends, Query, Request
 from typing import List, Dict, Any, Optional

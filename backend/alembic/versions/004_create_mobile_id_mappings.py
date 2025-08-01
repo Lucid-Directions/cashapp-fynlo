@@ -1,4 +1,5 @@
-"""Create mobile ID mappings table
+"""
+Create mobile ID mappings table
 
 Revision ID: 004_create_mobile_id_mappings
 Revises: 001_add_username

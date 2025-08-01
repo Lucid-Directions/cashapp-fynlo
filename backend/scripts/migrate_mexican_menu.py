@@ -13,7 +13,7 @@ Requirements:
     - Backend database connection configured
     - SQLAlchemy models for menu items and categories
     - Restaurant tenant ID for Mexican restaurant
-"""
+"""TODO: Add docstring."""
 
 import json
 import sys

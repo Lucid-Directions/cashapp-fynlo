@@ -1,4 +1,5 @@
-"""Add performance indexes
+"""
+Add performance indexes
 
 Revision ID: performance_indexes_20250117
 Revises: latest

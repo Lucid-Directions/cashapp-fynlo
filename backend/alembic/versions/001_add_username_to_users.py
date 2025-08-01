@@ -1,4 +1,5 @@
-"""Add username field to users table
+"""
+Add username field to users table
 
 Revision ID: 001_add_username
 Revises: 

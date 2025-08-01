@@ -2,7 +2,7 @@
 """
 Test script for WebSocket Real-time Events Implementation
 Tests WebSocket connections, message broadcasting, and event handling
-"""
+"""TODO: Add docstring."""
 
 import asyncio
 import websockets

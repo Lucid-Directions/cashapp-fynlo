@@ -1,4 +1,4 @@
 """
 Core package for Fynlo POS
 Contains core functionality, database models, and utilities
-"""
+"""TODO: Add docstring."""

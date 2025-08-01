@@ -1,6 +1,6 @@
 """
 Optimized Menu API endpoints with caching and performance improvements
-"""
+"""TODO: Add docstring."""
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query

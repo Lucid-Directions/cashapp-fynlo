@@ -1,4 +1,5 @@
-"""merge migration heads
+"""
+merge migration heads
 
 Revision ID: 11cec540dd38
 Revises: 701baf8cafd6, c9882ae130a2

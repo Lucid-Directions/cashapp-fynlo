@@ -1,4 +1,5 @@
-"""Test Helpers and Utilities for FastAPI Testing
+"""
+Test Helpers and Utilities for FastAPI Testing
 
 This module provides reusable test utilities, factories, and helpers
 for achieving 100% test coverage across the Fynlo backend.
@@ -718,4 +719,4 @@ def test_{function_name}_edge_cases():
     # - Concurrent access
     # - Permission edge cases
     pass
-"""
+"""TODO: Add docstring."""

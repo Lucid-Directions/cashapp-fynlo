@@ -1,7 +1,7 @@
 """
 Public Menu API endpoints for Fynlo POS
 These endpoints don't require authentication to allow menu loading before login
-"""
+"""TODO: Add docstring."""
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, HTTPException

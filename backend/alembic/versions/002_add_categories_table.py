@@ -1,4 +1,5 @@
-"""Add categories table and update products schema
+"""
+Add categories table and update products schema
 
 Revision ID: 002_add_categories_table
 Revises: 001_add_username_to_users

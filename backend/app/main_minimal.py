@@ -1,7 +1,7 @@
 """
 Minimal FastAPI app for DigitalOcean deployment
 No external dependencies, immediate startup
-"""
+"""TODO: Add docstring."""
 
 import os
 from fastapi import FastAPI

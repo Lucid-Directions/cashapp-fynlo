@@ -1,4 +1,5 @@
-"""Add Supabase auth support
+"""
+Add Supabase auth support
 
 Revision ID: 009_add_supabase_auth_support
 Revises: e8f9d5c7b2a1

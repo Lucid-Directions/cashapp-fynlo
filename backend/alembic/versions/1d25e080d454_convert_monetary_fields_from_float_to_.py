@@ -1,4 +1,5 @@
-"""Convert monetary fields from FLOAT to DECIMAL
+"""
+Convert monetary fields from FLOAT to DECIMAL
 
 Revision ID: 1d25e080d454
 Revises: 370119f53344

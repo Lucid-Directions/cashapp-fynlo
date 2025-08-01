@@ -1,6 +1,6 @@
 """
 Platform restaurant management endpoints.
-"""
+"""TODO: Add docstring."""
 
 from datetime import datetime
 from typing import List, Optional

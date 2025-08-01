@@ -1,7 +1,7 @@
 """
 Example endpoint showing proper RLS implementation
 This file demonstrates how to use RLS session variable isolation
-"""
+"""TODO: Add docstring."""
 
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException

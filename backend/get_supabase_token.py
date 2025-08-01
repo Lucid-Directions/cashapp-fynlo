@@ -1,7 +1,7 @@
 """
 Helper script to get a Supabase access token for testing
 This simulates what the mobile app will do
-"""
+"""TODO: Add docstring."""
 
 import asyncio
 from supabase import create_client, Client

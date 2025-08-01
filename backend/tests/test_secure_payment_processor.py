@@ -1,7 +1,7 @@
 """
 Test suite for Secure Payment Processor
 Tests payment processing, fallback logic, and audit trails
-"""
+"""TODO: Add docstring."""
 
 import pytest
 from unittest.mock import Mock, patch, AsyncMock

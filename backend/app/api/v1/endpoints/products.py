@@ -1,6 +1,6 @@
 """
 Products and Menu Management API endpoints for Fynlo POS
-"""
+"""TODO: Add docstring."""
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query

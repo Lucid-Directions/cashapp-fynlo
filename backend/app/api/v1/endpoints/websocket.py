@@ -1,7 +1,7 @@
 """
 WebSocket API endpoints for Fynlo POS
 Real-time communication endpoints
-"""
+"""TODO: Add docstring."""
 
 import asyncio
 import json
