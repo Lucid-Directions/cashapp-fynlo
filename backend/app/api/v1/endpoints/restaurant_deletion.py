@@ -41,7 +41,6 @@ async def delete_restaurant(
     
     Args:
         restaurant_id: Restaurant to delete
-"""
         force: Force deletion even with warnings (requires platform owner)
         current_user: Current authenticated user
         db: Database session
@@ -50,7 +49,6 @@ async def delete_restaurant(
         Success response or error with dependency information
     """
     # Validate restaurant_id format
-"""
     try:
         validate_uuid_format(restaurant_id)
     except ValueError:
