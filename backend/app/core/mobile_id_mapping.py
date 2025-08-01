@@ -3,6 +3,8 @@ Mobile ID Mapping System for Fynlo POS
 Provides collision-resistant UUID to integer conversion for mobile compatibility
 
 
+"""
+
 import hashlib
 import uuid
 from typing import Dict, Optional, Any
@@ -42,6 +44,7 @@ class MobileIDService:
     MAX_MOBILE_ID = 999999999
     MIN_MOBILE_ID = 100000000
     
+    """
     def __init__(self, db: Session, redis: Optional[RedisClient] = None):
         self.db = db
         self.redis = redis
