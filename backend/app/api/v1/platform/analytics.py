@@ -1,7 +1,8 @@
 """
 Platform analytics endpoints for dashboard insights.
-"""TODO: Add docstring."""
 
+
+"""
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, Query, HTTPException

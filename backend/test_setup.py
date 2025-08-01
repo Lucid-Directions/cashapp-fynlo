@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Quick test script to verify backend setup and dependencies
-"""TODO: Add docstring."""
 
+
+"""
 import sys
 import subprocess
 

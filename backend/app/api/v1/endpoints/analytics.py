@@ -1,7 +1,7 @@
 """
 Enhanced Analytics and reporting endpoints for Fynlo POS
 Real-time dashboard metrics optimized for mobile consumption
-"""TODO: Add docstring."""
+
 
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, Path

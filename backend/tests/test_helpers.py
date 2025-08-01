@@ -2,9 +2,11 @@
 Test Helpers and Utilities for FastAPI Testing
 
 This module provides reusable test utilities, factories, and helpers
+"""
 for achieving 100% test coverage across the Fynlo backend.
 """
 
+"""
 from typing import Dict, Any, Optional, List, Callable
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -719,4 +721,3 @@ def test_{function_name}_edge_cases():
     # - Concurrent access
     # - Permission edge cases
     pass
-"""TODO: Add docstring."""

@@ -3,7 +3,7 @@
 Platform Settings Migration Script
 Migrates existing restaurant settings to the new platform-controlled architecture
 CRITICAL: Run this script during low-traffic hours to avoid payment processing disruption
-"""TODO: Add docstring."""
+
 
 import os
 import sys
@@ -456,7 +456,7 @@ Next Steps:
 5. Update restaurant owners about new platform-controlled settings
 
 For support, contact the development team with this report.
-"""TODO: Add docstring."""
+
         
         with open(report_filename, 'w') as f:
             f.write(report_content)

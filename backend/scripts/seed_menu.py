@@ -2,7 +2,7 @@
 """
 Seed Menu Script
 Seeds menu data (categories and products) for a restaurant
-"""TODO: Add docstring."""
+
 
 import os
 import sys

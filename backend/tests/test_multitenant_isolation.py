@@ -1,8 +1,9 @@
 """
 Multi-tenant Isolation Test Suite for Fynlo POS
 Tests data isolation between restaurants and prevents cross-tenant access
-"""TODO: Add docstring."""
 
+
+"""
 import pytest
 from datetime import datetime
 from decimal import Decimal

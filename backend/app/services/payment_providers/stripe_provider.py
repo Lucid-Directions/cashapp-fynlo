@@ -1,7 +1,8 @@
 """
 Stripe Payment Provider Implementation
-"""TODO: Add docstring."""
 
+
+"""
 import stripe
 from decimal import Decimal
 from typing import Dict, Any, Optional

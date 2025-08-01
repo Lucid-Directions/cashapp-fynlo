@@ -57,7 +57,7 @@ class SensitiveDataFilter(logging.Filter):
     It redacts values in the `extra` dictionary of a log record
     if their keys match any of the `redacted_keywords`.
     It also attempts to redact well-known sensitive patterns from the log message itself.
-    """TODO: Add docstring."""
+    
 
     def __init__(self, name="", redacted_keywords=None, placeholder=REDACTION_PLACEHOLDER):
         super().__init__(name)

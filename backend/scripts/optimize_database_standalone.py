@@ -2,8 +2,9 @@
 """
 Standalone Database Optimization Script for Fynlo POS
 Works without app dependencies
-"""TODO: Add docstring."""
 
+
+"""
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
@@ -51,7 +52,7 @@ def analyze_table_sizes(cursor):
     WHERE schemaname = 'public'
     ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
     LIMIT 20;
-    """TODO: Add docstring."""
+    
     
     cursor.execute(query)
     results = cursor.fetchall()
@@ -98,7 +99,7 @@ def check_existing_indexes(cursor):
     FROM pg_indexes
     WHERE schemaname = 'public'
     ORDER BY tablename, indexname;
-    """TODO: Add docstring."""
+    
     
     cursor.execute(query)
     indexes = cursor.fetchall()
@@ -149,6 +150,7 @@ def check_connection_stats(cursor):
     """)
     
     active_queries = cursor.fetchall()
+"""
     if active_queries:
         print(f"\nActive queries: {len(active_queries)}")
         for q in active_queries[:5]:  # Show first 5
@@ -175,6 +177,7 @@ def check_cache_hit_rates(cursor):
     cache_stats = cursor.fetchone()
     print(f"Cache hit ratio: {cache_stats['cache_hit_ratio']}%")
     
+"""
     if cache_stats['cache_hit_ratio'] < 90:
         print("⚠️  Cache hit ratio is below 90% - consider increasing shared_buffers")
     else:

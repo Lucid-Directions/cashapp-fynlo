@@ -1,8 +1,9 @@
 """
 Safe Restaurant Deletion Endpoint
 Validates that a restaurant can be safely deleted without breaking critical dependencies
-"""TODO: Add docstring."""
 
+
+"""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
@@ -40,6 +41,7 @@ async def delete_restaurant(
     
     Args:
         restaurant_id: Restaurant to delete
+"""
         force: Force deletion even with warnings (requires platform owner)
         current_user: Current authenticated user
         db: Database session
@@ -48,6 +50,7 @@ async def delete_restaurant(
         Success response or error with dependency information
     """
     # Validate restaurant_id format
+"""
     try:
         validate_uuid_format(restaurant_id)
     except ValueError:

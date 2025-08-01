@@ -4,6 +4,7 @@ Backend Migration Script: Test Users for Authentication
 =====================================================
 
 This script creates test users in the backend authentication system
+"""
 for frontend testing of different user roles and permissions.
 
 Usage:
@@ -14,7 +15,7 @@ Requirements:
     - SQLAlchemy models for users and authentication
     - Password hashing utilities
     - Restaurant and platform models
-"""TODO: Add docstring."""
+
 
 import json
 import sys

@@ -1,8 +1,9 @@
 """
 Mobile API Compatibility Layer for Fynlo POS
 Provides Odoo-style endpoints and mobile-optimized responses for iOS app
-"""TODO: Add docstring."""
 
+
+"""
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, Request, Query
 from sqlalchemy.orm import Session

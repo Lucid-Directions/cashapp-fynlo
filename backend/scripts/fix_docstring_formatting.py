@@ -52,7 +52,7 @@ def fix_empty_docstring_lines(content: str) -> str:
                 next_line = lines[i + 1].strip()
                 # If next line is not indented or is another triple quote, this is likely an empty docstring
                 if not next_line or next_line == '"""':
-                    fixed_lines.append(' ' * indent + '"""TODO: Add docstring."""')
+                    fixed_lines.append(' ' * indent + '')
                     # Skip the closing quotes if they exist
                     if i + 1 < len(lines) and lines[i + 1].strip() == '"""':
                         i += 1
@@ -60,7 +60,7 @@ def fix_empty_docstring_lines(content: str) -> str:
                     fixed_lines.append(line)
             else:
                 # Last line is just triple quotes
-                fixed_lines.append(' ' * indent + '"""TODO: Add docstring."""')
+                fixed_lines.append(' ' * indent + '')
         else:
             fixed_lines.append(line)
         

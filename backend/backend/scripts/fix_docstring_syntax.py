@@ -106,7 +106,7 @@ def fix_docstring_indentation(content: str) -> str:
 ',
         r'\1
 
-        """TODO: Add docstring."""
+        
 ',
         content
     )

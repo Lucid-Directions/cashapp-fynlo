@@ -3,7 +3,7 @@ Subscription models for Fynlo POS
 
 This module contains SQLAlchemy models for managing subscription plans,
 restaurant subscriptions, and usage tracking.
-"""TODO: Add docstring."""
+
 
 from sqlalchemy import Column, Integer, String, DECIMAL, Boolean, TIMESTAMP, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB

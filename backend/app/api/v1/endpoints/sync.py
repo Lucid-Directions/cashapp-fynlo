@@ -1,8 +1,9 @@
 """
 Offline Sync API endpoints for Fynlo POS
 Handles batch upload, conflict resolution, and offline synchronization
-"""TODO: Add docstring."""
 
+
+"""
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, Query, Body, Path
 from sqlalchemy.orm import Session

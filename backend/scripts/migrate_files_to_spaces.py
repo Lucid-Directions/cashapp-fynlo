@@ -2,8 +2,9 @@
 """
 File migration script - Move existing local files to DigitalOcean Spaces
 Run this script to migrate existing uploads to cloud storage
-"""TODO: Add docstring."""
 
+
+"""
 import os
 import sys
 import asyncio

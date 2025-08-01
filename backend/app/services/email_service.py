@@ -1,8 +1,9 @@
 """
 Email Service using Resend API for Fynlo POS
 Handles transactional emails including receipt delivery
-"""TODO: Add docstring."""
 
+
+"""
 import os
 import logging
 from typing import Literal, Optional, Dict, Any

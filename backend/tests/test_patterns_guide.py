@@ -1400,7 +1400,7 @@ directory = htmlcov
 
 [xml]
 output = coverage.xml
-"""TODO: Add docstring."""
+
 
 # ============================================================================
 # PYTEST CONFIGURATION
@@ -1434,7 +1434,7 @@ markers =
     performance: marks performance tests
     
 asyncio_mode = auto
-"""TODO: Add docstring."""
+
 
 # ============================================================================
 # ADVANCED TESTING PATTERNS
@@ -1691,4 +1691,5 @@ coverage report
 
 # Show missing lines for specific file
 coverage report -m app/services/order_service.py
-"""TODO: Add docstring."""
+
+"""

@@ -2,8 +2,9 @@
 Critical Multi-tenant Isolation Test Suite for Issue #361
 Tests to verify complete data isolation between restaurants
 Written BEFORE implementing fixes to ensure we catch any vulnerabilities
-"""TODO: Add docstring."""
 
+
+"""
 import pytest
 import uuid
 from datetime import datetime

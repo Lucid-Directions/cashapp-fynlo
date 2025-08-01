@@ -24,8 +24,9 @@ if TYPE_CHECKING:
 class SyncService:
     """
     Manages bidirectional data synchronization between platform and restaurants
-    """TODO: Add docstring."""
     
+    
+"""
     def __init__(self):
         self.redis_client: Optional[Redis] = None
         self.ws_manager: Optional['EnhancedWebSocketManager'] = None

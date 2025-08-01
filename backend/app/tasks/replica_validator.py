@@ -1,7 +1,7 @@
 """
 Automated replica count validation service.
 Monitors instance counts and sends alerts for discrepancies.
-"""TODO: Add docstring."""
+
 
 import asyncio
 import logging
@@ -25,7 +25,7 @@ class ReplicaValidator:
     - Active instance count from heartbeats
     - Configured replica count from DigitalOcean
     - Sends alerts when mismatches detected
-    """TODO: Add docstring."""
+    
     
     def __init__(
         self, 
@@ -273,7 +273,7 @@ class ReplicaValidator:
             </ol>
             
             <p><small>Alert generated at: {alert_data['timestamp']}</small></p>
-            """TODO: Add docstring."""
+            
             
             await send_email(
                 to=settings.PLATFORM_OWNER_EMAIL,

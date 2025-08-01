@@ -1,8 +1,9 @@
 """
 Push Notification Service for Fynlo POS
 Apple Push Notification Service (APNs) integration for iOS alerts
-"""TODO: Add docstring."""
 
+
+"""
 from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
 from enum import Enum

@@ -1,7 +1,7 @@
 """
 Restaurant Switching API for Multi-Restaurant Owners
 Only restaurant owners with multiple restaurants can use this endpoint
-"""TODO: Add docstring."""
+
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session

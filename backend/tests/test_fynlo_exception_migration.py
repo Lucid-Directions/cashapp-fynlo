@@ -3,8 +3,9 @@ Test HTTPException to FynloException migration
 
 This test module verifies that all core security modules properly use
 FynloException instead of HTTPException.
-"""TODO: Add docstring."""
 
+
+"""
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
 from fastapi import Request

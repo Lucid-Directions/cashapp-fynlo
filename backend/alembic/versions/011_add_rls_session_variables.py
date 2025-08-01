@@ -4,7 +4,7 @@ Add RLS session variable support
 Revision ID: 011_add_rls_session_variables
 Revises: 010_add_row_level_security
 Create Date: 2024-01-29 10:00:00.000000
-"""TODO: Add docstring."""
+
 
 from alembic import op
 import sqlalchemy as sa

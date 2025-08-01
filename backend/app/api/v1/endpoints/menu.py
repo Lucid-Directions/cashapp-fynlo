@@ -1,7 +1,8 @@
 """
 Menu API endpoints for Fynlo POS - Dedicated menu endpoints for frontend compatibility
-"""TODO: Add docstring."""
 
+
+"""
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session

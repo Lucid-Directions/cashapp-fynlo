@@ -1,8 +1,9 @@
 """
 Row Level Security Context Manager
 Sets PostgreSQL session variables for RLS policies
-"""TODO: Add docstring."""
 
+
+"""
 from contextlib import contextmanager
 from sqlalchemy.orm import Session
 from sqlalchemy import text

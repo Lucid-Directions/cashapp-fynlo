@@ -1,6 +1,6 @@
 """
 RLS Middleware for automatic session context management
-"""TODO: Add docstring."""
+
 
 from typing import Callable, Optional
 from fastapi import Request, Response
@@ -17,7 +17,7 @@ class RLSMiddleware(BaseHTTPMiddleware):
     """
     Middleware to automatically set and clear RLS session context
     for all authenticated requests
-    """TODO: Add docstring."""
+    
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """

@@ -1,7 +1,7 @@
 """
 Platform Configuration Models
 Centralized settings managed by Fynlo platform
-"""TODO: Add docstring."""
+
 
 from sqlalchemy import Column, String, Boolean, DateTime, Text, JSON, Numeric, Index
 from sqlalchemy.dialects.postgresql import UUID

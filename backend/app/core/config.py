@@ -1,7 +1,8 @@
 """
 Configuration settings for Fynlo POS Backend
-"""TODO: Add docstring."""
 
+
+"""
 import os
 from pydantic_settings import BaseSettings
 from pydantic import field_validator

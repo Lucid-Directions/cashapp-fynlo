@@ -1,7 +1,8 @@
 """
 Supabase client configuration for authentication
-"""TODO: Add docstring."""
 
+
+"""
 import os
 import logging
 from typing import Optional

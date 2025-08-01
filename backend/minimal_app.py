@@ -1,8 +1,9 @@
 """
 Minimal FastAPI server to get essential endpoints working
 This bypasses complex payment provider imports and focuses on core data endpoints
-"""TODO: Add docstring."""
 
+
+"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any

@@ -1,8 +1,9 @@
 """
 Simplified Fynlo POS Backend for DigitalOcean deployment
 Minimal version to ensure successful startup and health checks
-"""TODO: Add docstring."""
 
+
+"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn

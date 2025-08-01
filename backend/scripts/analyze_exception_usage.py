@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Analyze exception usage to find migration issues
-"""TODO: Add docstring."""
 
+
+"""
 import os
 import re
 from collections import defaultdict

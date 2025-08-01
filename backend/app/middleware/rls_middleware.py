@@ -1,7 +1,7 @@
 """
 RLS (Row Level Security) Middleware for Fynlo POS
 Automatically sets session variables for database RLS policies
-"""TODO: Add docstring."""
+
 
 from fastapi import Request, Depends
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -20,7 +20,7 @@ class RLSMiddleware(BaseHTTPMiddleware):
     """
     Middleware to automatically set RLS context based on authenticated user.
     This ensures that all database queries in a request have proper tenant isolation.
-    """TODO: Add docstring."""
+    
     
     async def dispatch(self, request: Request, call_next):
         # Skip RLS for public endpoints

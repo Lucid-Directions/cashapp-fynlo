@@ -1,7 +1,8 @@
 """
 Supabase Authentication endpoints for Fynlo POS
-"""TODO: Add docstring."""
 
+
+"""
 from fastapi import APIRouter, Depends, Header, Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError

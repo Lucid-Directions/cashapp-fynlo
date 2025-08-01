@@ -1,8 +1,9 @@
 """
 Platform Settings Service
 Manages centralized platform configurations and restaurant overrides
-"""TODO: Add docstring."""
 
+
+"""
 import logging
 import json
 from datetime import datetime
