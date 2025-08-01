@@ -1,5 +1,9 @@
 """
 Square Payment Provider Implementation
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

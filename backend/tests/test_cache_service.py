@@ -1,5 +1,9 @@
 """
 Test suite for CacheService and caching functionality
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

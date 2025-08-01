@@ -1,5 +1,4 @@
-"""
-Convert monetary fields from FLOAT to DECIMAL
+"""Convert monetary fields from FLOAT to DECIMAL
 
 
 """

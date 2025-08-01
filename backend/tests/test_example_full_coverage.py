@@ -1,5 +1,4 @@
-"""
-Example: Achieving 100% Test Coverage for a Complete Feature
+"""Example: Achieving 100% Test Coverage for a Complete Feature
 
 This example demonstrates how to achieve 100% coverage for a hypothetical
 order management feature, covering all the patterns from test_patterns_guide.py

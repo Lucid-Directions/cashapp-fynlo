@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
 Script to check HTTPException usage and suggest FynloException replacements
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

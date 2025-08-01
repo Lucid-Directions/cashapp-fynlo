@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
 Generate detailed exception usage analysis with file and line information
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

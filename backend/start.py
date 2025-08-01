@@ -2,6 +2,10 @@
 """
 Minimal startup script for DigitalOcean deployment
 Uses minimal app without external dependencies
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

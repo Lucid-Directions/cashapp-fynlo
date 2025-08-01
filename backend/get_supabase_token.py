@@ -1,6 +1,10 @@
 """
 Helper script to get a Supabase access token for testing
 This simulates what the mobile app will do
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

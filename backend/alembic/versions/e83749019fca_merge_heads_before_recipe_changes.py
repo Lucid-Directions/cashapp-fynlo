@@ -1,5 +1,4 @@
-"""
-Merge heads before Recipe changes
+"""Merge heads before Recipe changes
 
 Revision ID: e83749019fca
 Revises: 30fd53b66d34, 9977a196aa67

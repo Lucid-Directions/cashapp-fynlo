@@ -1,5 +1,4 @@
-"""
-Test Helpers and Utilities for FastAPI Testing
+"""Test Helpers and Utilities for FastAPI Testing
 
 This module provides reusable test utilities, factories, and helpers
 """
@@ -718,3 +717,7 @@ def test_{function_name}_edge_cases():
     # - Concurrent access
     # - Permission edge cases
     pass
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)

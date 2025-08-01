@@ -43,7 +43,11 @@ class SecurePaymentConfigService:
     - Provides secure storage and retrieval
     - Validates configuration before storage
     - Audit trail for configuration changes
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     def __init__(self, db: Session):
         self.db = db

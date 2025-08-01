@@ -2,7 +2,11 @@
 """
 Redis Optimization Script for Fynlo POS
 Configures eviction policies and monitors usage
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import redis
 import json
@@ -246,7 +250,11 @@ tcp-keepalive 60
 rename-command FLUSHDB ""
 rename-command FLUSHALL ""
 rename-command CONFIG ""
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     print(config)
     

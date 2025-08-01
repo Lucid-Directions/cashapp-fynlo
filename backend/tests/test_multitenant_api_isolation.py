@@ -1,6 +1,10 @@
 """
 API-level Multi-tenant Isolation Tests
 Tests actual API endpoints for cross-tenant access vulnerabilities
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

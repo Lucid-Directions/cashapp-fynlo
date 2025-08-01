@@ -1,6 +1,10 @@
 """
 Platform audit logging model and functions.
 Tracks all platform admin actions for compliance and security.
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

@@ -2,6 +2,10 @@
 """
 Seed Chucho Restaurant Menu Data
 Seeds the Chucho restaurant menu data into the production database
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

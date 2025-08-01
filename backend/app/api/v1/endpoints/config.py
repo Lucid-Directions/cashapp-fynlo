@@ -1,6 +1,10 @@
 """
 Configuration Management API Endpoints
 Provides endpoints for managing payment system configuration
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

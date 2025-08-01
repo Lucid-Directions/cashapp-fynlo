@@ -1,6 +1,10 @@
 """
 WebSocket Manager for Fynlo POS
 Real-time communication for orders, payments, kitchen updates, and notifications
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

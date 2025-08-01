@@ -1,6 +1,10 @@
 """
 Push Notification API endpoints for Fynlo POS
 Device registration, notification sending, and preference management
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

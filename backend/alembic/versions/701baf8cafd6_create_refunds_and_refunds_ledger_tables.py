@@ -1,5 +1,4 @@
-"""
-create_refunds_and_refunds_ledger_tables
+"""create_refunds_and_refunds_ledger_tables
 
 Revision ID: 701baf8cafd6
 Revises: 469efcd81217

@@ -1,5 +1,4 @@
-"""
-merge_all_heads_for_multi_restaurant
+"""merge_all_heads_for_multi_restaurant
 
 Revision ID: d92292f7ec1d
 Revises: add_row_level_security, 011_add_rls_session_variables, 569b8ab547cb, add_portal_tables_2025, add_subscription_fields

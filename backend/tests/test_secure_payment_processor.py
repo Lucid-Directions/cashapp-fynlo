@@ -1,6 +1,10 @@
 """
 Test suite for Secure Payment Processor
 Tests payment processing, fallback logic, and audit trails
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

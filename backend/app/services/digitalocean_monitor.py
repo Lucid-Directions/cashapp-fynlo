@@ -2,7 +2,11 @@
 DigitalOcean App Platform monitoring service.
 Provides direct API access to get accurate instance counts and deployment status.
 Enhanced with security best practices and resilience patterns.
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import os
 import logging
@@ -58,7 +62,11 @@ class DigitalOceanMonitor:
     - Circuit breaker pattern
     - Input validation
     - Proper error handling
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     def __init__(self):
         # Load and decrypt API token securely

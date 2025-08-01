@@ -13,6 +13,10 @@ Requirements:
     - Backend database connection configured
     - SQLAlchemy models for menu items and categories
     - Restaurant tenant ID for Mexican restaurant
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

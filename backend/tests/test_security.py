@@ -1,6 +1,10 @@
 """
 Comprehensive unit tests for the security module.
 Tests environment filtering, input validation, token encryption, and webhook security.
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

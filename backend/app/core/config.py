@@ -1,5 +1,9 @@
 """
 Configuration settings for Fynlo POS Backend
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

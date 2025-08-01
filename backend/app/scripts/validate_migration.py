@@ -3,7 +3,11 @@
 Migration Validation Script
 Comprehensive validation of the platform settings migration
 Checks data integrity, API functionality, and configuration consistency
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import os
 import sys
@@ -524,7 +528,11 @@ DATABASE STATISTICS:
 
 VALIDATION STATUS: {'PASSED' if self.validation_results['tests_failed'] == 0 else 'FAILED'}
 
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
         
         if self.validation_results['errors']:
             report_content += "\nERRORS:\n"
@@ -548,7 +556,11 @@ Next Steps:
 5. Update documentation with new platform settings
 
 For support, contact the development team with this report.
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
         
         with open(report_filename, 'w') as f:
             f.write(report_content)

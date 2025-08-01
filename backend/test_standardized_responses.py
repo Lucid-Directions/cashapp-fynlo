@@ -1,6 +1,10 @@
 """
 Test script to verify standardized API responses
 Run this to validate the new response format works correctly
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

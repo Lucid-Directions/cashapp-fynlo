@@ -1,7 +1,11 @@
 """
 Payment Provider Management Endpoints
 Handles configuration and testing of payment providers
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 from fastapi import APIRouter, Depends, status, Query
 from typing import Dict, Any, List, Optional

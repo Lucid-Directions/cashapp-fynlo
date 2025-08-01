@@ -1,5 +1,4 @@
-"""
-create_platform_fees_and_staff_tip_distributions_tables
+"""create_platform_fees_and_staff_tip_distributions_tables
 
 Revision ID: YYY
 Revises: XXX_create_payment_method_settings

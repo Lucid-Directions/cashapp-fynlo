@@ -1,5 +1,4 @@
-"""
-Create recipe, inventory ledger tables and update inventory table
+"""Create recipe, inventory ledger tables and update inventory table
 
 Revision ID: 007
 Revises: e8f9d5c7b2a1

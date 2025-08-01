@@ -1,10 +1,10 @@
-
 """
+
+from app.core.exceptions import ServiceUnavailableError
 Redis client for caching, session management, and rate limiting.
 Connects to DigitalOcean Valkey (Redis compatible).
 """
 
-from app.core.exceptions import ServiceUnavailableError
 import json
 import logging
 import time

@@ -13,7 +13,11 @@ class StaffTipService:
     """
     Manages the distribution of tips to staff members,
     accounting for service charges and transaction fees.
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 """
     def __init__(self, db: Session):

@@ -1,5 +1,4 @@
-"""
-Add restaurant_id to Recipe table for multi-tenant isolation
+"""Add restaurant_id to Recipe table for multi-tenant isolation
 
 Revision ID: add_restaurant_id_to_recipe
 Revises: e83749019fca

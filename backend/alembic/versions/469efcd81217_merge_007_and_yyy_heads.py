@@ -1,5 +1,4 @@
-"""
-merge_007_and_YYY_heads
+"""merge_007_and_YYY_heads
 
 Revision ID: 469efcd81217
 Revises: 007, YYY_create_financial_records_tables

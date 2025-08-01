@@ -20,7 +20,11 @@ class APIVersionMiddleware:
     - WebSocket path normalization
     - Version header detection
     - Graceful fallback mechanisms
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     def __init__(self, app):
         self.app = app
@@ -63,7 +67,11 @@ class APIVersionMiddleware:
         /api/products -> /api/v1/products
         /api/v1/products -> /api/v1/products (unchanged)
         /health -> /health (unchanged)
+<<<<<<< HEAD
         
+=======
+        """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
         
         # Pattern for unversioned API calls
         unversioned_pattern = r'^/api/(?!v\d+/)(.+)$'
@@ -84,7 +92,11 @@ class APIVersionMiddleware:
         Examples:
         /ws/{restaurant_id} -> /api/v1/websocket/ws/{restaurant_id}
         /websocket/{restaurant_id} -> /api/v1/websocket/ws/{restaurant_id}
+<<<<<<< HEAD
         
+=======
+        """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
         
         # Pattern for direct WebSocket paths
         ws_patterns = [
@@ -105,7 +117,11 @@ class APIVersionMiddleware:
         Checks for:
         - X-API-Version header
         - Accept header with version
+<<<<<<< HEAD
         
+=======
+        """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
         
         # Check X-API-Version header
         api_version = request.headers.get("x-api-version")
@@ -124,7 +140,11 @@ class APIVersionMiddleware:
 def add_version_headers_to_response(request: Request, response: Response) -> Response:
     """
     Add version information to response headers
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     # Add current API version to response
     response.headers["X-API-Version"] = "1"
@@ -139,7 +159,11 @@ def add_version_headers_to_response(request: Request, response: Response) -> Res
 class WebSocketPathNormalizer:
     """
     Utility class for WebSocket path normalization
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     @staticmethod
     def normalize_ws_path(path: str, restaurant_id: str, connection_type: str = "general") -> str:
@@ -153,7 +177,11 @@ class WebSocketPathNormalizer:
             
         Returns:
             Normalized path
+<<<<<<< HEAD
         
+=======
+        """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
         
         base_path = f"/api/v1/websocket/ws"
         
@@ -166,7 +194,11 @@ class WebSocketPathNormalizer:
     def extract_restaurant_id_from_path(path: str) -> Optional[str]:
         """
         Extract restaurant ID from WebSocket path
+<<<<<<< HEAD
         
+=======
+        """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
         
         patterns = [
             r'/ws/([^/]+)',

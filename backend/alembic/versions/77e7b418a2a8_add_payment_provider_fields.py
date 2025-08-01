@@ -1,5 +1,4 @@
-"""
-add_payment_provider_fields
+"""add_payment_provider_fields
 
 Revision ID: 77e7b418a2a8
 Revises: 1d25e080d454

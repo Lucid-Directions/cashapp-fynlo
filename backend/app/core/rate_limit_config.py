@@ -1,8 +1,11 @@
 """
 Centralized rate limiting configuration for Fynlo POS backend.
 Provides endpoint-specific rate limits based on security and performance requirements.
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 """
 
 from typing import Dict

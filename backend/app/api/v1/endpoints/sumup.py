@@ -3,6 +3,10 @@ SumUp Payment Provider Initialization Endpoint
 Provides secure configuration for mobile app without exposing API keys
 
 Last updated: 2025-07-29 - Force rebuild after rate limiter fix
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

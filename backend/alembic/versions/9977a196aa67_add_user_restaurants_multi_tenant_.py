@@ -1,5 +1,4 @@
-"""
-add_user_restaurants_multi_tenant_support
+"""add_user_restaurants_multi_tenant_support
 
 Revision ID: 9977a196aa67
 Revises: d92292f7ec1d

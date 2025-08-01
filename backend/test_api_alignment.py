@@ -2,6 +2,10 @@
 """
 API Alignment Test Script
 Tests the newly implemented endpoints to ensure frontend compatibility
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

@@ -1,6 +1,10 @@
 """
 Employee Service - Business logic for employee management
 Handles employee CRUD operations, scheduling, time tracking, and performance metrics
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

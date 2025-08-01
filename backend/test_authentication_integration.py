@@ -2,6 +2,10 @@
 """
 Authentication Integration Testing for Fynlo POS
 Comprehensive end-to-end testing of JWT authentication flow
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

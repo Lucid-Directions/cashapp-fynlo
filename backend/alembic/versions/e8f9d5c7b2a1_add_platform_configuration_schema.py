@@ -1,5 +1,4 @@
-"""
-Add platform configuration schema
+"""Add platform configuration schema
 
 Revision ID: e8f9d5c7b2a1
 Revises: 77e7b418a2a8

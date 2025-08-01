@@ -3,6 +3,10 @@ Subscription schemas for API request/response validation
 
 This module contains Pydantic models for validating subscription-related
 API requests and responses.
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

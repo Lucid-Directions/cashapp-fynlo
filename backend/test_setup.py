@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
 Quick test script to verify backend setup and dependencies
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

@@ -1,8 +1,11 @@
 """
 Mobile ID Mapping System for Fynlo POS
 Provides collision-resistant UUID to integer conversion for mobile compatibility
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 """
 
 import hashlib
