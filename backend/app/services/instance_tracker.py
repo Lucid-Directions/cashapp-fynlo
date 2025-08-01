@@ -3,6 +3,8 @@ Instance tracking service for monitoring active backend instances.
 Tracks instances using Redis with heartbeat mechanism.
 
 
+"""
+
 import asyncio
 from datetime import datetime, timezone, timedelta
 import os
@@ -26,6 +28,7 @@ class InstanceTracker:
     Stale instances are automatically cleaned up based on TTL.
     
     
+    """
     def __init__(self, redis_client: RedisClient):
         self.redis = redis_client
         self.instance_id = self._generate_instance_id()

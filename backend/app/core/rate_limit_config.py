@@ -3,6 +3,8 @@ Centralized rate limiting configuration for Fynlo POS backend.
 Provides endpoint-specific rate limits based on security and performance requirements.
 
 
+"""
+
 from typing import Dict
 from app.core.config import settings
 

@@ -4,6 +4,8 @@ Ensures all API requests are properly isolated by restaurant
 Platform owners (Ryan and Arnaud) bypass all restrictions
 
 
+"""
+
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
@@ -21,6 +23,7 @@ class TenantIsolationMiddleware(BaseHTTPMiddleware):
     Middleware to enforce tenant isolation across all API endpoints
     
     
+    """
     def __init__(self, app: ASGIApp):
         super().__init__(app)
         
@@ -80,6 +83,7 @@ class TenantValidationMiddleware:
     Additional middleware to validate tenant access in request payloads
     
     
+    """
     @staticmethod
     async def validate_request_body(request: Request) -> None:
         """
