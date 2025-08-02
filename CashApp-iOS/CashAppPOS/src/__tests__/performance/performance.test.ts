@@ -3,7 +3,7 @@
  * Testing app performance and memory usage
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-native';
 
 import DatabaseService from '../../services/DatabaseService';
 import { useAppStore } from '../../store/useAppStore';
