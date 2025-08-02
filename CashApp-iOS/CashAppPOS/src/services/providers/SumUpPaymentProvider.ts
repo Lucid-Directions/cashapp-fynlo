@@ -1,3 +1,5 @@
+import { logger } from '../../utils/logger';
+
 // Note: This is a placeholder implementation since SumUp SDK for React Native
 // would need to be obtained from SumUp directly.
 
@@ -27,7 +29,7 @@ class SumUpPaymentProviderClass {
       this.initialized = true;
       logger.info('SumUp payment provider initialized (placeholder)');
     } catch (error) {
-      logger.error('Failed to initialize SumUp:', error);
+      console.error('Failed to initialize SumUp:', error);
       throw error;
     }
   }
@@ -43,14 +45,14 @@ class SumUpPaymentProviderClass {
 
       return false; // Placeholder
     } catch (error) {
-      logger.error('SumUp login failed:', error);
+      console.error('SumUp login failed:', error);
       return false;
     }
   }
 
   async processPayment(
     amount: number,
-    _currency: string = 'GBP',
+    currency: string = 'GBP',
     title?: string
   ): Promise<SumUpPaymentResult> {
     try {
@@ -77,7 +79,7 @@ class SumUpPaymentProviderClass {
     }
   }
 
-  async getCardReaderSettings(): Promise<unknown> {
+  async getCardReaderSettings(): Promise<any> {
     try {
       if (!this.initialized) {
         throw new Error('SumUp not initialized');
@@ -88,7 +90,7 @@ class SumUpPaymentProviderClass {
 
       return null;
     } catch (error) {
-      logger.error('Failed to get SumUp card reader settings:', error);
+      console.error('Failed to get SumUp card reader settings:', error);
       return null;
     }
   }

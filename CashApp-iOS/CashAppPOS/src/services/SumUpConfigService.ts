@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { API_CONFIG } from '../config/api';
 import tokenManager from '../utils/tokenManager';
+import { logger } from '../utils/logger';
 
 export interface SumUpConfig {
   appId: string;
@@ -86,7 +87,7 @@ class SumUpConfigService {
         throw new Error(result.message || 'Invalid response from server');
       }
     } catch (error) {
-      logger.error('❌ Failed to fetch SumUp configuration:', error);
+      console.error('❌ Failed to fetch SumUp configuration:', error);
       throw error;
     }
   }
@@ -94,7 +95,7 @@ class SumUpConfigService {
   /**
    * Get SumUp status from backend
    */
-  async getStatus(): Promise<unknown> {
+  async getStatus(): Promise<any> {
     try {
       const token = await tokenManager.getAuthToken();
       if (!token) {
@@ -116,7 +117,7 @@ class SumUpConfigService {
       const result = await response.json();
       return result.data;
     } catch (error) {
-      logger.error('❌ Failed to fetch SumUp status:', error);
+      console.error('❌ Failed to fetch SumUp status:', error);
       throw error;
     }
   }
@@ -147,7 +148,7 @@ class SumUpConfigService {
       const result = await response.json();
       return result.data?.valid === true;
     } catch (error) {
-      logger.error('❌ Failed to validate merchant code:', error);
+      console.error('❌ Failed to validate merchant code:', error);
       return false;
     }
   }
@@ -161,7 +162,7 @@ class SumUpConfigService {
       this.cachedConfig = null;
       logger.info('🧹 SumUp configuration cache cleared');
     } catch (error) {
-      logger.error('Failed to clear cache:', error);
+      console.error('Failed to clear cache:', error);
     }
   }
 
@@ -192,7 +193,7 @@ class SumUpConfigService {
       this.cachedConfig = config;
       return config;
     } catch (error) {
-      logger.error('Failed to get cached config:', error);
+      console.error('Failed to get cached config:', error);
       return null;
     }
   }
@@ -210,7 +211,7 @@ class SumUpConfigService {
       await AsyncStorage.setItem(this.configCacheKey, JSON.stringify(cacheData));
       this.cachedConfig = config;
     } catch (error) {
-      logger.error('Failed to cache config:', error);
+      console.error('Failed to cache config:', error);
     }
   }
 }

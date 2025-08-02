@@ -4,6 +4,7 @@
  */
 
 import { Platform } from 'react-native';
+import { logger } from '../utils/logger';
 
 export interface NFCCapabilities {
   isSupported: boolean;
@@ -46,7 +47,7 @@ class NFCServiceClass {
       }
       return false;
     } catch (error) {
-      logger.error('Failed to check NFC support:', error);
+      console.error('Failed to check NFC support:', error);
       return false;
     }
   }
@@ -61,7 +62,7 @@ class NFCServiceClass {
       const isSupported = await this.isNFCSupported();
       return isSupported;
     } catch (error) {
-      logger.error('Failed to check NFC status:', error);
+      console.error('Failed to check NFC status:', error);
       return false;
     }
   }
@@ -91,7 +92,7 @@ class NFCServiceClass {
         supportedMethods,
       };
     } catch (error) {
-      logger.error('Failed to get NFC capabilities:', error);
+      console.error('Failed to get NFC capabilities:', error);
       return {
         isSupported: false,
         isEnabled: false,
@@ -155,7 +156,7 @@ class NFCServiceClass {
       // This would typically use Apple Pay SDK to check availability
       return true;
     } catch (error) {
-      logger.error('Failed to check Apple Pay availability:', error);
+      console.error('Failed to check Apple Pay availability:', error);
       return false;
     }
   }
@@ -172,7 +173,7 @@ class NFCServiceClass {
       // This would typically use Google Pay SDK to check availability
       return true;
     } catch (error) {
-      logger.error('Failed to check Google Pay availability:', error);
+      console.error('Failed to check Google Pay availability:', error);
       return false;
     }
   }
@@ -201,7 +202,7 @@ class NFCServiceClass {
 
       return 'none';
     } catch (error) {
-      logger.error('Failed to get optimal payment method:', error);
+      console.error('Failed to get optimal payment method:', error);
       return 'none';
     }
   }
