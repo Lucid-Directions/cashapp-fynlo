@@ -1,0 +1,39 @@
+# Pre-commit hooks for Fynlo POS
+# Prevents syntax errors from being committed
+
+repos:
+  # Python syntax and style checks
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.6
+    hooks:
+      - id: ruff
+        args: [--select, E999, --fix]  # E999: SyntaxError
+        files: ^backend/.*\.py$
+        name: Check Python syntax errors
+        description: Prevents committing files with syntax errors
+
+  # Python syntax validation using py_compile
+  - repo: local
+    hooks:
+      - id: python-syntax-check
+        name: Validate Python syntax
+        entry: python -m py_compile
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: true
+        description: Compile Python files to check for syntax errors
+
+  # Check for unterminated strings in docstrings
+  - repo: local  
+    hooks:
+      - id: docstring-check
+        name: Check for unterminated docstrings
+        entry: python -c "import ast; import sys; ast.parse(open(sys.argv[1]).read())"
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: true
+        description: Parse Python AST to detect unterminated strings
+
+# Configuration
+fail_fast: true  # Stop on first error
+default_stages: [pre-commit]
