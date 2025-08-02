@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -9,8 +10,10 @@ import {
   FlatList,
   Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import Colors from '../../constants/Colors';
 
 interface BusinessSettingsItem {
@@ -130,19 +133,15 @@ const BusinessSettingsScreen: React.FC = () => {
       <View style={[styles.settingIcon, { backgroundColor: `${Colors.primary}15` }]}>
         <Icon name={item.icon} size={24} color={Colors.primary} />
       </View>
-      
+
       <View style={styles.settingContent}>
         <Text style={styles.settingTitle}>{item.title}</Text>
         <Text style={styles.settingDescription}>{item.description}</Text>
       </View>
-      
+
       <View style={styles.settingStatus}>
         {item.status && (
-          <Icon 
-            name={getStatusIcon(item.status)} 
-            size={20} 
-            color={getStatusColor(item.status)} 
-          />
+          <Icon name={getStatusIcon(item.status)} size={20} color={getStatusColor(item.status)} />
         )}
         <Icon name="chevron-right" size={24} color={Colors.lightGray} />
       </View>
@@ -152,22 +151,22 @@ const BusinessSettingsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           testID="back-button"
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Business Settings</Text>
           <Text style={styles.headerSubtitle}>Configure your business information</Text>
         </View>
-        
+
         <TouchableOpacity style={styles.helpButton}>
           <Icon name="help-outline" size={24} color={Colors.white} />
         </TouchableOpacity>
@@ -177,7 +176,7 @@ const BusinessSettingsScreen: React.FC = () => {
       <FlatList
         data={businessSettings}
         renderItem={renderSettingItem}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.settingsList}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={styles.separator} />}

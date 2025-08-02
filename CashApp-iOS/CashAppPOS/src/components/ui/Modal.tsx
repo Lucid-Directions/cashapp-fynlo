@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+
+import type { ViewStyle } from 'react-native';
 import {
   Modal as RNModal,
   View,
@@ -10,12 +12,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
-  ViewStyle,
   ScrollView,
 } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../../design-system/ThemeProvider';
-import { Theme } from '../../design-system/theme';
+
+import type { Theme } from '../../design-system/theme';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -153,7 +157,7 @@ const Modal: React.FC<ModalProps> = ({
   };
 
   const ContentComponent = scrollable ? ScrollView : View;
-  const contentProps = scrollable 
+  const contentProps = scrollable
     ? { showsVerticalScrollIndicator: false, contentContainerStyle: styles.scrollContent }
     : { style: styles.content };
 
@@ -183,7 +187,7 @@ const Modal: React.FC<ModalProps> = ({
                 </Text>
               )}
               {closable && (
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.closeButton}
                   onPress={onClose}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -195,16 +199,10 @@ const Modal: React.FC<ModalProps> = ({
           )}
 
           {/* Body */}
-          <ContentComponent {...contentProps}>
-            {children}
-          </ContentComponent>
+          <ContentComponent {...contentProps}>{children}</ContentComponent>
 
           {/* Footer */}
-          {footer && (
-            <View style={styles.footer}>
-              {footer}
-            </View>
-          )}
+          {footer && <View style={styles.footer}>{footer}</View>}
         </Animated.View>
       </KeyboardAvoidingView>
     </RNModal>
@@ -263,9 +261,7 @@ export const ModalAction: React.FC<ModalActionProps> = ({
       onPress={onPress}
       disabled={disabled}
     >
-      <Text style={[styles.actionText, { color: getTextColor() }]}>
-        {children}
-      </Text>
+      <Text style={[styles.actionText, { color: getTextColor() }]}>{children}</Text>
     </TouchableOpacity>
   );
 };
@@ -280,11 +276,7 @@ export const ModalActions: React.FC<ModalActionsProps> = ({ children, style }) =
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
-  return (
-    <View style={[styles.actions, style]}>
-      {children}
-    </View>
-  );
+  return <View style={[styles.actions, style]}>{children}</View>;
 };
 
 const createStyles = (theme: Theme) =>

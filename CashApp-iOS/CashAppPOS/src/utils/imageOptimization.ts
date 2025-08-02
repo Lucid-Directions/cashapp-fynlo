@@ -55,20 +55,12 @@ export class ImageOptimizer {
   }
 
   // Generate optimized image URL (for CDN or image service)
-  static generateOptimizedUrl(
-    originalUrl: string,
-    options: ImageOptimizationOptions = {}
-  ): string {
-    const {
-      width,
-      height,
-      quality = 80,
-      format = 'jpeg',
-    } = options;
+  static generateOptimizedUrl(originalUrl: string, options: ImageOptimizationOptions = {}): string {
+    const { width, height, quality = 80, format = 'jpeg' } = options;
 
     // For demonstration - in real app, this would integrate with your image CDN
     const params = new URLSearchParams();
-    
+
     if (width) params.append('w', width.toString());
     if (height) params.append('h', height.toString());
     params.append('q', quality.toString());
@@ -88,14 +80,14 @@ export class ImageOptimizer {
     options: ImageOptimizationOptions = {}
   ): OptimizedImageSource {
     const cacheKey = `${uri}_${JSON.stringify(options)}`;
-    
+
     // Check cache first
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey)!;
     }
 
     const optimizedUri = this.generateOptimizedUrl(uri, options);
-    
+
     const source: OptimizedImageSource = {
       uri: optimizedUri,
       width: options.width,
@@ -117,7 +109,7 @@ export class ImageOptimizer {
 
   // Preload images for better performance
   static async preloadImages(urls: string[]): Promise<void> {
-    const preloadPromises = urls.map(url => {
+    const preloadPromises = urls.map((url) => {
       return new Promise<void>((resolve, reject) => {
         const image = new Image();
         image.onload = () => resolve();
@@ -175,7 +167,7 @@ export const imageUtils = {
   ): boolean => {
     const originalSize = originalWidth * originalHeight;
     const targetSize = targetWidth * targetHeight;
-    
+
     // Optimize if original is more than 2x the target size
     return originalSize > targetSize * 2;
   },
@@ -222,13 +214,11 @@ export interface OptimizedImageProps {
 }
 
 // Helper function to create optimized image props
-export const createOptimizedImageProps = (
-  props: OptimizedImageProps
-): any => {
+export const createOptimizedImageProps = (props: OptimizedImageProps): any => {
   const { source, width, height, useCase, quality, format, cache } = props;
-  
+
   let optimalSize = { width: width || 200, height: height || 200 };
-  
+
   if (useCase) {
     optimalSize = ImageOptimizer.getOptimalSize(useCase);
   }
@@ -248,9 +238,7 @@ export const createOptimizedImageProps = (
       height: optimalSize.height / pixelRatio,
     },
     resizeMode: 'cover',
-    defaultSource: props.placeholder 
-      ? { uri: props.placeholder }
-      : undefined,
+    defaultSource: props.placeholder ? { uri: props.placeholder } : undefined,
   };
 };
 

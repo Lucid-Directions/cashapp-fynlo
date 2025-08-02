@@ -73,9 +73,9 @@ class NFCServiceClass {
     try {
       const isSupported = await this.isNFCSupported();
       const isEnabled = await this.isNFCEnabled();
-      
+
       const supportedMethods: string[] = [];
-      
+
       if (isSupported && isEnabled) {
         if (Platform.OS === 'ios') {
           supportedMethods.push('apple_pay', 'contactless_card');
@@ -83,7 +83,7 @@ class NFCServiceClass {
           supportedMethods.push('google_pay', 'contactless_card');
         }
       }
-      
+
       return {
         isSupported,
         isEnabled,
@@ -106,7 +106,7 @@ class NFCServiceClass {
    */
   startProximityDetection(callback: (event: NFCProximityEvent) => void): void {
     this.proximityCallback = callback;
-    
+
     // This would typically start native NFC proximity monitoring
     // For now, we'll simulate proximity detection for demo purposes
     console.log('Started NFC proximity detection');
@@ -131,7 +131,7 @@ class NFCServiceClass {
         deviceType,
         signal: 'strong',
       });
-      
+
       // Simulate device removal after 3 seconds
       setTimeout(() => {
         if (this.proximityCallback) {
@@ -150,7 +150,7 @@ class NFCServiceClass {
     if (Platform.OS !== 'ios') {
       return false;
     }
-    
+
     try {
       // This would typically use Apple Pay SDK to check availability
       return true;
@@ -167,7 +167,7 @@ class NFCServiceClass {
     if (Platform.OS !== 'android') {
       return false;
     }
-    
+
     try {
       // This would typically use Google Pay SDK to check availability
       return true;
@@ -193,12 +193,12 @@ class NFCServiceClass {
           return 'google_pay';
         }
       }
-      
+
       const nfcSupported = await this.isNFCSupported();
       if (nfcSupported) {
         return 'nfc';
       }
-      
+
       return 'none';
     } catch (error) {
       console.error('Failed to get optimal payment method:', error);
@@ -228,7 +228,7 @@ class NFCServiceClass {
       'Wait for the NFC icon to pulse before bringing the card close',
       'Ensure NFC is enabled in your device settings',
     ];
-    
+
     if (Platform.OS === 'ios') {
       tips.push('Make sure Face ID or Touch ID is set up and working');
       tips.push('Check that Apple Pay is set up in Wallet app');
@@ -236,7 +236,7 @@ class NFCServiceClass {
       tips.push('Ensure Google Pay is installed and set up');
       tips.push('Check that your default payment app is configured');
     }
-    
+
     return tips;
   }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -11,8 +12,10 @@ import {
   Alert,
   Switch,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useRestaurantConfig } from '../../hooks/useRestaurantConfig';
 
 const Colors = {
@@ -48,7 +51,7 @@ const RestaurantProfileScreen: React.FC = () => {
     zipCode: '',
     country: 'United Kingdom',
     currency: 'GBP',
-    taxRate: 0.20,
+    taxRate: 0.2,
     timezone: 'Europe/London',
   });
 
@@ -71,21 +74,21 @@ const RestaurantProfileScreen: React.FC = () => {
         zipCode: config.address?.zipCode || '',
         country: config.address?.country || 'United Kingdom',
         currency: config.currency || 'GBP',
-        taxRate: config.taxRate || 0.20,
+        taxRate: config.taxRate || 0.2,
         timezone: config.timezone || 'Europe/London',
       });
     }
   }, [config]);
 
   const updateField = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
 
   const handleSave = async () => {
     try {
       setSaving(true);
-      
+
       await updateConfig({
         restaurantName: formData.restaurantName,
         displayName: formData.displayName,
@@ -116,44 +119,48 @@ const RestaurantProfileScreen: React.FC = () => {
 
   const handleReset = () => {
     if (!hasChanges) return;
-    
-    Alert.alert(
-      'Discard Changes',
-      'Are you sure you want to discard all unsaved changes?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Discard',
-          style: 'destructive',
-          onPress: () => {
-            if (config) {
-              setFormData({
-                restaurantName: config.restaurantName || '',
-                displayName: config.displayName || '',
-                businessType: config.businessType || 'Restaurant',
-                phone: config.phone || '',
-                email: config.email || '',
-                website: config.website || '',
-                street: config.address?.street || '',
-                city: config.address?.city || '',
-                state: config.address?.state || '',
-                zipCode: config.address?.zipCode || '',
-                country: config.address?.country || 'United Kingdom',
-                currency: config.currency || 'GBP',
-                taxRate: config.taxRate || 0.20,
-                timezone: config.timezone || 'Europe/London',
-              });
-              setHasChanges(false);
-            }
-          },
+
+    Alert.alert('Discard Changes', 'Are you sure you want to discard all unsaved changes?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Discard',
+        style: 'destructive',
+        onPress: () => {
+          if (config) {
+            setFormData({
+              restaurantName: config.restaurantName || '',
+              displayName: config.displayName || '',
+              businessType: config.businessType || 'Restaurant',
+              phone: config.phone || '',
+              email: config.email || '',
+              website: config.website || '',
+              street: config.address?.street || '',
+              city: config.address?.city || '',
+              state: config.address?.state || '',
+              zipCode: config.address?.zipCode || '',
+              country: config.address?.country || 'United Kingdom',
+              currency: config.currency || 'GBP',
+              taxRate: config.taxRate || 0.2,
+              timezone: config.timezone || 'Europe/London',
+            });
+            setHasChanges(false);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const businessTypes = [
-    'Restaurant', 'Fast Food', 'Cafe', 'Bar & Pub', 'Food Truck', 
-    'Bakery', 'Pizzeria', 'Bistro', 'Fine Dining', 'Other'
+    'Restaurant',
+    'Fast Food',
+    'Cafe',
+    'Bar & Pub',
+    'Food Truck',
+    'Bakery',
+    'Pizzeria',
+    'Bistro',
+    'Fine Dining',
+    'Other',
   ];
 
   const currencies = [
@@ -165,27 +172,24 @@ const RestaurantProfileScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Restaurant Profile</Text>
           <Text style={styles.headerSubtitle}>Manage your restaurant details</Text>
         </View>
-        
-        <TouchableOpacity 
-          style={styles.resetButton}
-          onPress={handleReset}
-          disabled={!hasChanges}
-        >
-          <Icon name="refresh" size={24} color={hasChanges ? Colors.white : 'rgba(255,255,255,0.5)'} />
+
+        <TouchableOpacity style={styles.resetButton} onPress={handleReset} disabled={!hasChanges}>
+          <Icon
+            name="refresh"
+            size={24}
+            color={hasChanges ? Colors.white : 'rgba(255,255,255,0.5)'}
+          />
         </TouchableOpacity>
       </View>
 
@@ -193,7 +197,7 @@ const RestaurantProfileScreen: React.FC = () => {
         {/* Basic Information */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Basic Information</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Restaurant Name *</Text>
             <TextInput
@@ -219,7 +223,11 @@ const RestaurantProfileScreen: React.FC = () => {
 
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Business Type *</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.businessTypeScroll}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.businessTypeScroll}
+            >
               {businessTypes.map((type) => (
                 <TouchableOpacity
                   key={type}
@@ -229,10 +237,12 @@ const RestaurantProfileScreen: React.FC = () => {
                   ]}
                   onPress={() => updateField('businessType', type)}
                 >
-                  <Text style={[
-                    styles.businessTypeText,
-                    formData.businessType === type && styles.businessTypeTextActive,
-                  ]}>
+                  <Text
+                    style={[
+                      styles.businessTypeText,
+                      formData.businessType === type && styles.businessTypeTextActive,
+                    ]}
+                  >
                     {type}
                   </Text>
                 </TouchableOpacity>
@@ -244,7 +254,7 @@ const RestaurantProfileScreen: React.FC = () => {
         {/* Contact Information */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Contact Information</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Phone Number *</Text>
             <TextInput
@@ -287,7 +297,7 @@ const RestaurantProfileScreen: React.FC = () => {
         {/* Address */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Location</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Street Address *</Text>
             <TextInput
@@ -328,10 +338,14 @@ const RestaurantProfileScreen: React.FC = () => {
         {/* Business Settings */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Business Settings</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Currency</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.currencyScroll}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.currencyScroll}
+            >
               {currencies.map((currency) => (
                 <TouchableOpacity
                   key={currency.code}
@@ -341,10 +355,12 @@ const RestaurantProfileScreen: React.FC = () => {
                   ]}
                   onPress={() => updateField('currency', currency.code)}
                 >
-                  <Text style={[
-                    styles.currencyText,
-                    formData.currency === currency.code && styles.currencyTextActive,
-                  ]}>
+                  <Text
+                    style={[
+                      styles.currencyText,
+                      formData.currency === currency.code && styles.currencyTextActive,
+                    ]}
+                  >
                     {currency.symbol} {currency.code}
                   </Text>
                 </TouchableOpacity>
@@ -375,9 +391,7 @@ const RestaurantProfileScreen: React.FC = () => {
             disabled={saving}
           >
             <Icon name="save" size={20} color={Colors.white} />
-            <Text style={styles.saveButtonText}>
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Text>
+            <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save Changes'}</Text>
           </TouchableOpacity>
         </View>
       )}

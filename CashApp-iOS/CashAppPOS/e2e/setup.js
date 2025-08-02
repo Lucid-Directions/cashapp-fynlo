@@ -4,7 +4,9 @@
  */
 
 const detox = require('detox');
+
 const config = require('../package.json').detox;
+
 const adapter = require('detox/runners/jest/adapter');
 
 jest.setTimeout(120000);
@@ -34,7 +36,7 @@ global.loginAsTestUser = async () => {
   await element(by.id('username-input')).typeText('demo');
   await element(by.id('password-input')).typeText('demo123');
   await element(by.id('login-button')).tap();
-  
+
   // Wait for main screen to load
   await waitFor(element(by.id('pos-screen')))
     .toBeVisible()

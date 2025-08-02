@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -10,12 +11,14 @@ import {
   Dimensions,
   Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import ComingSoon from '../../components/feedback/ComingSoon';
+import LoadingView from '../../components/feedback/LoadingView';
 import { useTheme } from '../../design-system/ThemeProvider';
 import DataService from '../../services/DataService';
-import LoadingView from '../../components/feedback/LoadingView';
-import ComingSoon from '../../components/feedback/ComingSoon';
 
 // Mock ENV flag
 const ENV = {
@@ -63,16 +66,18 @@ const StaffReportDetailScreen = () => {
   const [selectedMetric, setSelectedMetric] = useState('sales');
 
   const handleExportReport = () => {
-    Alert.alert(
-      'Export Staff Report',
-      'Choose export format',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'PDF Report', onPress: () => Alert.alert('PDF Export', 'Staff performance PDF coming soon') },
-        { text: 'CSV Data', onPress: () => Alert.alert('CSV Export', 'Staff data CSV coming soon') },
-        { text: 'Email Summary', onPress: () => Alert.alert('Email Report', 'Email functionality coming soon') }
-      ]
-    );
+    Alert.alert('Export Staff Report', 'Choose export format', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'PDF Report',
+        onPress: () => Alert.alert('PDF Export', 'Staff performance PDF coming soon'),
+      },
+      { text: 'CSV Data', onPress: () => Alert.alert('CSV Export', 'Staff data CSV coming soon') },
+      {
+        text: 'Email Summary',
+        onPress: () => Alert.alert('Email Report', 'Email functionality coming soon'),
+      },
+    ]);
   };
 
   useEffect(() => {
@@ -83,7 +88,8 @@ const StaffReportDetailScreen = () => {
     }
   }, [selectedPeriod]);
 
-  const loadStaffData = async () => { // Modified
+  const loadStaffData = async () => {
+    // Modified
     setIsLoading(true);
     setError(null);
     try {
@@ -105,53 +111,71 @@ const StaffReportDetailScreen = () => {
   // For this refactor, we assume the service provides the necessary StaffMember[] structure with pre-calculated metrics.
 
   const formatCurrency = (amount: number) => {
-    return `£${amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `£${amount.toLocaleString('en-GB', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   };
 
   const getPerformanceColor = (performance: string) => {
     switch (performance) {
-      case 'excellent': return Colors.success;
-      case 'good': return Colors.primary;
-      case 'average': return Colors.warning;
-      case 'needs_improvement': return Colors.danger;
-      default: return Colors.lightText;
+      case 'excellent':
+        return Colors.success;
+      case 'good':
+        return Colors.primary;
+      case 'average':
+        return Colors.warning;
+      case 'needs_improvement':
+        return Colors.danger;
+      default:
+        return Colors.lightText;
     }
   };
 
   const getPerformanceIcon = (performance: string) => {
     switch (performance) {
-      case 'excellent': return 'star';
-      case 'good': return 'thumb-up';
-      case 'average': return 'trending-flat';
-      case 'needs_improvement': return 'trending-down';
-      default: return 'help';
+      case 'excellent':
+        return 'star';
+      case 'good':
+        return 'thumb-up';
+      case 'average':
+        return 'trending-flat';
+      case 'needs_improvement':
+        return 'trending-down';
+      default:
+        return 'help';
     }
   };
 
   const getRoleIcon = (role: string) => {
     switch (role.toLowerCase()) {
-      case 'manager': return 'supervisor-account';
-      case 'cashier': return 'point-of-sale';
-      case 'cook': return 'restaurant';
-      case 'server': return 'room-service';
-      default: return 'person';
+      case 'manager':
+        return 'supervisor-account';
+      case 'cashier':
+        return 'point-of-sale';
+      case 'cook':
+        return 'restaurant';
+      case 'server':
+        return 'room-service';
+      default:
+        return 'person';
     }
   };
 
   const getTopPerformer = () => {
     if (staffData.length === 0) return null;
-    
+
     switch (selectedMetric) {
       case 'sales':
-        return staffData.reduce((prev, current) => 
+        return staffData.reduce((prev, current) =>
           prev.totalSales > current.totalSales ? prev : current
         );
       case 'transactions':
-        return staffData.reduce((prev, current) => 
+        return staffData.reduce((prev, current) =>
           prev.transactionsHandled > current.transactionsHandled ? prev : current
         );
       case 'efficiency':
-        return staffData.reduce((prev, current) => 
+        return staffData.reduce((prev, current) =>
           prev.efficiency > current.efficiency ? prev : current
         );
       default:
@@ -163,9 +187,10 @@ const StaffReportDetailScreen = () => {
     const totalSales = staffData.reduce((sum, staff) => sum + staff.totalSales, 0);
     const totalTransactions = staffData.reduce((sum, staff) => sum + staff.transactionsHandled, 0);
     const totalHours = staffData.reduce((sum, staff) => sum + staff.hoursWorked, 0);
-    const averageRating = staffData.length > 0 
-      ? staffData.reduce((sum, staff) => sum + staff.customerRating, 0) / staffData.length 
-      : 0;
+    const averageRating =
+      staffData.length > 0
+        ? staffData.reduce((sum, staff) => sum + staff.customerRating, 0) / staffData.length
+        : 0;
 
     return { totalSales, totalTransactions, totalHours, averageRating };
   };
@@ -185,11 +210,12 @@ const StaffReportDetailScreen = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-             <Icon name="arrow-back" size={24} color={Colors.white} />
-           </TouchableOpacity>
-           <Text style={styles.headerTitle}>Staff Report</Text>
-           <View style={{width: 24}} />{/* Placeholder for balance */}
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Staff Report</Text>
+          <View style={{ width: 24 }} />
+          {/* Placeholder for balance */}
         </View>
         <View style={styles.centeredError}>
           <Icon name="error-outline" size={64} color={Colors.danger} />
@@ -211,7 +237,9 @@ const StaffReportDetailScreen = () => {
         <View style={styles.centeredError}>
           <Icon name="people-outline" size={64} color={Colors.mediumGray} />
           <Text style={styles.errorTextHeader}>No Staff Data</Text>
-          <Text style={styles.errorText}>There is no staff data available for the selected period.</Text>
+          <Text style={styles.errorText}>
+            There is no staff data available for the selected period.
+          </Text>
         </View>
       );
     }
@@ -220,9 +248,7 @@ const StaffReportDetailScreen = () => {
         {/* Top Performer */}
         {topPerformer && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              Top Performer ({selectedMetric})
-            </Text>
+            <Text style={styles.sectionTitle}>Top Performer ({selectedMetric})</Text>
             <View style={styles.topPerformerCard}>
               <View style={styles.avatarContainer}>
                 <View style={[styles.avatar, { backgroundColor: Colors.primary }]}>
@@ -266,19 +292,18 @@ const StaffReportDetailScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sort by Performance</Text>
           <View style={styles.metricSelector}>
-            {['sales', 'transactions', 'efficiency'].map(metric => (
+            {['sales', 'transactions', 'efficiency'].map((metric) => (
               <TouchableOpacity
                 key={metric}
                 style={[
                   styles.metricButton,
-                  selectedMetric === metric && styles.metricButtonActive
+                  selectedMetric === metric && styles.metricButtonActive,
                 ]}
                 onPress={() => setSelectedMetric(metric)}
               >
-                <Text style={[
-                  styles.metricText,
-                  selectedMetric === metric && styles.metricTextActive
-                ]}>
+                <Text
+                  style={[styles.metricText, selectedMetric === metric && styles.metricTextActive]}
+                >
                   {metric.charAt(0).toUpperCase() + metric.slice(1)}
                 </Text>
               </TouchableOpacity>
@@ -293,99 +318,107 @@ const StaffReportDetailScreen = () => {
           {staffData
             .sort((a, b) => {
               switch (selectedMetric) {
-                case 'sales': return b.totalSales - a.totalSales;
-                case 'transactions': return b.transactionsHandled - a.transactionsHandled;
-                case 'efficiency': return b.efficiency - a.efficiency;
-                default: return 0;
+                case 'sales':
+                  return b.totalSales - a.totalSales;
+                case 'transactions':
+                  return b.transactionsHandled - a.transactionsHandled;
+                case 'efficiency':
+                  return b.efficiency - a.efficiency;
+                default:
+                  return 0;
               }
             })
             .map((staff, index) => (
-            <View key={staff.id} style={styles.staffCard}>
-              <View style={styles.staffHeader}>
-                <View style={styles.staffBasicInfo}>
-                  <View style={[styles.avatar, { backgroundColor: Colors.secondary }]}>
-                    <Text style={styles.avatarText}>{staff.avatar}</Text>
-                  </View>
+              <View key={staff.id} style={styles.staffCard}>
+                <View style={styles.staffHeader}>
+                  <View style={styles.staffBasicInfo}>
+                    <View style={[styles.avatar, { backgroundColor: Colors.secondary }]}>
+                      <Text style={styles.avatarText}>{staff.avatar}</Text>
+                    </View>
 
-                  <View style={styles.staffDetails}>
-                    <View style={styles.staffNameRow}>
-                      <Text style={styles.staffName}>{staff.name}</Text>
-                      <View style={styles.rankBadge}>
-                        <Text style={styles.rankText}>#{index + 1}</Text>
+                    <View style={styles.staffDetails}>
+                      <View style={styles.staffNameRow}>
+                        <Text style={styles.staffName}>{staff.name}</Text>
+                        <View style={styles.rankBadge}>
+                          <Text style={styles.rankText}>#{index + 1}</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.staffRoleRow}>
+                        <Icon name={getRoleIcon(staff.role)} size={16} color={Colors.lightText} />
+                        <Text style={styles.staffRole}>{staff.role}</Text>
                       </View>
                     </View>
+                  </View>
 
-                    <View style={styles.staffRoleRow}>
-                      <Icon name={getRoleIcon(staff.role)} size={16} color={Colors.lightText} />
-                      <Text style={styles.staffRole}>{staff.role}</Text>
-                    </View>
+                  <View style={styles.performanceIndicator}>
+                    <Icon
+                      name={getPerformanceIcon(staff.performance)}
+                      size={20}
+                      color={getPerformanceColor(staff.performance)}
+                    />
+                    <Text
+                      style={[
+                        styles.performanceText,
+                        { color: getPerformanceColor(staff.performance) },
+                      ]}
+                    >
+                      {staff.performance.replace('_', ' ').toUpperCase()}
+                    </Text>
                   </View>
                 </View>
 
-                <View style={styles.performanceIndicator}>
-                  <Icon
-                    name={getPerformanceIcon(staff.performance)}
-                    size={20}
-                    color={getPerformanceColor(staff.performance)}
-                  />
-                  <Text style={[
-                    styles.performanceText,
-                    { color: getPerformanceColor(staff.performance) }
-                  ]}>
-                    {staff.performance.replace('_', ' ').toUpperCase()}
-                  </Text>
+                <View style={styles.staffMetrics}>
+                  <View style={styles.metricItem}>
+                    <Text style={styles.metricLabel}>Sales</Text>
+                    <Text style={styles.metricValue}>{formatCurrency(staff.totalSales)}</Text>
+                  </View>
+
+                  <View style={styles.metricItem}>
+                    <Text style={styles.metricLabel}>Orders</Text>
+                    <Text style={styles.metricValue}>{staff.transactionsHandled}</Text>
+                  </View>
+
+                  <View style={styles.metricItem}>
+                    <Text style={styles.metricLabel}>Avg Order</Text>
+                    <Text style={styles.metricValue}>
+                      {formatCurrency(staff.averageOrderValue)}
+                    </Text>
+                  </View>
+
+                  <View style={styles.metricItem}>
+                    <Text style={styles.metricLabel}>Hours</Text>
+                    <Text style={styles.metricValue}>{staff.hoursWorked.toFixed(1)}h</Text>
+                  </View>
+
+                  <View style={styles.metricItem}>
+                    <Text style={styles.metricLabel}>Efficiency</Text>
+                    <Text style={styles.metricValue}>{formatCurrency(staff.efficiency)}/h</Text>
+                  </View>
+
+                  <View style={styles.metricItem}>
+                    <Text style={styles.metricLabel}>Rating</Text>
+                    <Text style={styles.metricValue}>{staff.customerRating.toFixed(1)}★</Text>
+                  </View>
+                </View>
+
+                {/* Performance Bar */}
+                <View style={styles.performanceBarContainer}>
+                  <Text style={styles.performanceBarLabel}>Performance Score</Text>
+                  <View style={styles.performanceBar}>
+                    <View
+                      style={[
+                        styles.performanceBarFill,
+                        {
+                          width: `${Math.min((staff.efficiency / 150) * 100, 100)}%`, // Example logic
+                          backgroundColor: getPerformanceColor(staff.performance),
+                        },
+                      ]}
+                    />
+                  </View>
                 </View>
               </View>
-
-              <View style={styles.staffMetrics}>
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Sales</Text>
-                  <Text style={styles.metricValue}>{formatCurrency(staff.totalSales)}</Text>
-                </View>
-
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Orders</Text>
-                  <Text style={styles.metricValue}>{staff.transactionsHandled}</Text>
-                </View>
-
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Avg Order</Text>
-                  <Text style={styles.metricValue}>{formatCurrency(staff.averageOrderValue)}</Text>
-                </View>
-
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Hours</Text>
-                  <Text style={styles.metricValue}>{staff.hoursWorked.toFixed(1)}h</Text>
-                </View>
-
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Efficiency</Text>
-                  <Text style={styles.metricValue}>{formatCurrency(staff.efficiency)}/h</Text>
-                </View>
-
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Rating</Text>
-                  <Text style={styles.metricValue}>{staff.customerRating.toFixed(1)}★</Text>
-                </View>
-              </View>
-
-              {/* Performance Bar */}
-              <View style={styles.performanceBarContainer}>
-                <Text style={styles.performanceBarLabel}>Performance Score</Text>
-                <View style={styles.performanceBar}>
-                  <View
-                    style={[
-                      styles.performanceBarFill,
-                      {
-                        width: `${Math.min((staff.efficiency / 150) * 100, 100)}%`, // Example logic
-                        backgroundColor: getPerformanceColor(staff.performance)
-                      }
-                    ]}
-                  />
-                </View>
-              </View>
-            </View>
-          ))}
+            ))}
         </View>
       </>
     );
@@ -394,13 +427,10 @@ const StaffReportDetailScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Staff Report</Text>
@@ -411,19 +441,13 @@ const StaffReportDetailScreen = () => {
 
       {/* Period Selector */}
       <View style={styles.periodSelector}>
-        {['today', 'week', 'month'].map(period => (
+        {['today', 'week', 'month'].map((period) => (
           <TouchableOpacity
             key={period}
-            style={[
-              styles.periodButton,
-              selectedPeriod === period && styles.periodButtonActive
-            ]}
+            style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
             onPress={() => setSelectedPeriod(period)}
           >
-            <Text style={[
-              styles.periodText,
-              selectedPeriod === period && styles.periodTextActive
-            ]}>
+            <Text style={[styles.periodText, selectedPeriod === period && styles.periodTextActive]}>
               {period.charAt(0).toUpperCase() + period.slice(1)}
             </Text>
           </TouchableOpacity>
@@ -457,9 +481,7 @@ const StaffReportDetailScreen = () => {
         {/* Top Performer */}
         {topPerformer && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              Top Performer ({selectedMetric})
-            </Text>
+            <Text style={styles.sectionTitle}>Top Performer ({selectedMetric})</Text>
             <View style={styles.topPerformerCard}>
               <View style={styles.avatarContainer}>
                 <View style={[styles.avatar, { backgroundColor: Colors.primary }]}>
@@ -469,11 +491,11 @@ const StaffReportDetailScreen = () => {
                   <Icon name="emoji-events" size={20} color={Colors.warning} />
                 </View>
               </View>
-              
+
               <View style={styles.performerInfo}>
                 <Text style={styles.performerName}>{topPerformer.name}</Text>
                 <Text style={styles.performerRole}>{topPerformer.role}</Text>
-                
+
                 <View style={styles.performerStats}>
                   <View style={styles.performerStat}>
                     <Text style={styles.performerStatValue}>
@@ -503,19 +525,18 @@ const StaffReportDetailScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sort by Performance</Text>
           <View style={styles.metricSelector}>
-            {['sales', 'transactions', 'efficiency'].map(metric => (
+            {['sales', 'transactions', 'efficiency'].map((metric) => (
               <TouchableOpacity
                 key={metric}
                 style={[
                   styles.metricButton,
-                  selectedMetric === metric && styles.metricButtonActive
+                  selectedMetric === metric && styles.metricButtonActive,
                 ]}
                 onPress={() => setSelectedMetric(metric)}
               >
-                <Text style={[
-                  styles.metricText,
-                  selectedMetric === metric && styles.metricTextActive
-                ]}>
+                <Text
+                  style={[styles.metricText, selectedMetric === metric && styles.metricTextActive]}
+                >
                   {metric.charAt(0).toUpperCase() + metric.slice(1)}
                 </Text>
               </TouchableOpacity>
@@ -526,103 +547,111 @@ const StaffReportDetailScreen = () => {
         {/* Staff List */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Staff Performance</Text>
-          
+
           {staffData
             .sort((a, b) => {
               switch (selectedMetric) {
-                case 'sales': return b.totalSales - a.totalSales;
-                case 'transactions': return b.transactionsHandled - a.transactionsHandled;
-                case 'efficiency': return b.efficiency - a.efficiency;
-                default: return 0;
+                case 'sales':
+                  return b.totalSales - a.totalSales;
+                case 'transactions':
+                  return b.transactionsHandled - a.transactionsHandled;
+                case 'efficiency':
+                  return b.efficiency - a.efficiency;
+                default:
+                  return 0;
               }
             })
             .map((staff, index) => (
-            <View key={staff.id} style={styles.staffCard}>
-              <View style={styles.staffHeader}>
-                <View style={styles.staffBasicInfo}>
-                  <View style={[styles.avatar, { backgroundColor: Colors.secondary }]}>
-                    <Text style={styles.avatarText}>{staff.avatar}</Text>
-                  </View>
-                  
-                  <View style={styles.staffDetails}>
-                    <View style={styles.staffNameRow}>
-                      <Text style={styles.staffName}>{staff.name}</Text>
-                      <View style={styles.rankBadge}>
-                        <Text style={styles.rankText}>#{index + 1}</Text>
+              <View key={staff.id} style={styles.staffCard}>
+                <View style={styles.staffHeader}>
+                  <View style={styles.staffBasicInfo}>
+                    <View style={[styles.avatar, { backgroundColor: Colors.secondary }]}>
+                      <Text style={styles.avatarText}>{staff.avatar}</Text>
+                    </View>
+
+                    <View style={styles.staffDetails}>
+                      <View style={styles.staffNameRow}>
+                        <Text style={styles.staffName}>{staff.name}</Text>
+                        <View style={styles.rankBadge}>
+                          <Text style={styles.rankText}>#{index + 1}</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.staffRoleRow}>
+                        <Icon name={getRoleIcon(staff.role)} size={16} color={Colors.lightText} />
+                        <Text style={styles.staffRole}>{staff.role}</Text>
                       </View>
                     </View>
-                    
-                    <View style={styles.staffRoleRow}>
-                      <Icon name={getRoleIcon(staff.role)} size={16} color={Colors.lightText} />
-                      <Text style={styles.staffRole}>{staff.role}</Text>
-                    </View>
+                  </View>
+
+                  <View style={styles.performanceIndicator}>
+                    <Icon
+                      name={getPerformanceIcon(staff.performance)}
+                      size={20}
+                      color={getPerformanceColor(staff.performance)}
+                    />
+                    <Text
+                      style={[
+                        styles.performanceText,
+                        { color: getPerformanceColor(staff.performance) },
+                      ]}
+                    >
+                      {staff.performance.replace('_', ' ').toUpperCase()}
+                    </Text>
                   </View>
                 </View>
-                
-                <View style={styles.performanceIndicator}>
-                  <Icon 
-                    name={getPerformanceIcon(staff.performance)} 
-                    size={20} 
-                    color={getPerformanceColor(staff.performance)} 
-                  />
-                  <Text style={[
-                    styles.performanceText,
-                    { color: getPerformanceColor(staff.performance) }
-                  ]}>
-                    {staff.performance.replace('_', ' ').toUpperCase()}
-                  </Text>
-                </View>
-              </View>
 
-              <View style={styles.staffMetrics}>
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Sales</Text>
-                  <Text style={styles.metricValue}>{formatCurrency(staff.totalSales)}</Text>
-                </View>
-                
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Orders</Text>
-                  <Text style={styles.metricValue}>{staff.transactionsHandled}</Text>
-                </View>
-                
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Avg Order</Text>
-                  <Text style={styles.metricValue}>{formatCurrency(staff.averageOrderValue)}</Text>
-                </View>
-                
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Hours</Text>
-                  <Text style={styles.metricValue}>{staff.hoursWorked.toFixed(1)}h</Text>
-                </View>
-                
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Efficiency</Text>
-                  <Text style={styles.metricValue}>{formatCurrency(staff.efficiency)}/h</Text>
-                </View>
-                
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Rating</Text>
-                  <Text style={styles.metricValue}>{staff.customerRating.toFixed(1)}★</Text>
-                </View>
-              </View>
+                <View style={styles.staffMetrics}>
+                  <View style={styles.metricItem}>
+                    <Text style={styles.metricLabel}>Sales</Text>
+                    <Text style={styles.metricValue}>{formatCurrency(staff.totalSales)}</Text>
+                  </View>
 
-              {/* Performance Bar */}
-              <View style={styles.performanceBarContainer}>
-                <Text style={styles.performanceBarLabel}>Performance Score</Text>
-                <View style={styles.performanceBar}>
-                  <View 
-                    style={[
-                      styles.performanceBarFill,
-                      { 
-                        width: `${Math.min((staff.efficiency / 150) * 100, 100)}%`,
-                        backgroundColor: getPerformanceColor(staff.performance)
-                      }
-                    ]} 
-                  />
+                  <View style={styles.metricItem}>
+                    <Text style={styles.metricLabel}>Orders</Text>
+                    <Text style={styles.metricValue}>{staff.transactionsHandled}</Text>
+                  </View>
+
+                  <View style={styles.metricItem}>
+                    <Text style={styles.metricLabel}>Avg Order</Text>
+                    <Text style={styles.metricValue}>
+                      {formatCurrency(staff.averageOrderValue)}
+                    </Text>
+                  </View>
+
+                  <View style={styles.metricItem}>
+                    <Text style={styles.metricLabel}>Hours</Text>
+                    <Text style={styles.metricValue}>{staff.hoursWorked.toFixed(1)}h</Text>
+                  </View>
+
+                  <View style={styles.metricItem}>
+                    <Text style={styles.metricLabel}>Efficiency</Text>
+                    <Text style={styles.metricValue}>{formatCurrency(staff.efficiency)}/h</Text>
+                  </View>
+
+                  <View style={styles.metricItem}>
+                    <Text style={styles.metricLabel}>Rating</Text>
+                    <Text style={styles.metricValue}>{staff.customerRating.toFixed(1)}★</Text>
+                  </View>
+                </View>
+
+                {/* Performance Bar */}
+                <View style={styles.performanceBarContainer}>
+                  <Text style={styles.performanceBarLabel}>Performance Score</Text>
+                  <View style={styles.performanceBar}>
+                    <View
+                      style={[
+                        styles.performanceBarFill,
+                        {
+                          width: `${Math.min((staff.efficiency / 150) * 100, 100)}%`,
+                          backgroundColor: getPerformanceColor(staff.performance),
+                        },
+                      ]}
+                    />
+                  </View>
                 </View>
               </View>
-            </View>
-          ))}
+            ))}
         </View>
 
         <View style={styles.spacer} />
@@ -928,14 +957,16 @@ const styles = StyleSheet.create({
   spacer: {
     height: 40,
   },
-  centeredError: { // Added
+  centeredError: {
+    // Added
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
     backgroundColor: Colors.background,
   },
-  errorTextHeader: { // Added
+  errorTextHeader: {
+    // Added
     fontSize: 18, // Using fixed size as getFontSize might not be defined in this scope
     fontWeight: 'bold',
     color: Colors.danger,
@@ -943,19 +974,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: 'center',
   },
-  errorText: { // Added
+  errorText: {
+    // Added
     fontSize: 14, // Using fixed size
     color: Colors.text,
     textAlign: 'center',
     marginBottom: 20,
   },
-  retryButton: { // Added
+  retryButton: {
+    // Added
     backgroundColor: Colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
-  retryButtonText: { // Added
+  retryButtonText: {
+    // Added
     color: Colors.white,
     fontSize: 16, // Using fixed size
     fontWeight: '600',

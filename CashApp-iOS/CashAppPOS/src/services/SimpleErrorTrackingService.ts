@@ -37,11 +37,11 @@ class SimpleErrorTrackingService {
     try {
       console.log('🔍 Simple Error Tracking initialized');
       this.isInitialized = true;
-      
+
       // Track successful initialization
       this.trackEvent('error_tracking_initialized', {
         timestamp: new Date().toISOString(),
-        environment: __DEV__ ? 'development' : 'production'
+        environment: __DEV__ ? 'development' : 'production',
       });
     } catch (error) {
       console.error('Failed to initialize Simple Error Tracking:', error);
@@ -62,18 +62,18 @@ class SimpleErrorTrackingService {
         timestamp: new Date().toISOString(),
         error: error.message,
         context,
-        stack: error.stack
+        stack: error.stack,
       };
-      
+
       this.errorLog.push(errorEntry);
-      
+
       // Keep only last 100 errors to prevent memory issues
       if (this.errorLog.length > 100) {
         this.errorLog = this.errorLog.slice(-100);
       }
-      
+
       console.error('🚨 Error captured:', error.message, context);
-      
+
       // In development, also log the full error
       if (__DEV__) {
         console.error('Full error details:', errorEntry);
@@ -84,17 +84,21 @@ class SimpleErrorTrackingService {
     }
   }
 
-  captureMessage(message: string, level: 'info' | 'warning' | 'error' = 'info', context?: ErrorContext): void {
+  captureMessage(
+    message: string,
+    level: 'info' | 'warning' | 'error' = 'info',
+    context?: ErrorContext
+  ): void {
     try {
       const messageEntry = {
         timestamp: new Date().toISOString(),
         message,
         level,
-        context
+        context,
       };
-      
+
       console.log(`📝 Message captured [${level}]:`, message, context);
-      
+
       if (__DEV__) {
         console.log('Full message details:', messageEntry);
       }
@@ -119,8 +123,8 @@ class SimpleErrorTrackingService {
       additionalData: {
         itemData,
         calculationContext,
-        errorType: 'pricing_nan_error'
-      }
+        errorType: 'pricing_nan_error',
+      },
     });
   }
 
@@ -130,8 +134,8 @@ class SimpleErrorTrackingService {
       additionalData: {
         endpoint,
         method,
-        errorType: 'network_error'
-      }
+        errorType: 'network_error',
+      },
     });
   }
 
@@ -141,8 +145,8 @@ class SimpleErrorTrackingService {
       additionalData: {
         component,
         props,
-        errorType: 'ui_render_error'
-      }
+        errorType: 'ui_render_error',
+      },
     });
   }
 
@@ -152,8 +156,8 @@ class SimpleErrorTrackingService {
       additionalData: {
         operation,
         data,
-        errorType: 'business_logic_error'
-      }
+        errorType: 'business_logic_error',
+      },
     });
   }
 

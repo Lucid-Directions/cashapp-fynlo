@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -8,8 +9,10 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../../design-system/ThemeProvider';
 
 const Colors = {
@@ -34,10 +37,7 @@ const CostAnalysisReportDetailScreen = () => {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Cost Analysis Report</Text>
@@ -54,13 +54,13 @@ const CostAnalysisReportDetailScreen = () => {
             <Text style={[styles.summaryValue, { color: theme.colors.text }]}>32%</Text>
             <Text style={[styles.summaryLabel, { color: Colors.darkGray }]}>Food Cost %</Text>
           </View>
-          
+
           <View style={[styles.summaryCard, { backgroundColor: theme.colors.white }]}>
             <Icon name="groups" size={32} color={Colors.warning} />
             <Text style={[styles.summaryValue, { color: theme.colors.text }]}>28%</Text>
             <Text style={[styles.summaryLabel, { color: Colors.darkGray }]}>Labor Cost %</Text>
           </View>
-          
+
           <View style={[styles.summaryCard, { backgroundColor: theme.colors.white }]}>
             <Icon name="account-balance" size={32} color={Colors.primary} />
             <Text style={[styles.summaryValue, { color: theme.colors.text }]}>18%</Text>
@@ -75,9 +75,10 @@ const CostAnalysisReportDetailScreen = () => {
             Cost Analysis Report
           </Text>
           <Text style={[styles.comingSoonText, { color: Colors.darkGray }]}>
-            Advanced cost analysis and optimization tools are being developed to help you maximize profitability:
+            Advanced cost analysis and optimization tools are being developed to help you maximize
+            profitability:
           </Text>
-          
+
           <View style={styles.featureList}>
             <View style={styles.featureItem}>
               <Icon name="check-circle" size={20} color={Colors.success} />
@@ -111,9 +112,11 @@ const CostAnalysisReportDetailScreen = () => {
             </View>
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.notifyButton}
-            onPress={() => Alert.alert('Notification', 'You will be notified when this feature is ready!')}
+            onPress={() =>
+              Alert.alert('Notification', 'You will be notified when this feature is ready!')
+            }
           >
             <Icon name="notifications" size={20} color={Colors.white} style={styles.notifyIcon} />
             <Text style={styles.notifyButtonText}>Notify Me When Ready</Text>

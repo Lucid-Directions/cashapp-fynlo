@@ -129,12 +129,12 @@ expect.extend({
       flatStyle = style;
     }
 
-    const hasMinimumSize = 
+    const hasMinimumSize =
       (flatStyle.width >= 44 && flatStyle.height >= 44) ||
       (flatStyle.minWidth >= 44 && flatStyle.minHeight >= 44);
 
     return {
-      message: () => 
+      message: () =>
         hasMinimumSize
           ? `Expected element not to have minimum touch target size (44x44)`
           : `Expected element to have minimum touch target size (44x44)`,
@@ -146,7 +146,7 @@ expect.extend({
     // Simplified contrast check for testing
     const backgroundColor = received.props.style?.backgroundColor;
     const color = received.props.style?.color;
-    
+
     // This is a simplified check - in reality you'd calculate actual contrast ratios
     const hasGoodContrast = backgroundColor !== color;
 
@@ -179,7 +179,7 @@ beforeEach(() => {
     if (
       typeof args[0] === 'string' &&
       (args[0].includes('Warning: ReactDOM.render is no longer supported') ||
-       args[0].includes('Warning: componentWillMount has been renamed'))
+        args[0].includes('Warning: componentWillMount has been renamed'))
     ) {
       return;
     }
