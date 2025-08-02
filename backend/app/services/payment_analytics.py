@@ -3,8 +3,6 @@ Advanced Payment Analytics Service
 Provides detailed insights into payment performance, cost optimization, and provider analytics
 """
 
-
-"""
 import logging
 from datetime import datetime, timedelta
 from decimal import Decimal

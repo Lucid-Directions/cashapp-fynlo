@@ -2,8 +2,6 @@
 Platform analytics endpoints for dashboard insights.
 """
 
-
-"""
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, Query, HTTPException

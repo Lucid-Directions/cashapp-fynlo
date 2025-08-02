@@ -3,8 +3,6 @@ API Response Helper for Fynlo POS
 Standardizes API responses across the application
 """
 
-
-"""
 from typing import Any, Dict, List, Optional, Union
 from datetime import datetime
 from fastapi import status

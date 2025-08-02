@@ -2,8 +2,6 @@
 Authentication schemas for Supabase integration
 """
 
-
-"""
 from pydantic import BaseModel
 from typing import Optional, List
 

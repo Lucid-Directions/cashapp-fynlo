@@ -3,8 +3,6 @@ Monitoring and Alerting Service for Payment System
 Tracks metrics, health, and sends alerts for payment-related issues
 """
 
-
-"""
 import logging
 import asyncio
 import time

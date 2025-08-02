@@ -3,8 +3,6 @@ Platform Settings Service
 Manages centralized platform configurations and restaurant overrides
 """
 
-
-"""
 import logging
 import json
 from datetime import datetime

@@ -2,8 +2,6 @@
 Payment Provider Factory with Smart Routing
 """
 
-
-"""
 from typing import Dict, Any, List, Optional
 from decimal import Decimal
 import logging

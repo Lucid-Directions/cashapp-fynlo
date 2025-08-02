@@ -3,8 +3,6 @@ Enhanced WebSocket API endpoints for Fynlo POS
 Implements heartbeat, reconnection, and improved connection management
 """
 
-
-"""
 import asyncio
 import json
 import logging

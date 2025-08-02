@@ -3,8 +3,6 @@ Minimal FastAPI app for DigitalOcean deployment
 No external dependencies, immediate startup
 """
 
-
-"""
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

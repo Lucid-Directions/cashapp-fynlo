@@ -3,8 +3,6 @@ Push Notification API endpoints for Fynlo POS
 Device registration, notification sending, and preference management
 """
 
-
-"""
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, Query, Body, Path
 from sqlalchemy.orm import Session

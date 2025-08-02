@@ -3,8 +3,6 @@ Notification Event Integration for Fynlo POS
 Connects backend services with push notification sending
 """
 
-
-"""
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 import asyncio

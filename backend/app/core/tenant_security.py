@@ -6,8 +6,6 @@ Platform Owners (Ryan and Arnaud) have FULL access to everything.
 All other users are restricted to their own restaurant's data.
 """
 
-
-"""
 from typing import Optional, Union, List
 from fastapi import status, Request
 from sqlalchemy.orm import Session, Query

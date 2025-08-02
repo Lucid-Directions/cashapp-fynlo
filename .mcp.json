@@ -36,12 +36,6 @@
         "puppeteer-mcp-server"
       ]
     },
-    "semgrep": {
-      "command": "uvx",
-      "args": [
-        "mcp-server-semgrep"
-      ]
-    },
     "ref": {
       "type": "http",
       "url": "https://api.ref.tools/mcp?apiKey=ref-e06e8f51d674800dffaf"

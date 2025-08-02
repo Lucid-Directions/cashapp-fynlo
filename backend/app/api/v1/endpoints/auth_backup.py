@@ -2,8 +2,6 @@
 Authentication endpoints for Fynlo POS
 """
 
-
-"""
 from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request

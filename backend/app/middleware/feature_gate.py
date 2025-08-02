@@ -5,8 +5,6 @@ This module provides decorators and middleware for restricting access
 to features based on subscription plans.
 """
 
-
-"""
 from functools import wraps
 from fastapi import Request, Depends
 from sqlalchemy.orm import Session
@@ -130,7 +128,6 @@ def require_feature(feature_name: str):
     Returns a dependency function that can be used with Depends().
     
     Usage:
-"""
         @router.get("/advanced-report")
         async def get_advanced_report(
             restaurant_id: int = Query(...),
@@ -139,7 +136,6 @@ def require_feature(feature_name: str):
         ):
             pass
     """
-"""
     from fastapi import Query
     
     def feature_dependency(
@@ -168,7 +164,6 @@ def require_usage_limit(limit_type: str, increment: int = 1):
     Returns a dependency function that can be used with Depends().
     
     Usage:
-"""
         @router.post("/create-order")
         async def create_order(
             restaurant_id: int = Query(...),
@@ -177,7 +172,6 @@ def require_usage_limit(limit_type: str, increment: int = 1):
         ):
             pass
     """
-"""
     from fastapi import Query
     
     def usage_dependency(
