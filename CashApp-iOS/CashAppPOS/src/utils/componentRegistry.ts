@@ -7,6 +7,7 @@
  */
 
 import { TextInput, ScrollView, KeyboardAvoidingView, FlatList } from 'react-native';
+
 import { logger } from '../utils/logger';
 
 // Global registry to prevent tree-shaking

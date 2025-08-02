@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-/* eslint-disable @typescript-eslint/no-var-requires */
 
 const fs = require('fs');
 const path = require('path');
+
 const glob = require('glob');
 
 // Function to process TypeScript/TSX files
@@ -30,12 +30,12 @@ function processFile(filePath) {
     const requirePatterns = [
       {
         pattern: /const\s+(\w+)\s*=\s*require\(['"](.+)['"]\);?/g,
-        replacement: "import $1 from '$2';"
+        replacement: "import $1 from '$2';",
       },
       {
         pattern: /const\s*\{\s*([^}]+)\s*\}\s*=\s*require\(['"](.+)['"]\);?/g,
-        replacement: "import { $1 } from '$2';"
-      }
+        replacement: "import { $1 } from '$2';",
+      },
     ];
 
     requirePatterns.forEach(({ pattern, replacement }) => {
@@ -51,8 +51,8 @@ function processFile(filePath) {
     // Convert type-only imports to use 'import type'
     {
       pattern: /import\s+\{([^}]*(?:Props|Type|Interface)[^}]*)\}\s+from\s+(['"][^'"]+['"])/g,
-      replacement: 'import type {$1} from $2'
-    }
+      replacement: 'import type {$1} from $2',
+    },
   ];
 
   typeImportPatterns.forEach(({ pattern, replacement }) => {
@@ -64,7 +64,7 @@ function processFile(filePath) {
 
   // Fix 5: Remove unused imports (conservative approach)
   // This is tricky and might need manual review, so we'll just flag them
-  
+
   if (modified) {
     fs.writeFileSync(filePath, content);
     console.log(`Fixed: ${path.relative(process.cwd(), filePath)}`);
@@ -78,12 +78,12 @@ console.log('Starting ESLint fixes...\n');
 
 // Find all TypeScript and JavaScript files
 const files = glob.sync('src/**/*.{ts,tsx,js,jsx}', {
-  ignore: ['**/node_modules/**', '**/build/**', '**/dist/**']
+  ignore: ['**/node_modules/**', '**/build/**', '**/dist/**'],
 });
 
 let totalFixed = 0;
 
-files.forEach(file => {
+files.forEach((file) => {
   if (processFile(file)) {
     totalFixed++;
   }
