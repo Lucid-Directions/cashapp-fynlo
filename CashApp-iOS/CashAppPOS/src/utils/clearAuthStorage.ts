@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { logger } from '../utils/logger';
 
 /**
  * Clear all authentication-related storage
@@ -30,6 +31,6 @@ export async function clearAuthStorage() {
 
     logger.info('✅ Auth storage cleared successfully');
   } catch (error) {
-    logger.error('❌ Error clearing auth storage:', error);
+    console.error('❌ Error clearing auth storage:', error);
   }
 }
