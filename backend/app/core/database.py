@@ -141,11 +141,6 @@ class Restaurant(Base):
     
     # Relationships
     inventory_items = relationship("InventoryItem", back_populates="restaurant")
-    
-    # Exclude floor_plan_layout from queries if column doesn't exist
-    __mapper_args__ = {
-        'exclude_properties': ['floor_plan_layout']
-    }
 
 class User(Base):
     """Users with role-based access"""
