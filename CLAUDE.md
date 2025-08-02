@@ -18,6 +18,7 @@
 - **Puppeteer** (`mcp__puppeteer__`) - Browser automation with Puppeteer
 - **SemGrep** (`mcp__semgrep__`) - Security scanning, code analysis
 - **Ref** (`mcp__Ref__`) - Search documentation, GitHub, private resources
+- **Tree-sitter** (`mcp__tree-sitter__`) - Advanced code parsing and AST analysis for Python syntax validation
 
 ### Built-in Claude Tools
 - **Bash** - Execute shell commands, git operations, terminal tasks
@@ -243,8 +244,36 @@ interface StoreState {
 
 ## 🧪 Testing Requirements
 - Backend: pytest (80% coverage)
-- Frontend: Jest + React Native Testing Library
+- Frontend: Jest + React Native Testing Library (Note: Use @testing-library/react-native, not @testing-library/react-hooks for React 18)
 - Security: Auth flows, input validation, multi-tenant isolation
+- Python Syntax: Tree-sitter validation before deployment
+- CI/CD: All checks must pass before merge (syntax, linting, tests)
+
+## 🎯 Code Quality Initiative
+
+### Recent Improvements (PRs #506, #507, #508)
+- **PR #506**: React Native style fixes - Removed 939 style warnings
+- **PR #507**: ESLint max-warnings reduction - Set to 100 warnings (temporarily non-blocking)
+- **PR #508**: Backend Python syntax validation - Added comprehensive pre-deployment checks
+
+### CI/CD Transition Strategy
+- **Phase 1 (Current)**: ESLint warnings are non-blocking (max-warnings: 100)
+- **Phase 2**: Gradually reduce max-warnings as code improves
+- **Phase 3**: Make all checks blocking once codebase is clean
+- **Ruff Config**: Removed deprecated E999 rule that was causing false positives
+
+### Python Syntax Validation Infrastructure
+```python
+# scripts/check_python_syntax.py
+# Uses Tree-sitter for AST parsing
+# Validates all Python files before deployment
+# Catches syntax errors that break DigitalOcean deployments
+```
+
+### Common CI/CD Fixes
+- **React 18 Testing**: Replace `@testing-library/react-hooks` with `@testing-library/react-native`
+- **Ruff Linter**: Remove E999 from select rules if present
+- **ESLint**: Use `--max-warnings` flag during transition period
 
 ## 💾 CONTEXT PERSISTENCE WITH PIECES
 
@@ -327,4 +356,33 @@ vercel list
 vercel rollback
 ```
 
-**Remember**: Always commit before switching branches. Keep changes simple. Check logs for common issues.
+## 🔴 Critical Backend Deployment Recovery
+
+### The Docstring Incident (July 31, 2025)
+- **What Happened**: Commit af057592 corrupted 266 Python files attempting to fix empty docstrings
+- **Impact**: Backend deployment blocked for 2 days, 23+ failed fix attempts
+- **Resolution**: Complete revert of the problematic commit
+- **Lesson**: Always validate Python syntax before pushing, especially for bulk changes
+
+### Python Syntax Validation Workflow
+1. **Before ANY Python changes**:
+   ```bash
+   python scripts/check_python_syntax.py
+   ```
+2. **Use Tree-sitter for AST validation**:
+   ```bash
+   # In Claude, use the tree-sitter MCP tool
+   # It can parse and validate Python syntax
+   ```
+3. **Test deployment locally**:
+   ```bash
+   cd backend && python -m py_compile app/**/*.py
+   ```
+
+### DigitalOcean Deployment Requirements
+- **Must Have**: Valid Python syntax (not just PEP8 compliant)
+- **Check**: No syntax errors in any .py file
+- **Validate**: All imports resolve correctly
+- **Test**: FastAPI can start without errors
+
+**Remember**: Always commit before switching branches. Keep changes simple. Check logs for common issues. ALWAYS validate Python syntax before pushing.
