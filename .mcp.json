@@ -41,10 +41,10 @@
       "url": "https://api.ref.tools/mcp?apiKey=ref-e06e8f51d674800dffaf"
     },
     "tree-sitter": {
-      "command": "python",
+      "command": "python3",
       "args": ["-m", "mcp_server_tree_sitter.server"],
       "env": {
-        "PYTHONPATH": "/Users/arnauddecube/Documents/Fynlo/cashapp-fynlo/backend"
+        "PYTHONPATH": "./backend"
       }
     }
   }
