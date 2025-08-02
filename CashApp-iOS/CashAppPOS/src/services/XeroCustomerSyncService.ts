@@ -495,7 +495,7 @@ export class XeroCustomerSyncService {
         new Date().toISOString()
       );
     } catch (error) {
-      console.error('Failed to update last sync time:', error);
+      logger.error('Failed to update last sync time:', error);
     }
   }
 

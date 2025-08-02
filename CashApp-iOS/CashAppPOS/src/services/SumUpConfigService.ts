@@ -87,7 +87,7 @@ class SumUpConfigService {
         throw new Error(result.message || 'Invalid response from server');
       }
     } catch (error) {
-      console.error('❌ Failed to fetch SumUp configuration:', error);
+      logger.error('❌ Failed to fetch SumUp configuration:', error);
       throw error;
     }
   }
@@ -117,7 +117,7 @@ class SumUpConfigService {
       const result = await response.json();
       return result.data;
     } catch (error) {
-      console.error('❌ Failed to fetch SumUp status:', error);
+      logger.error('❌ Failed to fetch SumUp status:', error);
       throw error;
     }
   }
@@ -148,7 +148,7 @@ class SumUpConfigService {
       const result = await response.json();
       return result.data?.valid === true;
     } catch (error) {
-      console.error('❌ Failed to validate merchant code:', error);
+      logger.error('❌ Failed to validate merchant code:', error);
       return false;
     }
   }
@@ -162,7 +162,7 @@ class SumUpConfigService {
       this.cachedConfig = null;
       logger.info('🧹 SumUp configuration cache cleared');
     } catch (error) {
-      console.error('Failed to clear cache:', error);
+      logger.error('Failed to clear cache:', error);
     }
   }
 
@@ -193,7 +193,7 @@ class SumUpConfigService {
       this.cachedConfig = config;
       return config;
     } catch (error) {
-      console.error('Failed to get cached config:', error);
+      logger.error('Failed to get cached config:', error);
       return null;
     }
   }
@@ -211,7 +211,7 @@ class SumUpConfigService {
       await AsyncStorage.setItem(this.configCacheKey, JSON.stringify(cacheData));
       this.cachedConfig = config;
     } catch (error) {
-      console.error('Failed to cache config:', error);
+      logger.error('Failed to cache config:', error);
     }
   }
 }

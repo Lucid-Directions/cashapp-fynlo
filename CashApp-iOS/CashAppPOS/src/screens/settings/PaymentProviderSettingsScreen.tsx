@@ -14,6 +14,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+import { logger } from '../../utils/logger';
+
 import PaymentService from '../../services/PaymentService';
 
 import type { PaymentProviderConfig } from '../../services/PaymentService';
@@ -73,7 +75,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
         setConfig(savedConfig);
       }
     } catch (error) {
-      console.error('Failed to load payment configuration:', error);
+      logger.error('Failed to load payment configuration:', error);
     } finally {
       setLoading(false);
     }
@@ -85,7 +87,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
       Alert.alert('Success', 'Payment provider configuration saved successfully');
     } catch (error) {
       Alert.alert('Error', 'Failed to save configuration');
-      console.error('Failed to save payment configuration:', error);
+      logger.error('Failed to save payment configuration:', error);
     }
   };
 
@@ -124,7 +126,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
       }
     } catch (error) {
       Alert.alert('Error', `Failed to test ${provider} connection`);
-      console.error(`${provider} connection test failed:`, error);
+      logger.error(`${provider} connection test failed:`, error);
     }
   };
 

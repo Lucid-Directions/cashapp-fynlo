@@ -32,6 +32,6 @@ export async function clearAuthStorage() {
 
     logger.info('✅ Auth storage cleared successfully');
   } catch (error) {
-    console.error('❌ Error clearing auth storage:', error);
+    logger.error('❌ Error clearing auth storage:', error);
   }
 }
