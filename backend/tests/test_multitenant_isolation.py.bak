@@ -3,6 +3,12 @@ Multi-tenant Isolation Test Suite for Fynlo POS
 Tests data isolation between restaurants and prevents cross-tenant access
 """
 
+<<<<<<< HEAD
+
+"""
+=======
+import os
+>>>>>>> a0823baf (fix: replace hardcoded secrets with environment variables (PR 2/4))
 import pytest
 from datetime import datetime
 from decimal import Decimal
@@ -78,7 +84,7 @@ class TestMultiTenantIsolation:
             with patch("app.core.database.get_db", return_value=mock_db_session):
                 response = test_client.get(
                     "/api/v1/orders/order_123",
-                    headers={"Authorization": "Bearer token"}
+                    headers={"Authorization": f"Bearer {os.environ.get('TEST_AUTH_TOKEN', 'test_token_multitenant')}"}
                 )
                 
                 assert response.status_code == 403
@@ -101,7 +107,7 @@ class TestMultiTenantIsolation:
             with patch("app.core.database.get_db", return_value=mock_db_session):
                 response = test_client.get(
                     "/api/v1/products",
-                    headers={"Authorization": "Bearer token"}
+                    headers={"Authorization": f"Bearer {os.environ.get('TEST_AUTH_TOKEN', 'test_token_multitenant')}"}
                 )
                 
                 assert response.status_code == 200
@@ -127,7 +133,7 @@ class TestMultiTenantIsolation:
                 response = test_client.post(
                     "/api/v1/orders",
                     json=order_data,
-                    headers={"Authorization": "Bearer token"}
+                    headers={"Authorization": f"Bearer {os.environ.get('TEST_AUTH_TOKEN', 'test_token_multitenant')}"}
                 )
                 
                 assert response.status_code == 403
@@ -147,7 +153,7 @@ class TestMultiTenantIsolation:
                 response = test_client.put(
                     f"/api/v1/restaurants/{restaurant_2.id}/settings",
                     json=settings_data,
-                    headers={"Authorization": "Bearer token"}
+                    headers={"Authorization": f"Bearer {os.environ.get('TEST_AUTH_TOKEN', 'test_token_multitenant')}"}
                 )
                 
                 assert response.status_code == 403
@@ -167,7 +173,7 @@ class TestMultiTenantIsolation:
                     # Try injection in search parameter
                     response = test_client.get(
                         f"/api/v1/orders?search={injection}",
-                        headers={"Authorization": "Bearer token"}
+                        headers={"Authorization": f"Bearer {os.environ.get('TEST_AUTH_TOKEN', 'test_token_multitenant')}"}
                     )
                     
                     # Should either sanitize or return safe results
@@ -184,7 +190,7 @@ class TestMultiTenantIsolation:
                 # Try to access restaurant 2's reports
                 response = test_client.get(
                     "/api/v1/reports/sales?restaurant_id=restaurant_2",
-                    headers={"Authorization": "Bearer token"}
+                    headers={"Authorization": f"Bearer {os.environ.get('TEST_AUTH_TOKEN', 'test_token_multitenant')}"}
                 )
                 
                 assert response.status_code == 403
@@ -209,7 +215,7 @@ class TestMultiTenantIsolation:
                         "product_ids": ["p1", "p2", "p3"],  # Including p2 from restaurant 2
                         "updates": {"price": 15.99}
                     },
-                    headers={"Authorization": "Bearer token"}
+                    headers={"Authorization": f"Bearer {os.environ.get('TEST_AUTH_TOKEN', 'test_token_multitenant')}"}
                 )
                 
                 assert response.status_code == 200
@@ -234,7 +240,7 @@ class TestMultiTenantIsolation:
                 response = test_client.put(
                     f"/api/v1/tables/{table.id}",
                     json={"restaurant_id": "restaurant_2"},
-                    headers={"Authorization": "Bearer token"}
+                    headers={"Authorization": f"Bearer {os.environ.get('TEST_AUTH_TOKEN', 'test_token_multitenant')}"}
                 )
                 
                 assert response.status_code in [400, 403]
@@ -259,7 +265,7 @@ class TestMultiTenantIsolation:
             with patch("app.core.database.get_db", return_value=mock_db_session):
                 response = test_client.get(
                     "/api/v1/admin/orders",
-                    headers={"Authorization": "Bearer token"}
+                    headers={"Authorization": f"Bearer {os.environ.get('TEST_AUTH_TOKEN', 'test_token_multitenant')}"}
                 )
                 
                 assert response.status_code == 200
@@ -290,7 +296,7 @@ class TestMultiTenantIsolation:
                         "items": order.items,
                         "total": 50.00
                     },
-                    headers={"Authorization": "Bearer token"}
+                    headers={"Authorization": f"Bearer {os.environ.get('TEST_AUTH_TOKEN', 'test_token_multitenant')}"}
                 )
                 
                 assert response.status_code == 400
