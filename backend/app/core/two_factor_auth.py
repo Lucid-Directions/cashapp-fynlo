@@ -129,7 +129,8 @@ class TwoFactorAuth:
             )
         
         # Verify token
-        secret = setup_data.get("secret")        if not self.verify_totp(secret, token):
+        secret = setup_data.get("secret")
+        if not self.verify_totp(secret, token):
             return False
         
         # Store 2FA data permanently
@@ -218,7 +219,8 @@ class TwoFactorAuth:
             raise AuthenticationException(
                 detail="Invalid 2FA token"
             )
-                if self.redis:
+        
+        if self.redis:
             user_2fa_key = f"2fa:user:{user.id}"
             await self.redis.delete(user_2fa_key)
         

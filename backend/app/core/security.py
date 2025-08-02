@@ -385,7 +385,7 @@ class MonitoringQueryParams(BaseModel):
 
 class InstanceIdentifier(BaseModel):
     """Validated instance identifier."""
-    instance_id: str = Field(..., pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$")
+    instance_id: str = Field(..., pattern=r"^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$")
     
     @validator('instance_id')
     def validate_instance_id(cls, v):
@@ -485,7 +485,7 @@ class RefreshReplicasRequest(BaseModel):
 
 class InstanceHeartbeatRequest(BaseModel):
     """Request for instance heartbeat registration."""
-    instance_id: str = Field(..., pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$")
+    instance_id: str = Field(..., pattern=r"^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$")
     hostname: str = Field(..., max_length=255)
     environment: str = Field(..., pattern="^(development|staging|production|test)$")
     version: Optional[str] = Field(None, max_length=50)
@@ -547,9 +547,9 @@ class FilePathValidator(BaseModel):
 class RequestContext(BaseModel):
     """Context for request tracking and correlation."""
     request_id: str = Field(default_factory=lambda: TokenEncryption.generate_secure_token(16))
-    correlation_id: Optional[str] = Field(None, pattern="^[a-zA-Z0-9\-]{1,64}$")
+    correlation_id: Optional[str] = Field(None, pattern=r"^[a-zA-Z0-9\-]{1,64}$")
     user_agent: Optional[str] = Field(None, max_length=500)
-    ip_address: Optional[str] = Field(None, pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$|^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$")
+    ip_address: Optional[str] = Field(None, pattern=r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$|^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$")
     
     class Config:
         extra = "forbid"
