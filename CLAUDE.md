@@ -18,6 +18,7 @@
 - **Puppeteer** (`mcp__puppeteer__`) - Browser automation with Puppeteer
 - **SemGrep** (`mcp__semgrep__`) - Security scanning, code analysis
 - **Ref** (`mcp__Ref__`) - Search documentation, GitHub, private resources
+- **Tree-sitter** (`mcp__tree-sitter__`) - AST parsing, Python syntax validation
 
 ### Built-in Claude Tools
 - **Bash** - Execute shell commands, git operations, terminal tasks
@@ -243,8 +244,54 @@ interface StoreState {
 
 ## 🧪 Testing Requirements
 - Backend: pytest (80% coverage)
-- Frontend: Jest + React Native Testing Library
+- Frontend: Jest + React Native Testing Library (use @testing-library/react-native for React 18)
 - Security: Auth flows, input validation, multi-tenant isolation
+- Python: Syntax validation via `python -m compileall` before deployment
+- CI/CD: All checks must pass before merge (temporarily non-blocking during code quality transition)
+
+## 📈 Code Quality Initiative
+
+### Three-PR Approach (Merged August 2025)
+1. **PR #506**: Remove TypeScript `any` types (90 occurrences)
+2. **PR #507**: Fix React hook dependencies (49 warnings)
+3. **PR #508**: Remove console statements & address TODOs (87 items)
+
+### CI/CD Improvements
+- **Non-blocking checks during transition**: All quality checks temporarily allow failures
+- **Will be strict after cleanup**: Once code quality PRs are complete, checks become mandatory
+- **Python syntax validation**: Multi-layer defense against syntax errors
+- **Pre-commit hooks**: Automatic linting and formatting
+
+### Common CI/CD Fixes
+```bash
+# Fix package-lock.json issues
+rm -f package-lock.json && npm install --legacy-peer-deps
+
+# Fix Python unused imports
+# Check backend/app/api/mobile/endpoints.py and other files
+
+# Make CI checks non-blocking (temporary)
+# Update .github/workflows/code-quality-check.yml
+```
+
+## 🚨 Critical Backend Deployment Recovery
+
+### The Docstring Incident (August 2025)
+- **Issue**: 83 Python files had orphaned triple quotes between docstrings and imports
+- **Impact**: Backend deployment failed with "unterminated triple-quoted string literal"
+- **Resolution**: PRs #502-505 fixed all syntax errors systematically
+
+### Python Syntax Validation Infrastructure
+1. **Pre-commit hooks**: Ruff linter catches issues locally
+2. **Docker build validation**: `python -m compileall` during build
+3. **GitHub Actions**: Syntax check before deployment
+4. **Tree-sitter MCP**: AST-level validation for complex cases
+
+### DigitalOcean Deployment Requirements
+- Python files MUST be syntactically valid
+- All imports must be used (no F401 errors)
+- All names must be defined (no F821 errors)
+- Backend URL: https://fynlopos-9eg2c.ondigitalocean.app
 
 ## 💾 CONTEXT PERSISTENCE WITH PIECES
 
