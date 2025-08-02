@@ -1,0 +1,43 @@
+name: Python Syntax Check
+
+on:
+  push:
+    paths:
+      - 'backend/**/*.py'
+  pull_request:
+    paths:
+      - 'backend/**/*.py'
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+    name: Check Python Syntax
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Check Python syntax with compile
+      run: |
+        echo "🔍 Checking all Python files for syntax errors..."
+        cd backend
+        python -m compileall -q app || (echo "❌ Syntax errors found!" && exit 1)
+        echo "✅ All Python files have valid syntax!"
+    
+    - name: Install and run pylint (optional)
+      continue-on-error: true
+      run: |
+        pip install pylint
+        cd backend
+        # Run pylint but only fail on syntax errors (E)
+        pylint app --errors-only --disable=all --enable=E0001
+    
+    - name: Count Python files checked
+      run: |
+        cd backend
+        file_count=$(find app -name "*.py" -type f | wc -l)
+        echo "✅ Checked $file_count Python files"

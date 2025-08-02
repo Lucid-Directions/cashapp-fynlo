@@ -220,7 +220,8 @@ class TwoFactorAuth:
             raise AuthenticationException(
                 message="Invalid 2FA token"
             )
-                if self.redis:
+        
+        if self.redis:
             user_2fa_key = f"2fa:user:{user.id}"
             await self.redis.delete(user_2fa_key)
         

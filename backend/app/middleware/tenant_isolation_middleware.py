@@ -21,15 +21,11 @@ class TenantIsolationMiddleware(BaseHTTPMiddleware):
     Middleware to enforce tenant isolation across all API endpoints
     """
     
-    
-    """
     def __init__(self, app: ASGIApp):
         super().__init__(app)
         
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        """
-        Process each request to ensure tenant isolation
-        """
+        """Process each request to ensure tenant isolation"""
         # Skip middleware for non-API routes
         if not request.url.path.startswith("/api/"):
             return await call_next(request)
@@ -82,13 +78,9 @@ class TenantValidationMiddleware:
     Additional middleware to validate tenant access in request payloads
     """
     
-    
-    """
     @staticmethod
     async def validate_request_body(request: Request) -> None:
-        """
-        Validate that request body doesn't contain cross-tenant data
-        """
+        """Validate that request body doesn't contain cross-tenant data"""
         # Only check POST, PUT, PATCH requests
         if request.method not in ["POST", "PUT", "PATCH"]:
             return
