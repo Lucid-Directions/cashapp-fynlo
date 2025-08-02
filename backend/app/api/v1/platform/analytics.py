@@ -3,7 +3,10 @@ Platform analytics endpoints for dashboard insights.
 """
 
 from datetime import datetime, timedelta
+<<<<<<< HEAD
 from typing import Optional
+=======
+>>>>>>> origin/main
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
@@ -14,7 +17,6 @@ from app.core.cache import get_cached_data_async, cache_data
 from app.core.responses import APIResponseHelper
 
 router = APIRouter(prefix="/analytics", tags=["platform-analytics"])
-
 
 @router.get("/overview")
 async def get_platform_overview(
@@ -106,7 +108,6 @@ async def get_platform_overview(
             status_code=500
         )
 
-
 @router.get("/revenue-trends")
 async def get_revenue_trends(
     days: int = Query(30, ge=7, le=365),
@@ -153,7 +154,6 @@ async def get_revenue_trends(
             message=f"Failed to fetch revenue trends: {str(e)}",
             status_code=500
         )
-
 
 @router.get("/top-restaurants")
 async def get_top_restaurants(

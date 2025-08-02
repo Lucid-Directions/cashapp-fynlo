@@ -10,14 +10,14 @@ import sys
 import logging
 import json
 from datetime import datetime
-from typing import Dict, Any, List, Tuple, Optional
+from typing import Dict, Any, List
 from sqlalchemy.orm import Session
-from sqlalchemy import text, and_
+from sqlalchemy import and_
 
 # Add parent directory to path to import app modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.core.database import SessionLocal, Restaurant, Platform
+from app.core.database import SessionLocal, Restaurant
 from app.models.platform_config import (
     PlatformConfiguration, 
     RestaurantOverride, 
@@ -42,6 +42,8 @@ logger = logging.getLogger(__name__)
 class PlatformSettingsMigration:
     """Main migration class for converting restaurant settings to platform architecture"""
     
+    pass
+
     def __init__(self, dry_run: bool = True):
         self.dry_run = dry_run
         self.db: Session = SessionLocal()
@@ -462,7 +464,9 @@ For support, contact the development team with this report.
             f.write(report_content)
             
         logger.info(f"Migration report generated: {report_filename}")
-
+=======
+        logger.info(report_content)
+>>>>>>> origin/main
 
 def main():
     """Main function to run the migration"""
@@ -481,11 +485,12 @@ def main():
     dry_run = not args.execute
     
     if not dry_run:
+<<<<<<< HEAD
         confirmation = input("Are you sure you want to execute the migration? (yes/no): ")
         if confirmation.lower() != 'yes':
             return
     
-    print(f"Starting migration (DRY RUN: {dry_run})...")
+    logger.info(f"Starting migration (DRY RUN: {dry_run})...")
     
     with PlatformSettingsMigration(dry_run=dry_run) as migration:
         success = migration.run_migration()
@@ -498,7 +503,6 @@ def main():
         else:
             print("Migration failed. Check logs for details.")
             sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

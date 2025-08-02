@@ -1,13 +1,17 @@
-// @ts-nocheck
+// // @ts-nocheck
 /**
  * Test Utilities for Fynlo POS
  * Provides common testing helpers, wrappers, and utilities
  */
 
-import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react-native';
+import type { ReactElement } from 'react';
+// TODO: Unused import - import React from 'react';
+
 import { NavigationContainer } from '@react-navigation/native';
+import { render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import type { RenderOptions } from '@testing-library/react-native';
 
 // Custom render function with providers
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
@@ -18,23 +22,16 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
 const AllTheProviders = ({ children, navigationProps = {} }: any) => {
   return (
     <SafeAreaProvider>
-      <NavigationContainer {...navigationProps}>
-        {children}
-      </NavigationContainer>
+      <NavigationContainer {...navigationProps}>{children}</NavigationContainer>
     </SafeAreaProvider>
   );
 };
 
-const customRender = (
-  ui: ReactElement,
-  options: CustomRenderOptions = {}
-) => {
+const customRender = (ui: ReactElement, options: CustomRenderOptions = {}) => {
   const { navigationProps, ...renderOptions } = options;
-  
+
   return render(ui, {
-    wrapper: (props) => (
-      <AllTheProviders {...props} navigationProps={navigationProps} />
-    ),
+    wrapper: (props) => <AllTheProviders {...props} navigationProps={navigationProps} />,
     ...renderOptions,
   });
 };
@@ -95,8 +92,7 @@ export const createMockSession = (overrides = {}) => ({
 });
 
 // Wait for async operations
-export const waitFor = (ms: number) => 
-  new Promise(resolve => setTimeout(resolve, ms));
+export const waitFor = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Mock navigation helpers
 export const createMockNavigation = (overrides = {}) => ({
@@ -124,12 +120,12 @@ export const createMockRoute = (overrides = {}) => ({
 });
 
 // Test assertion helpers
-export const expectToBeVisible = (element: any) => {
+export const expectToBeVisible = (element: unknown) => {
   expect(element).toBeTruthy();
   expect(element.props.style).not.toContainEqual({ display: 'none' });
 };
 
-export const expectToBeHidden = (element: any) => {
+export const expectToBeHidden = (element: unknown) => {
   expect(element).toBeFalsy();
 };
 
@@ -146,7 +142,7 @@ export const createMockAppStore = (initialState = {}) => {
   };
 
   const state = { ...defaultState, ...initialState };
-  
+
   return {
     ...state,
     setUser: jest.fn(),
@@ -160,13 +156,11 @@ export const createMockAppStore = (initialState = {}) => {
     setOnlineStatus: jest.fn(),
     setLoading: jest.fn(),
     setError: jest.fn(),
-    cartTotal: jest.fn(() => 
-      state.cart.reduce((total: number, item: any) => 
-        total + (item.price * item.quantity), 0)
+    cartTotal: jest.fn(() =>
+      state.cart.reduce((total: number, item: any) => total + item.price * item.quantity, 0)
     ),
-    cartItemCount: jest.fn(() => 
-      state.cart.reduce((count: number, item: any) => 
-        count + item.quantity, 0)
+    cartItemCount: jest.fn(() =>
+      state.cart.reduce((count: number, item: any) => count + item.quantity, 0)
     ),
   };
 };
@@ -180,7 +174,7 @@ export const createMockUIStore = (initialState = {}) => {
   };
 
   const state = { ...defaultState, ...initialState };
-  
+
   return {
     ...state,
     setSelectedCategory: jest.fn(),
@@ -217,13 +211,13 @@ export const pressButton = async (getByTestId: any, testId: string) => {
 };
 
 // Mock fetch for API testing
-export const createMockFetch = (responses: any[] = []) => {
+export const createMockFetch = (responses: unknown[] = []) => {
   let callCount = 0;
-  
+
   return jest.fn(() => {
     const response = responses[callCount] || { ok: true, json: () => Promise.resolve({}) };
     callCount++;
-    
+
     return Promise.resolve({
       ok: response.ok !== false,
       status: response.status || 200,

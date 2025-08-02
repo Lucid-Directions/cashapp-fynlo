@@ -8,6 +8,10 @@ from datetime import datetime
 import asyncio
 
 from app.core.push_notifications import (
+import logging
+
+logger = logging.getLogger(__name__)
+
     get_push_service,
     send_order_notification,
     send_payment_notification,
@@ -19,6 +23,8 @@ from app.core.push_notifications import (
 class NotificationEventService:
     """Service to integrate backend events with push notifications"""
     
+    pass
+
     @staticmethod
     async def on_order_created(order_data: Dict[str, Any]):
         """Handle new order creation event"""

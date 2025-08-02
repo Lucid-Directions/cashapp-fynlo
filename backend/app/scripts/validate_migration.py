@@ -8,17 +8,15 @@ Checks data integrity, API functionality, and configuration consistency
 import os
 import sys
 import logging
-import json
 import asyncio
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Tuple, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import text, and_, func
+from sqlalchemy import text, and_
 
 # Add parent directory to path to import app modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.core.database import SessionLocal, Restaurant, Platform
+from app.core.database import SessionLocal, Restaurant
 from app.models.platform_config import (
     PlatformConfiguration, 
     RestaurantOverride, 
@@ -38,6 +36,8 @@ logger = logging.getLogger(__name__)
 class MigrationValidator:
     """Comprehensive validation of platform settings migration"""
     
+    pass
+
     def __init__(self):
         self.db: Session = SessionLocal()
         self.validation_results = {
@@ -553,12 +553,15 @@ For support, contact the development team with this report.
         with open(report_filename, 'w') as f:
             f.write(report_content)
         
+=======
+        logger.info(report_content)
+>>>>>>> origin/main
         logger.info(f"Validation report generated: {report_filename}")
-
 
 def main():
     """Main function to run the validation"""
     
+<<<<<<< HEAD
     with MigrationValidator() as validator:
         success = validator.run_validation()
         
@@ -566,7 +569,6 @@ def main():
             sys.exit(0)
         else:
             sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

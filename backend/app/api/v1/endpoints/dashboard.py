@@ -7,17 +7,17 @@ from pydantic import Field, validator
 from datetime import datetime, date, timedelta
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func, case
-from collections import defaultdict
+from sqlalchemy import func
 import json
 
-from app.core.database import get_db, Restaurant, Order, Product, User, Customer, InventoryItem
-from app.core.exceptions import ValidationException
+from app.core.database import get_db, Restaurant, Order, User, InventoryItem
+from app.core.exceptions import AuthenticationException
 from app.core.auth import get_current_user
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.services.activity_logger import ActivityLogger
 from app.middleware.rate_limit_middleware import limiter, PORTAL_DASHBOARD_RATE
+from app.core.exceptions import AuthenticationException
 
 router = APIRouter()
 
@@ -213,7 +213,9 @@ async def get_platform_dashboard(
     
     # Check if user is platform owner
     if current_user.role != 'platform_owner':
-        raise ValidationException(message="Platform owner access required")
+        raise AuthenticationException(            message="Platform owner access required",
+            error_code="ACCESS_DENIED"
+        )
     
     # Check cache
     cache_key = f"platform_dashboard:{period}"
@@ -246,7 +248,9 @@ async def get_platform_dashboard(
         ).all()
     else:
         # Non-platform owners shouldn't access this endpoint
-        raise ValidationException(message="Platform owner access required")
+        raise AuthenticationException(            message="Platform owner access required",
+            error_code="ACCESS_DENIED"
+        )
     
     # Aggregate metrics across all restaurants
     total_revenue = 0
@@ -365,7 +369,9 @@ async def get_restaurant_comparison(
     
     # Check if user is platform owner
     if current_user.role != 'platform_owner':
-        raise ValidationException(message="Platform owner access required")
+        raise AuthenticationException(            message="Platform owner access required",
+            error_code="ACCESS_DENIED"
+        )
     
     # Calculate date range
     end_date = datetime.utcnow()

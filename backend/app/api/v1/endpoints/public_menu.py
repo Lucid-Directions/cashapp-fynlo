@@ -7,7 +7,6 @@ from typing import Optional
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Query 
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
 import time
 import logging
 

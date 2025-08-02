@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+ios/Pods/
+
+# Build outputs
+android/build/
+ios/build/
+build/
+coverage/
+*.log
+
+# Generated files
+ios/main.jsbundle
+android/app/src/main/assets/
+
+# Metro
+.metro-health-check*
+metro.config.js
+
+# Native code
+android/
+ios/
+
+# Test artifacts
+__tests__/fixtures/
+jest/
+coverage/
+*.lcov
+
+# Temporary files
+.tmp/
+temp/
+*.tmp
+
+# Third-party libraries
+patches/
+
+# Generated documentation
+docs/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Bundle files
+*.bundle
+*.jsbundle
+
+# Gradle
+android/gradle/
+android/gradlew
+android/gradlew.bat
+
+# Standalone test files
+testAPIConnectivity.js
+testDataService.js

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+
 import { InteractionManager, Platform } from 'react-native';
 
 interface PerformanceMetrics {
@@ -36,21 +37,23 @@ export const usePerformanceMonitor = (
 
   useEffect(() => {
     renderStartTime.current = Date.now();
-    
+
     // Measure interaction completion time
     const interactionPromise = InteractionManager.runAfterInteractions(() => {
       const interactionTime = Date.now() - startTime.current;
-      
-      setMetrics(prev => ({
+
+      setMetrics((prev) => ({
         ...prev,
         interactionTime,
         isReady: true,
       }));
-      
+
       setIsReady(true);
-      
+
       if (logToConsole) {
-        console.log(`[Performance] ${componentName} - Interaction completed in ${interactionTime}ms`);
+        console.log(
+          `[Performance] ${componentName} - Interaction completed in ${interactionTime}ms`
+        );
       }
     });
 
@@ -62,8 +65,8 @@ export const usePerformanceMonitor = (
   useEffect(() => {
     // Measure render time
     const renderTime = Date.now() - renderStartTime.current;
-    
-    setMetrics(prev => ({
+
+    setMetrics((prev) => ({
       ...prev,
       renderTime,
     }));
@@ -80,14 +83,16 @@ export const usePerformanceMonitor = (
       const getMemoryUsage = () => {
         // Simulate memory usage calculation
         const estimatedUsage = Math.random() * 100 + 50; // 50-150 MB simulation
-        
-        setMetrics(prev => ({
+
+        setMetrics((prev) => ({
           ...prev,
           memoryUsage: estimatedUsage,
         }));
 
         if (logToConsole) {
-          console.log(`[Performance] ${componentName} - Memory usage: ${estimatedUsage.toFixed(2)}MB`);
+          console.log(
+            `[Performance] ${componentName} - Memory usage: ${estimatedUsage.toFixed(2)}MB`
+          );
         }
       };
 
@@ -107,12 +112,12 @@ export const usePerformanceMonitor = (
 // Performance timing utilities
 export const performanceUtils = {
   // Debounce function for performance optimization
-  debounce: <T extends (...args: any[]) => any>(
+  debounce: <T extends (...args: unknown[]) => any>(
     func: T,
     delay: number
   ): ((...args: Parameters<T>) => void) => {
     let timeoutId: NodeJS.Timeout;
-    
+
     return (...args: Parameters<T>) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => func.apply(null, args), delay);
@@ -120,12 +125,12 @@ export const performanceUtils = {
   },
 
   // Throttle function for performance optimization
-  throttle: <T extends (...args: any[]) => any>(
+  throttle: <T extends (...args: unknown[]) => any>(
     func: T,
     delay: number
   ): ((...args: Parameters<T>) => void) => {
     let isThrottled = false;
-    
+
     return (...args: Parameters<T>) => {
       if (!isThrottled) {
         func.apply(null, args);
@@ -145,28 +150,25 @@ export const performanceUtils = {
     const startTime = Date.now();
     const result = await func();
     const executionTime = Date.now() - startTime;
-    
+
     if (__DEV__ && label) {
       console.log(`[Performance] ${label} executed in ${executionTime}ms`);
     }
-    
+
     return { result, executionTime };
   },
 
   // Batch state updates for better performance
-  batchUpdates: <T>(
-    updates: Array<() => void>,
-    delay: number = 0
-  ): Promise<void> => {
+  batchUpdates: <_T>(updates: Array<() => void>, delay: number = 0): Promise<void> => {
     return new Promise((resolve) => {
       if (delay > 0) {
         setTimeout(() => {
-          updates.forEach(update => update());
+          updates.forEach((update) => update());
           resolve();
         }, delay);
       } else {
         InteractionManager.runAfterInteractions(() => {
-          updates.forEach(update => update());
+          updates.forEach((update) => update());
           resolve();
         });
       }
@@ -183,28 +185,28 @@ export const performanceUtils = {
   },
 
   // Create a memoized version of a function
-  memoize: <T extends (...args: any[]) => any>(
+  memoize: <T extends (...args: unknown[]) => any>(
     func: T,
     keyGenerator?: (...args: Parameters<T>) => string
   ): T => {
     const cache = new Map<string, ReturnType<T>>();
-    
+
     return ((...args: Parameters<T>): ReturnType<T> => {
       const key = keyGenerator ? keyGenerator(...args) : JSON.stringify(args);
-      
+
       if (cache.has(key)) {
         return cache.get(key)!;
       }
-      
+
       const result = func(...args);
       cache.set(key, result);
-      
+
       // Limit cache size to prevent memory leaks
       if (cache.size > 100) {
         const firstKey = cache.keys().next().value;
         cache.delete(firstKey);
       }
-      
+
       return result;
     }) as T;
   },

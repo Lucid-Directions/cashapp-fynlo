@@ -8,7 +8,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 from datetime import datetime, timedelta
+<<<<<<< HEAD
 from typing import Optional, List, Dict
+=======
+>>>>>>> origin/main
 
 from app.core.database import get_db, Restaurant, User, Order, Payment, InventoryItem, UserRestaurant
 from app.core.auth import get_current_user
@@ -19,15 +22,15 @@ from app.core.validators import validate_uuid_format
 
 router = APIRouter()
 
-
 class DeletionCheckResult:
     """Result of deletion safety check"""
+    pass
+
     def __init__(self):
         self.can_delete = True
         self.warnings = []
         self.blockers = []
         self.stats = {}
-
 
 @router.delete("/{restaurant_id}")
 async def delete_restaurant(
@@ -149,7 +152,6 @@ async def delete_restaurant(
         )
         raise FynloException(message="Failed to delete restaurant")
 
-
 async def check_deletion_safety(restaurant_id: str, db: Session) -> DeletionCheckResult:
     """
     Check if a restaurant can be safely deleted
@@ -264,7 +266,6 @@ async def check_deletion_safety(restaurant_id: str, db: Session) -> DeletionChec
             result.warnings.append(f"User {user.email} will have no restaurants after deletion")
     
     return result
-
 
 @router.post("/{restaurant_id}/archive")
 async def archive_restaurant(

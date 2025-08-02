@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// TODO: Unused import - import React, { useState, useEffect } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -10,19 +11,21 @@ import {
   Dimensions,
   Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import ComingSoon from '../../components/feedback/ComingSoon';
+import LoadingView from '../../components/feedback/LoadingView';
 import { useTheme } from '../../design-system/ThemeProvider';
 import DataService from '../../services/DataService';
-import LoadingView from '../../components/feedback/LoadingView';
-import ComingSoon from '../../components/feedback/ComingSoon';
 
 // Mock ENV flag
 const ENV = {
   FEATURE_REPORTS: true, // Set to true to enable, false to show ComingSoon
 };
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: _screenHeight } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 const isSmallDevice = screenWidth < 380;
 
@@ -80,7 +83,7 @@ const SalesReportDetailScreen = () => {
     { id: 'today', label: 'Today', icon: 'today' },
     { id: 'week', label: 'This Week', icon: 'date-range' },
     { id: 'month', label: 'This Month', icon: 'calendar-today' },
-    { id: 'quarter', label: 'Quarter', icon: 'event' }
+    { id: 'quarter', label: 'Quarter', icon: 'event' },
   ];
 
   useEffect(() => {
@@ -91,7 +94,8 @@ const SalesReportDetailScreen = () => {
     }
   }, [selectedPeriod]);
 
-  const loadSalesData = async () => { // Modified
+  const loadSalesData = async () => {
+    // Modified
     setIsLoading(true);
     setError(null);
     try {
@@ -112,8 +116,7 @@ const SalesReportDetailScreen = () => {
         setTotalSales(0);
         setTotalTransactions(0);
       }
-
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load sales report.');
       setSalesData([]);
       setTotalSales(0);
@@ -124,22 +127,25 @@ const SalesReportDetailScreen = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return `£${amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `£${amount.toLocaleString('en-GB', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-GB', { 
-      weekday: 'short', 
-      day: '2-digit', 
-      month: 'short' 
+    return date.toLocaleDateString('en-GB', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
     });
   };
 
   const getTopSellingItems = () => {
     const itemMap: { [key: string]: { sold: number; revenue: number } } = {};
-    
-    salesData.forEach(day => {
-      day.topItems.forEach(item => {
+
+    salesData.forEach((day) => {
+      day.topItems.forEach((item) => {
         if (itemMap[item.name]) {
           itemMap[item.name].sold += item.sold;
           itemMap[item.name].revenue += item.revenue;
@@ -156,22 +162,27 @@ const SalesReportDetailScreen = () => {
   };
 
   const handleExportReport = () => {
-    Alert.alert(
-      'Export Sales Report',
-      'Choose export format',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'PDF', onPress: () => Alert.alert('PDF Export', 'PDF export functionality coming soon') },
-        { text: 'CSV', onPress: () => Alert.alert('CSV Export', 'CSV export functionality coming soon') },
-        { text: 'Email', onPress: () => Alert.alert('Email Report', 'Email functionality coming soon') }
-      ]
-    );
+    Alert.alert('Export Sales Report', 'Choose export format', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'PDF',
+        onPress: () => Alert.alert('PDF Export', 'PDF export functionality coming soon'),
+      },
+      {
+        text: 'CSV',
+        onPress: () => Alert.alert('CSV Export', 'CSV export functionality coming soon'),
+      },
+      {
+        text: 'Email',
+        onPress: () => Alert.alert('Email Report', 'Email functionality coming soon'),
+      },
+    ]);
   };
 
   const getPaymentMethodTotals = () => {
     const totals = { card: 0, cash: 0, mobile: 0, qrCode: 0 };
-    
-    salesData.forEach(day => {
+
+    salesData.forEach((day) => {
       totals.card += day.paymentMethods.card;
       totals.cash += day.paymentMethods.cash;
       totals.mobile += day.paymentMethods.mobile;
@@ -182,7 +193,8 @@ const SalesReportDetailScreen = () => {
   };
 
   const topItems = salesData.length > 0 ? getTopSellingItems() : [];
-  const paymentTotals = salesData.length > 0 ? getPaymentMethodTotals() : { card: 0, cash: 0, mobile: 0, qrCode: 0 };
+  const paymentTotals =
+    salesData.length > 0 ? getPaymentMethodTotals() : { card: 0, cash: 0, mobile: 0, qrCode: 0 };
 
   if (!ENV.FEATURE_REPORTS) {
     return <ComingSoon />;
@@ -196,11 +208,12 @@ const SalesReportDetailScreen = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-             <Icon name="arrow-back" size={24} color={Colors.white} />
-           </TouchableOpacity>
-           <Text style={styles.headerTitle}>Sales Report</Text>
-           <View style={{width: 24}} />{/* Placeholder for balance */}
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Sales Report</Text>
+          <View style={{ width: 24 }} />
+          {/* Placeholder for balance */}
         </View>
         <View style={styles.centeredError}>
           <Icon name="error-outline" size={64} color={Colors.danger} />
@@ -216,25 +229,32 @@ const SalesReportDetailScreen = () => {
 
   // Handling for when salesData is empty after loading (no error)
   if (salesData.length === 0) {
-     return (
+    return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-             <Icon name="arrow-back" size={24} color={Colors.white} />
-           </TouchableOpacity>
-           <Text style={styles.headerTitle}>Sales Report</Text>
-            <TouchableOpacity style={styles.headerAction} onPress={() => {/* Share action */}}>
-              <Icon name="share" size={24} color={Colors.white} />
-            </TouchableOpacity>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Sales Report</Text>
+          <TouchableOpacity
+            style={styles.headerAction}
+            onPress={() => {
+              /* Share action */
+            }}
+          >
+            <Icon name="share" size={24} color={Colors.white} />
+          </TouchableOpacity>
         </View>
-         <View style={styles.periodSelector}>
-          {['today', 'week', 'month', 'year'].map(period => (
+        <View style={styles.periodSelector}>
+          {['today', 'week', 'month', 'year'].map((period) => (
             <TouchableOpacity
               key={period}
               style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
               onPress={() => setSelectedPeriod(period)}
             >
-              <Text style={[styles.periodText, selectedPeriod === period && styles.periodTextActive]}>
+              <Text
+                style={[styles.periodText, selectedPeriod === period && styles.periodTextActive]}
+              >
                 {period.charAt(0).toUpperCase() + period.slice(1)}
               </Text>
             </TouchableOpacity>
@@ -243,7 +263,9 @@ const SalesReportDetailScreen = () => {
         <View style={styles.centeredError}>
           <Icon name="receipt-long" size={64} color={Colors.mediumGray} />
           <Text style={styles.errorTextHeader}>No Sales Data</Text>
-          <Text style={styles.errorText}>There is no sales data available for the selected period.</Text>
+          <Text style={styles.errorText}>
+            There is no sales data available for the selected period.
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -252,13 +274,10 @@ const SalesReportDetailScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Sales Report</Text>
@@ -269,27 +288,29 @@ const SalesReportDetailScreen = () => {
 
       {/* Enhanced Period Selector */}
       <View style={[styles.periodSelector, { backgroundColor: theme.colors.white }]}>
-        {periods.map(period => (
+        {periods.map((period) => (
           <TouchableOpacity
             key={period.id}
             style={[
               styles.periodButton,
               selectedPeriod === period.id && styles.periodButtonActive,
-              { backgroundColor: selectedPeriod === period.id ? Colors.primary : 'transparent' }
+              { backgroundColor: selectedPeriod === period.id ? Colors.primary : 'transparent' },
             ]}
             onPress={() => setSelectedPeriod(period.id)}
           >
-            <Icon 
-              name={period.icon} 
-              size={16} 
+            <Icon
+              name={period.icon}
+              size={16}
               color={selectedPeriod === period.id ? Colors.white : Colors.darkGray}
               style={styles.periodIcon}
             />
-            <Text style={[
-              styles.periodText,
-              selectedPeriod === period.id && styles.periodTextActive,
-              { color: selectedPeriod === period.id ? Colors.white : theme.colors.text }
-            ]}>
+            <Text
+              style={[
+                styles.periodText,
+                selectedPeriod === period.id && styles.periodTextActive,
+                { color: selectedPeriod === period.id ? Colors.white : theme.colors.text },
+              ]}
+            >
               {period.label}
             </Text>
           </TouchableOpacity>
@@ -335,20 +356,20 @@ const SalesReportDetailScreen = () => {
           <View style={styles.chartContainer}>
             <View style={styles.chartArea}>
               {salesData.slice(-7).map((day, index) => {
-                const maxSales = Math.max(...salesData.slice(-7).map(d => d.dailySales));
+                const maxSales = Math.max(...salesData.slice(-7).map((d) => d.dailySales));
                 const height = (day.dailySales / maxSales) * 120;
-                
+
                 return (
                   <View key={index} style={styles.chartBar}>
-                    <View 
+                    <View
                       style={[
-                        styles.bar, 
-                        { 
-                          height, 
+                        styles.bar,
+                        {
+                          height,
                           backgroundColor: Colors.primary,
-                          opacity: 0.7 + (0.3 * day.dailySales / maxSales)
-                        }
-                      ]} 
+                          opacity: 0.7 + (0.3 * day.dailySales) / maxSales,
+                        },
+                      ]}
                     />
                     <Text style={styles.chartLabel}>{formatDate(day.date)}</Text>
                     <Text style={styles.chartValue}>{formatCurrency(day.dailySales)}</Text>
@@ -375,14 +396,14 @@ const SalesReportDetailScreen = () => {
                   </Text>
                 </View>
                 <View style={styles.itemProgress}>
-                  <View 
+                  <View
                     style={[
-                      styles.progressBar, 
-                      { 
+                      styles.progressBar,
+                      {
                         width: `${(item.sold / topItems[0].sold) * 100}%`,
-                        backgroundColor: Colors.primary 
-                      }
-                    ]} 
+                        backgroundColor: Colors.primary,
+                      },
+                    ]}
                   />
                 </View>
               </View>
@@ -651,14 +672,16 @@ const styles = StyleSheet.create({
   spacer: {
     height: 40,
   },
-  centeredError: { // Added
+  centeredError: {
+    // Added
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
     backgroundColor: Colors.background, // Ensure background color
   },
-  errorTextHeader: { // Added
+  errorTextHeader: {
+    // Added
     fontSize: getFontSize(18),
     fontWeight: 'bold',
     color: Colors.danger,
@@ -666,19 +689,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: 'center',
   },
-  errorText: { // Added
+  errorText: {
+    // Added
     fontSize: getFontSize(14),
     color: Colors.text,
     textAlign: 'center',
     marginBottom: 20,
   },
-  retryButton: { // Added
+  retryButton: {
+    // Added
     backgroundColor: Colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
-  retryButtonText: { // Added
+  retryButtonText: {
+    // Added
     color: Colors.white,
     fontSize: getFontSize(16),
     fontWeight: '600',

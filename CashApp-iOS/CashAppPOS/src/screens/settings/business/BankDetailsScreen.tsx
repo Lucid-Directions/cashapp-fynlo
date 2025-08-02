@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -11,11 +12,13 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { SimpleTextInput } from '../../../components/inputs'; // Assuming SimpleDecimalInput not needed for now
-import { useAuth } from '../../../contexts/AuthContext';
 import Colors from '../../../constants/Colors';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface BankDetails {
   accountHolderName: string;
@@ -31,8 +34,8 @@ interface BankDetails {
 
 const BankDetailsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { user } = useAuth();
-  
+  const { _user } = useAuth();
+
   const [bankDetails, setBankDetails] = useState<BankDetails>({
     accountHolderName: '',
     bankName: '',
@@ -44,7 +47,7 @@ const BankDetailsScreen: React.FC = () => {
     currency: 'GBP',
     primaryAccount: true,
   });
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [hasExistingDetails, setHasExistingDetails] = useState(false);
 
@@ -62,7 +65,7 @@ const BankDetailsScreen: React.FC = () => {
         setHasExistingDetails(true);
       }
     } catch (error) {
-      console.error('Failed to load bank details:', error);
+      logger.error('Failed to load bank details:', error);
     }
   };
 
@@ -88,10 +91,12 @@ const BankDetailsScreen: React.FC = () => {
 
   const handleSave = async () => {
     // Validate required fields
-    if (!bankDetails.accountHolderName.trim() || 
-        !bankDetails.bankName.trim() || 
-        !bankDetails.accountNumber.trim() || 
-        !bankDetails.sortCode.trim()) {
+    if (
+      !bankDetails.accountHolderName.trim() ||
+      !bankDetails.bankName.trim() ||
+      !bankDetails.accountNumber.trim() ||
+      !bankDetails.sortCode.trim()
+    ) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
@@ -114,14 +119,16 @@ const BankDetailsScreen: React.FC = () => {
     try {
       // In real implementation, this would save to API
       await saveBankDetails(bankDetails);
-      
+
       Alert.alert(
         'Success',
-        hasExistingDetails ? 'Bank details updated successfully' : 'Bank details saved successfully',
+        hasExistingDetails
+          ? 'Bank details updated successfully'
+          : 'Bank details saved successfully',
         [{ text: 'OK', onPress: () => navigation.goBack() }]
       );
     } catch (error) {
-      console.error('Failed to save bank details:', error);
+      logger.error('Failed to save bank details:', error);
       Alert.alert('Error', 'Failed to save bank details. Please try again.');
     } finally {
       setIsLoading(false);
@@ -132,7 +139,7 @@ const BankDetailsScreen: React.FC = () => {
     // Simulate API call
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log('Bank details saved:', details);
+        logger.info('Bank details saved:', details);
         resolve();
       }, 1500);
     });
@@ -141,7 +148,7 @@ const BankDetailsScreen: React.FC = () => {
   const formatSortCode = (text: string) => {
     // Remove all non-digits
     const digits = text.replace(/\D/g, '');
-    
+
     // Add hyphens automatically
     if (digits.length <= 2) return digits;
     if (digits.length <= 4) return `${digits.slice(0, 2)}-${digits.slice(2)}`;
@@ -162,39 +169,30 @@ const BankDetailsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Bank Details</Text>
           <Text style={styles.headerSubtitle}>
             {hasExistingDetails ? 'Update payment details' : 'Set up payment receiving'}
           </Text>
         </View>
-        
-        <TouchableOpacity 
-          style={styles.saveButton}
-          onPress={handleSave}
-          disabled={isLoading}
-        >
-          <Text style={styles.saveButtonText}>
-            {isLoading ? 'Saving...' : 'Save'}
-          </Text>
+
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={isLoading}>
+          <Text style={styles.saveButtonText}>{isLoading ? 'Saving...' : 'Save'}</Text>
         </TouchableOpacity>
       </View>
 
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -205,7 +203,8 @@ const BankDetailsScreen: React.FC = () => {
             <View style={styles.securityContent}>
               <Text style={styles.securityTitle}>Secure & Encrypted</Text>
               <Text style={styles.securityText}>
-                Your banking information is encrypted and stored securely. This information is used only for receiving payments from the platform.
+                Your banking information is encrypted and stored securely. This information is used
+                only for receiving payments from the platform.
               </Text>
             </View>
           </View>
@@ -216,7 +215,7 @@ const BankDetailsScreen: React.FC = () => {
               label="Account Holder Name *"
               placeholder="Enter the name on the bank account"
               value={bankDetails.accountHolderName}
-              onValueChange={(text) => setBankDetails({...bankDetails, accountHolderName: text})}
+              onValueChange={(text) => setBankDetails({ ...bankDetails, accountHolderName: text })}
               autoCapitalize="words"
               placeholderTextColor={Colors.darkGray}
               // containerStyle prop can be used for styles.formGroup if needed for spacing only
@@ -229,7 +228,7 @@ const BankDetailsScreen: React.FC = () => {
               label="Bank Name *"
               placeholder="e.g., Lloyds Bank, Barclays, HSBC"
               value={bankDetails.bankName}
-              onValueChange={(text) => setBankDetails({...bankDetails, bankName: text})}
+              onValueChange={(text) => setBankDetails({ ...bankDetails, bankName: text })}
               autoCapitalize="words"
               placeholderTextColor={Colors.darkGray}
             />
@@ -267,7 +266,7 @@ const BankDetailsScreen: React.FC = () => {
               label="IBAN (Optional)"
               placeholder="GB29 LOYD 3099 8812 3456 78"
               value={bankDetails.iban}
-              onValueChange={(text) => setBankDetails({...bankDetails, iban: text.toUpperCase()})}
+              onValueChange={(text) => setBankDetails({ ...bankDetails, iban: text.toUpperCase() })}
               autoCapitalize="characters"
               placeholderTextColor={Colors.darkGray}
             />
@@ -279,7 +278,9 @@ const BankDetailsScreen: React.FC = () => {
               label="SWIFT/BIC Code (Optional)"
               placeholder="e.g., LOYDGB2L"
               value={bankDetails.swiftCode}
-              onValueChange={(text) => setBankDetails({...bankDetails, swiftCode: text.toUpperCase()})}
+              onValueChange={(text) =>
+                setBankDetails({ ...bankDetails, swiftCode: text.toUpperCase() })
+              }
               autoCapitalize="characters"
               placeholderTextColor={Colors.darkGray}
             />
@@ -292,39 +293,43 @@ const BankDetailsScreen: React.FC = () => {
               <TouchableOpacity
                 style={[
                   styles.accountTypeOption,
-                  bankDetails.accountType === 'business' && styles.accountTypeOptionSelected
+                  bankDetails.accountType === 'business' && styles.accountTypeOptionSelected,
                 ]}
-                onPress={() => setBankDetails({...bankDetails, accountType: 'business'})}
+                onPress={() => setBankDetails({ ...bankDetails, accountType: 'business' })}
               >
-                <Icon 
-                  name="business" 
-                  size={20} 
-                  color={bankDetails.accountType === 'business' ? Colors.white : Colors.primary} 
+                <Icon
+                  name="business"
+                  size={20}
+                  color={bankDetails.accountType === 'business' ? Colors.white : Colors.primary}
                 />
-                <Text style={[
-                  styles.accountTypeText,
-                  bankDetails.accountType === 'business' && styles.accountTypeTextSelected
-                ]}>
+                <Text
+                  style={[
+                    styles.accountTypeText,
+                    bankDetails.accountType === 'business' && styles.accountTypeTextSelected,
+                  ]}
+                >
                   Business Account
                 </Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={[
                   styles.accountTypeOption,
-                  bankDetails.accountType === 'personal' && styles.accountTypeOptionSelected
+                  bankDetails.accountType === 'personal' && styles.accountTypeOptionSelected,
                 ]}
-                onPress={() => setBankDetails({...bankDetails, accountType: 'personal'})}
+                onPress={() => setBankDetails({ ...bankDetails, accountType: 'personal' })}
               >
-                <Icon 
-                  name="person" 
-                  size={20} 
-                  color={bankDetails.accountType === 'personal' ? Colors.white : Colors.primary} 
+                <Icon
+                  name="person"
+                  size={20}
+                  color={bankDetails.accountType === 'personal' ? Colors.white : Colors.primary}
                 />
-                <Text style={[
-                  styles.accountTypeText,
-                  bankDetails.accountType === 'personal' && styles.accountTypeTextSelected
-                ]}>
+                <Text
+                  style={[
+                    styles.accountTypeText,
+                    bankDetails.accountType === 'personal' && styles.accountTypeTextSelected,
+                  ]}
+                >
                   Personal Account
                 </Text>
               </TouchableOpacity>
@@ -344,7 +349,9 @@ const BankDetailsScreen: React.FC = () => {
             </View>
             <View style={styles.infoItem}>
               <Icon name="receipt" size={20} color={Colors.secondary} />
-              <Text style={styles.infoText}>Detailed payment reports available in your dashboard</Text>
+              <Text style={styles.infoText}>
+                Detailed payment reports available in your dashboard
+              </Text>
             </View>
           </View>
 

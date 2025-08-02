@@ -169,17 +169,13 @@ class ShiftResponse(BaseModel):
 
     @property
     def scheduled_hours(self) -> float:
-    """TODO: Implement function."""
-    pass
-        """Calculate scheduled hours for the shift"""
+                """Calculate scheduled hours for the shift"""
         delta = self.scheduled_end - self.scheduled_start
         return round(delta.total_seconds() / 3600, 2)
 
     @property
     def actual_hours(self) -> Optional[float]:
-    """TODO: Implement function."""
-    pass
-        """Calculate actual hours worked"""
+                """Calculate actual hours worked"""
         if not self.actual_start or not self.actual_end:
             return None
         delta = self.actual_end - self.actual_start

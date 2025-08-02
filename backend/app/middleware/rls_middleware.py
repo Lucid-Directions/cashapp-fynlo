@@ -5,7 +5,6 @@ Automatically sets session variables for database RLS policies
 
 from fastapi import Request, Depends
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response
 import logging
 from typing import Optional
 

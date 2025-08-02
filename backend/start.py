@@ -12,13 +12,17 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     host = "0.0.0.0"
     
-    print(f"🚀 Starting Fynlo POS Backend on {host}:{port}")
-    print(f"Environment: {os.environ.get('ENVIRONMENT', 'production')}")
-    print(f"Debug mode: {os.environ.get('DEBUG', 'false')}")
+    logger.info(f"🚀 Starting Fynlo POS Backend on {host}:{port}")
+    logger.info(f"Environment: {os.environ.get('ENVIRONMENT', 'production')}")
+    logger.debug(f"Debug mode: {os.environ.get('DEBUG', 'false')}")
     
     # Force minimal app for deployment stability
     from app.main_minimal import app
-    print("✅ Using minimal app (no external dependencies)")
+import logging
+
+logger = logging.getLogger(__name__)
+
+    logger.info("✅ Using minimal app (no external dependencies)")
     
     uvicorn.run(
         app,

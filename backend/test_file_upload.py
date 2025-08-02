@@ -36,10 +36,10 @@ def create_test_image_base64(size=(300, 300), color='red'):
 
 def test_file_upload_validation():
     """Test file upload validation"""
-    print("🧪 Testing File Upload Validation...")
+    logger.info("🧪 Testing File Upload Validation...")
     
     # Test 1: Invalid base64
-    print("\n1. Testing invalid base64...")
+    logger.info("\n1. Testing invalid base64...")
     invalid_base64 = "not_valid_base64"
     
     from app.core.file_upload import file_upload_service
@@ -49,12 +49,12 @@ def test_file_upload_validation():
             base64_data=invalid_base64,
             upload_type="product"
         )
-        print("❌ Should have failed for invalid base64")
+        logger.error("❌ Should have failed for invalid base64")
     except Exception as e:
-        print(f"✅ Correctly rejected invalid base64: {str(e)}")
+        logger.info(f"✅ Correctly rejected invalid base64: {str(e)}")
     
     # Test 2: Valid image upload
-    print("\n2. Testing valid image upload...")
+    logger.info("\n2. Testing valid image upload...")
     test_image = create_test_image_base64(size=(200, 200), color='blue')
     
     try:
@@ -63,16 +63,16 @@ def test_file_upload_validation():
             upload_type="product",
             filename="test_product.jpg"
         )
-        print(f"✅ Upload successful: {result.file_id}")
-        print(f"   Original URL: {result.original_url}")
-        print(f"   Thumbnail URL: {result.thumbnail_url}")
-        print(f"   Variants: {list(result.variants.keys())}")
+        logger.info(f"✅ Upload successful: {result.file_id}")
+        logger.info(f"   Original URL: {result.original_url}")
+        logger.info(f"   Thumbnail URL: {result.thumbnail_url}")
+        logger.info(f"   Variants: {list(result.variants.keys())}")
     except Exception as e:
-        print(f"❌ Upload failed: {str(e)}")
+        logger.error(f"❌ Upload failed: {str(e)}")
 
 def test_mobile_optimization():
     """Test mobile optimization features"""
-    print("\n🔍 Testing Mobile Optimization...")
+    logger.info("\n🔍 Testing Mobile Optimization...")
     
     from app.core.file_upload import file_upload_service
     
@@ -87,34 +87,38 @@ def test_mobile_optimization():
             generate_variants=True
         )
         
-        print(f"✅ Large image processed successfully")
-        print(f"   Generated variants: {len(result.variants)}")
+        logger.info(f"✅ Large image processed successfully")
+        logger.info(f"   Generated variants: {len(result.variants)}")
         
         for variant_name, variant_info in result.variants.items():
-            print(f"   {variant_name}: {variant_info['size']} -> {variant_info['url']}")
+            logger.info(f"   {variant_name}: {variant_info['size']} -> {variant_info['url']}")
             
     except Exception as e:
-        print(f"❌ Large image processing failed: {str(e)}")
+        logger.error(f"❌ Large image processing failed: {str(e)}")
 
 def test_api_endpoints():
     """Test API endpoints with authentication"""
-    print("\n🌐 Testing API Endpoints...")
+    logger.info("\n🌐 Testing API Endpoints...")
     
     # Note: This would require a running server and valid credentials
-    print("⚠️  API endpoint testing requires running server")
-    print("   Test manually with:")
-    print(f"   POST {ENDPOINTS['product_image']}/{{product_id}}/image")
-    print("   Body: {\"image_data\": \"<base64_encoded_image>\"}")
+    logger.info("⚠️  API endpoint testing requires running server")
+    logger.info("   Test manually with:")
+    logger.info(f"   POST {ENDPOINTS['product_image']}/{{product_id}}/image")
+    logger.info("   Body: {\"image_data\": \"<base64_encoded_image>\"}")
 
 def test_ios_integration():
     """Test iOS-specific features"""
-    print("\n📱 Testing iOS Integration Features...")
+    logger.info("\n📱 Testing iOS Integration Features...")
     
     # Test data URL format (common in mobile apps)
     test_image_data = create_test_image_base64(size=(150, 150), color='purple')
     data_url = f"data:image/jpeg;base64,{test_image_data}"
     
     from app.core.file_upload import file_upload_service
+import logging
+
+logger = logging.getLogger(__name__)
+
     
     try:
         result = file_upload_service.upload_base64_image(
@@ -122,8 +126,8 @@ def test_ios_integration():
             upload_type="product",
             filename="ios_test.jpg"
         )
-        print("✅ Data URL format processed successfully")
-        print(f"   File ID: {result.file_id}")
+        logger.info("✅ Data URL format processed successfully")
+        logger.info(f"   File ID: {result.file_id}")
         
         # Test multiple size variants (mobile needs different densities)
         variants = result.variants
@@ -131,17 +135,17 @@ def test_ios_integration():
         
         for size in required_sizes:
             if size in variants:
-                print(f"   ✅ {size}: {variants[size]['size']}")
+                logger.info(f"   ✅ {size}: {variants[size]['size']}")
             else:
-                print(f"   ❌ Missing {size} variant")
+                logger.info(f"   ❌ Missing {size} variant")
                 
     except Exception as e:
-        print(f"❌ iOS integration test failed: {str(e)}")
+        logger.error(f"❌ iOS integration test failed: {str(e)}")
 
 def main():
     """Run all file upload tests"""
-    print("🚀 Fynlo POS File Upload System Tests")
-    print("=" * 50)
+    logger.info("🚀 Fynlo POS File Upload System Tests")
+    logger.info("=" * 50)
     
     try:
         test_file_upload_validation()
@@ -149,19 +153,19 @@ def main():
         test_ios_integration()
         test_api_endpoints()
         
-        print("\n" + "=" * 50)
-        print("✅ File Upload System Tests Completed")
-        print("\nNext steps:")
-        print("1. Start the server: uvicorn app.main:app --reload")
-        print("2. Test endpoints with actual product IDs")
-        print("3. Verify file serving works correctly")
+        logger.info("\n" + "=" * 50)
+        logger.info("✅ File Upload System Tests Completed")
+        logger.info("\nNext steps:")
+        logger.info("1. Start the server: uvicorn app.main:app --reload")
+        logger.info("2. Test endpoints with actual product IDs")
+        logger.info("3. Verify file serving works correctly")
         
     except ImportError as e:
-        print(f"❌ Import error: {e}")
-        print("Make sure you're running from the backend directory")
-        print("Install dependencies: pip install -r requirements.txt")
+        logger.error(f"❌ Import error: {e}")
+        logger.info("Make sure you're running from the backend directory")
+        logger.info("Install dependencies: pip install -r requirements.txt")
     except Exception as e:
-        print(f"❌ Test failed: {e}")
+        logger.error(f"❌ Test failed: {e}")
 
 if __name__ == "__main__":
     main()

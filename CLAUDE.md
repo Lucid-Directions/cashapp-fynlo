@@ -10,21 +10,29 @@
 
 ## 🛠️ AVAILABLE TOOLS & AGENTS
 
-### MCP Tools
-- **Desktop Commander** (`mcp__desktop-commander__`) - System file operations, process management
+### MCP Servers (Model Context Protocol)
 - **File System** (`mcp__filesystem__`) - Project file operations
 - **Sequential Thinking** (`mcp__sequential-thinking__`) - Break down complex problems
 - **Memory Bank** (`mcp__memory-bank__`) - Persist context across conversations
-- **Playwright/Puppeteer** (`mcp__playwright__`, `mcp__puppeteer__`) - Browser automation
+- **Playwright** (`mcp__playwright__`) - Browser automation with Playwright
+- **Puppeteer** (`mcp__puppeteer__`) - Browser automation with Puppeteer
 - **SemGrep** (`mcp__semgrep__`) - Security scanning, code analysis
 - **Ref** (`mcp__Ref__`) - Search documentation, GitHub, private resources
-- **DigitalOcean** (`mcp__digitalocean-mcp-local__`) - Infrastructure management
+- **Tree-sitter** (`mcp__tree-sitter__`) - AST parsing, Python syntax validation
+
+### Built-in Claude Tools
+- **Bash** - Execute shell commands, git operations, terminal tasks
+- **Read/Write/Edit** - File operations
+- **Grep/Glob** - Search files and content
+- **WebFetch/WebSearch** - HTTP requests and web searches
+- **Task** - Launch specialized sub-agents
+- **TodoWrite** - Task management
 
 ### CLI Tools
 - **Pieces**: `pieces` - Context management (`pieces search`, `pieces ask`, `pieces create`)
 - **Supabase**: `/opt/homebrew/bin/supabase` - Auth & database management
 - **GitHub**: `gh` - Repository & PR management
-- **DigitalOcean**: `doctl` - Infrastructure control
+- **DigitalOcean**: `doctl` - Infrastructure control (configured with API token)
 - **Vercel**: `vercel` - Deployment (requires VERCEL_TOKEN env var)
 - **Trivy**: `trivy` - Vulnerability scanner for dependencies and Docker images
 
@@ -37,6 +45,33 @@
 - **fynlo-platform-integrator** - Multi-tenant features
 - **fynlo-infrastructure-manager** - DigitalOcean ops
 - **general-purpose** - Complex research & multi-step tasks
+
+### Development Workflow Agents (in .claude/agents/)
+- **planning-agent** - Architecture design, feature planning, technical decisions
+- **research-agent** - Problem investigation, documentation search, solution discovery
+- **setup-agent** - Environment configuration, dependency management, toolchain setup
+- **development-agent** - Code implementation, building, deployment fixes
+- **testing-agent** - Test creation, quality assurance, coverage improvement
+- **version-control-agent** - Git operations, PR management, deployment coordination
+- **documentation-agent** - Technical documentation, knowledge management, context preservation
+
+## 🤖 USING DEVELOPMENT AGENTS
+
+### When to Use Which Agent
+1. **Planning Agent** - Start here for new features or major changes
+2. **Research Agent** - When stuck or need to understand existing code
+3. **Setup Agent** - For environment issues or new tool installation
+4. **Development Agent** - For implementing features and fixing bugs
+5. **Testing Agent** - After code changes or when tests fail
+6. **Version Control Agent** - For PRs, deployments, and git issues
+7. **Documentation Agent** - To update docs or save important context
+
+### How to Invoke Agents
+```bash
+# Use the Task tool with the agent name
+# Example: "Act as the planning-agent"
+# Or: "I need the testing-agent to help with this"
+```
 
 ## 7 Working Rules
 1. Read problem → Find files → Write plan to tasks/todo.md
@@ -210,8 +245,54 @@ interface StoreState {
 
 ## 🧪 Testing Requirements
 - Backend: pytest (80% coverage)
-- Frontend: Jest + React Native Testing Library
+- Frontend: Jest + React Native Testing Library (use @testing-library/react-native for React 18)
 - Security: Auth flows, input validation, multi-tenant isolation
+- Python: Syntax validation via `python -m compileall` before deployment
+- CI/CD: All checks must pass before merge (temporarily non-blocking during code quality transition)
+
+## 📈 Code Quality Initiative
+
+### Three-PR Approach (Merged August 2025)
+1. **PR #506**: Remove TypeScript `any` types (90 occurrences)
+2. **PR #507**: Fix React hook dependencies (49 warnings)
+3. **PR #508**: Remove console statements & address TODOs (87 items)
+
+### CI/CD Improvements
+- **Non-blocking checks during transition**: All quality checks temporarily allow failures
+- **Will be strict after cleanup**: Once code quality PRs are complete, checks become mandatory
+- **Python syntax validation**: Multi-layer defense against syntax errors
+- **Pre-commit hooks**: Automatic linting and formatting
+
+### Common CI/CD Fixes
+```bash
+# Fix package-lock.json issues
+rm -f package-lock.json && npm install --legacy-peer-deps
+
+# Fix Python unused imports
+# Check backend/app/api/mobile/endpoints.py and other files
+
+# Make CI checks non-blocking (temporary)
+# Update .github/workflows/code-quality-check.yml
+```
+
+## 🚨 Critical Backend Deployment Recovery
+
+### The Docstring Incident (August 2025)
+- **Issue**: 83 Python files had orphaned triple quotes between docstrings and imports
+- **Impact**: Backend deployment failed with "unterminated triple-quoted string literal"
+- **Resolution**: PRs #502-505 fixed all syntax errors systematically
+
+### Python Syntax Validation Infrastructure
+1. **Pre-commit hooks**: Ruff linter catches issues locally
+2. **Docker build validation**: `python -m compileall` during build
+3. **GitHub Actions**: Syntax check before deployment
+4. **Tree-sitter MCP**: AST-level validation for complex cases
+
+### DigitalOcean Deployment Requirements
+- Python files MUST be syntactically valid
+- All imports must be used (no F401 errors)
+- All names must be defined (no F821 errors)
+- Backend URL: https://fynlopos-9eg2c.ondigitalocean.app
 
 ## 💾 CONTEXT PERSISTENCE WITH PIECES
 

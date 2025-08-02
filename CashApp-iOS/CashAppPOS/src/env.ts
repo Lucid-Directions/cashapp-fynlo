@@ -18,4 +18,4 @@ export function envBool(name: string, fallback: boolean = false): boolean {
   if (raw === '1' || raw === 'true') return true;
   if (raw === '0' || raw === 'false') return false;
   return fallback;
-} 
+}

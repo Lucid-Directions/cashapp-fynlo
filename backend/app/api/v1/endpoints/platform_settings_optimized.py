@@ -10,7 +10,6 @@ import asyncio
 from datetime import datetime, timedelta
 from asyncio import Lock
 
-from app.core.database import get_db
 from app.core.responses import APIResponseHelper
 from app.services.cache_service import PlatformCacheService
 import logging

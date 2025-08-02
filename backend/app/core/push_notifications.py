@@ -6,14 +6,12 @@ Apple Push Notification Service (APNs) integration for iOS alerts
 from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
 from enum import Enum
-import json
 import uuid
 import asyncio
 from dataclasses import dataclass
 import logging
 
 from app.core.exceptions import FynloException, ErrorCodes
-from app.core.responses import APIResponseHelper
 
 # Mock APNs implementation for development
 # In production, this would use aioapns or similar library

@@ -3,11 +3,10 @@ Test suite for CacheWarmer functionality
 """
 
 import pytest
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timedelta
 
-from app.core.cache_warmer import CacheWarmer, cache_warmer, warm_cache_task, warm_cache_on_startup
+from app.core.cache_warmer import CacheWarmer, warm_cache_task, warm_cache_on_startup
 from app.core.cache_service import cache_service
 
 

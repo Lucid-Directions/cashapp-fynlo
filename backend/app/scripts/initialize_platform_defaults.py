@@ -9,7 +9,6 @@ import os
 import sys
 import logging
 from datetime import datetime
-from typing import Dict, Any, List
 
 # Add parent directory to path to import app modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -33,6 +32,8 @@ logger = logging.getLogger(__name__)
 class PlatformDefaultsInitializer:
     """Initializes platform with production-ready default configurations"""
     
+    pass
+
     def __init__(self, update_existing: bool = False):
         self.update_existing = update_existing
         self.db = SessionLocal()
@@ -184,8 +185,10 @@ DATABASE STATE:
 STATUS: {'SUCCESS' if self.stats['errors'] == 0 else 'COMPLETED WITH ERRORS'}
 """
         
+=======
+        logger.info(report)
+>>>>>>> origin/main
         logger.info("Platform initialization report generated")
-
 
 def main():
     """Main function to run the initialization"""
@@ -199,6 +202,7 @@ def main():
     args = parser.parse_args()
     
     if args.update_existing:
+<<<<<<< HEAD
         confirmation = input("Are you sure you want to update existing configs? (yes/no): ")
         if confirmation.lower() != 'yes':
             return
@@ -211,7 +215,6 @@ def main():
         else:
             print("\n❌ Platform initialization failed")
             sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

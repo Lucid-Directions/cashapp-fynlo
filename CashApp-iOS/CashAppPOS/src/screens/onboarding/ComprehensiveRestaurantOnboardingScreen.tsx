@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -8,19 +9,23 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  KeyboardAvoidingView,
+  _KeyboardAvoidingView,
   Platform,
   Switch,
   TextInput,
   Keyboard,
   Dimensions,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '../../design-system/ThemeProvider';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import FastInput from '../../components/ui/FastInput';
+import { API_CONFIG } from '../../config/api';
+import { useTheme } from '../../design-system/ThemeProvider';
 import { useRestaurantConfig } from '../../hooks/useRestaurantConfig';
+import { useAuthStore } from '../../store/useAuthStore';
 import {
   parseNumericInput,
   parseCurrencyInput,
@@ -34,8 +39,6 @@ import {
   validateIBAN,
   validateSWIFT,
 } from '../../utils/inputValidation';
-import { API_CONFIG } from '../../config/api';
-import { useAuthStore } from '../../store/useAuthStore';
 
 interface RestaurantFormData {
   // Basic Information
@@ -43,19 +46,19 @@ interface RestaurantFormData {
   displayName: string;
   businessType: string;
   description: string;
-  
+
   // Contact Information
   phone: string;
   email: string;
   website: string;
-  
+
   // Location Information
   street: string;
   city: string;
   state: string;
   zipCode: string;
   country: string;
-  
+
   // Business Hours
   operatingHours: {
     [key: string]: {
@@ -64,12 +67,12 @@ interface RestaurantFormData {
       closed: boolean;
     };
   };
-  
+
   // Owner Information
   ownerName: string;
   ownerEmail: string;
   ownerPhone: string;
-  
+
   // Bank Details
   bankDetails?: {
     sortCode: string;
@@ -92,13 +95,13 @@ interface Employee {
 }
 
 // Fix for iOS keyboard handling to prevent NaN errors
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { height: _SCREEN_HEIGHT } = Dimensions.get('window');
 const KEYBOARD_VERTICAL_OFFSET = Platform.OS === 'ios' ? 90 : 0;
 
 const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const { updateConfig, completeSetupStep } = useRestaurantConfig();
+  const { _updateConfig, _completeSetupStep } = useRestaurantConfig();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -121,7 +124,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     iban: '',
     swiftBic: '',
   });
-  
+
   const [formData, setFormData] = useState<RestaurantFormData>({
     restaurantName: '',
     displayName: '',
@@ -152,8 +155,8 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       accountNumber: '',
       accountName: '',
       iban: '',
-      swiftBic: ''
-    }
+      swiftBic: '',
+    },
   });
 
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -168,12 +171,12 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   });
 
   const totalSteps = 9;
-  
+
   // Keep TextInput reference to prevent tree-shaking
   // This fixes the "ReferenceError: Can't find variable: TextInput" error
   // that occurs during onboarding at the bank details step
   const _TextInputRef = TextInput;
-  
+
   // Fix keyboard handling to prevent NaN errors
   useEffect(() => {
     const keyboardWillShowListener = Keyboard.addListener(
@@ -200,8 +203,16 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     };
   }, []);
   const businessTypes = [
-    'Restaurant', 'Fast Food', 'Cafe', 'Bar & Pub', 'Food Truck',
-    'Bakery', 'Pizzeria', 'Bistro', 'Fine Dining', 'Other'
+    'Restaurant',
+    'Fast Food',
+    'Cafe',
+    'Bar & Pub',
+    'Food Truck',
+    'Bakery',
+    'Pizzeria',
+    'Bistro',
+    'Fine Dining',
+    'Other',
   ];
 
   const employeeRoles = [
@@ -220,15 +231,15 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  const updateField = (field: keyof RestaurantFormData, value: any) => {
-    setFormData(prev => {
+  const updateField = (field: keyof RestaurantFormData, value: unknown) => {
+    setFormData((prev) => {
       const updated = { ...prev, [field]: value };
-      
+
       // Auto-generate display name from restaurant name if not manually set
       if (field === 'restaurantName' && !prev.displayName) {
         updated.displayName = value;
       }
-      
+
       return updated;
     });
   };
@@ -242,14 +253,14 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     // Validate email if not already validated via onBlur
     if (!validateEmail(newEmployee.email!)) {
       // Set the error state instead of showing alert
-      setFieldErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
+      setFieldErrors((prev) => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
       // Focus on the email field to trigger the error display
       return;
     }
 
     // Parse and validate hourly rate
     const hourlyRateNumber = parseCurrencyInput(newEmployee.hourlyRate);
-    
+
     const employee: Employee = {
       id: Date.now().toString(),
       name: sanitizeInput(newEmployee.name!),
@@ -261,9 +272,9 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       accessLevel: newEmployee.accessLevel as Employee['accessLevel'],
     };
 
-    setEmployees(prev => [...prev, employee]);
+    setEmployees((prev) => [...prev, employee]);
     // Clear the email error when successfully adding
-    setFieldErrors(prev => ({ ...prev, employeeEmail: '' }));
+    setFieldErrors((prev) => ({ ...prev, employeeEmail: '' }));
     setNewEmployee({
       name: '',
       email: '',
@@ -276,75 +287,84 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   };
 
   const removeEmployee = (id: string) => {
-    setEmployees(prev => prev.filter(emp => emp.id !== id));
+    setEmployees((prev) => prev.filter((emp) => emp.id !== id));
   };
 
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1: // Basic Info
         return !!(formData.restaurantName && formData.displayName && formData.businessType);
-        
+
       case 2: // Contact
         if (!formData.phone || !formData.email) return false;
-        
+
         // Check data validity without setting state
         const phoneValid = validateUKPhone(formData.phone);
         const emailValid = validateEmail(formData.email);
-        
+
         // Also check if there are existing errors from onBlur
         const noContactErrors = !fieldErrors.phone && !fieldErrors.restaurantEmail;
-        
+
         return phoneValid && emailValid && noContactErrors;
-        
+
       case 3: // Location
         if (!formData.street || !formData.city || !formData.zipCode) return false;
-        
+
         // Check postcode validity
         const postcodeValid = validatePostcode(formData.zipCode);
         const noPostcodeError = !fieldErrors.postcode;
-        
+
         return postcodeValid && noPostcodeError;
-        
+
       case 4: // Owner Info
         if (!formData.ownerName || !formData.ownerEmail) return false;
-        
+
         // Check email validity and existing errors
         const ownerEmailValid = validateEmail(formData.ownerEmail);
         const noOwnerEmailError = !fieldErrors.ownerEmail;
-        
+
         return ownerEmailValid && noOwnerEmailError;
-        
+
       case 5: // Business Hours
         return true; // Optional
-        
+
       case 6: // Employees
         return true; // Optional
-        
+
       case 7: // Menu Setup
         return true; // Optional but recommended
-        
+
       case 8: // Bank Details
-        if (!formData.bankDetails?.sortCode || !formData.bankDetails?.accountNumber || !formData.bankDetails?.accountName) {
+        if (
+          !formData.bankDetails?.sortCode ||
+          !formData.bankDetails?.accountNumber ||
+          !formData.bankDetails?.accountName
+        ) {
           return false;
         }
-        
+
         // Check validity of all bank fields
         const sortCodeValid = validateSortCode(formData.bankDetails.sortCode);
         const accountNumberValid = validateAccountNumber(formData.bankDetails.accountNumber);
-        
+
         // Optional fields - only validate if provided
         const ibanValid = !formData.bankDetails.iban || validateIBAN(formData.bankDetails.iban);
-        const swiftValid = !formData.bankDetails.swiftBic || validateSWIFT(formData.bankDetails.swiftBic);
-        
+        const swiftValid =
+          !formData.bankDetails.swiftBic || validateSWIFT(formData.bankDetails.swiftBic);
+
         // Check for existing errors
-        const noBankingErrors = !fieldErrors.accountName && !fieldErrors.sortCode && 
-                                 !fieldErrors.accountNumber && !fieldErrors.iban && !fieldErrors.swiftBic;
-        
+        const noBankingErrors =
+          !fieldErrors.accountName &&
+          !fieldErrors.sortCode &&
+          !fieldErrors.accountNumber &&
+          !fieldErrors.iban &&
+          !fieldErrors.swiftBic;
+
         return sortCodeValid && accountNumberValid && ibanValid && swiftValid && noBankingErrors;
-        
+
       case 9: // Review
         return true;
-        
+
       default:
         return true;
     }
@@ -356,59 +376,68 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       case 2: // Contact
         // Check for empty required fields first
         if (!formData.phone) {
-          setFieldErrors(prev => ({ ...prev, phone: 'Phone number is required' }));
+          setFieldErrors((prev) => ({ ...prev, phone: 'Phone number is required' }));
         } else if (!validateUKPhone(formData.phone)) {
-          setFieldErrors(prev => ({ ...prev, phone: 'Please enter a valid UK phone number' }));
+          setFieldErrors((prev) => ({ ...prev, phone: 'Please enter a valid UK phone number' }));
         }
-        
+
         if (!formData.email) {
-          setFieldErrors(prev => ({ ...prev, restaurantEmail: 'Email is required' }));
+          setFieldErrors((prev) => ({ ...prev, restaurantEmail: 'Email is required' }));
         } else if (!validateEmail(formData.email)) {
-          setFieldErrors(prev => ({ ...prev, restaurantEmail: 'Please enter a valid email address' }));
+          setFieldErrors((prev) => ({
+            ...prev,
+            restaurantEmail: 'Please enter a valid email address',
+          }));
         }
         break;
-        
+
       case 3: // Location
         if (!formData.zipCode) {
-          setFieldErrors(prev => ({ ...prev, postcode: 'Postcode is required' }));
+          setFieldErrors((prev) => ({ ...prev, postcode: 'Postcode is required' }));
         } else if (!validatePostcode(formData.zipCode)) {
-          setFieldErrors(prev => ({ ...prev, postcode: 'Please enter a valid UK postcode' }));
+          setFieldErrors((prev) => ({ ...prev, postcode: 'Please enter a valid UK postcode' }));
         }
         break;
-        
+
       case 4: // Owner Info
         if (!formData.ownerEmail) {
-          setFieldErrors(prev => ({ ...prev, ownerEmail: 'Owner email is required' }));
+          setFieldErrors((prev) => ({ ...prev, ownerEmail: 'Owner email is required' }));
         } else if (!validateEmail(formData.ownerEmail)) {
-          setFieldErrors(prev => ({ ...prev, ownerEmail: 'Please enter a valid email address' }));
+          setFieldErrors((prev) => ({ ...prev, ownerEmail: 'Please enter a valid email address' }));
         }
         break;
-        
+
       // Note: Case 6 (Employee) removed - employees are optional and validated when adding
-        
+
       case 8: // Bank Details
         if (!formData.bankDetails?.accountName) {
-          setFieldErrors(prev => ({ ...prev, accountName: 'Account name is required' }));
+          setFieldErrors((prev) => ({ ...prev, accountName: 'Account name is required' }));
         }
-        
+
         if (!formData.bankDetails?.sortCode) {
-          setFieldErrors(prev => ({ ...prev, sortCode: 'Sort code is required' }));
+          setFieldErrors((prev) => ({ ...prev, sortCode: 'Sort code is required' }));
         } else if (!validateSortCode(formData.bankDetails.sortCode)) {
-          setFieldErrors(prev => ({ ...prev, sortCode: 'Please enter a valid 6-digit sort code' }));
+          setFieldErrors((prev) => ({
+            ...prev,
+            sortCode: 'Please enter a valid 6-digit sort code',
+          }));
         }
-        
+
         if (!formData.bankDetails?.accountNumber) {
-          setFieldErrors(prev => ({ ...prev, accountNumber: 'Account number is required' }));
+          setFieldErrors((prev) => ({ ...prev, accountNumber: 'Account number is required' }));
         } else if (!validateAccountNumber(formData.bankDetails.accountNumber)) {
-          setFieldErrors(prev => ({ ...prev, accountNumber: 'Please enter a valid 8-digit account number' }));
+          setFieldErrors((prev) => ({
+            ...prev,
+            accountNumber: 'Please enter a valid 8-digit account number',
+          }));
         }
-        
+
         // IBAN and SWIFT are optional, only validate if provided
         if (formData.bankDetails?.iban && !validateIBAN(formData.bankDetails.iban)) {
-          setFieldErrors(prev => ({ ...prev, iban: 'Please enter a valid IBAN' }));
+          setFieldErrors((prev) => ({ ...prev, iban: 'Please enter a valid IBAN' }));
         }
         if (formData.bankDetails?.swiftBic && !validateSWIFT(formData.bankDetails.swiftBic)) {
-          setFieldErrors(prev => ({ ...prev, swiftBic: 'Please enter a valid SWIFT/BIC code' }));
+          setFieldErrors((prev) => ({ ...prev, swiftBic: 'Please enter a valid SWIFT/BIC code' }));
         }
         break;
     }
@@ -420,7 +449,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       triggerValidationErrors(currentStep);
       return;
     }
-    
+
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -437,10 +466,10 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const completeOnboarding = async () => {
     try {
       setLoading(true);
-      
+
       // Get auth token from AsyncStorage
       const token = await AsyncStorage.getItem('auth_token');
-      
+
       if (!token) {
         Alert.alert('Authentication Error', 'Please log in again.');
         navigation.navigate('Auth' as never);
@@ -469,7 +498,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           email: formData.ownerEmail.toLowerCase().trim(),
           phone: formData.ownerPhone || '',
         },
-        employees: employees.map(emp => ({
+        employees: employees.map((emp) => ({
           name: sanitizeInput(emp.name),
           email: emp.email.toLowerCase().trim(),
           phone: emp.phone || '',
@@ -478,20 +507,22 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           start_date: emp.startDate,
           access_level: emp.accessLevel,
         })),
-        bank_details: formData.bankDetails ? {
-          sort_code: formData.bankDetails.sortCode.replace(/-/g, ''),
-          account_number: formData.bankDetails.accountNumber,
-          account_name: sanitizeInput(formData.bankDetails.accountName),
-          iban: formData.bankDetails.iban || null,
-          swift_bic: formData.bankDetails.swiftBic || null,
-        } : null,
+        bank_details: formData.bankDetails
+          ? {
+              sort_code: formData.bankDetails.sortCode.replace(/-/g, ''),
+              account_number: formData.bankDetails.accountNumber,
+              account_name: sanitizeInput(formData.bankDetails.accountName),
+              iban: formData.bankDetails.iban || null,
+              swift_bic: formData.bankDetails.swiftBic || null,
+            }
+          : null,
       };
 
       // Call the new onboarding endpoint
       const response = await fetch(`${API_CONFIG.FULL_API_URL}/restaurants/onboarding/create`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(restaurantData),
@@ -503,15 +534,15 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       }
 
       const result = await response.json();
-      
+
       // Update local state with the new restaurant ID
       await AsyncStorage.setItem('restaurant_id', result.restaurant_id);
       await AsyncStorage.setItem('needs_onboarding', 'false');
-      
+
       // Refresh auth state to update user data
       const { checkAuth } = useAuthStore.getState();
       await checkAuth();
-      
+
       Alert.alert(
         'Onboarding Complete! 🎉',
         `Welcome to Fynlo, ${formData.restaurantName}! Your restaurant is now fully set up and ready to start taking orders.`,
@@ -531,19 +562,16 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             onPress: () => {
               navigation.reset({
                 index: 1,
-                routes: [
-                  { name: 'Main' as never },
-                  { name: 'SettingsMenuManagement' as never },
-                ],
+                routes: [{ name: 'Main' as never }, { name: 'SettingsMenuManagement' as never }],
               });
             },
           },
         ]
       );
     } catch (error) {
-      console.error('Onboarding error:', error);
+      logger.error('Onboarding error:', error);
       Alert.alert(
-        'Error', 
+        'Error',
         error instanceof Error ? error.message : 'Failed to complete onboarding. Please try again.'
       );
     } finally {
@@ -553,9 +581,9 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
   const renderStepIndicator = () => (
     <View style={styles.stepIndicator}>
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false} 
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.stepIndicatorContent}
         scrollIndicatorInsets={{ top: 0, left: 0, bottom: 0, right: 0 }}
         contentInset={{ left: 0, right: 0, top: 0, bottom: 0 }}
@@ -564,27 +592,23 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           const step = index + 1;
           return (
             <View key={step} style={styles.stepIndicatorItem}>
-              <View style={[
-                styles.stepCircle,
-                currentStep >= step && styles.stepCircleActive,
-                currentStep > step && styles.stepCircleCompleted,
-              ]}>
+              <View
+                style={[
+                  styles.stepCircle,
+                  currentStep >= step && styles.stepCircleActive,
+                  currentStep > step && styles.stepCircleCompleted,
+                ]}
+              >
                 {currentStep > step ? (
                   <Icon name="check" size={16} color={theme.colors.white} />
                 ) : (
-                  <Text style={[
-                    styles.stepNumber,
-                    currentStep >= step && styles.stepNumberActive,
-                  ]}>
+                  <Text style={[styles.stepNumber, currentStep >= step && styles.stepNumberActive]}>
                     {step}
                   </Text>
                 )}
               </View>
               {step < totalSteps && (
-                <View style={[
-                  styles.stepLine,
-                  currentStep > step && styles.stepLineCompleted,
-                ]} />
+                <View style={[styles.stepLine, currentStep > step && styles.stepLineCompleted]} />
               )}
             </View>
           );
@@ -622,9 +646,9 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
       <View style={styles.inputGroup}>
         <Text style={styles.inputLabel}>Business Type *</Text>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
           style={styles.businessTypeScroll}
           contentInset={{ left: 0, right: 0, top: 0, bottom: 0 }}
           scrollIndicatorInsets={{ top: 0, left: 0, bottom: 0, right: 0 }}
@@ -638,10 +662,12 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
               ]}
               onPress={() => updateField('businessType', type)}
             >
-              <Text style={[
-                styles.businessTypeText,
-                formData.businessType === type && styles.businessTypeTextActive,
-              ]}>
+              <Text
+                style={[
+                  styles.businessTypeText,
+                  formData.businessType === type && styles.businessTypeTextActive,
+                ]}
+              >
                 {type}
               </Text>
             </TouchableOpacity>
@@ -664,9 +690,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const renderStep2 = () => (
     <View style={styles.stepContent}>
       <Text style={styles.stepTitle}>Contact Information</Text>
-      <Text style={styles.stepDescription}>
-        How can customers and Finlow support reach you?
-      </Text>
+      <Text style={styles.stepDescription}>How can customers and Finlow support reach you?</Text>
 
       <FastInput
         label="Phone Number *"
@@ -676,14 +700,14 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           updateField('phone', value);
           // Clear error when user starts typing
           if (fieldErrors.phone) {
-            setFieldErrors(prev => ({ ...prev, phone: '' }));
+            setFieldErrors((prev) => ({ ...prev, phone: '' }));
           }
         }}
         onBlur={() => {
           if (formData.phone && !validateUKPhone(formData.phone)) {
-            setFieldErrors(prev => ({ ...prev, phone: 'Please enter a valid UK phone number' }));
+            setFieldErrors((prev) => ({ ...prev, phone: 'Please enter a valid UK phone number' }));
           } else {
-            setFieldErrors(prev => ({ ...prev, phone: '' }));
+            setFieldErrors((prev) => ({ ...prev, phone: '' }));
           }
         }}
         placeholder="+44 20 1234 5678"
@@ -699,14 +723,17 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           updateField('email', value);
           // Clear error when user starts typing
           if (fieldErrors.restaurantEmail) {
-            setFieldErrors(prev => ({ ...prev, restaurantEmail: '' }));
+            setFieldErrors((prev) => ({ ...prev, restaurantEmail: '' }));
           }
         }}
         onBlur={() => {
           if (formData.email && !validateEmail(formData.email)) {
-            setFieldErrors(prev => ({ ...prev, restaurantEmail: 'Please enter a valid email address' }));
+            setFieldErrors((prev) => ({
+              ...prev,
+              restaurantEmail: 'Please enter a valid email address',
+            }));
           } else {
-            setFieldErrors(prev => ({ ...prev, restaurantEmail: '' }));
+            setFieldErrors((prev) => ({ ...prev, restaurantEmail: '' }));
           }
         }}
         placeholder="owner@mariaskitchen.co.uk"
@@ -741,7 +768,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       />
 
       <View style={styles.inputRow}>
-        <View style={{ flex: 2 }}>
+        <View style={styles.inputRowPrimary}>
           <FastInput
             label="City *"
             inputType="text"
@@ -752,7 +779,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           />
         </View>
 
-        <View style={{ flex: 1, marginLeft: 12 }}>
+        <View style={styles.inputRowSecondary}>
           <FastInput
             label="Postcode *"
             inputType="text"
@@ -761,14 +788,17 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
               updateField('zipCode', value);
               // Clear error when user starts typing
               if (fieldErrors.postcode) {
-                setFieldErrors(prev => ({ ...prev, postcode: '' }));
+                setFieldErrors((prev) => ({ ...prev, postcode: '' }));
               }
             }}
             onBlur={() => {
               if (formData.zipCode && !validatePostcode(formData.zipCode)) {
-                setFieldErrors(prev => ({ ...prev, postcode: 'Please enter a valid UK postcode' }));
+                setFieldErrors((prev) => ({
+                  ...prev,
+                  postcode: 'Please enter a valid UK postcode',
+                }));
               } else {
-                setFieldErrors(prev => ({ ...prev, postcode: '' }));
+                setFieldErrors((prev) => ({ ...prev, postcode: '' }));
               }
             }}
             placeholder="SW1A 1AA"
@@ -779,7 +809,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       </View>
 
       <View style={styles.inputRow}>
-        <View style={{ flex: 1 }}>
+        <View style={styles.inputRowFull}>
           <FastInput
             label="County/State"
             inputType="text"
@@ -789,7 +819,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           />
         </View>
 
-        <View style={{ flex: 1, marginLeft: 12 }}>
+        <View style={styles.inputRowSecondary}>
           <FastInput
             label="Country"
             inputType="text"
@@ -806,9 +836,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const renderStep4 = () => (
     <View style={styles.stepContent}>
       <Text style={styles.stepTitle}>Owner Information</Text>
-      <Text style={styles.stepDescription}>
-        Primary owner/manager contact details
-      </Text>
+      <Text style={styles.stepDescription}>Primary owner/manager contact details</Text>
 
       <FastInput
         label="Owner/Manager Name *"
@@ -827,14 +855,17 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           updateField('ownerEmail', value);
           // Clear error when user starts typing
           if (fieldErrors.ownerEmail) {
-            setFieldErrors(prev => ({ ...prev, ownerEmail: '' }));
+            setFieldErrors((prev) => ({ ...prev, ownerEmail: '' }));
           }
         }}
         onBlur={() => {
           if (formData.ownerEmail && !validateEmail(formData.ownerEmail)) {
-            setFieldErrors(prev => ({ ...prev, ownerEmail: 'Please enter a valid email address' }));
+            setFieldErrors((prev) => ({
+              ...prev,
+              ownerEmail: 'Please enter a valid email address',
+            }));
           } else {
-            setFieldErrors(prev => ({ ...prev, ownerEmail: '' }));
+            setFieldErrors((prev) => ({ ...prev, ownerEmail: '' }));
           }
         }}
         placeholder="owner@restaurant.com"
@@ -855,9 +886,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const renderStep5 = () => (
     <View style={styles.stepContent}>
       <Text style={styles.stepTitle}>Business Hours</Text>
-      <Text style={styles.stepDescription}>
-        Set your restaurant's operating hours
-      </Text>
+      <Text style={styles.stepDescription}>Set your restaurant's operating hours</Text>
 
       {dayNames.map((day, index) => (
         <View key={day} style={styles.businessHourRow}>
@@ -868,13 +897,13 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
               onValueChange={(value) => {
                 updateField('operatingHours', {
                   ...formData.operatingHours,
-                  [day]: { ...formData.operatingHours[day], closed: !value }
+                  [day]: { ...formData.operatingHours[day], closed: !value },
                 });
               }}
               trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
             />
           </View>
-          
+
           {!formData.operatingHours[day].closed && (
             <View style={styles.timeInputs}>
               <View style={styles.timeInput}>
@@ -885,7 +914,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
                   onChangeText={(value) => {
                     updateField('operatingHours', {
                       ...formData.operatingHours,
-                      [day]: { ...formData.operatingHours[day], open: value }
+                      [day]: { ...formData.operatingHours[day], open: value },
                     });
                   }}
                   placeholder="09:00"
@@ -901,7 +930,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
                   onChangeText={(value) => {
                     updateField('operatingHours', {
                       ...formData.operatingHours,
-                      [day]: { ...formData.operatingHours[day], close: value }
+                      [day]: { ...formData.operatingHours[day], close: value },
                     });
                   }}
                   placeholder="22:00"
@@ -918,29 +947,27 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const renderStep6 = () => (
     <View style={styles.stepContent}>
       <Text style={styles.stepTitle}>Employee Management</Text>
-      <Text style={styles.stepDescription}>
-        Add your team members and set their access levels
-      </Text>
+      <Text style={styles.stepDescription}>Add your team members and set their access levels</Text>
 
       {/* Add New Employee */}
       <View style={styles.addEmployeeSection}>
         <Text style={styles.sectionTitle}>Add New Employee</Text>
-        
+
         <View style={styles.inputRow}>
-          <View style={{ flex: 2 }}>
+          <View style={styles.inputRowPrimary}>
             <FastInput
               label="Full Name"
               inputType="text"
               value={newEmployee.name || ''}
-              onChangeText={(value) => setNewEmployee(prev => ({ ...prev, name: value }))}
+              onChangeText={(value) => setNewEmployee((prev) => ({ ...prev, name: value }))}
               placeholder="John Smith"
             />
           </View>
-          <View style={{ flex: 1, marginLeft: 12 }}>
+          <View style={styles.inputRowSecondary}>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Role</Text>
-              <ScrollView 
-                horizontal 
+              <ScrollView
+                horizontal
                 showsHorizontalScrollIndicator={false}
                 contentInset={{ left: 0, right: 0, top: 0, bottom: 0 }}
                 scrollIndicatorInsets={{ top: 0, left: 0, bottom: 0, right: 0 }}
@@ -952,13 +979,23 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
                       styles.roleButton,
                       newEmployee.role === role.value && styles.roleButtonActive,
                     ]}
-                    onPress={() => setNewEmployee(prev => ({ ...prev, role: role.value as Employee['role'] }))}
+                    onPress={() =>
+                      setNewEmployee((prev) => ({ ...prev, role: role.value as Employee['role'] }))
+                    }
                   >
-                    <Icon name={role.icon} size={16} color={newEmployee.role === role.value ? theme.colors.white : theme.colors.text} />
-                    <Text style={[
-                      styles.roleText,
-                      newEmployee.role === role.value && styles.roleTextActive,
-                    ]}>
+                    <Icon
+                      name={role.icon}
+                      size={16}
+                      color={
+                        newEmployee.role === role.value ? theme.colors.white : theme.colors.text
+                      }
+                    />
+                    <Text
+                      style={[
+                        styles.roleText,
+                        newEmployee.role === role.value && styles.roleTextActive,
+                      ]}
+                    >
                       {role.label}
                     </Text>
                   </TouchableOpacity>
@@ -969,35 +1006,38 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         </View>
 
         <View style={styles.inputRow}>
-          <View style={{ flex: 2 }}>
+          <View style={styles.inputRowPrimary}>
             <FastInput
               label="Email"
               inputType="email"
               value={newEmployee.email || ''}
               onChangeText={(value) => {
-                setNewEmployee(prev => ({ ...prev, email: value }));
+                setNewEmployee((prev) => ({ ...prev, email: value }));
                 // Clear error when user starts typing
                 if (fieldErrors.employeeEmail) {
-                  setFieldErrors(prev => ({ ...prev, employeeEmail: '' }));
+                  setFieldErrors((prev) => ({ ...prev, employeeEmail: '' }));
                 }
               }}
               onBlur={() => {
                 if (newEmployee.email && !validateEmail(newEmployee.email)) {
-                  setFieldErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    employeeEmail: 'Please enter a valid email address',
+                  }));
                 } else {
-                  setFieldErrors(prev => ({ ...prev, employeeEmail: '' }));
+                  setFieldErrors((prev) => ({ ...prev, employeeEmail: '' }));
                 }
               }}
               placeholder="john@mariaskitchen.co.uk"
               error={fieldErrors.employeeEmail}
             />
           </View>
-          <View style={{ flex: 1, marginLeft: 12 }}>
+          <View style={styles.inputRowSecondary}>
             <FastInput
               label="Hourly Rate (£)"
               inputType="currency"
               value={newEmployee.hourlyRate || ''}
-              onChangeText={(value) => setNewEmployee(prev => ({ ...prev, hourlyRate: value }))}
+              onChangeText={(value) => setNewEmployee((prev) => ({ ...prev, hourlyRate: value }))}
               placeholder="12.50"
             />
           </View>
@@ -1013,18 +1053,27 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
                   styles.accessLevelButton,
                   newEmployee.accessLevel === level.value && styles.accessLevelButtonActive,
                 ]}
-                onPress={() => setNewEmployee(prev => ({ ...prev, accessLevel: level.value as Employee['accessLevel'] }))}
+                onPress={() =>
+                  setNewEmployee((prev) => ({
+                    ...prev,
+                    accessLevel: level.value as Employee['accessLevel'],
+                  }))
+                }
               >
-                <Text style={[
-                  styles.accessLevelTitle,
-                  newEmployee.accessLevel === level.value && styles.accessLevelTitleActive,
-                ]}>
+                <Text
+                  style={[
+                    styles.accessLevelTitle,
+                    newEmployee.accessLevel === level.value && styles.accessLevelTitleActive,
+                  ]}
+                >
                   {level.label}
                 </Text>
-                <Text style={[
-                  styles.accessLevelDescription,
-                  newEmployee.accessLevel === level.value && styles.accessLevelDescriptionActive,
-                ]}>
+                <Text
+                  style={[
+                    styles.accessLevelDescription,
+                    newEmployee.accessLevel === level.value && styles.accessLevelDescriptionActive,
+                  ]}
+                >
                   {level.description}
                 </Text>
               </TouchableOpacity>
@@ -1046,8 +1095,12 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             <View key={employee.id} style={styles.employeeCard}>
               <View style={styles.employeeInfo}>
                 <Text style={styles.employeeName}>{employee.name}</Text>
-                <Text style={styles.employeeRole}>{employeeRoles.find(r => r.value === employee.role)?.label}</Text>
-                <Text style={styles.employeeDetails}>{employee.email} • £{employee.hourlyRate}/hr</Text>
+                <Text style={styles.employeeRole}>
+                  {employeeRoles.find((r) => r.value === employee.role)?.label}
+                </Text>
+                <Text style={styles.employeeDetails}>
+                  {employee.email} • £{employee.hourlyRate}/hr
+                </Text>
               </View>
               <TouchableOpacity
                 style={styles.removeEmployeeButton}
@@ -1071,10 +1124,8 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
       <View style={styles.menuSetupContainer}>
         <Icon name="restaurant-menu" size={64} color={theme.colors.primary} />
-        <Text style={styles.menuSetupText}>
-          Your menu is essential for taking orders. You can:
-        </Text>
-        
+        <Text style={styles.menuSetupText}>Your menu is essential for taking orders. You can:</Text>
+
         <View style={styles.menuOptions}>
           <View style={styles.menuOption}>
             <Icon name="check-circle" size={24} color={theme.colors.success} />
@@ -1082,19 +1133,15 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
               Add menu categories (e.g., Appetizers, Main Courses, Drinks)
             </Text>
           </View>
-          
+
           <View style={styles.menuOption}>
             <Icon name="check-circle" size={24} color={theme.colors.success} />
-            <Text style={styles.menuOptionText}>
-              Add items with prices and descriptions
-            </Text>
+            <Text style={styles.menuOptionText}>Add items with prices and descriptions</Text>
           </View>
-          
+
           <View style={styles.menuOption}>
             <Icon name="check-circle" size={24} color={theme.colors.success} />
-            <Text style={styles.menuOptionText}>
-              Set item availability and featured items
-            </Text>
+            <Text style={styles.menuOptionText}>Set item availability and featured items</Text>
           </View>
         </View>
 
@@ -1118,7 +1165,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
               'You can always add your menu later from the Settings menu.',
               [
                 { text: 'Cancel', style: 'cancel' },
-                { text: 'Skip', onPress: () => nextStep() }
+                { text: 'Skip', onPress: () => nextStep() },
               ]
             );
           }}
@@ -1132,33 +1179,34 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const renderBankDetails = () => (
     <View style={styles.stepContent}>
       <Text style={styles.stepTitle}>Bank Details</Text>
-      <Text style={styles.stepDescription}>
-        Add your bank account details to receive payments
-      </Text>
-      
+      <Text style={styles.stepDescription}>Add your bank account details to receive payments</Text>
+
       <FastInput
         label="Sort Code *"
         inputType="text"
         value={formData.bankDetails?.sortCode || ''}
         onChangeText={(text) => {
           const formattedSortCode = formatSortCode(text);
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
             bankDetails: {
               ...prev.bankDetails!,
-              sortCode: formattedSortCode
-            }
+              sortCode: formattedSortCode,
+            },
           }));
           // Clear error when user starts typing
           if (fieldErrors.sortCode) {
-            setFieldErrors(prev => ({ ...prev, sortCode: '' }));
+            setFieldErrors((prev) => ({ ...prev, sortCode: '' }));
           }
         }}
         onBlur={() => {
           if (formData.bankDetails?.sortCode && !validateSortCode(formData.bankDetails.sortCode)) {
-            setFieldErrors(prev => ({ ...prev, sortCode: 'Please enter a valid 6-digit sort code' }));
+            setFieldErrors((prev) => ({
+              ...prev,
+              sortCode: 'Please enter a valid 6-digit sort code',
+            }));
           } else {
-            setFieldErrors(prev => ({ ...prev, sortCode: '' }));
+            setFieldErrors((prev) => ({ ...prev, sortCode: '' }));
           }
         }}
         placeholder="00-00-00"
@@ -1166,30 +1214,36 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         maxLength={8}
         error={fieldErrors.sortCode}
       />
-      
+
       <FastInput
         label="Account Number *"
         inputType="text"
         value={formData.bankDetails?.accountNumber || ''}
         onChangeText={(text) => {
           const cleanedText = text.replace(/[^0-9]/g, '').slice(0, 8);
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
             bankDetails: {
               ...prev.bankDetails!,
-              accountNumber: cleanedText
-            }
+              accountNumber: cleanedText,
+            },
           }));
           // Clear error when user starts typing
           if (fieldErrors.accountNumber) {
-            setFieldErrors(prev => ({ ...prev, accountNumber: '' }));
+            setFieldErrors((prev) => ({ ...prev, accountNumber: '' }));
           }
         }}
         onBlur={() => {
-          if (formData.bankDetails?.accountNumber && !validateAccountNumber(formData.bankDetails.accountNumber)) {
-            setFieldErrors(prev => ({ ...prev, accountNumber: 'Please enter a valid 8-digit account number' }));
+          if (
+            formData.bankDetails?.accountNumber &&
+            !validateAccountNumber(formData.bankDetails.accountNumber)
+          ) {
+            setFieldErrors((prev) => ({
+              ...prev,
+              accountNumber: 'Please enter a valid 8-digit account number',
+            }));
           } else {
-            setFieldErrors(prev => ({ ...prev, accountNumber: '' }));
+            setFieldErrors((prev) => ({ ...prev, accountNumber: '' }));
           }
         }}
         placeholder="12345678"
@@ -1197,87 +1251,93 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         maxLength={8}
         error={fieldErrors.accountNumber}
       />
-      
+
       <FastInput
         label="Account Name *"
         inputType="text"
         value={formData.bankDetails?.accountName || ''}
         onChangeText={(text) => {
           const sanitized = sanitizeInput(text, 100);
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
             bankDetails: {
               ...prev.bankDetails!,
-              accountName: sanitized
-            }
+              accountName: sanitized,
+            },
           }));
           // Clear error when user starts typing
           if (fieldErrors.accountName) {
-            setFieldErrors(prev => ({ ...prev, accountName: '' }));
+            setFieldErrors((prev) => ({ ...prev, accountName: '' }));
           }
         }}
         onBlur={() => {
           if (!formData.bankDetails?.accountName) {
-            setFieldErrors(prev => ({ ...prev, accountName: 'Account name is required' }));
+            setFieldErrors((prev) => ({ ...prev, accountName: 'Account name is required' }));
           }
         }}
         error={fieldErrors.accountName}
         placeholder="Your Restaurant Ltd"
       />
-      
+
       <FastInput
         label="IBAN (Optional)"
         inputType="text"
         value={formData.bankDetails?.iban || ''}
         onChangeText={(text) => {
           const upperCase = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
             bankDetails: {
               ...prev.bankDetails!,
-              iban: upperCase
-            }
+              iban: upperCase,
+            },
           }));
           // Clear error if field becomes empty
           if (!upperCase && fieldErrors.iban) {
-            setFieldErrors(prev => ({ ...prev, iban: '' }));
+            setFieldErrors((prev) => ({ ...prev, iban: '' }));
           }
         }}
         onBlur={() => {
           if (formData.bankDetails?.iban && !validateIBAN(formData.bankDetails.iban)) {
-            setFieldErrors(prev => ({ ...prev, iban: 'Please enter a valid IBAN' }));
+            setFieldErrors((prev) => ({ ...prev, iban: 'Please enter a valid IBAN' }));
           } else {
-            setFieldErrors(prev => ({ ...prev, iban: '' }));
+            setFieldErrors((prev) => ({ ...prev, iban: '' }));
           }
         }}
         error={fieldErrors.iban}
         placeholder="GB00XXXX00000000000000"
         autoCapitalize="characters"
       />
-      
+
       <FastInput
         label="SWIFT/BIC Code (Optional)"
         inputType="text"
         value={formData.bankDetails?.swiftBic || ''}
         onChangeText={(text) => {
-          const upperCase = text.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 11);
-          setFormData(prev => ({
+          const upperCase = text
+            .toUpperCase()
+            .replace(/[^A-Z0-9]/g, '')
+            .slice(0, 11);
+          setFormData((prev) => ({
             ...prev,
             bankDetails: {
               ...prev.bankDetails!,
-              swiftBic: upperCase
-            }
+              swiftBic: upperCase,
+            },
           }));
           // Clear error if field becomes empty
           if (!upperCase && fieldErrors.swiftBic) {
-            setFieldErrors(prev => ({ ...prev, swiftBic: '' }));
+            setFieldErrors((prev) => ({ ...prev, swiftBic: '' }));
           }
         }}
         onBlur={() => {
           if (formData.bankDetails?.swiftBic && !validateSWIFT(formData.bankDetails.swiftBic)) {
-            setFieldErrors(prev => ({ ...prev, swiftBic: 'Please enter a valid SWIFT/BIC code' }));
+            setFieldErrors((prev) => ({
+              ...prev,
+              swiftBic: 'Please enter a valid SWIFT/BIC code',
+            }));
           } else {
-            setFieldErrors(prev => ({ ...prev, swiftBic: '' }));
+            setFieldErrors((prev) => ({ ...prev, swiftBic: '' }));
           }
         }}
         error={fieldErrors.swiftBic}
@@ -1285,16 +1345,17 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         autoCapitalize="characters"
         maxLength={11}
       />
-      
+
       <View style={styles.infoBox}>
         <Icon name="info" size={20} color={theme.colors.primary} />
         <Text style={styles.infoText}>
-          Your bank details are encrypted and securely stored. Payments are processed weekly on Fridays.
+          Your bank details are encrypted and securely stored. Payments are processed weekly on
+          Fridays.
         </Text>
       </View>
     </View>
   );
-  
+
   const renderStep7 = () => (
     <View style={styles.stepContent}>
       <Text style={styles.stepTitle}>Review & Complete</Text>
@@ -1314,11 +1375,15 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         </View>
         <View style={styles.reviewItem}>
           <Text style={styles.reviewLabel}>Contact:</Text>
-          <Text style={styles.reviewValue}>{formData.phone} • {formData.email}</Text>
+          <Text style={styles.reviewValue}>
+            {formData.phone} • {formData.email}
+          </Text>
         </View>
         <View style={styles.reviewItem}>
           <Text style={styles.reviewLabel}>Address:</Text>
-          <Text style={styles.reviewValue}>{formData.street}, {formData.city} {formData.zipCode}</Text>
+          <Text style={styles.reviewValue}>
+            {formData.street}, {formData.city} {formData.zipCode}
+          </Text>
         </View>
       </View>
 
@@ -1346,16 +1411,26 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
   const renderCurrentStep = () => {
     switch (currentStep) {
-      case 1: return renderStep1();
-      case 2: return renderStep2();
-      case 3: return renderStep3();
-      case 4: return renderStep4();
-      case 5: return renderStep5();
-      case 6: return renderStep6();
-      case 7: return renderMenuSetup();
-      case 8: return renderBankDetails();
-      case 9: return renderStep7();
-      default: return renderStep1();
+      case 1:
+        return renderStep1();
+      case 2:
+        return renderStep2();
+      case 3:
+        return renderStep3();
+      case 4:
+        return renderStep4();
+      case 5:
+        return renderStep5();
+      case 6:
+        return renderStep6();
+      case 7:
+        return renderMenuSetup();
+      case 8:
+        return renderBankDetails();
+      case 9:
+        return renderStep7();
+      default:
+        return renderStep1();
     }
   };
 
@@ -1467,6 +1542,16 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     },
     inputRow: {
       flexDirection: 'row',
+    },
+    inputRowPrimary: {
+      flex: 2,
+    },
+    inputRowSecondary: {
+      flex: 1,
+      marginLeft: 12,
+    },
+    inputRowFull: {
+      flex: 1,
     },
     inputLabel: {
       fontSize: 16,
@@ -1821,36 +1906,39 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={theme.colors.primary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           testID="header-back-button"
         >
           <Icon name="arrow-back" size={24} color={theme.colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Restaurant Setup</Text>
-          <Text style={styles.headerSubtitle}>Step {currentStep} of {totalSteps}</Text>
+          <Text style={styles.headerSubtitle}>
+            Step {currentStep} of {totalSteps}
+          </Text>
         </View>
-        
+
         <View style={styles.headerSpacer} />
       </View>
 
       <View style={styles.content}>
         {renderStepIndicator()}
 
-        <ScrollView 
+        <ScrollView
           style={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
-            paddingBottom: isKeyboardVisible && Platform.OS === 'ios' 
-              ? Math.max(0, keyboardHeight - KEYBOARD_VERTICAL_OFFSET) + 100
-              : 100
+            paddingBottom:
+              isKeyboardVisible && Platform.OS === 'ios'
+                ? Math.max(0, keyboardHeight - KEYBOARD_VERTICAL_OFFSET) + 100
+                : 100,
           }}
         >
           {renderCurrentStep()}
@@ -1859,35 +1947,28 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         {/* Navigation Buttons */}
         <View style={styles.navigationBar}>
           {currentStep > 1 && (
-            <TouchableOpacity
-              style={styles.prevButton}
-              onPress={prevStep}
-              testID="back-button"
-            >
+            <TouchableOpacity style={styles.prevButton} onPress={prevStep} testID="back-button">
               <Icon name="arrow-back" size={20} color={theme.colors.text} />
               <Text style={styles.prevButtonText}>Previous</Text>
             </TouchableOpacity>
           )}
-          
+
           <View style={styles.navigationSpacer} />
-          
+
           <TouchableOpacity
-            style={[
-              styles.nextButton,
-              !validateStep(currentStep) && styles.nextButtonDisabled,
-            ]}
+            style={[styles.nextButton, !validateStep(currentStep) && styles.nextButtonDisabled]}
             onPress={nextStep}
             disabled={loading || !validateStep(currentStep)}
-            testID={currentStep === totalSteps ? "complete-setup-button" : "next-step-button"}
+            testID={currentStep === totalSteps ? 'complete-setup-button' : 'next-step-button'}
           >
             <Text style={styles.nextButtonText}>
               {loading ? 'Saving...' : currentStep === totalSteps ? 'Complete Setup' : 'Next'}
             </Text>
             {!loading && (
-              <Icon 
-                name={currentStep === totalSteps ? "check" : "arrow-forward"} 
-                size={20} 
-                color={theme.colors.white} 
+              <Icon
+                name={currentStep === totalSteps ? 'check' : 'arrow-forward'}
+                size={20}
+                color={theme.colors.white}
               />
             )}
           </TouchableOpacity>

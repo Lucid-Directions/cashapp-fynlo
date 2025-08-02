@@ -20,7 +20,7 @@ from app.services.digitalocean_monitor import DigitalOceanMonitor
 
 async def test_instance_tracking():
     """Test instance tracking functionality."""
-    print("\n=== Testing Instance Tracking ===")
+    logger.info("\n=== Testing Instance Tracking ===")
     
     # Initialize Redis
     await redis_client.connect()
@@ -28,8 +28,8 @@ async def test_instance_tracking():
     # Create instance tracker
     tracker = InstanceTracker(redis_client)
     
-    print(f"Instance ID: {tracker.instance_id}")
-    print(f"Starting instance tracker...")
+    logger.info(f"Instance ID: {tracker.instance_id}")
+    logger.info(f"Starting instance tracker...")
     
     # Start tracking
     await tracker.start()
@@ -39,17 +39,17 @@ async def test_instance_tracking():
     
     # Get active instances
     instances = await tracker.get_active_instances()
-    print(f"\nActive instances: {len(instances)}")
+    logger.info(f"\nActive instances: {len(instances)}")
     
     for inst in instances:
-        print(f"  - {inst.get('instance_id')} (last heartbeat: {inst.get('last_heartbeat')})")
+        logger.info(f"  - {inst.get('instance_id')} (last heartbeat: {inst.get('last_heartbeat')})")
     
     # Get instance count
     counts = await tracker.get_instance_count()
-    print(f"\nInstance counts:")
-    print(f"  Active: {counts['active']}")
-    print(f"  Stale: {counts['stale']}")
-    print(f"  Total: {counts['total']}")
+    logger.info(f"\nInstance counts:")
+    logger.info(f"  Active: {counts['active']}")
+    logger.info(f"  Stale: {counts['stale']}")
+    logger.info(f"  Total: {counts['total']}")
     
     # Stop tracking
     await tracker.stop()
@@ -57,107 +57,111 @@ async def test_instance_tracking():
     # Close Redis
     await redis_client.disconnect()
     
-    print("\n✅ Instance tracking test completed")
+    logger.info("\n✅ Instance tracking test completed")
 
 
 async def test_digitalocean_monitor():
     """Test DigitalOcean monitoring functionality."""
-    print("\n=== Testing DigitalOcean Monitor ===")
+    logger.info("\n=== Testing DigitalOcean Monitor ===")
     
     monitor = DigitalOceanMonitor()
     
     # Check if configured
     if not (os.environ.get("DO_API_TOKEN") and os.environ.get("DO_APP_ID")):
-        print("⚠️  DO_API_TOKEN and DO_APP_ID not configured")
-        print("   Set these environment variables to test DO monitoring")
+        logger.info("⚠️  DO_API_TOKEN and DO_APP_ID not configured")
+        logger.info("   Set these environment variables to test DO monitoring")
         return
     
-    print("Testing DigitalOcean API connection...")
+    logger.info("Testing DigitalOcean API connection...")
     
     # Get app info
     app_info = await monitor.get_app_info()
     if "error" in app_info:
-        print(f"❌ Error: {app_info['error']}")
+        logger.error(f"❌ Error: {app_info['error']}")
         return
     
-    print("✅ Connected to DigitalOcean API")
+    logger.info("✅ Connected to DigitalOcean API")
     
     # Get replica info
     replica_info = await monitor.get_actual_replicas()
     if "error" not in replica_info:
-        print(f"\nReplica Information:")
-        print(f"  Service: {replica_info['service_name']}")
-        print(f"  Desired replicas: {replica_info['desired_replicas']}")
-        print(f"  Instance size: {replica_info['instance_size']}")
-        print(f"  Region: {replica_info['region']}")
-        print(f"  Deployment phase: {replica_info['deployment']['phase']}")
+        logger.info(f"\nReplica Information:")
+        logger.info(f"  Service: {replica_info['service_name']}")
+        logger.info(f"  Desired replicas: {replica_info['desired_replicas']}")
+        logger.info(f"  Instance size: {replica_info['instance_size']}")
+        logger.info(f"  Region: {replica_info['region']}")
+        logger.info(f"  Deployment phase: {replica_info['deployment']['phase']}")
     
     # Get metrics summary
     metrics = await monitor.get_metrics_summary()
     if metrics.get("configured"):
-        print(f"\nApp Summary:")
-        print(f"  App ID: {metrics['app']['id']}")
-        print(f"  App Name: {metrics['app']['name']}")
-        print(f"  Region: {metrics['app']['region']}")
-        print(f"  Recent deployments: {len(metrics['recent_deployments'])}")
+        logger.info(f"\nApp Summary:")
+        logger.info(f"  App ID: {metrics['app']['id']}")
+        logger.info(f"  App Name: {metrics['app']['name']}")
+        logger.info(f"  Region: {metrics['app']['region']}")
+        logger.info(f"  Recent deployments: {len(metrics['recent_deployments'])}")
     
-    print("\n✅ DigitalOcean monitoring test completed")
+    logger.info("\n✅ DigitalOcean monitoring test completed")
 
 
 async def test_health_endpoints():
     """Test health check endpoints (requires running server)."""
-    print("\n=== Testing Health Endpoints ===")
-    print("Note: This test requires the backend server to be running")
-    print("Start the server with: uvicorn app.main:app --reload")
+    logger.info("\n=== Testing Health Endpoints ===")
+    logger.info("Note: This test requires the backend server to be running")
+    logger.info("Start the server with: uvicorn app.main:app --reload")
     
     try:
         import httpx
+import logging
+
+logger = logging.getLogger(__name__)
+
         
         base_url = "http://localhost:8000"
         
         async with httpx.AsyncClient() as client:
             # Test basic health
-            print("\nTesting /health endpoint...")
+            logger.info("\nTesting /health endpoint...")
             response = await client.get(f"{base_url}/health")
-            print(f"  Status: {response.status_code}")
-            print(f"  Response: {response.json()}")
+            logger.info(f"  Status: {response.status_code}")
+            logger.info(f"  Response: {response.json()}")
             
             # Test detailed health
-            print("\nTesting /api/v1/health/detailed endpoint...")
+            logger.info("\nTesting /api/v1/health/detailed endpoint...")
             response = await client.get(f"{base_url}/api/v1/health/detailed")
             if response.status_code == 200:
                 data = response.json()
-                print(f"  Status: {data['data']['status']}")
-                print(f"  Instance ID: {data['data']['instance']['id']}")
-                print(f"  Uptime: {data['data']['system']['uptime_human']}")
+                logger.info(f"  Status: {data['data']['status']}")
+                logger.info(f"  Instance ID: {data['data']['instance']['id']}")
+                logger.info(f"  Uptime: {data['data']['system']['uptime_human']}")
             else:
-                print(f"  Status: {response.status_code} (auth may be required)")
+                logger.info(f"  Status: {response.status_code} (auth may be required)")
             
             # Test instances endpoint
-            print("\nTesting /api/v1/health/instances endpoint...")
+            logger.info("\nTesting /api/v1/health/instances endpoint...")
             response = await client.get(f"{base_url}/api/v1/health/instances")
             if response.status_code == 200:
                 data = response.json()
-                print(f"  Desired replicas: {data['data']['desired_replicas']}")
-                print(f"  Active instances: {data['data']['active_instances']}")
+                logger.info(f"  Desired replicas: {data['data']['desired_replicas']}")
+                logger.info(f"  Active instances: {data['data']['active_instances']}")
             else:
-                print(f"  Status: {response.status_code} (auth may be required)")
+                logger.info(f"  Status: {response.status_code} (auth may be required)")
                 
     except Exception as e:
-        print(f"❌ Error testing endpoints: {e}")
-        print("   Make sure the backend server is running")
+        logger.error(f"❌ Error testing endpoints: {e}")
+        logger.info("   Make sure the backend server is running")
         return
     
-    print("\n✅ Health endpoint test completed")
+    logger.info("\n✅ Health endpoint test completed")
 
 
 async def main():
     """Run all tests."""
-    print("Fynlo Replica Monitoring Test Suite")
-    print("=" * 40)
-    print(f"Environment: {settings.ENVIRONMENT}")
-    print(f"Redis URL: {settings.REDIS_URL}")
-    print(f"Timestamp: {datetime.now().isoformat()}")
+    logger.info("Fynlo Replica Monitoring Test Suite")
+    logger.info("=" * 40)
+    logger.info(f"Environment: {settings.ENVIRONMENT}")
+    logger.info(f"Redis URL: {settings.REDIS_URL}")
+    logger.info(f"Timestamp: {datetime.now().isoformat()}")
     
     # Test instance tracking
     await test_instance_tracking()
@@ -168,8 +172,8 @@ async def main():
     # Test health endpoints
     await test_health_endpoints()
     
-    print("\n" + "=" * 40)
-    print("All tests completed!")
+    logger.info("\n" + "=" * 40)
+    logger.info("All tests completed!")
 
 
 if __name__ == "__main__":

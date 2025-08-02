@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -13,19 +14,24 @@ import {
   Linking,
   ActivityIndicator,
 } from 'react-native';
+
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+
 import Colors from '../../constants/Colors';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-
-type QRScannerRouteProp = RouteProp<{
-  QRScanner: {
-    onScanned: (data: string) => void;
-    title?: string;
-    subtitle?: string;
-  };
-}, 'QRScanner'>;
+import type { RouteProp } from '@react-navigation/native';
+const { width: _screenWidth, height: _screenHeight } = Dimensions.get('window');
+type QRScannerRouteProp = RouteProp<
+  {
+    QRScanner: {
+      onScanned: (data: string) => void;
+      title?: string;
+      subtitle?: string;
+    };
+  },
+  'QRScanner'
+>;
 
 interface ScanResult {
   data: string;
@@ -36,21 +42,25 @@ interface ScanResult {
 const QRScannerScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute<QRScannerRouteProp>();
-  
-  const { onScanned, title = 'QR Scanner', subtitle = 'Point camera at QR code' } = route.params || {};
-  
+
+  const {
+    onScanned,
+    title = 'QR Scanner',
+    subtitle = 'Point camera at QR code',
+  } = route.params || {};
+
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isScanning, setIsScanning] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(false);
   const [scannedData, setScannedData] = useState<ScanResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
-  
+
   const scanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     requestCameraPermission();
-    
+
     return () => {
       if (scanTimeoutRef.current) {
         clearTimeout(scanTimeoutRef.current);
@@ -61,19 +71,17 @@ const QRScannerScreen: React.FC = () => {
   const requestCameraPermission = async () => {
     try {
       setIsLoading(true);
-      
+
       if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          {
-            title: 'Camera Permission Required',
-            message: 'Fynlo POS needs camera access to scan QR codes for payments and inventory management.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Deny',
-            buttonPositive: 'Allow',
-          }
-        );
-        
+        const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
+          title: 'Camera Permission Required',
+          message:
+            'Fynlo POS needs camera access to scan QR codes for payments and inventory management.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Deny',
+          buttonPositive: 'Allow',
+        });
+
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           setHasPermission(true);
           setPermissionDenied(false);
@@ -90,7 +98,7 @@ const QRScannerScreen: React.FC = () => {
         }, 1000);
       }
     } catch (error) {
-      console.error('Error requesting camera permission:', error);
+      logger.error('Error requesting camera permission:', error);
       setHasPermission(false);
       setPermissionDenied(true);
     } finally {
@@ -100,7 +108,7 @@ const QRScannerScreen: React.FC = () => {
 
   const simulateQRScan = () => {
     if (!isScanning) return;
-    
+
     // Simulate different types of QR codes
     const mockQRCodes = [
       'PAYMENT:£25.50:TXN123456',
@@ -111,21 +119,21 @@ const QRScannerScreen: React.FC = () => {
       'https://fynlo.com/payment/abc123',
       'INVENTORY:INV789:Ground Coffee - House Blend',
     ];
-    
+
     const randomCode = mockQRCodes[Math.floor(Math.random() * mockQRCodes.length)];
-    
+
     const result: ScanResult = {
       data: randomCode,
       type: 'QR_CODE',
       timestamp: new Date(),
     };
-    
+
     setScannedData(result);
     setIsScanning(false);
-    
+
     // Provide haptic feedback simulation
-    console.log('QR Code scanned:', randomCode);
-    
+    logger.info('QR Code scanned:', randomCode);
+
     // Auto-confirm after 2 seconds or let user manually confirm
     scanTimeoutRef.current = setTimeout(() => {
       handleConfirmScan(result);
@@ -136,7 +144,7 @@ const QRScannerScreen: React.FC = () => {
     if (scanTimeoutRef.current) {
       clearTimeout(scanTimeoutRef.current);
     }
-    
+
     if (onScanned) {
       onScanned(result.data);
     }
@@ -196,13 +204,10 @@ const QRScannerScreen: React.FC = () => {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
-        
+
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Icon name="arrow-back" size={24} color={Colors.white} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Camera Permission</Text>
@@ -215,7 +220,7 @@ const QRScannerScreen: React.FC = () => {
           <Text style={styles.permissionMessage}>
             Fynlo POS needs camera access to scan QR codes for:
           </Text>
-          
+
           <View style={styles.featureList}>
             <View style={styles.featureItem}>
               <Icon name="payment" size={20} color={Colors.primary} />
@@ -235,18 +240,12 @@ const QRScannerScreen: React.FC = () => {
             </View>
           </View>
 
-          <TouchableOpacity
-            style={styles.permissionButton}
-            onPress={requestCameraPermission}
-          >
+          <TouchableOpacity style={styles.permissionButton} onPress={requestCameraPermission}>
             <Icon name="camera-alt" size={20} color={Colors.white} />
             <Text style={styles.permissionButtonText}>Grant Camera Access</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.settingsButton}
-            onPress={handleOpenSettings}
-          >
+          <TouchableOpacity style={styles.settingsButton} onPress={handleOpenSettings}>
             <Text style={styles.settingsButtonText}>Open App Settings</Text>
           </TouchableOpacity>
         </View>
@@ -257,27 +256,21 @@ const QRScannerScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="close" size={24} color={Colors.white} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>{title}</Text>
           <Text style={styles.headerSubtitle}>{subtitle}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.flashButton}
-          onPress={() => setFlashEnabled(!flashEnabled)}
-        >
-          <Icon 
-            name={flashEnabled ? 'flash-on' : 'flash-off'} 
-            size={24} 
-            color={flashEnabled ? Colors.warning : Colors.white} 
+        <TouchableOpacity style={styles.flashButton} onPress={() => setFlashEnabled(!flashEnabled)}>
+          <Icon
+            name={flashEnabled ? 'flash-on' : 'flash-off'}
+            size={24}
+            color={flashEnabled ? Colors.warning : Colors.white}
           />
         </TouchableOpacity>
       </View>
@@ -290,18 +283,14 @@ const QRScannerScreen: React.FC = () => {
           <View style={[styles.scanFrameCorner, styles.topRight]} />
           <View style={[styles.scanFrameCorner, styles.bottomLeft]} />
           <View style={[styles.scanFrameCorner, styles.bottomRight]} />
-          
-          {isScanning && (
-            <View style={styles.scanLine} />
-          )}
+
+          {isScanning && <View style={styles.scanLine} />}
         </View>
 
         {/* Scanning Instructions */}
         {isScanning ? (
           <View style={styles.instructionsContainer}>
-            <Text style={styles.instructionsText}>
-              Position QR code within the frame
-            </Text>
+            <Text style={styles.instructionsText}>Position QR code within the frame</Text>
             <Text style={styles.instructionsSubtext}>
               Camera will automatically detect and scan
             </Text>
@@ -313,16 +302,13 @@ const QRScannerScreen: React.FC = () => {
               <Text style={styles.resultTitle}>QR Code Detected!</Text>
               <Text style={styles.resultType}>{getQRCodeTypeDisplay(scannedData.data)}</Text>
               <Text style={styles.resultData}>{formatScannedData(scannedData.data)}</Text>
-              
+
               <View style={styles.resultActions}>
-                <TouchableOpacity
-                  style={styles.retryButton}
-                  onPress={handleRetryScanning}
-                >
+                <TouchableOpacity style={styles.retryButton} onPress={handleRetryScanning}>
                   <Icon name="refresh" size={20} color={Colors.secondary} />
                   <Text style={styles.retryButtonText}>Scan Again</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   style={styles.confirmButton}
                   onPress={() => handleConfirmScan(scannedData)}
@@ -339,20 +325,15 @@ const QRScannerScreen: React.FC = () => {
       {/* Bottom Controls */}
       <View style={styles.bottomControls}>
         {isScanning && (
-          <TouchableOpacity
-            style={styles.manualScanButton}
-            onPress={simulateQRScan}
-          >
+          <TouchableOpacity style={styles.manualScanButton} onPress={simulateQRScan}>
             <Icon name="qr-code-scanner" size={24} color={Colors.white} />
             <Text style={styles.manualScanText}>Simulate Scan</Text>
           </TouchableOpacity>
         )}
-        
+
         <View style={styles.helpContainer}>
           <Icon name="info-outline" size={16} color={Colors.lightText} />
-          <Text style={styles.helpText}>
-            Ensure good lighting and hold device steady
-          </Text>
+          <Text style={styles.helpText}>Ensure good lighting and hold device steady</Text>
         </View>
       </View>
     </SafeAreaView>

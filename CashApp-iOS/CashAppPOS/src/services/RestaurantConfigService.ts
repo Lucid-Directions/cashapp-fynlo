@@ -1,14 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import tokenManager from '../utils/tokenManager';
-import RestaurantDataService from './RestaurantDataService';
+
 import API_CONFIG from '../config/api';
+import tokenManager from '../utils/tokenManager';
+
+import RestaurantDataService from './RestaurantDataService';
 
 export interface RestaurantConfig {
   // Restaurant Identity
   restaurantName: string;
   displayName: string; // What shows in headers
   businessType: string; // e.g., "Mexican Restaurant", "Italian Bistro"
-  
+
   // Contact Information
   address: {
     street: string;
@@ -20,18 +22,18 @@ export interface RestaurantConfig {
   phone: string;
   email: string;
   website?: string;
-  
+
   // Branding
   primaryColor?: string;
   logo?: string; // Base64 or URL
   theme?: 'light' | 'dark' | 'auto';
-  
+
   // Business Settings
   currency: string;
   timezone: string;
   taxRate: number;
   serviceCharge?: number;
-  
+
   // Operational
   operatingHours: {
     [key: string]: {
@@ -40,11 +42,11 @@ export interface RestaurantConfig {
       closed: boolean;
     };
   };
-  
+
   // Platform Integration
   fynloAccountId: string;
   subscriptionTier: 'basic' | 'premium' | 'enterprise';
-  
+
   // Setup Status
   onboardingCompleted: boolean;
   setupSteps: {
@@ -53,7 +55,7 @@ export interface RestaurantConfig {
     paymentSetup: boolean;
     staffSetup: boolean;
   };
-  
+
   // Metadata
   createdAt: Date;
   updatedAt: Date;
@@ -66,7 +68,7 @@ const DEFAULT_CONFIG: Partial<RestaurantConfig> = {
   businessType: 'Mexican Restaurant',
   currency: 'GBP',
   timezone: 'Europe/London',
-  taxRate: 0.20, // 20% VAT for UK
+  taxRate: 0.2, // 20% VAT for UK
   theme: 'light',
   operatingHours: {
     monday: { open: '09:00', close: '22:00', closed: false },
@@ -113,7 +115,7 @@ class RestaurantConfigService {
           this.config.updatedAt = new Date(this.config.updatedAt);
         }
       }
-      
+
       // If no config exists, create default
       if (!this.config) {
         this.config = {
@@ -124,11 +126,11 @@ class RestaurantConfigService {
         } as RestaurantConfig;
         await this.saveConfig();
       }
-      
+
       this.notifyListeners();
       return this.config;
     } catch (error) {
-      console.error('Error loading restaurant config:', error);
+      logger.error('Error loading restaurant config:', error);
       throw error;
     }
   }
@@ -138,13 +140,13 @@ class RestaurantConfigService {
    */
   async saveConfig(): Promise<void> {
     if (!this.config) return;
-    
+
     try {
       this.config.updatedAt = new Date();
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
       this.notifyListeners();
     } catch (error) {
-      console.error('Error saving restaurant config:', error);
+      logger.error('Error saving restaurant config:', error);
       throw error;
     }
   }
@@ -156,27 +158,29 @@ class RestaurantConfigService {
     if (!this.config) {
       await this.loadConfig();
     }
-    
+
     this.config = {
       ...this.config!,
       ...updates,
       updatedAt: new Date(),
     };
-    
+
     // Try to save to API first
     try {
       const authToken = await tokenManager.getTokenWithRefresh();
       const userStr = await AsyncStorage.getItem('@auth_user');
       const user = userStr ? JSON.parse(userStr) : null;
       const restaurantId = user?.businessId || user?.restaurant_id;
-      
+
       if (authToken && restaurantId) {
         // Prepare API payload
         const apiPayload = {
           name: this.config.restaurantName,
           display_name: this.config.displayName,
           business_type: this.config.businessType,
-          address: `${this.config.address?.street || ''}, ${this.config.address?.city || ''}, ${this.config.address?.state || ''} ${this.config.address?.zipCode || ''}`.trim(),
+          address: `${this.config.address?.street || ''}, ${this.config.address?.city || ''}, ${
+            this.config.address?.state || ''
+          } ${this.config.address?.zipCode || ''}`.trim(),
           phone: this.config.phone,
           email: this.config.email,
           website: this.config.website,
@@ -191,46 +195,48 @@ class RestaurantConfigService {
             operating_hours: this.config.operatingHours,
           },
         };
-        
+
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/restaurants/${restaurantId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`,
+            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify(apiPayload),
         });
-        
+
         if (response.ok) {
-          console.log('✅ Restaurant config saved to API');
+          logger.info('✅ Restaurant config saved to API');
         } else {
           const errorData = await response.json();
-          console.error('❌ API save failed:', errorData);
+          logger.error('❌ API save failed:', errorData);
           throw new Error(errorData.detail || 'Failed to save to API');
         }
       }
     } catch (apiError) {
-      console.error('❌ Failed to save to API, saving locally:', apiError);
+      logger.error('❌ Failed to save to API, saving locally:', apiError);
       // Continue with local save
     }
-    
+
     // Always save locally as backup
     await this.saveConfig();
-    
+
     // Sync with RestaurantDataService for platform visibility
     try {
       const restaurantDataService = RestaurantDataService.getInstance();
-      
+
       // Check if restaurant exists in platform
       const existingData = await restaurantDataService.getCurrentRestaurantData();
-      
+
       if (!existingData) {
         // Create new restaurant in platform
         await restaurantDataService.createRestaurant({
           name: this.config.restaurantName,
           displayName: this.config.displayName,
           businessType: this.config.businessType,
-          address: `${this.config.address?.street || ''}, ${this.config.address?.city || ''}, ${this.config.address?.zipCode || ''}`,
+          address: `${this.config.address?.street || ''}, ${this.config.address?.city || ''}, ${
+            this.config.address?.zipCode || ''
+          }`,
           phone: this.config.phone,
           email: this.config.email,
           website: this.config.website,
@@ -251,7 +257,9 @@ class RestaurantConfigService {
           name: this.config.restaurantName,
           displayName: this.config.displayName,
           businessType: this.config.businessType,
-          address: `${this.config.address?.street || ''}, ${this.config.address?.city || ''}, ${this.config.address?.zipCode || ''}`,
+          address: `${this.config.address?.street || ''}, ${this.config.address?.city || ''}, ${
+            this.config.address?.zipCode || ''
+          }`,
           phone: this.config.phone,
           email: this.config.email,
           website: this.config.website,
@@ -265,13 +273,13 @@ class RestaurantConfigService {
           onboardingCompleted: this.config.onboardingCompleted,
         });
       }
-      
-      console.log('✅ Restaurant config synced to platform');
+
+      logger.info('✅ Restaurant config synced to platform');
     } catch (error) {
-      console.error('❌ Failed to sync restaurant to platform:', error);
+      logger.error('❌ Failed to sync restaurant to platform:', error);
       // Don't fail the update if sync fails
     }
-    
+
     return this.config;
   }
 
@@ -310,15 +318,15 @@ class RestaurantConfigService {
     if (!this.config) {
       await this.loadConfig();
     }
-    
+
     this.config!.setupSteps[step] = true;
-    
+
     // Check if all steps are completed
     const allStepsCompleted = Object.values(this.config!.setupSteps).every(Boolean);
     if (allStepsCompleted) {
       this.config!.onboardingCompleted = true;
     }
-    
+
     await this.saveConfig();
   }
 
@@ -336,7 +344,7 @@ class RestaurantConfigService {
    */
   subscribe(listener: (config: RestaurantConfig) => void): () => void {
     this.listeners.push(listener);
-    
+
     // Return unsubscribe function
     return () => {
       const index = this.listeners.indexOf(listener);
@@ -351,7 +359,7 @@ class RestaurantConfigService {
    */
   private notifyListeners(): void {
     if (this.config) {
-      this.listeners.forEach(listener => listener(this.config!));
+      this.listeners.forEach((listener) => listener(this.config!));
     }
   }
 
@@ -378,22 +386,22 @@ class RestaurantConfigService {
   async importConfig(configJson: string): Promise<RestaurantConfig> {
     try {
       const importedConfig = JSON.parse(configJson);
-      
+
       // Validate required fields
       if (!importedConfig.restaurantName || !importedConfig.fynloAccountId) {
         throw new Error('Invalid configuration format');
       }
-      
+
       // Convert date strings to Date objects
       importedConfig.createdAt = new Date(importedConfig.createdAt);
       importedConfig.updatedAt = new Date();
-      
+
       this.config = importedConfig;
       await this.saveConfig();
-      
+
       return this.config;
     } catch (error) {
-      console.error('Error importing configuration:', error);
+      logger.error('Error importing configuration:', error);
       throw error;
     }
   }
@@ -403,10 +411,10 @@ class RestaurantConfigService {
    */
   getSetupProgress(): number {
     if (!this.config) return 0;
-    
+
     const completedSteps = Object.values(this.config.setupSteps).filter(Boolean).length;
     const totalSteps = Object.keys(this.config.setupSteps).length;
-    
+
     return Math.round((completedSteps / totalSteps) * 100);
   }
 
@@ -415,20 +423,20 @@ class RestaurantConfigService {
    */
   getNextSetupStep(): keyof RestaurantConfig['setupSteps'] | null {
     if (!this.config) return 'restaurantInfo';
-    
+
     const steps: (keyof RestaurantConfig['setupSteps'])[] = [
       'restaurantInfo',
-      'menuSetup', 
+      'menuSetup',
       'paymentSetup',
-      'staffSetup'
+      'staffSetup',
     ];
-    
+
     for (const step of steps) {
       if (!this.config.setupSteps[step]) {
         return step;
       }
     }
-    
+
     return null; // All steps completed
   }
 }

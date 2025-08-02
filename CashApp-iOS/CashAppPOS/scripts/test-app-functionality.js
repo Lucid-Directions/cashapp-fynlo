@@ -16,7 +16,7 @@ const testResults = {
   passed: 0,
   failed: 0,
   warnings: 0,
-  details: []
+  details: [],
 };
 
 // Helper functions
@@ -52,7 +52,9 @@ function testWarning(test, message) {
 console.log('📱 Testing Payment Method Selection');
 console.log('-----------------------------------');
 
-const paymentScreen = readFile(path.join(__dirname, '../src/screens/payment/EnhancedPaymentScreen.tsx'));
+const paymentScreen = readFile(
+  path.join(__dirname, '../src/screens/payment/EnhancedPaymentScreen.tsx')
+);
 if (paymentScreen) {
   // Test 1.1: Check onPress handlers
   if (paymentScreen.includes('onPress={() => handlePaymentMethodSelect(method.id)')) {
@@ -60,15 +62,16 @@ if (paymentScreen) {
   } else {
     testFailed('Payment method onPress handler', 'Missing handlePaymentMethodSelect');
   }
-  
+
   // Test 1.2: Check useEffect dependencies
-  const useEffectRegex = /useEffect\(\(\) => \{[^}]*enabledPaymentMethods[^}]*\}, \[[^\]]*enabledPaymentMethods[^\]]*selectedPaymentMethod[^\]]*\]\)/;
+  const useEffectRegex =
+    /useEffect\(\(\) => \{[^}]*enabledPaymentMethods[^}]*\}, \[[^\]]*enabledPaymentMethods[^\]]*selectedPaymentMethod[^\]]*\]\)/;
   if (useEffectRegex.test(paymentScreen)) {
     testPassed('useEffect dependencies', 'Correct dependencies for payment selection');
   } else {
     testFailed('useEffect dependencies', 'Missing proper dependencies in useEffect');
   }
-  
+
   // Test 1.3: Check state management
   if (paymentScreen.includes('const [selectedPaymentMethod, setSelectedPaymentMethod]')) {
     testPassed('Payment state management', 'State hooks properly defined');
@@ -85,19 +88,19 @@ const currencyFiles = [
   'src/screens/main/POSScreen.tsx',
   'src/screens/payment/EnhancedPaymentScreen.tsx',
   'src/screens/orders/OrdersScreen.tsx',
-  'src/utils/mockDataGenerator.ts'
+  'src/utils/mockDataGenerator.ts',
 ];
 
 let dollarSignFound = false;
 let poundSignCount = 0;
 
-currencyFiles.forEach(file => {
+currencyFiles.forEach((file) => {
   const content = readFile(path.join(__dirname, '..', file));
   if (content) {
     // Count pound signs
     const poundMatches = content.match(/£/g);
     if (poundMatches) poundSignCount += poundMatches.length;
-    
+
     // Check for dollar signs (excluding template literals)
     const dollarMatches = content.match(/\$(?!\{)/g);
     if (dollarMatches && dollarMatches.length > 0) {
@@ -115,12 +118,14 @@ if (!dollarSignFound && poundSignCount > 0) {
 console.log('\n🎁 Testing Gift Card Removal');
 console.log('-----------------------------------');
 
-const paymentMethodsScreen = readFile(path.join(__dirname, '../src/screens/settings/business/PaymentMethodsScreen.tsx'));
+const paymentMethodsScreen = readFile(
+  path.join(__dirname, '../src/screens/settings/business/PaymentMethodsScreen.tsx')
+);
 if (paymentMethodsScreen) {
   // Test for gift card
   const hasGiftCard = /gift\s*card/i.test(paymentMethodsScreen);
   const hasQRCode = paymentMethodsScreen.includes('QR Code Payment');
-  
+
   if (!hasGiftCard && hasQRCode) {
     testPassed('Gift card removal', 'Gift card removed, QR Code present');
   } else if (hasGiftCard) {
@@ -128,7 +133,7 @@ if (paymentMethodsScreen) {
   } else if (!hasQRCode) {
     testFailed('QR Code implementation', 'QR Code payment method not found');
   }
-  
+
   // Check for 1.2% fee mention
   if (paymentMethodsScreen.includes('1.2%')) {
     testPassed('QR Code fees', 'Correct fee percentage mentioned');
@@ -144,28 +149,37 @@ console.log('-----------------------------------');
 const themeSwitcher = readFile(path.join(__dirname, '../src/components/theme/ThemeSwitcher.tsx'));
 if (themeSwitcher) {
   const requiredColors = [
-    'Fynlo Green', 'Ocean Blue', 'Royal Purple', 'Sunset Orange',
-    'Cherry Red', 'Emerald Teal', 'Deep Indigo', 'Rose Pink',
-    'Fresh Lime', 'Golden Amber'
+    'Fynlo Green',
+    'Ocean Blue',
+    'Royal Purple',
+    'Sunset Orange',
+    'Cherry Red',
+    'Emerald Teal',
+    'Deep Indigo',
+    'Rose Pink',
+    'Fresh Lime',
+    'Golden Amber',
   ];
-  
-  const foundColors = requiredColors.filter(color => themeSwitcher.includes(color));
-  
+
+  const foundColors = requiredColors.filter((color) => themeSwitcher.includes(color));
+
   if (foundColors.length === 10) {
     testPassed('Theme color count', 'All 10 color themes present');
   } else {
     testFailed('Theme color count', `Only ${foundColors.length}/10 colors found`);
   }
-  
+
   // Check colors variant implementation
   if (themeSwitcher.includes("if (variant === 'colors')")) {
     testPassed('Colors variant', 'Colors variant properly implemented');
   } else {
     testFailed('Colors variant', 'Colors variant not implemented');
   }
-  
+
   // Check if it's displayed in ThemeOptionsScreen
-  const themeOptionsScreen = readFile(path.join(__dirname, '../src/screens/settings/user/ThemeOptionsScreen.tsx'));
+  const themeOptionsScreen = readFile(
+    path.join(__dirname, '../src/screens/settings/user/ThemeOptionsScreen.tsx')
+  );
   if (themeOptionsScreen && themeOptionsScreen.includes('variant="colors"')) {
     testPassed('Colors display', 'Color themes shown in Theme Options');
   } else {
@@ -177,17 +191,19 @@ if (themeSwitcher) {
 console.log('\n👤 Testing User Profile Safety');
 console.log('-----------------------------------');
 
-const userProfile = readFile(path.join(__dirname, '../src/screens/settings/user/UserProfileScreen.tsx'));
+const userProfile = readFile(
+  path.join(__dirname, '../src/screens/settings/user/UserProfileScreen.tsx')
+);
 if (userProfile) {
   // Test null safety
   const nullSafetyChecks = [
     { pattern: /if\s*\(\s*!user\s*\)/, name: 'User null check' },
     { pattern: /\?\.trim\(\)/, name: 'Safe trim operations' },
     { pattern: /\?\.includes/, name: 'Safe includes checks' },
-    { pattern: /user\.photo/, name: 'Direct photo access' }
+    { pattern: /user\.photo/, name: 'Direct photo access' },
   ];
-  
-  nullSafetyChecks.forEach(check => {
+
+  nullSafetyChecks.forEach((check) => {
     if (check.name === 'Direct photo access') {
       // This should NOT be found (it's unsafe)
       if (!check.pattern.test(userProfile) || userProfile.includes('user?.photo')) {
@@ -220,8 +236,8 @@ if (testResults.failed === 0) {
   console.log(`\n${RED}⚠️  ${testResults.failed} tests failed. The app may have issues.${RESET}`);
   console.log('\nFailed tests:');
   testResults.details
-    .filter(d => d.status === 'FAIL')
-    .forEach(d => console.log(`  - ${d.test}: ${d.message}`));
+    .filter((d) => d.status === 'FAIL')
+    .forEach((d) => console.log(`  - ${d.test}: ${d.message}`));
 }
 
 // Save detailed report
@@ -230,9 +246,9 @@ const report = {
   summary: {
     passed: testResults.passed,
     failed: testResults.failed,
-    warnings: testResults.warnings
+    warnings: testResults.warnings,
   },
-  details: testResults.details
+  details: testResults.details,
 };
 
 fs.writeFileSync(

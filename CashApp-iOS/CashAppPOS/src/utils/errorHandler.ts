@@ -1,4 +1,5 @@
 import { Alert, Platform } from 'react-native';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface ErrorInfo {
@@ -9,9 +10,9 @@ export interface ErrorInfo {
   timestamp: Date;
   context?: string;
   userId?: string;
-  deviceInfo?: any;
+  deviceInfo?: unknown;
   stackTrace?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export enum ErrorType {
@@ -71,10 +72,10 @@ class ErrorHandler {
     type: ErrorType = ErrorType.SYSTEM,
     severity: ErrorSeverity = ErrorSeverity.MEDIUM,
     context?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     const errorInfo = this.createErrorInfo(error, type, severity, context, metadata);
-    
+
     // Log the error
     if (this.config.enableLogging) {
       this.logError(errorInfo);
@@ -100,11 +101,7 @@ class ErrorHandler {
   /**
    * Handle network errors with retry logic
    */
-  async handleNetworkError(
-    error: Error,
-    requestConfig?: any,
-    context?: string
-  ): Promise<void> {
+  async handleNetworkError(error: Error, requestConfig?: unknown, context?: string): Promise<void> {
     const errorInfo = this.createErrorInfo(
       error,
       ErrorType.NETWORK,
@@ -113,13 +110,9 @@ class ErrorHandler {
       { requestConfig }
     );
 
-    await this.handleError(
-      error,
-      ErrorType.NETWORK,
-      this.getNetworkErrorSeverity(error),
-      context,
-      { requestConfig }
-    );
+    await this.handleError(error, ErrorType.NETWORK, this.getNetworkErrorSeverity(error), context, {
+      requestConfig,
+    });
 
     // Automatic retry for network errors
     if (requestConfig && this.shouldRetry(errorInfo)) {
@@ -135,35 +128,24 @@ class ErrorHandler {
   async handleValidationError(
     field: string,
     message: string,
-    value?: any,
+    value?: unknown,
     context?: string
   ): Promise<void> {
     const error = new Error(`Validation failed for ${field}: ${message}`);
-    await this.handleError(
-      error,
-      ErrorType.VALIDATION,
-      ErrorSeverity.LOW,
-      context,
-      { field, value }
-    );
+    await this.handleError(error, ErrorType.VALIDATION, ErrorSeverity.LOW, context, {
+      field,
+      value,
+    });
   }
 
   /**
    * Handle payment errors
    */
-  async handlePaymentError(
-    error: Error,
-    paymentData?: any,
-    context?: string
-  ): Promise<void> {
+  async handlePaymentError(error: Error, paymentData?: unknown, context?: string): Promise<void> {
     // Payment errors are always high severity
-    await this.handleError(
-      error,
-      ErrorType.PAYMENT,
-      ErrorSeverity.HIGH,
-      context,
-      { paymentData: this.sanitizePaymentData(paymentData) }
-    );
+    await this.handleError(error, ErrorType.PAYMENT, ErrorSeverity.HIGH, context, {
+      paymentData: this.sanitizePaymentData(paymentData),
+    });
   }
 
   /**
@@ -173,16 +155,13 @@ class ErrorHandler {
     message: string,
     code?: string,
     context?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     const error = new Error(message);
-    await this.handleError(
-      error,
-      ErrorType.BUSINESS_LOGIC,
-      ErrorSeverity.MEDIUM,
-      context,
-      { errorCode: code, ...metadata }
-    );
+    await this.handleError(error, ErrorType.BUSINESS_LOGIC, ErrorSeverity.MEDIUM, context, {
+      errorCode: code,
+      ...metadata,
+    });
   }
 
   /**
@@ -193,7 +172,7 @@ class ErrorHandler {
       const stored = await AsyncStorage.getItem(this.STORAGE_KEY);
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.warn('Failed to retrieve stored errors:', error);
+      logger.warn('Failed to retrieve stored errors:', error);
       return [];
     }
   }
@@ -206,7 +185,7 @@ class ErrorHandler {
       await AsyncStorage.removeItem(this.STORAGE_KEY);
       this.errorQueue = [];
     } catch (error) {
-      console.warn('Failed to clear stored errors:', error);
+      logger.warn('Failed to clear stored errors:', error);
     }
   }
 
@@ -226,13 +205,13 @@ class ErrorHandler {
     const bySeverity = {} as Record<ErrorSeverity, number>;
     let recent = 0;
 
-    this.errorQueue.forEach(error => {
+    this.errorQueue.forEach((error) => {
       // Count by type
       byType[error.type] = (byType[error.type] || 0) + 1;
-      
+
       // Count by severity
       bySeverity[error.severity] = (bySeverity[error.severity] || 0) + 1;
-      
+
       // Count recent errors
       if (error.timestamp.getTime() > oneDayAgo) {
         recent++;
@@ -252,7 +231,7 @@ class ErrorHandler {
     type: ErrorType,
     severity: ErrorSeverity,
     context?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): ErrorInfo {
     const errorMessage = typeof error === 'string' ? error : error.message;
     const stackTrace = typeof error === 'object' ? error.stack : undefined;
@@ -273,23 +252,23 @@ class ErrorHandler {
   private logError(errorInfo: ErrorInfo): void {
     const logLevel = this.getLogLevel(errorInfo.severity);
     const logMessage = `[${errorInfo.type.toUpperCase()}] ${errorInfo.message}`;
-    
+
     switch (logLevel) {
       case 'error':
-        console.error(logMessage, errorInfo);
+        logger.error(logMessage, errorInfo);
         break;
       case 'warn':
-        console.warn(logMessage, errorInfo);
+        logger.warn(logMessage, errorInfo);
         break;
       default:
-        console.log(logMessage, errorInfo);
+        logger.info(logMessage, errorInfo);
     }
   }
 
   private async storeError(errorInfo: ErrorInfo): Promise<void> {
     try {
       this.errorQueue.push(errorInfo);
-      
+
       // Limit stored errors
       if (this.errorQueue.length > this.config.maxStoredErrors) {
         this.errorQueue = this.errorQueue.slice(-this.config.maxStoredErrors);
@@ -297,7 +276,7 @@ class ErrorHandler {
 
       await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.errorQueue));
     } catch (error) {
-      console.warn('Failed to store error:', error);
+      logger.warn('Failed to store error:', error);
     }
   }
 
@@ -308,7 +287,7 @@ class ErrorHandler {
         this.errorQueue = JSON.parse(stored);
       }
     } catch (error) {
-      console.warn('Failed to load stored errors:', error);
+      logger.warn('Failed to load stored errors:', error);
     }
   }
 
@@ -336,11 +315,15 @@ class ErrorHandler {
         userMessage,
         [
           { text: 'OK', style: 'default' },
-          ...(this.canRetry(errorInfo) ? [{ 
-            text: 'Retry', 
-            style: 'default',
-            onPress: () => this.attemptRecovery(errorInfo)
-          }] : []),
+          ...(this.canRetry(errorInfo)
+            ? [
+                {
+                  text: 'Retry',
+                  style: 'default',
+                  onPress: () => this.attemptRecovery(errorInfo),
+                },
+              ]
+            : []),
         ],
         { cancelable: true }
       );
@@ -387,15 +370,15 @@ class ErrorHandler {
 
   private getNetworkErrorSeverity(error: Error): ErrorSeverity {
     const message = error.message.toLowerCase();
-    
+
     if (message.includes('timeout') || message.includes('network')) {
       return ErrorSeverity.MEDIUM;
     }
-    
+
     if (message.includes('unauthorized') || message.includes('forbidden')) {
       return ErrorSeverity.HIGH;
     }
-    
+
     return ErrorSeverity.MEDIUM;
   }
 
@@ -412,17 +395,16 @@ class ErrorHandler {
   }
 
   private shouldRetry(errorInfo: ErrorInfo): boolean {
-    return errorInfo.type === ErrorType.NETWORK && 
-           errorInfo.severity !== ErrorSeverity.CRITICAL;
+    return errorInfo.type === ErrorType.NETWORK && errorInfo.severity !== ErrorSeverity.CRITICAL;
   }
 
   private canRetry(errorInfo: ErrorInfo): boolean {
     return [ErrorType.NETWORK, ErrorType.STORAGE].includes(errorInfo.type);
   }
 
-  private async retryRequest(requestConfig: any, errorInfo: ErrorInfo): Promise<void> {
+  private async retryRequest(requestConfig: unknown, _errorInfo: ErrorInfo): Promise<void> {
     // This would integrate with your API layer to retry requests
-    console.log('Retrying request:', requestConfig);
+    logger.info('Retrying request:', requestConfig);
   }
 
   private attemptRecovery(errorInfo: ErrorInfo): void {
@@ -433,29 +415,29 @@ class ErrorHandler {
         break;
       case ErrorType.AUTHENTICATION:
         // Redirect to login
-        console.log('Redirecting to authentication...');
+        logger.info('Redirecting to authentication...');
         break;
       default:
-        console.log('No automatic recovery available for this error type');
+        logger.info('No automatic recovery available for this error type');
     }
   }
 
   private sendToCrashReporting(errorInfo: ErrorInfo): void {
     // This would integrate with crash reporting services like Crashlytics
     if (__DEV__) {
-      console.log('Would send to crash reporting:', errorInfo);
+      logger.info('Would send to crash reporting:', errorInfo);
     }
   }
 
-  private sanitizePaymentData(paymentData: any): any {
+  private sanitizePaymentData(paymentData: unknown): unknown {
     if (!paymentData) return null;
-    
+
     // Remove sensitive payment information
     const sanitized = { ...paymentData };
     delete sanitized.cardNumber;
     delete sanitized.cvv;
     delete sanitized.pin;
-    
+
     return sanitized;
   }
 
@@ -463,7 +445,7 @@ class ErrorHandler {
     return `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private getDeviceInfo(): any {
+  private getDeviceInfo(): unknown {
     return {
       platform: Platform.OS,
       version: Platform.Version,
@@ -476,13 +458,13 @@ class ErrorHandler {
 export const errorHandler = new ErrorHandler();
 
 // Convenience functions for common error scenarios
-export const handleNetworkError = (error: Error, context?: string) => 
+export const handleNetworkError = (error: Error, context?: string) =>
   errorHandler.handleNetworkError(error, undefined, context);
 
-export const handleValidationError = (field: string, message: string, value?: any) =>
+export const handleValidationError = (field: string, message: string, value?: unknown) =>
   errorHandler.handleValidationError(field, message, value);
 
-export const handlePaymentError = (error: Error, paymentData?: any) =>
+export const handlePaymentError = (error: Error, paymentData?: unknown) =>
   errorHandler.handlePaymentError(error, paymentData);
 
 export const handleBusinessError = (message: string, code?: string, context?: string) =>

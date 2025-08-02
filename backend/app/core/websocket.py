@@ -11,7 +11,10 @@ import uuid
 from enum import Enum
 
 from app.core.exceptions import FynloException, ErrorCodes
-from app.core.responses import APIResponseHelper
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class EventType(str, Enum):
     """WebSocket event types"""

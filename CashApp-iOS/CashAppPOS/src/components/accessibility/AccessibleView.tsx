@@ -1,11 +1,13 @@
 import React from 'react';
-import {
-  View,
+
+import type {
   ViewProps,
   AccessibilityRole,
   AccessibilityState,
   AccessibilityProps,
 } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+
 import { createAccessibilityState } from '../../utils/accessibility';
 
 // Enhanced accessibility props
@@ -15,13 +17,15 @@ export interface AccessibleViewProps extends ViewProps, Omit<AccessibilityProps,
   accessibilityLabel?: string;
   accessibilityHint?: string;
   accessibilityRole?: AccessibilityRole;
-  accessibilityState?: AccessibilityState | {
-    selected?: boolean;
-    disabled?: boolean;
-    checked?: boolean;
-    expanded?: boolean;
-    busy?: boolean;
-  };
+  accessibilityState?:
+    | AccessibilityState
+    | {
+        selected?: boolean;
+        disabled?: boolean;
+        checked?: boolean;
+        expanded?: boolean;
+        busy?: boolean;
+      };
   // Semantic options
   semanticRole?: 'header' | 'main' | 'navigation' | 'section' | 'footer' | 'article';
   focusable?: boolean;
@@ -49,7 +53,7 @@ const AccessibleView: React.FC<AccessibleViewProps> = ({
   // Convert semantic role to accessibility role
   const getAccessibilityRole = (): AccessibilityRole | undefined => {
     if (accessibilityRole) return accessibilityRole;
-    
+
     switch (semanticRole) {
       case 'header':
         return 'header';
@@ -68,8 +72,8 @@ const AccessibleView: React.FC<AccessibleViewProps> = ({
   // Normalize accessibility state
   const normalizedAccessibilityState = accessibilityState
     ? 'selected' in accessibilityState || 'disabled' in accessibilityState
-      ? createAccessibilityState(accessibilityState as any)
-      : accessibilityState as AccessibilityState
+      ? createAccessibilityState(accessibilityState as unknown)
+      : (accessibilityState as AccessibilityState)
     : undefined;
 
   // Screen reader only styles
@@ -94,11 +98,7 @@ const AccessibleView: React.FC<AccessibleViewProps> = ({
   };
 
   return (
-    <View
-      style={[style, screenReaderOnlyStyle]}
-      {...accessibilityProps}
-      {...viewProps}
-    >
+    <View style={[style, screenReaderOnlyStyle]} {...accessibilityProps} {...viewProps}>
       {children}
     </View>
   );
@@ -119,12 +119,7 @@ export const SkipLinks: React.FC<SkipLinksProps> = ({ links }) => {
       semanticRole="navigation"
       accessibilityLabel="Skip navigation"
       screenReaderOnly
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: 9999,
-      }}
+      style={styles.skipLinksContainer}
     >
       {links.map((link, index) => (
         <AccessibleView
@@ -133,12 +128,7 @@ export const SkipLinks: React.FC<SkipLinksProps> = ({ links }) => {
           accessibilityLabel={link.label}
           focusable
           onTouchEnd={link.onPress}
-          style={{
-            backgroundColor: '#000',
-            color: '#fff',
-            padding: 8,
-            textDecorationLine: 'underline',
-          }}
+          style={styles.skipLink}
         >
           {/* Skip link content would go here */}
         </AccessibleView>
@@ -155,12 +145,7 @@ export interface LandmarkProps {
   style?: ViewProps['style'];
 }
 
-export const Landmark: React.FC<LandmarkProps> = ({
-  children,
-  role,
-  label,
-  style,
-}) => {
+export const Landmark: React.FC<LandmarkProps> = ({ children, role, label, style }) => {
   const getAccessibilityRole = (): AccessibilityRole => {
     switch (role) {
       case 'banner':
@@ -222,15 +207,10 @@ export interface FocusTrapProps {
   style?: ViewProps['style'];
 }
 
-export const FocusTrap: React.FC<FocusTrapProps> = ({
-  children,
-  active,
-  onEscape,
-  style,
-}) => {
+export const FocusTrap: React.FC<FocusTrapProps> = ({ children, active, _onEscape, style }) => {
   // In a real implementation, this would manage focus trapping
   // For now, it's a semantic wrapper
-  
+
   return (
     <AccessibleView
       importantForAccessibility={active ? 'yes' : 'no-hide-descendants'}
@@ -241,5 +221,20 @@ export const FocusTrap: React.FC<FocusTrapProps> = ({
     </AccessibleView>
   );
 };
+
+const styles = StyleSheet.create({
+  skipLinksContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 9999,
+  },
+  skipLink: {
+    backgroundColor: '#000',
+    color: '#fff',
+    padding: 8,
+    textDecorationLine: 'underline',
+  },
+});
 
 export default AccessibleView;

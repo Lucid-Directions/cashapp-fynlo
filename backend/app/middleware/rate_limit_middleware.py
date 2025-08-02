@@ -8,8 +8,11 @@ from fastapi import Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+<<<<<<< HEAD
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+=======
+>>>>>>> origin/main
 from jose import JWTError, jwt
 
 from app.core.config import settings
@@ -68,7 +71,6 @@ async def identify_portal_client(request: Request) -> str:
 # The redis_client.get_client() will provide the actual aioredis.Redis instance
 # or a compatible mock if Redis connection fails in dev/test.
 limiter = Limiter(key_func=identify_client, strategy="moving-window")
-
 
 # --- RateLimitMiddleware ---
 # We will use the SlowAPIMiddleware and apply limits per-route using decorators.
@@ -131,7 +133,6 @@ async def init_fastapi_limiter():
     # `request.state.limiter` in dependencies, this would be cleaner.
     # For now, the global `limiter` instance should work with decorators.
     logger.info("✅ Rate limiter configured to use Redis client (or mock).")
-
 
 # Custom exception handler for RateLimitExceeded to provide a standard API response.
 # This is already handled by slowapi's default handler if we add it to the app.

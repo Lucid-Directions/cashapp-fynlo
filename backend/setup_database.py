@@ -26,13 +26,13 @@ def check_postgresql_installed():
     try:
         result = subprocess.run(['psql', '--version'], capture_output=True, text=True)
         if result.returncode == 0:
-            print(f"✅ PostgreSQL found: {result.stdout.strip()}")
+            logger.info(f"✅ PostgreSQL found: {result.stdout.strip()}")
             return True
         else:
-            print("❌ PostgreSQL not found in PATH")
+            logger.info("❌ PostgreSQL not found in PATH")
             return False
     except FileNotFoundError:
-        print("❌ PostgreSQL not installed or not in PATH")
+        logger.info("❌ PostgreSQL not installed or not in PATH")
         return False
 
 def check_postgresql_running():
@@ -46,10 +46,10 @@ def check_postgresql_running():
             user="postgres"
         )
         conn.close()
-        print("✅ PostgreSQL service is running")
+        logger.info("✅ PostgreSQL service is running")
         return True
     except psycopg2.OperationalError as e:
-        print(f"❌ PostgreSQL service not running or connection failed: {e}")
+        logger.error(f"❌ PostgreSQL service not running or connection failed: {e}")
         return False
 
 def create_database_and_user():
@@ -68,27 +68,27 @@ def create_database_and_user():
         # Create user if not exists
         try:
             cursor.execute("CREATE USER fynlo_user WITH PASSWORD 'fynlo_password';")
-            print("✅ Created database user: fynlo_user")
+            logger.info("✅ Created database user: fynlo_user")
         except psycopg2.errors.DuplicateObject:
-            print("ℹ️ Database user 'fynlo_user' already exists")
+            logger.info("ℹ️ Database user 'fynlo_user' already exists")
         
         # Create database if not exists
         try:
             cursor.execute("CREATE DATABASE fynlo_pos OWNER fynlo_user;")
-            print("✅ Created database: fynlo_pos")
+            logger.info("✅ Created database: fynlo_pos")
         except psycopg2.errors.DuplicateDatabase:
-            print("ℹ️ Database 'fynlo_pos' already exists")
+            logger.info("ℹ️ Database 'fynlo_pos' already exists")
         
         # Grant privileges
         cursor.execute("GRANT ALL PRIVILEGES ON DATABASE fynlo_pos TO fynlo_user;")
-        print("✅ Granted privileges to fynlo_user")
+        logger.info("✅ Granted privileges to fynlo_user")
         
         cursor.close()
         conn.close()
         return True
         
     except psycopg2.Error as e:
-        print(f"❌ Failed to create database/user: {e}")
+        logger.error(f"❌ Failed to create database/user: {e}")
         return False
 
 def test_connection():
@@ -99,33 +99,33 @@ def test_connection():
         with test_engine.connect() as conn:
             result = conn.execute(text("SELECT version();"))
             version = result.fetchone()[0]
-            print(f"✅ Database connection successful")
-            print(f"   PostgreSQL version: {version}")
+            logger.info(f"✅ Database connection successful")
+            logger.info(f"   PostgreSQL version: {version}")
             return True
     except Exception as e:
-        print(f"❌ Database connection failed: {e}")
+        logger.error(f"❌ Database connection failed: {e}")
         return False
 
 def run_migrations():
     """Run Alembic migrations to create tables"""
     try:
-        print("🔄 Running database migrations...")
+        logger.info("🔄 Running database migrations...")
         result = subprocess.run(['alembic', 'upgrade', 'head'], 
                               capture_output=True, text=True, cwd=project_root)
         
         if result.returncode == 0:
-            print("✅ Database migrations completed successfully")
+            logger.info("✅ Database migrations completed successfully")
             if result.stdout:
-                print(f"   Output: {result.stdout}")
+                logger.info(f"   Output: {result.stdout}")
             return True
         else:
-            print(f"❌ Migration failed: {result.stderr}")
+            logger.error(f"❌ Migration failed: {result.stderr}")
             return False
     except FileNotFoundError:
-        print("❌ Alembic not found. Please install: pip install alembic")
+        logger.info("❌ Alembic not found. Please install: pip install alembic")
         return False
     except Exception as e:
-        print(f"❌ Migration error: {e}")
+        logger.error(f"❌ Migration error: {e}")
         return False
 
 def create_sample_data():
@@ -134,13 +134,17 @@ def create_sample_data():
         from app.core.database import Platform, Restaurant, User
         from app.api.v1.endpoints.auth import get_password_hash
         import uuid
+import logging
+
+logger = logging.getLogger(__name__)
+
         
         db = SessionLocal()
         
         # Check if data already exists
         existing_platform = db.query(Platform).first()
         if existing_platform:
-            print("ℹ️ Sample data already exists, skipping creation")
+            logger.info("ℹ️ Sample data already exists, skipping creation")
             db.close()
             return True
         
@@ -207,17 +211,17 @@ def create_sample_data():
         db.add_all([admin_user, manager_user, employee_user])
         db.commit()
         
-        print("✅ Sample data created successfully")
-        print("   Login credentials:")
-        print("   - Admin: admin@fynlo.com / admin123")
-        print("   - Manager: manager@fynlo.com / manager123")
-        print("   - Employee: employee@fynlo.com / employee123")
+        logger.info("✅ Sample data created successfully")
+        logger.info("   Login credentials:")
+        logger.info("   - Admin: admin@fynlo.com / admin123")
+        logger.info("   - Manager: manager@fynlo.com / manager123")
+        logger.info("   - Employee: employee@fynlo.com / employee123")
         
         db.close()
         return True
         
     except Exception as e:
-        print(f"❌ Failed to create sample data: {e}")
+        logger.error(f"❌ Failed to create sample data: {e}")
         if 'db' in locals():
             db.rollback()
             db.close()
@@ -236,31 +240,31 @@ def create_upload_directories():
         for subdir in subdirs:
             (upload_dir / subdir).mkdir(exist_ok=True)
         
-        print(f"✅ Upload directories created at: {upload_dir}")
+        logger.info(f"✅ Upload directories created at: {upload_dir}")
         return True
     except Exception as e:
-        print(f"❌ Failed to create upload directories: {e}")
+        logger.error(f"❌ Failed to create upload directories: {e}")
         return False
 
 def main():
     """Main setup function"""
-    print("🚀 Fynlo POS Database Setup")
-    print("=" * 50)
+    logger.info("🚀 Fynlo POS Database Setup")
+    logger.info("=" * 50)
     
     # Step 1: Check PostgreSQL installation
     if not check_postgresql_installed():
-        print("\n💡 To install PostgreSQL:")
-        print("   macOS: brew install postgresql")
-        print("   Ubuntu: sudo apt-get install postgresql postgresql-contrib")
-        print("   Windows: Download from https://www.postgresql.org/download/")
+        logger.info("\n💡 To install PostgreSQL:")
+        logger.info("   macOS: brew install postgresql")
+        logger.info("   Ubuntu: sudo apt-get install postgresql postgresql-contrib")
+        logger.info("   Windows: Download from https://www.postgresql.org/download/")
         return False
     
     # Step 2: Check PostgreSQL service
     if not check_postgresql_running():
-        print("\n💡 To start PostgreSQL:")
-        print("   macOS: brew services start postgresql")
-        print("   Ubuntu: sudo systemctl start postgresql")
-        print("   Windows: Start PostgreSQL service from Services app")
+        logger.info("\n💡 To start PostgreSQL:")
+        logger.info("   macOS: brew services start postgresql")
+        logger.info("   Ubuntu: sudo systemctl start postgresql")
+        logger.info("   Windows: Start PostgreSQL service from Services app")
         return False
     
     # Step 3: Create database and user
@@ -283,11 +287,11 @@ def main():
     if not create_upload_directories():
         return False
     
-    print("\n🎉 Database setup completed successfully!")
-    print("\n📋 Next steps:")
-    print("   1. Start the backend server: python -m uvicorn app.main:app --reload")
-    print("   2. Test API endpoints at: http://localhost:8000/docs")
-    print("   3. Connect the iOS app to test full functionality")
+    logger.info("\n🎉 Database setup completed successfully!")
+    logger.info("\n📋 Next steps:")
+    logger.info("   1. Start the backend server: python -m uvicorn app.main:app --reload")
+    logger.info("   2. Test API endpoints at: http://localhost:8000/docs")
+    logger.info("   3. Connect the iOS app to test full functionality")
     
     return True
 

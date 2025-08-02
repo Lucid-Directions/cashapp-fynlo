@@ -3,9 +3,12 @@
  * Extends existing PaymentService patterns while adding platform fee management
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import PlatformService, { PaymentFee, FeeCalculation } from './PlatformService';
+// TODO: Unused import - import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import PaymentService from './PaymentService';
+import PlatformService from './PlatformService';
+
+import type { PaymentFee, FeeCalculation } from './PlatformService';
 
 export interface PlatformPaymentMethod {
   id: string;
@@ -52,17 +55,20 @@ class PlatformPaymentService {
   /**
    * Get payment methods with current platform fees
    */
-  async getPaymentMethodsWithFees(amount: number, restaurantId?: string): Promise<PlatformPaymentMethod[]> {
+  async getPaymentMethodsWithFees(
+    amount: number,
+    restaurantId?: string
+  ): Promise<PlatformPaymentMethod[]> {
     try {
       // Get base payment methods from existing service
       const baseMethods = await this.paymentService.getAvailablePaymentMethods();
-      
+
       // Get platform fees
       const platformFees = await this.getPlatformFees();
-      
+
       // Calculate effective fees for each method
       const methodsWithFees: PlatformPaymentMethod[] = [];
-      
+
       for (const method of baseMethods) {
         const platformFee = platformFees[method.id];
         if (!platformFee) continue;
@@ -76,7 +82,7 @@ class PlatformPaymentService {
             restaurantId
           );
         } catch (error) {
-          console.warn(`Failed to calculate fee for ${method.id}:`, error);
+          logger.warn(`Failed to calculate fee for ${method.id}:`, error);
           // Fall back to basic calculation
           effectiveFee = this.calculateBasicFee(method.id, amount, platformFee);
         }
@@ -98,7 +104,7 @@ class PlatformPaymentService {
 
       return methodsWithFees;
     } catch (error) {
-      console.error('Failed to get payment methods with fees:', error);
+      logger.error('Failed to get payment methods with fees:', error);
       // Fall back to basic payment methods
       return this.getFallbackPaymentMethods();
     }
@@ -110,14 +116,14 @@ class PlatformPaymentService {
   async getOptimalPaymentMethod(amount: number, restaurantId?: string): Promise<string> {
     try {
       const methods = await this.getPaymentMethodsWithFees(amount, restaurantId);
-      const enabledMethods = methods.filter(m => m.enabled);
-      
+      const enabledMethods = methods.filter((m) => m.enabled);
+
       if (enabledMethods.length === 0) {
         return 'sumup'; // Default to SumUp
       }
 
       // Prefer SumUp if it's available and enabled
-      const sumupMethod = enabledMethods.find(m => m.id === 'sumup');
+      const sumupMethod = enabledMethods.find((m) => m.id === 'sumup');
       if (sumupMethod) {
         return 'sumup';
       }
@@ -125,7 +131,7 @@ class PlatformPaymentService {
       // Return method with lowest effective fee if SumUp not available
       return enabledMethods[0].id;
     } catch (error) {
-      console.error('Failed to determine optimal payment method:', error);
+      logger.error('Failed to determine optimal payment method:', error);
       return 'sumup'; // Default to SumUp
     }
   }
@@ -134,8 +140,8 @@ class PlatformPaymentService {
    * Get detailed fee information for display
    */
   async getPaymentFeeInfo(
-    paymentMethod: string, 
-    amount: number, 
+    paymentMethod: string,
+    amount: number,
     restaurantId?: string
   ): Promise<PaymentFeeDisplayInfo> {
     try {
@@ -146,8 +152,8 @@ class PlatformPaymentService {
       );
 
       const allMethods = await this.getPaymentMethodsWithFees(amount, restaurantId);
-      const currentMethod = allMethods.find(m => m.id === paymentMethod);
-      const lowestFee = Math.min(...allMethods.map(m => m.effectiveFee?.effective_fee || 0));
+      const _currentMethod = allMethods.find((m) => m.id === paymentMethod);
+      const lowestFee = Math.min(...allMethods.map((m) => m.effectiveFee?.effective_fee || 0));
 
       return {
         shortDescription: this.generateShortFeeDescription(feeCalculation),
@@ -159,7 +165,7 @@ class PlatformPaymentService {
         hasRestaurantMarkup: feeCalculation.restaurant_markup > 0,
       };
     } catch (error) {
-      console.error('Failed to get fee info:', error);
+      logger.error('Failed to get fee info:', error);
       return {
         shortDescription: 'Fee information unavailable',
         detailedDescription: 'Unable to calculate processing fee at this time.',
@@ -181,13 +187,13 @@ class PlatformPaymentService {
         restaurantId,
         'payment_fees'
       );
-      
+
       // Check if any payment fee settings come from restaurant level
       return Object.values(effectiveSettings).some(
-        (setting: any) => setting.source === 'restaurant'
+        (setting: unknown) => setting.source === 'restaurant'
       );
     } catch (error) {
-      console.error('Failed to check restaurant overrides:', error);
+      logger.error('Failed to check restaurant overrides:', error);
       return false;
     }
   }
@@ -213,7 +219,7 @@ class PlatformPaymentService {
         markupPercentage > 0.5 // Require approval for markups > 0.5%
       );
     } catch (error) {
-      console.error('Failed to update restaurant fee markup:', error);
+      logger.error('Failed to update restaurant fee markup:', error);
       return false;
     }
   }
@@ -223,7 +229,7 @@ class PlatformPaymentService {
    */
   private async getPlatformFees(): Promise<Record<string, PaymentFee>> {
     const now = Date.now();
-    
+
     if (this.cachedFees && now < this.cacheExpiry) {
       return this.cachedFees;
     }
@@ -233,7 +239,7 @@ class PlatformPaymentService {
       this.cacheExpiry = now + this.CACHE_DURATION;
       return this.cachedFees;
     } catch (error) {
-      console.error('Failed to fetch platform fees:', error);
+      logger.error('Failed to fetch platform fees:', error);
       // Return cached fees if available, otherwise empty
       return this.cachedFees || {};
     }
@@ -243,12 +249,12 @@ class PlatformPaymentService {
    * Calculate basic fee when platform calculation fails
    */
   private calculateBasicFee(
-    paymentMethod: string, 
-    amount: number, 
+    paymentMethod: string,
+    amount: number,
     platformFee: PaymentFee
   ): FeeCalculation {
-    const feeAmount = (amount * platformFee.percentage / 100) + (platformFee.fixed_fee || 0);
-    
+    const feeAmount = (amount * platformFee.percentage) / 100 + (platformFee.fixed_fee || 0);
+
     return {
       payment_method: paymentMethod,
       amount,
@@ -269,7 +275,7 @@ class PlatformPaymentService {
     }
 
     const { effective_fee, currency, fee_percentage } = feeCalculation;
-    
+
     if (effective_fee === 0) {
       return 'No processing fee';
     }
@@ -281,8 +287,8 @@ class PlatformPaymentService {
    * Generate short fee description for UI
    */
   private generateShortFeeDescription(feeCalculation: FeeCalculation): string {
-    const { effective_fee, currency, fee_percentage } = feeCalculation;
-    
+    const { effective_fee, _currency, fee_percentage } = feeCalculation;
+
     if (effective_fee === 0) {
       return 'No fee';
     }
@@ -294,20 +300,17 @@ class PlatformPaymentService {
    * Generate detailed fee description
    */
   private generateDetailedFeeDescription(feeCalculation: FeeCalculation): string {
-    const { 
-      effective_fee, 
-      platform_fee, 
-      restaurant_markup, 
-      currency, 
-      fee_percentage 
-    } = feeCalculation;
+    const { effective_fee, platform_fee, restaurant_markup, currency, fee_percentage } =
+      feeCalculation;
 
     if (effective_fee === 0) {
       return 'This payment method has no processing fees.';
     }
 
-    let description = `Processing fee: ${fee_percentage.toFixed(2)}% (${currency}${effective_fee.toFixed(2)})`;
-    
+    let description = `Processing fee: ${fee_percentage.toFixed(
+      2
+    )}% (${currency}${effective_fee.toFixed(2)})`;
+
     if (restaurant_markup > 0) {
       description += `\nPlatform fee: ${currency}${platform_fee.toFixed(2)}`;
       description += `\nRestaurant markup: ${restaurant_markup.toFixed(2)}%`;
@@ -359,7 +362,7 @@ class PlatformPaymentService {
         enabled: true,
         requiresAuth: true,
         feeInfo: '1.4% + 20p',
-        platformFee: { percentage: 1.4, fixed_fee: 0.20, currency: 'GBP' },
+        platformFee: { percentage: 1.4, fixed_fee: 0.2, currency: 'GBP' },
       },
       {
         id: 'square',
@@ -387,7 +390,7 @@ class PlatformPaymentService {
    */
   async getFeeSummary(
     restaurantId?: string,
-    dateRange?: { start: Date; end: Date }
+    _dateRange?: { start: Date; end: Date }
   ): Promise<{
     totalFees: number;
     feesByMethod: Record<string, number>;

@@ -11,11 +11,13 @@ from sqlalchemy import or_
 from app.core.database import get_db, Restaurant, User
 from app.core.auth import get_current_platform_owner
 from app.core.responses import APIResponseHelper
+<<<<<<< HEAD
 from app.schemas.restaurant import RestaurantResponse
+=======
+>>>>>>> origin/main
 from app.core.security_utils import sanitize_sql_like_pattern
 
 router = APIRouter(prefix="/restaurants", tags=["platform-restaurants"])
-
 
 @router.get("/")
 async def list_all_restaurants(
@@ -89,7 +91,6 @@ async def list_all_restaurants(
             status_code=500
         )
 
-
 @router.get("/{restaurant_id}")
 async def get_restaurant_details(
     restaurant_id: str,
@@ -153,7 +154,6 @@ async def get_restaurant_details(
             status_code=500
         )
 
-
 @router.put("/{restaurant_id}/subscription")
 async def update_restaurant_subscription(
     restaurant_id: str,
@@ -212,7 +212,6 @@ async def update_restaurant_subscription(
             message=f"Failed to update subscription: {str(e)}",
             status_code=500
         )
-
 
 @router.put("/{restaurant_id}/status")
 async def toggle_restaurant_status(

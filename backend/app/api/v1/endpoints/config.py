@@ -3,8 +3,8 @@ Configuration Management API Endpoints
 Provides endpoints for managing payment system configuration
 """
 
-from typing import Dict, Any, Optional, List
-from fastapi import APIRouter, Depends, status
+from typing import Dict, Any, Optional
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
@@ -12,10 +12,11 @@ from app.core.database import get_db, User
 from app.core.exceptions import FynloException, ResourceNotFoundException, ValidationException, AuthenticationException, ConflictException
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
-from app.services.config_manager import config_manager, ProviderConfig, RoutingConfig, FeatureFlags
+from app.services.config_manager import config_manager
 from app.services.payment_factory import payment_factory
 from app.services.smart_routing import RoutingStrategy
 from app.services.monitoring import get_monitoring_service
+from app.core.exceptions import ValidationException, FynloException, ResourceNotFoundException
 
 router = APIRouter()
 
@@ -61,36 +62,6 @@ async def get_configuration_summary(
             data=summary,
             message="Configuration summary retrieved successfully"
         )
-        
-    except Exception as e:
-        raise FynloException(message=str(e))
-
-@router.get("/providers")
-async def get_provider_configurations(
-    current_user: User = Depends(get_current_user)
-):
-    """Get all provider configurations"""
-    try:
-        providers_config = {}
-        
-        for name, config in config_manager.providers.items():
-            providers_config[name] = {
-                'name': config.name,
-                'enabled': config.enabled,
-                'environment': config.environment,
-                'webhook_url': config.webhook_url,
-                'timeout_seconds': config.timeout_seconds,
-                'retry_attempts': config.retry_attempts,
-                'custom_settings': config.custom_settings,
-                'has_api_key': bool(config.api_key),
-                'has_secret_key': bool(config.secret_key)
-            }
-        
-        return APIResponseHelper.success(
-            data=providers_config,
-            message=f"Retrieved configuration for {len(providers_config)} providers"
-        )
-        
     except Exception as e:
         raise FynloException(message=str(e))
 
@@ -147,8 +118,7 @@ async def update_provider_configuration(
         }
         
         if not update_data:
-            raise ValidationException(message="No configuration changes provided")
-        
+            raise ValidationException(message="No configuration changes provided")        
         # Update configuration
         config_manager.update_provider_config(provider_name, **update_data)
         
@@ -197,53 +167,6 @@ async def get_routing_configuration(
             data=config_data,
             message="Routing configuration retrieved successfully"
         )
-        
-    except Exception as e:
-        raise FynloException(message=str(e))
-
-@router.put("/routing")
-async def update_routing_configuration(
-    config_update: RoutingConfigRequest,
-    current_user: User = Depends(get_current_user)
-):
-    """Update smart routing configuration"""
-    try:
-        routing_config = config_manager.routing
-        
-        # Update provided fields
-        if config_update.enabled is not None:
-            routing_config.enabled = config_update.enabled
-        
-        if config_update.default_strategy is not None:
-            # Validate strategy
-            try:
-                RoutingStrategy(config_update.default_strategy)
-                routing_config.default_strategy = config_update.default_strategy
-            except ValueError:
-                raise ValidationException(message=f"Invalid routing strategy: {config_update.default_strategy}")
-        
-        if config_update.fallback_provider is not None:
-            # Validate provider exists
-            if config_update.fallback_provider not in config_manager.providers:
-                raise ValidationException(
-                    message=f"Fallback provider '{config_update.fallback_provider}' not configured"
-                )
-            routing_config.fallback_provider = config_update.fallback_provider
-        
-        # Save configuration
-        config_manager.save_configuration("routing")
-        
-        return APIResponseHelper.success(
-            data={
-                'enabled': routing_config.enabled,
-                'default_strategy': routing_config.default_strategy,
-                'fallback_provider': routing_config.fallback_provider
-            },
-            message="Routing configuration updated successfully"
-        )
-        
-    except FynloException:
-        raise
     except Exception as e:
         raise FynloException(message=str(e))
 
@@ -270,30 +193,6 @@ async def get_feature_flags(
             data=feature_flags,
             message="Feature flags retrieved successfully"
         )
-        
-    except Exception as e:
-        raise FynloException(message=str(e))
-
-@router.put("/features")
-async def update_feature_flag(
-    feature_update: FeatureFlagRequest,
-    current_user: User = Depends(get_current_user)
-):
-    """Update a feature flag"""
-    try:
-        config_manager.update_feature_flag(feature_update.feature_name, feature_update.enabled)
-        
-        # Save configuration
-        config_manager.save_configuration("features")
-        
-        return APIResponseHelper.success(
-            data={
-                'feature_name': feature_update.feature_name,
-                'enabled': feature_update.enabled
-            },
-            message=f"Feature flag '{feature_update.feature_name}' updated successfully"
-        )
-        
     except Exception as e:
         raise FynloException(message=str(e))
 
@@ -318,52 +217,6 @@ async def get_security_configuration(
             data=config_data,
             message="Security configuration retrieved successfully"
         )
-        
-    except Exception as e:
-        raise FynloException(message=str(e))
-
-@router.post("/validate")
-async def validate_configuration(
-    current_user: User = Depends(get_current_user)
-):
-    """Validate current configuration"""
-    try:
-        # Re-run validation
-        config_manager._validate_configurations()
-        
-        # Get validation results
-        issues = []
-        
-        # Check provider configurations
-        enabled_providers = config_manager.get_enabled_providers()
-        if not enabled_providers:
-            issues.append("No payment providers are enabled")
-        
-        # Check routing configuration
-        if config_manager.routing.enabled and config_manager.routing.fallback_provider not in enabled_providers:
-            issues.append(f"Fallback provider '{config_manager.routing.fallback_provider}' is not enabled")
-        
-        # Check feature dependencies
-        if config_manager.features.smart_routing_enabled and not config_manager.routing.enabled:
-            issues.append("Smart routing feature is enabled but routing is disabled")
-        
-        validation_result = {
-            'valid': len(issues) == 0,
-            'issues': issues,
-            'enabled_providers': enabled_providers,
-            'routing_enabled': config_manager.routing.enabled,
-            'features_enabled': {
-                name: getattr(config_manager.features, name)
-                for name in dir(config_manager.features)
-                if not name.startswith('_')
-            }
-        }
-        
-        return APIResponseHelper.success(
-            data=validation_result,
-            message="Configuration validation completed"
-        )
-        
     except Exception as e:
         raise FynloException(message=str(e))
 
@@ -381,21 +234,9 @@ async def get_system_health(
             data=health_status,
             message="System health status retrieved successfully"
         )
-        
     except Exception as e:
         raise FynloException(message=str(e))
 
-@router.get("/monitoring/metrics")
-async def get_system_metrics(
-    hours: int = 24,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Get system metrics for specified time period"""
-    try:
-        if hours < 1 or hours > 168:  # Max 1 week
-            raise ValidationException(message="Hours must be between 1 and 168")
-        
         monitoring_service = get_monitoring_service(db)
         metrics = await monitoring_service.get_system_metrics(hours)
         
@@ -424,39 +265,6 @@ async def update_monitoring_thresholds(
             data=threshold_update.thresholds,
             message="Monitoring thresholds updated successfully"
         )
-        
-    except Exception as e:
-        raise FynloException(message=str(e))
-
-@router.post("/test/routing")
-async def test_routing_simulation(
-    restaurant_id: str,
-    strategy: str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Test routing strategy simulation"""
-    try:
-        # Validate strategy
-        try:
-            routing_strategy = RoutingStrategy(strategy)
-        except ValueError:
-            raise ValidationException(message=f"Invalid routing strategy: {strategy}")
-        
-        # Run simulation
-        simulation_result = await payment_factory.simulate_routing_impact(
-            restaurant_id=restaurant_id,
-            strategy=routing_strategy,
-            db_session=db
-        )
-        
-        return APIResponseHelper.success(
-            data=simulation_result,
-            message="Routing simulation completed successfully"
-        )
-        
-    except FynloException:
-        raise
     except Exception as e:
         raise FynloException(message=str(e))
 
@@ -479,6 +287,5 @@ async def backup_configuration(
             },
             message="Configuration backup created successfully"
         )
-        
     except Exception as e:
         raise FynloException(message=str(e))

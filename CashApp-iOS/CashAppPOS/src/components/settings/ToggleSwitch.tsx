@@ -1,11 +1,6 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Animated,
-  Easing,
-} from 'react-native';
+
+import { StyleSheet, _View, TouchableOpacity, Animated, Easing } from 'react-native';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -84,26 +79,23 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
     outputRange: [1, 1.1, 1],
   });
 
+  const dynamicStyles = React.useMemo(
+    () => createDynamicStyles(config, disabled),
+    [config, disabled]
+  );
+
   return (
     <TouchableOpacity
       onPress={handlePress}
       disabled={disabled}
       activeOpacity={0.8}
-      style={[
-        styles.container,
-        {
-          width: config.width,
-          height: config.height,
-          opacity: disabled ? 0.5 : 1,
-        },
-      ]}
+      style={[styles.container, dynamicStyles.container, disabled && styles.containerDisabled]}
     >
       <Animated.View
         style={[
           styles.track,
+          dynamicStyles.track,
           {
-            width: config.width,
-            height: config.height,
             backgroundColor: trackColor,
           },
         ]}
@@ -111,16 +103,10 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
       <Animated.View
         style={[
           styles.thumb,
+          dynamicStyles.thumb,
           {
-            width: config.thumbSize,
-            height: config.thumbSize,
             backgroundColor: thumbColor,
-            transform: [
-              { translateX: thumbTranslate },
-              { scale: thumbScale },
-            ],
-            top: config.padding,
-            left: config.padding,
+            transform: [{ translateX: thumbTranslate }, { scale: thumbScale }],
           },
         ]}
       />
@@ -128,10 +114,31 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   );
 };
 
+const createDynamicStyles = (config: any, disabled: boolean) =>
+  StyleSheet.create({
+    container: {
+      width: config.width,
+      height: config.height,
+    },
+    track: {
+      width: config.width,
+      height: config.height,
+    },
+    thumb: {
+      width: config.thumbSize,
+      height: config.thumbSize,
+      top: config.padding,
+      left: config.padding,
+    },
+  });
+
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
     justifyContent: 'center',
+  },
+  containerDisabled: {
+    opacity: 0.5,
   },
   track: {
     borderRadius: 100,

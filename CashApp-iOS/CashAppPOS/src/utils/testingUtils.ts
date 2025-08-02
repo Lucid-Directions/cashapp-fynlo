@@ -1,5 +1,29 @@
-import { ReactTestInstance } from 'react-test-renderer';
 import { fireEvent, waitFor } from '@testing-library/react-native';
+
+import type { ReactTestInstance } from 'react-test-renderer';
+
+// Validation interfaces
+interface TestOrder {
+  id: string | number;
+  items: unknown[];
+  total: number;
+  status?: string;
+}
+
+interface TestCustomer {
+  id: string | number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+}
+
+interface TestPayment {
+  id: string | number;
+  amount: number;
+  method: string;
+  status: string;
+}
 
 export interface TestScenario {
   name: string;
@@ -13,7 +37,7 @@ export interface TestScenario {
 export interface TestStep {
   action: string;
   target?: string;
-  data?: any;
+  data?: Record<string, unknown> | string | number | boolean | null;
   waitFor?: number;
   description: string;
 }
@@ -49,7 +73,7 @@ class TestingUtils {
    */
   static generateTestData = {
     // Generate test orders
-    orders: (count: number = 10, config?: MockDataGeneratorConfig) => {
+    orders: (count: number = 10, _config?: MockDataGeneratorConfig) => {
       const orders = [];
       for (let i = 0; i < count; i++) {
         orders.push({
@@ -58,7 +82,9 @@ class TestingUtils {
           customerId: `test_customer_${i + 1}`,
           items: TestingUtils.generateTestData.orderItems(Math.floor(Math.random() * 5) + 1),
           total: Math.floor(Math.random() * 10000) / 100,
-          status: ['pending', 'processing', 'completed', 'cancelled'][Math.floor(Math.random() * 4)],
+          status: ['pending', 'processing', 'completed', 'cancelled'][
+            Math.floor(Math.random() * 4)
+          ],
           createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
           type: ['dine_in', 'takeout', 'delivery'][Math.floor(Math.random() * 3)],
         });
@@ -70,7 +96,7 @@ class TestingUtils {
     orderItems: (count: number = 3) => {
       const items = [];
       const menuItems = ['Burger', 'Pizza', 'Salad', 'Fries', 'Drink', 'Dessert'];
-      
+
       for (let i = 0; i < count; i++) {
         items.push({
           id: `test_item_${i + 1}`,
@@ -88,7 +114,7 @@ class TestingUtils {
       const customers = [];
       const firstNames = ['John', 'Jane', 'Mike', 'Sarah', 'David', 'Emma'];
       const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia'];
-      
+
       for (let i = 0; i < count; i++) {
         customers.push({
           id: `test_customer_${i + 1}`,
@@ -107,7 +133,7 @@ class TestingUtils {
     payments: (count: number = 20) => {
       const payments = [];
       const methods = ['card', 'cash', 'mobile_pay'];
-      
+
       for (let i = 0; i < count; i++) {
         payments.push({
           id: `test_payment_${i + 1}`,
@@ -247,11 +273,15 @@ class TestingUtils {
       const style = element.props.style;
       if (Array.isArray(style)) {
         const flatStyle = Object.assign({}, ...style);
-        return (flatStyle.width >= 44 && flatStyle.height >= 44) ||
-               (flatStyle.minWidth >= 44 && flatStyle.minHeight >= 44);
+        return (
+          (flatStyle.width >= 44 && flatStyle.height >= 44) ||
+          (flatStyle.minWidth >= 44 && flatStyle.minHeight >= 44)
+        );
       }
-      return (style?.width >= 44 && style?.height >= 44) ||
-             (style?.minWidth >= 44 && style?.minHeight >= 44);
+      return (
+        (style?.width >= 44 && style?.height >= 44) ||
+        (style?.minWidth >= 44 && style?.minHeight >= 44)
+      );
     },
   };
 
@@ -268,7 +298,9 @@ class TestingUtils {
     },
 
     // Measure async operation time
-    measureAsyncOperation: async <T>(operation: () => Promise<T>): Promise<{ result: T; duration: number }> => {
+    measureAsyncOperation: async <T>(
+      operation: () => Promise<T>
+    ): Promise<{ result: T; duration: number }> => {
       const startTime = performance.now();
       const result = await operation();
       const endTime = performance.now();
@@ -295,25 +327,28 @@ class TestingUtils {
   static common = {
     // Wait for element to appear
     waitForElement: async (getElement: () => ReactTestInstance | null, timeout: number = 5000) => {
-      return waitFor(() => {
-        const element = getElement();
-        if (!element) {
-          throw new Error('Element not found');
-        }
-        return element;
-      }, { timeout });
+      return waitFor(
+        () => {
+          const element = getElement();
+          if (!element) {
+            throw new Error('Element not found');
+          }
+          return element;
+        },
+        { timeout }
+      );
     },
 
     // Simulate user input with delay
     simulateUserInput: async (element: ReactTestInstance, text: string, delay: number = 100) => {
       for (let i = 0; i <= text.length; i++) {
         fireEvent.changeText(element, text.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     },
 
     // Simulate scroll to element
-    scrollToElement: (scrollView: ReactTestInstance, element: ReactTestInstance) => {
+    scrollToElement: (scrollView: ReactTestInstance, _element: ReactTestInstance) => {
       fireEvent.scroll(scrollView, {
         nativeEvent: {
           contentOffset: { y: 100 }, // Simplified scroll position
@@ -348,8 +383,8 @@ class TestingUtils {
 
     // Simulate validation error
     simulateValidationError: (field: string, message: string) => {
-      const error = new Error(`Validation failed: ${message}`);
-      (error as any).field = field;
+      const error = new Error(`Validation failed: ${message}`) as Error & { field: string };
+      error.field = field;
       return Promise.reject(error);
     },
   };
@@ -359,37 +394,44 @@ class TestingUtils {
    */
   static validation = {
     // Validate order structure
-    isValidOrder: (order: any): boolean => {
+    isValidOrder: (order: unknown): order is TestOrder => {
       return !!(
         order &&
-        order.id &&
-        order.items &&
-        Array.isArray(order.items) &&
-        typeof order.total === 'number' &&
-        order.status
+        typeof order === 'object' &&
+        'id' in order &&
+        'items' in order &&
+        'total' in order &&
+        Array.isArray((order as TestOrder).items) &&
+        typeof (order as TestOrder).total === 'number'
       );
     },
 
     // Validate customer structure
-    isValidCustomer: (customer: any): boolean => {
+    isValidCustomer: (customer: unknown): customer is TestCustomer => {
       return !!(
         customer &&
-        customer.id &&
-        customer.firstName &&
-        customer.lastName &&
-        customer.email &&
-        customer.phone
+        typeof customer === 'object' &&
+        'id' in customer &&
+        'firstName' in customer &&
+        'lastName' in customer &&
+        'email' in customer &&
+        'phone' in customer &&
+        typeof (customer as TestCustomer).firstName === 'string' &&
+        typeof (customer as TestCustomer).lastName === 'string'
       );
     },
 
     // Validate payment structure
-    isValidPayment: (payment: any): boolean => {
+    isValidPayment: (payment: unknown): payment is TestPayment => {
       return !!(
         payment &&
-        payment.id &&
-        payment.method &&
-        typeof payment.amount === 'number' &&
-        payment.status
+        typeof payment === 'object' &&
+        'id' in payment &&
+        'method' in payment &&
+        'amount' in payment &&
+        'status' in payment &&
+        typeof (payment as TestPayment).amount === 'number' &&
+        typeof (payment as TestPayment).method === 'string'
       );
     },
   };
@@ -400,7 +442,7 @@ class TestingUtils {
   static mockAPI = {
     // Mock successful API response
     success: <T>(data: T, delay: number = 100): Promise<T> => {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         setTimeout(() => resolve(data), delay);
       });
     },
@@ -409,8 +451,8 @@ class TestingUtils {
     error: (message: string, status: number = 500, delay: number = 100): Promise<never> => {
       return new Promise((_, reject) => {
         setTimeout(() => {
-          const error = new Error(message);
-          (error as any).status = status;
+          const error = new Error(message) as Error & { status: number };
+          error.status = status;
           reject(error);
         }, delay);
       });
@@ -421,7 +463,7 @@ class TestingUtils {
       const startIndex = (page - 1) * pageSize;
       const endIndex = startIndex + pageSize;
       const paginatedData = data.slice(startIndex, endIndex);
-      
+
       return TestingUtils.mockAPI.success({
         data: paginatedData,
         pagination: {

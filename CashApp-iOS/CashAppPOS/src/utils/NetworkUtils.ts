@@ -4,6 +4,7 @@
  */
 
 import API_CONFIG from '../config/api';
+
 import tokenManager from './tokenManager';
 
 interface NetworkRequestOptions {
@@ -46,12 +47,14 @@ class NetworkUtils {
 
     for (let attempt = 0; attempt <= retryAttempts; attempt++) {
       try {
-        console.log(`🌐 Network request (attempt ${attempt + 1}/${retryAttempts + 1}): ${method} ${url}`);
+        logger.info(
+          `🌐 Network request (attempt ${attempt + 1}/${retryAttempts + 1}): ${method} ${url}`
+        );
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
           controller.abort();
-          console.warn(`⏰ Request timeout after ${timeout}ms: ${url}`);
+          logger.warn(`⏰ Request timeout after ${timeout}ms: ${url}`);
         }, timeout);
 
         const response = await fetch(url, {
@@ -65,7 +68,7 @@ class NetworkUtils {
 
         if (response.ok) {
           const data = await response.json();
-          console.log(`✅ Network request successful: ${method} ${url}`);
+          logger.info(`✅ Network request successful: ${method} ${url}`);
           return {
             success: true,
             data,
@@ -73,7 +76,9 @@ class NetworkUtils {
           };
         } else {
           const errorText = await response.text();
-          console.warn(`⚠️ Network request failed: ${response.status} ${response.statusText} - ${errorText}`);
+          logger.warn(
+            `⚠️ Network request failed: ${response.status} ${response.statusText} - ${errorText}`
+          );
           return {
             success: false,
             error: `HTTP ${response.status}: ${response.statusText}`,
@@ -82,11 +87,11 @@ class NetworkUtils {
         }
       } catch (error) {
         lastError = error as Error;
-        console.warn(`❌ Network request attempt ${attempt + 1} failed:`, error.message);
+        logger.warn(`❌ Network request attempt ${attempt + 1} failed:`, error.message);
 
         // Don't retry on the last attempt
         if (attempt < retryAttempts) {
-          console.log(`🔄 Retrying in ${retryDelay}ms...`);
+          logger.info(`🔄 Retrying in ${retryDelay}ms...`);
           await this.delay(retryDelay);
         }
       }
@@ -110,7 +115,7 @@ class NetworkUtils {
       });
       return result.success;
     } catch (error) {
-      console.warn('Backend health check failed:', error);
+      logger.warn('Backend health check failed:', error);
       return false;
     }
   }
@@ -118,9 +123,9 @@ class NetworkUtils {
   /**
    * Gets platform service charge configuration with robust error handling
    */
-  static async getServiceChargeConfig(): Promise<NetworkResponse<any>> {
+  static async getServiceChargeConfig(): Promise<NetworkResponse<unknown>> {
     const endpoint = `${API_CONFIG.FULL_API_URL}${API_CONFIG.PLATFORM_ENDPOINTS.SERVICE_CHARGE}`;
-    
+
     return this.makeRequest(endpoint, {
       method: 'GET',
       retryAttempts: 2, // Retry twice for critical config
@@ -131,28 +136,30 @@ class NetworkUtils {
    * Simple delay utility for retries
    */
   private static delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
    * Creates headers with authentication if available
    */
-  static async createAuthHeaders(additionalHeaders: Record<string, string> = {}): Promise<Record<string, string>> {
+  static async createAuthHeaders(
+    additionalHeaders: Record<string, string> = {}
+  ): Promise<Record<string, string>> {
     const headers = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...additionalHeaders,
     };
 
     try {
       // Get auth token using tokenManager
       const authToken = await tokenManager.getTokenWithRefresh();
-      
+
       if (authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`;
+        headers.Authorization = `Bearer ${authToken}`;
       }
     } catch (error) {
-      console.warn('Failed to get auth token:', error);
+      logger.warn('Failed to get auth token:', error);
     }
 
     return headers;
@@ -166,12 +173,12 @@ class NetworkUtils {
       // Check if our backend is reachable instead of external services
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000);
-      
+
       const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.HEALTH_ENDPOINT}`, {
         method: 'GET',
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
       return response.ok;
     } catch {

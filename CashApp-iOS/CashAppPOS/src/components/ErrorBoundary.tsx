@@ -4,16 +4,13 @@
  * Displays user-friendly error UI instead of white screen
  */
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
-} from 'react-native';
+import type { ErrorInfo, ReactNode } from 'react';
+// TODO: Unused import - import React, { Component } from 'react';
+
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+
 import { errorHandler } from '../services/errorHandler';
+import { logger } from '../utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -34,21 +31,21 @@ class ErrorBoundary extends Component<Props, State> {
   static getDerivedStateFromError(error: Error): State {
     // Update state so the next render will show the fallback UI
     const errorId = Date.now().toString(36); // Simple error ID
-    
+
     // Log error in dev mode only
     if (__DEV__) {
-      console.error('ErrorBoundary caught:', error);
+      logger.error('ErrorBoundary caught:', error);
     }
-    
+
     return { hasError: true, errorId };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error details in dev mode
     if (__DEV__) {
-      console.error('Error details:', errorInfo);
+      logger.error('Error details:', errorInfo);
     }
-    
+
     // In production, you might want to send this to an error reporting service
     // But be careful not to send sensitive information
   }
@@ -80,20 +77,20 @@ class ErrorBoundary extends Component<Props, State> {
               <Text style={styles.message}>
                 We're sorry for the inconvenience. The app encountered an unexpected error.
               </Text>
-              
+
               {__DEV__ && this.state.errorId && (
                 <Text style={styles.errorId}>Error ID: {this.state.errorId}</Text>
               )}
-              
+
               <View style={styles.buttonContainer}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.button, styles.primaryButton]}
                   onPress={this.handleRestart}
                 >
                   <Text style={styles.primaryButtonText}>Try Again</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   style={[styles.button, styles.secondaryButton]}
                   onPress={() => {
                     errorHandler.showSupportInfo(this.state.errorId);
@@ -102,7 +99,7 @@ class ErrorBoundary extends Component<Props, State> {
                   <Text style={styles.secondaryButtonText}>Contact Support</Text>
                 </TouchableOpacity>
               </View>
-              
+
               <Text style={styles.helpText}>
                 If this problem persists, please contact your manager or IT support.
               </Text>

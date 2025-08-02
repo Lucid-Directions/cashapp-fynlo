@@ -1,6 +1,9 @@
 from sqlalchemy import Column, String, Boolean, Integer, UniqueConstraint, Index
+<<<<<<< HEAD
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
+=======
+>>>>>>> origin/main
 
 from app.core.database import Base # Assuming Base is correctly defined in app.core.database
 from app.schemas.fee_schemas import PaymentMethodEnum  # Reusing the enum

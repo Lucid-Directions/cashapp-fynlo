@@ -5,7 +5,6 @@ Provides comprehensive business logic validation with iOS-friendly error message
 
 from typing import List, Dict, Any, Optional, Union
 from datetime import datetime, time
-from decimal import Decimal
 import re
 from pydantic import BaseModel
 
@@ -385,7 +384,6 @@ Provides JSON schema validation for all JSONB fields in database models
 import re
 from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, validator, ValidationError
-from jsonschema import validate, ValidationError as JSONSchemaError
 
 
 class AddressSchema(BaseModel):

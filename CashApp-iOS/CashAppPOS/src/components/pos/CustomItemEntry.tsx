@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -10,11 +11,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { OrderItem } from '../../types';
+
 import useAppStore from '../../store/useAppStore';
 import SimpleDecimalInput from '../inputs/SimpleDecimalInput';
 import SimpleTextInput from '../inputs/SimpleTextInput';
+
+import type { OrderItem } from '../../types';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -53,7 +57,7 @@ const commonItems = [
 
 const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) => {
   const { addToCart } = useAppStore();
-  
+
   const [itemName, setItemName] = useState('');
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -62,11 +66,46 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const emojis = [
-    '🍽️', '🥤', '🍺', '☕', '🍷', '🥃', '🍹', '🧃',
-    '🍕', '🍔', '🌮', '🌯', '🥗', '🥙', '🍜', '🍲',
-    '🍰', '🧁', '🍪', '🍩', '🍨', '🍮', '🎂', '🍫',
-    '🍟', '🥨', '🥖', '🧀', '🥓', '🥚', '🥞', '🧇',
-    '💳', '💷', '🎁', '📦', '🚚', '⭐', '❤️', '👍'
+    '🍽️',
+    '🥤',
+    '🍺',
+    '☕',
+    '🍷',
+    '🥃',
+    '🍹',
+    '🧃',
+    '🍕',
+    '🍔',
+    '🌮',
+    '🌯',
+    '🥗',
+    '🥙',
+    '🍜',
+    '🍲',
+    '🍰',
+    '🧁',
+    '🍪',
+    '🍩',
+    '🍨',
+    '🍮',
+    '🎂',
+    '🍫',
+    '🍟',
+    '🥨',
+    '🥖',
+    '🧀',
+    '🥓',
+    '🥚',
+    '🥞',
+    '🧇',
+    '💳',
+    '💷',
+    '🎁',
+    '📦',
+    '🚚',
+    '⭐',
+    '❤️',
+    '👍',
   ];
 
   const handleAddItem = () => {
@@ -74,7 +113,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
       alert('Please enter an item name');
       return;
     }
-    
+
     if (price <= 0) {
       alert('Please enter a valid price');
       return;
@@ -83,8 +122,8 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
     const customItem: OrderItem = {
       id: Date.now(), // Generate unique ID
       name: itemName,
-      price: price,
-      quantity: quantity,
+      price,
+      quantity,
       emoji: selectedEmoji,
       notes: notes || undefined,
     };
@@ -114,13 +153,8 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
   // formatPrice function removed - DecimalInput handles validation internally
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <KeyboardAvoidingView 
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <KeyboardAvoidingView
         style={styles.modalOverlay}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
@@ -141,10 +175,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
                 {commonItems.map((item, index) => (
                   <TouchableOpacity
                     key={index}
-                    style={[
-                      styles.commonItem,
-                      itemName === item.name && styles.commonItemSelected
-                    ]}
+                    style={[styles.commonItem, itemName === item.name && styles.commonItemSelected]}
                     onPress={() => handleCommonItem(item)}
                   >
                     <Text style={styles.commonItemEmoji}>{item.emoji}</Text>
@@ -157,7 +188,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
             {/* Item Details */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Item Details</Text>
-              
+
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Item Name</Text>
                 <View style={styles.nameInputContainer}>
@@ -268,13 +299,10 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
 
           {/* Actions */}
           <View style={styles.actions}>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.cancelButton]}
-              onPress={onClose}
-            >
+            <TouchableOpacity style={[styles.actionButton, styles.cancelButton]} onPress={onClose}>
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.actionButton, styles.clearButton]}
               onPress={handleReset}
@@ -282,7 +310,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
               <Icon name="refresh" size={20} color={Colors.warning} />
               <Text style={styles.clearButtonText}>Clear</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.actionButton, styles.addButton]}
               onPress={handleAddItem}

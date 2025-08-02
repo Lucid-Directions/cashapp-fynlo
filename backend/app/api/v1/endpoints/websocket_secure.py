@@ -3,8 +3,11 @@ Enhanced WebSocket Security with TenantSecurity module
 Ensures proper isolation while maintaining platform owner access
 """
 
+<<<<<<< HEAD
 from fastapi import WebSocket, Depends
 from sqlalchemy.orm import Session
+=======
+>>>>>>> origin/main
 from typing import Optional
 import logging
 
@@ -13,7 +16,6 @@ from app.core.tenant_security import TenantSecurity
 from app.core.websocket import websocket_manager
 
 logger = logging.getLogger(__name__)
-
 
 async def verify_websocket_access_secure(
     restaurant_id: str,
@@ -59,7 +61,6 @@ async def verify_websocket_access_secure(
     
     # User has access to their own restaurant
     return True
-
 
 async def handle_websocket_message_secure(
     message: dict,
@@ -118,12 +119,13 @@ async def handle_websocket_message_secure(
         restaurant_id=restaurant_id
     )
 
-
 class SecureWebSocketManager:
     """
     Enhanced WebSocket manager with tenant isolation
     """
     
+    pass
+
     @staticmethod
     async def broadcast_to_restaurant_secure(
         restaurant_id: str,

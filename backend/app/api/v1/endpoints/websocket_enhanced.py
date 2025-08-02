@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-
 class ConnectionInfo:
     def __init__(self, websocket: WebSocket, user_id: str, restaurant_id: str, client_type: str = "mobile_pos"):
         self.id = f"{user_id}:{datetime.utcnow().timestamp()}"
@@ -34,7 +33,6 @@ class ConnectionInfo:
         self.last_ping = datetime.utcnow()
         self.authenticated = False
         self.missed_pongs = 0
-
 
 class EnhancedWebSocketManager:
     def __init__(self):
@@ -393,7 +391,6 @@ async def init_websocket_services():
     await sync_service.initialize(manager)
     logger.info("WebSocket services initialized")
 
-
 @router.websocket("/ws/{connection_type}/{restaurant_id}")
 async def websocket_endpoint(
     websocket: WebSocket,
@@ -535,7 +532,6 @@ async def websocket_endpoint(
         if connection_id:
             await manager.disconnect(connection_id)
 
-
 async def process_message(connection_id: str, message: dict, db: Session):
     """Process business logic messages"""
     conn_info = manager.connection_map.get(connection_id)
@@ -563,7 +559,6 @@ async def process_message(connection_id: str, message: dict, db: Session):
                 "timestamp": datetime.utcnow().isoformat()
             }
         )
-
 
 # Background task starter
 async def start_health_monitor():

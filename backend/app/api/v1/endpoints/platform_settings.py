@@ -12,13 +12,13 @@ from pydantic import BaseModel, Field
 from app.core.database import get_db, User
 from app.core.exceptions import (
     FynloException,
-    PaymentException,
     ResourceNotFoundException,
     ValidationException
 )
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.services.platform_service import PlatformSettingsService
+from app.core.exceptions import ValidationException, FynloException, ResourceNotFoundException
 
 router = APIRouter()
 
@@ -97,8 +97,7 @@ async def get_service_charge_configuration(
         return config # FastAPI will wrap this in the response_model
     except Exception as e:
         logging.error(f"Error retrieving service charge configuration: {e}", exc_info=True)
-        raise PaymentException(message="Failed to retrieve service charge configuration")
-
+        raise FynloException(message="Failed to retrieve service charge configuration")
 @router.put(
     "/service-charge",
     response_model=ServiceChargeConfigResponse,
@@ -122,8 +121,7 @@ async def update_service_charge_configuration(
             # This case might be tricky if partial updates occurred.
             # The service method tries to update all and returns True if all succeed.
             # If it returns False, it implies one or more updates failed but didn't raise an exception (e.g. key not found).
-            raise PaymentException(message="Failed to update some service charge settings")
-
+            raise FynloException(message="Failed to update some service charge settings")
         # Fetch the updated configuration to return
         updated_config = await service.get_service_charge_config()
         return updated_config
@@ -131,8 +129,7 @@ async def update_service_charge_configuration(
         raise ValidationException(message="An error occurred processing the request")
     except Exception as e:
         logging.error(f"Error updating service charge configuration: {e}", exc_info=True)
-        raise PaymentException(message="Failed to update service charge configuration")
-
+        raise FynloException(message="Failed to update service charge configuration")
 @router.get("/settings/{config_key}")
 async def get_platform_setting(
     config_key: str,
@@ -145,7 +142,10 @@ async def get_platform_setting(
         setting = await service.get_platform_setting(config_key)
         
         if not setting:
-            raise ResourceNotFoundException(resource="Resource", message=f"Platform setting ")
+            raise ResourceNotFoundException(
+                resource="Platform setting",
+                message=f"Platform setting '{config_key}' not found"
+            )
         
         return APIResponseHelper.success(
             data=setting,
@@ -178,7 +178,10 @@ async def update_platform_setting(
         )
         
         if not success:
-            raise ResourceNotFoundException(resource="Resource", message=f"Platform setting ")
+            raise ResourceNotFoundException(
+                resource="Platform setting",
+                message=f"Platform setting '{config_key}' not found"
+            )
         
         # Log the change for audit
         if http_request:
@@ -274,8 +277,7 @@ async def calculate_payment_fee(
     """Calculate effective payment fee for given parameters"""
     try:
         if amount <= 0:
-            raise ValidationException(message="Amount must be positive", field="amount")
-        
+            raise ValidationException(message="Amount must be positive")        
         service = PlatformSettingsService(db)
         fee_calculation = await service.calculate_effective_fee(
             payment_method=payment_method,
@@ -333,7 +335,10 @@ async def update_feature_flag(
         )
         
         if not success:
-            raise ResourceNotFoundException(resource="Resource", message=f"Feature flag ")
+            raise ResourceNotFoundException(
+                resource="Feature flag",
+                message=f"Feature flag '{feature_key}' not found"
+            )
         
         return APIResponseHelper.success(
             data={'feature_key': feature_key, 'is_enabled': request.is_enabled},
@@ -389,7 +394,8 @@ async def initialize_default_settings(
                 message="Default platform settings initialized successfully"
             )
         else:
-            raise FynloException(message="Failed to initialize default settings", status_code=500)
+            raise FynloException(message="Failed to initialize default settings"
+            )
         
     except Exception as e:
         raise FynloException(message="An error occurred processing the request", status_code=500)
@@ -451,7 +457,8 @@ async def set_restaurant_override(
                 message=f"Restaurant override set successfully ({status_msg})"
             )
         else:
-            raise FynloException(message="Failed to set restaurant override", status_code=500)
+            raise FynloException(message="Failed to set restaurant override"
+            )
         
     except ValueError as e:
         raise ValidationException(message="An error occurred processing the request")

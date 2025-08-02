@@ -3,11 +3,11 @@ Integration tests for cached endpoints
 """
 
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.core.database import User, Restaurant, Category, Product, get_db
+from app.core.database import User, Category, Product, get_db
 from app.core.cache_service import cache_service
 from app.core.auth import get_current_user
 from app.main import app
@@ -295,7 +295,6 @@ class TestCacheMetricsEndpoint:
         """Test getting cache metrics"""
         # This would be a new endpoint to implement
         # Skip for now as it's not in the current implementation
-        pass
 
 
 @pytest.mark.asyncio
@@ -303,4 +302,3 @@ async def test_concurrent_cache_access():
     """Test concurrent access to cached endpoints"""
     # Test that multiple concurrent requests handle caching correctly
     # This would require more complex setup with asyncio
-    pass

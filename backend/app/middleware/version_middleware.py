@@ -4,7 +4,10 @@ Provides automatic version detection and backward compatibility
 """
 
 from fastapi import Request, Response
+<<<<<<< HEAD
 from fastapi.responses import JSONResponse
+=======
+>>>>>>> origin/main
 import re
 from typing import Optional
 import logging
@@ -22,6 +25,8 @@ class APIVersionMiddleware:
     - Graceful fallback mechanisms
     """
     
+    pass
+
     def __init__(self, app):
         self.app = app
         
@@ -120,7 +125,6 @@ class APIVersionMiddleware:
         
         return None
 
-
 def add_version_headers_to_response(request: Request, response: Response) -> Response:
     """
     Add version information to response headers
@@ -135,12 +139,13 @@ def add_version_headers_to_response(request: Request, response: Response) -> Res
     
     return response
 
-
 class WebSocketPathNormalizer:
     """
     Utility class for WebSocket path normalization
     """
     
+    pass
+
     @staticmethod
     def normalize_ws_path(path: str, restaurant_id: str, connection_type: str = "general") -> str:
         """
@@ -180,7 +185,6 @@ class WebSocketPathNormalizer:
                 return match.group(1)
         
         return None
-
 
 # Configuration constants
 API_VERSION_CONFIG = {

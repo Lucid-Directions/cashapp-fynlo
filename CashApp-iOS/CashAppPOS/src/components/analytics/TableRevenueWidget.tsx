@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   View,
   Text,
@@ -8,7 +9,9 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../../design-system/ThemeProvider';
 
 interface TableRevenueData {
@@ -37,7 +40,7 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
     try {
       setLoading(true);
       setError(null);
-      
+
       // Mock data for demo - in real app, call API
       const mockData: TableRevenueData[] = [
         {
@@ -52,9 +55,9 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
           table_id: 'table4',
           table_name: 'T4',
           section_name: 'Main Dining',
-          total_revenue: 189.50,
+          total_revenue: 189.5,
           order_count: 5,
-          average_order_value: 37.90,
+          average_order_value: 37.9,
         },
         {
           table_id: 'table3',
@@ -76,19 +79,19 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
           table_id: 'table6',
           table_name: 'B1',
           section_name: 'Bar Area',
-          total_revenue: 67.50,
+          total_revenue: 67.5,
           order_count: 6,
           average_order_value: 11.25,
         },
       ];
-      
+
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       setData(mockData);
     } catch (err) {
       setError('Failed to load table revenue data');
-      console.error('Error fetching table revenue:', err);
+      logger.error('Error fetching table revenue:', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -107,11 +110,16 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
   const totalRevenue = data.reduce((sum, table) => sum + table.total_revenue, 0);
   const totalOrders = data.reduce((sum, table) => sum + table.order_count, 0);
 
-  const renderTableRow = (table: TableRevenueData, index: number) => (
-    <View key={table.table_id} style={[styles.tableRow, { borderBottomColor: theme.colors.border }]}>
+  const renderTableRow = (table: TableRevenueData, _index: number) => (
+    <View
+      key={table.table_id}
+      style={[styles.tableRow, { borderBottomColor: theme.colors.border }]}
+    >
       <View style={styles.tableInfo}>
         <Text style={[styles.tableName, { color: theme.colors.text }]}>{table.table_name}</Text>
-        <Text style={[styles.sectionName, { color: theme.colors.textSecondary }]}>{table.section_name}</Text>
+        <Text style={[styles.sectionName, { color: theme.colors.textSecondary }]}>
+          {table.section_name}
+        </Text>
       </View>
       <View style={styles.revenueInfo}>
         <Text style={[styles.revenue, { color: theme.colors.success }]}>
@@ -138,7 +146,9 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>Loading...</Text>
+          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+            Loading...
+          </Text>
         </View>
       </View>
     );
@@ -174,30 +184,37 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
         <View>
           <Text style={[styles.title, { color: theme.colors.text }]}>Revenue by Table</Text>
           <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-            {selectedPeriod === 'today' ? 'Today' : selectedPeriod === 'week' ? 'This Week' : 'This Month'}
+            {selectedPeriod === 'today'
+              ? 'Today'
+              : selectedPeriod === 'week'
+              ? 'This Week'
+              : 'This Month'}
           </Text>
         </View>
-        {onPress && (
-          <Icon name="chevron-right" size={24} color={theme.colors.textSecondary} />
-        )}
+        {onPress && <Icon name="chevron-right" size={24} color={theme.colors.textSecondary} />}
       </View>
 
       <View style={styles.periodSelector}>
-        {(['today', 'week', 'month'] as const).map(period => (
+        {(['today', 'week', 'month'] as const).map((period) => (
           <TouchableOpacity
             key={period}
             style={[
               styles.periodButton,
               { borderColor: theme.colors.border },
-              selectedPeriod === period && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
+              selectedPeriod === period && {
+                backgroundColor: theme.colors.primary,
+                borderColor: theme.colors.primary,
+              },
             ]}
             onPress={() => setSelectedPeriod(period)}
           >
-            <Text style={[
-              styles.periodButtonText,
-              { color: theme.colors.text },
-              selectedPeriod === period && { color: theme.colors.white }
-            ]}>
+            <Text
+              style={[
+                styles.periodButtonText,
+                { color: theme.colors.text },
+                selectedPeriod === period && { color: theme.colors.white },
+              ]}
+            >
               {period === 'today' ? 'Today' : period === 'week' ? 'Week' : 'Month'}
             </Text>
           </TouchableOpacity>
@@ -209,19 +226,23 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
           <Text style={[styles.summaryValue, { color: theme.colors.primary }]}>
             £{totalRevenue.toFixed(2)}
           </Text>
-          <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Total Revenue</Text>
+          <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+            Total Revenue
+          </Text>
         </View>
         <View style={styles.summaryItem}>
           <Text style={[styles.summaryValue, { color: theme.colors.secondary }]}>
             {totalOrders}
           </Text>
-          <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Total Orders</Text>
+          <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+            Total Orders
+          </Text>
         </View>
         <View style={styles.summaryItem}>
-          <Text style={[styles.summaryValue, { color: theme.colors.warning }]}>
-            {data.length}
+          <Text style={[styles.summaryValue, { color: theme.colors.warning }]}>{data.length}</Text>
+          <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+            Active Tables
           </Text>
-          <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Active Tables</Text>
         </View>
       </View>
 
@@ -247,15 +268,16 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
           <>
             <View style={[styles.headerRow, { borderBottomColor: theme.colors.border }]}>
               <Text style={[styles.headerText, { color: theme.colors.textSecondary }]}>Table</Text>
-              <Text style={[styles.headerText, { color: theme.colors.textSecondary }]}>Revenue</Text>
-              <Text style={[styles.headerText, { color: theme.colors.textSecondary }]}>Avg Order</Text>
+              <Text style={[styles.headerText, { color: theme.colors.textSecondary }]}>
+                Revenue
+              </Text>
+              <Text style={[styles.headerText, { color: theme.colors.textSecondary }]}>
+                Avg Order
+              </Text>
             </View>
             {data.slice(0, compact ? 3 : data.length).map(renderTableRow)}
             {compact && data.length > 3 && (
-              <TouchableOpacity
-                style={styles.viewMoreButton}
-                onPress={onPress}
-              >
+              <TouchableOpacity style={styles.viewMoreButton} onPress={onPress}>
                 <Text style={[styles.viewMoreText, { color: theme.colors.primary }]}>
                   View all {data.length} tables
                 </Text>

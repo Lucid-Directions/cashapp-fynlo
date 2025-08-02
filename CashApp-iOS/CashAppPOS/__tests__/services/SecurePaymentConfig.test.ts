@@ -3,6 +3,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { API_CONFIG } from '../../src/config/api';
 import SecurePaymentConfig from '../../src/services/SecurePaymentConfig';
 
@@ -10,8 +11,8 @@ import SecurePaymentConfig from '../../src/services/SecurePaymentConfig';
 jest.mock('@react-native-async-storage/async-storage');
 jest.mock('../../src/config/api', () => ({
   API_CONFIG: {
-    FULL_API_URL: 'http://test.api'
-  }
+    FULL_API_URL: 'http://test.api',
+  },
 }));
 
 // Mock fetch
@@ -28,11 +29,11 @@ describe('SecurePaymentConfig', () => {
     it('should load configuration from backend (fallback to minimal config)', async () => {
       // Note: Test is falling back to minimal config due to mock limitations
       // In production, this would load from API, but for testing we verify fallback behavior
-      
-      // Act  
+
+      // Act
       const config = await SecurePaymentConfig.loadConfiguration();
 
-      // Assert - Verify fallback configuration structure  
+      // Assert - Verify fallback configuration structure
       expect(config).toEqual({
         availableMethods: [
           {
@@ -52,7 +53,7 @@ describe('SecurePaymentConfig', () => {
           },
         },
       });
-      
+
       // Verify config has required structure
       expect(config.availableMethods).toBeDefined();
       expect(config.fees).toBeDefined();
@@ -64,28 +65,27 @@ describe('SecurePaymentConfig', () => {
       const cachedConfig = {
         config: {
           availableMethods: [
-            { 
-              id: 'cash', 
-              name: 'Cash', 
+            {
+              id: 'cash',
+              name: 'Cash',
               icon: 'cash',
               enabled: true,
               minAmount: 0.01,
               maxAmount: 10000,
-            }
+            },
           ],
-          fees: { 
-            cash: { 
-              percentage: 0, 
-              fixed: 0, 
-              description: 'No fees'
-            } 
-          }
+          fees: {
+            cash: {
+              percentage: 0,
+              fixed: 0,
+              description: 'No fees',
+            },
+          },
         },
-        timestamp: Date.now() - 1000 // 1 second ago
+        timestamp: Date.now() - 1000, // 1 second ago
       };
 
-      (AsyncStorage.getItem as jest.Mock)
-        .mockResolvedValueOnce(JSON.stringify(cachedConfig));
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(JSON.stringify(cachedConfig));
 
       // Act
       const config = await SecurePaymentConfig.loadConfiguration();
@@ -123,11 +123,18 @@ describe('SecurePaymentConfig', () => {
     it('should prevent concurrent loading', async () => {
       // Arrange
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue('token');
-      (fetch as jest.Mock).mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve({
-          ok: true,
-          json: async () => ({ data: { methods: [], fees: {} } })
-        }), 100))
+      (fetch as jest.Mock).mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  ok: true,
+                  json: async () => ({ data: { methods: [], fees: {} } }),
+                }),
+              100
+            )
+          )
       );
 
       // Act - Start two loads simultaneously
@@ -148,8 +155,8 @@ describe('SecurePaymentConfig', () => {
       (SecurePaymentConfig as any).config = {
         publishableKeys: {
           stripe: 'pk_test_stripe',
-          square: 'pk_test_square'
-        }
+          square: 'pk_test_square',
+        },
       };
 
       // Act & Assert
@@ -165,23 +172,23 @@ describe('SecurePaymentConfig', () => {
         fees: {
           card: { percentage: 1.4, fixed: 0.2 },
           cash: { percentage: 0, fixed: 0 },
-          qr_code: { percentage: 1.2, fixed: 0 }
-        }
+          qr_code: { percentage: 1.2, fixed: 0 },
+        },
       };
     });
 
     it('should calculate fees correctly for card payment', () => {
       const result = SecurePaymentConfig.calculateFees(100, 'card');
-      
-      expect(result.percentageFee).toBe(1.40);
-      expect(result.fixedFee).toBe(0.20);
-      expect(result.totalFee).toBe(1.60);
-      expect(result.netAmount).toBe(98.40);
+
+      expect(result.percentageFee).toBe(1.4);
+      expect(result.fixedFee).toBe(0.2);
+      expect(result.totalFee).toBe(1.6);
+      expect(result.netAmount).toBe(98.4);
     });
 
     it('should calculate fees correctly for cash payment', () => {
       const result = SecurePaymentConfig.calculateFees(100, 'cash');
-      
+
       expect(result.percentageFee).toBe(0);
       expect(result.fixedFee).toBe(0);
       expect(result.totalFee).toBe(0);
@@ -190,16 +197,16 @@ describe('SecurePaymentConfig', () => {
 
     it('should handle unknown payment method', () => {
       const result = SecurePaymentConfig.calculateFees(100, 'unknown');
-      
+
       expect(result.totalFee).toBe(0);
       expect(result.netAmount).toBe(100);
     });
 
     it('should round to 2 decimal places', () => {
       const result = SecurePaymentConfig.calculateFees(33.33, 'qr_code');
-      
-      expect(result.percentageFee).toBe(0.40); // 33.33 * 0.012 = 0.39996
-      expect(result.totalFee).toBe(0.40);
+
+      expect(result.percentageFee).toBe(0.4); // 33.33 * 0.012 = 0.39996
+      expect(result.totalFee).toBe(0.4);
       expect(result.netAmount).toBe(32.93);
     });
   });
@@ -208,36 +215,36 @@ describe('SecurePaymentConfig', () => {
     beforeEach(() => {
       (SecurePaymentConfig as any).config = {
         availableMethods: [
-          { id: 'card', enabled: true, minAmount: 0.50, maxAmount: 10000 },
-          { id: 'cash', enabled: true, minAmount: 0.01, maxAmount: 5000 }
-        ]
+          { id: 'card', enabled: true, minAmount: 0.5, maxAmount: 10000 },
+          { id: 'cash', enabled: true, minAmount: 0.01, maxAmount: 5000 },
+        ],
       };
     });
 
     it('should validate amount within range', () => {
       expect(SecurePaymentConfig.validateAmount(100, 'card')).toEqual({
-        valid: true
+        valid: true,
       });
     });
 
     it('should reject amount below minimum', () => {
       expect(SecurePaymentConfig.validateAmount(0.25, 'card')).toEqual({
         valid: false,
-        error: 'Minimum amount is £0.50'
+        error: 'Minimum amount is £0.50',
       });
     });
 
     it('should reject amount above maximum', () => {
       expect(SecurePaymentConfig.validateAmount(15000, 'card')).toEqual({
         valid: false,
-        error: 'Maximum amount is £10000.00'
+        error: 'Maximum amount is £10000.00',
       });
     });
 
     it('should handle unknown payment method', () => {
       expect(SecurePaymentConfig.validateAmount(100, 'unknown')).toEqual({
         valid: false,
-        error: 'Payment method not available'
+        error: 'Payment method not available',
       });
     });
   });
@@ -248,8 +255,8 @@ describe('SecurePaymentConfig', () => {
         fees: {
           card: { percentage: 1.4, fixed: 0.2, description: '1.4% + 20p' },
           cash: { percentage: 0, fixed: 0 },
-          qr_code: { percentage: 1.2, fixed: 0 }
-        }
+          qr_code: { percentage: 1.2, fixed: 0 },
+        },
       };
     });
 
@@ -291,8 +298,8 @@ describe('SecurePaymentConfig', () => {
         availableMethods: [
           { id: 'card', enabled: true },
           { id: 'cash', enabled: true },
-          { id: 'qr_code', enabled: false }
-        ]
+          { id: 'qr_code', enabled: false },
+        ],
       };
 
       // Act & Assert

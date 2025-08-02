@@ -9,17 +9,18 @@ All other users are restricted to their own restaurant's data.
 from typing import Optional, Union, List
 from fastapi import status, Request
 from sqlalchemy.orm import Session, Query
-from sqlalchemy import select, func
-from app.models import User, Restaurant, UserRestaurant
+from sqlalchemy import func
+from app.models import User, UserRestaurant
 from app.core.security_monitor import security_monitor, SecurityEventType
 from app.core.config import settings
 from app.core.validators import validate_uuid_format
 from app.core.exceptions import FynloException, ValidationException, AuthorizationException
 
-
 class TenantSecurity:
     """Handles multi-tenant data isolation and access control"""
     
+    pass
+
     @staticmethod
     def is_platform_owner(user: User) -> bool:
         """
@@ -81,8 +82,7 @@ class TenantSecurity:
             return  # Full access granted
         
         # Check if user has access to this restaurant (multi-restaurant support)
-        has_access = False
-        
+        has_access = False        
         # First check legacy single restaurant assignment
         if user.restaurant_id and str(user.restaurant_id) == str(restaurant_id):
             has_access = True

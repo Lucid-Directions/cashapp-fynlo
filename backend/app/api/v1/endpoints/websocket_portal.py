@@ -11,6 +11,10 @@ from datetime import datetime
 
 from app.core.database import get_db, User, Restaurant
 from app.core.websocket import (
+import logging
+
+logger = logging.getLogger(__name__)
+
     websocket_manager, 
     ConnectionType, 
     EventType,
@@ -125,7 +129,6 @@ async def websocket_portal_endpoint(
         if connection_id:
             await websocket_manager.disconnect(connection_id)
 
-
 @router.websocket("/ws/platform")
 async def websocket_platform_endpoint(
     websocket: WebSocket,
@@ -239,7 +242,6 @@ async def websocket_platform_endpoint(
         if connection_id:
             await websocket_manager.disconnect(connection_id)
 
-
 async def handle_portal_update_request(
     websocket: WebSocket,
     connection_id: str,
@@ -277,7 +279,6 @@ async def handle_portal_update_request(
             
     except Exception as e:
         logger.error(f"Portal update request error: {str(e)}")
-
 
 async def handle_platform_stats_request(websocket: WebSocket, db: Session):
     """Handle platform statistics request"""

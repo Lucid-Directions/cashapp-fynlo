@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import {
   Modal,
   View,
@@ -12,8 +13,11 @@ import {
   PermissionsAndroid,
   Platform,
 } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
+import { logger } from '../../utils/logger';
 // import { scanReceipt, ScannedItemAPIResponse } from '../../services/InventoryApiService'; // Temporarily disabled
 // import { launchCamera, ImagePickerResponse, MediaType } from 'react-native-image-picker'; // Temporarily disabled
 
@@ -30,7 +34,7 @@ interface ReceiptItem {
   id: string; // Client-side ID for list management
   name: string;
   quantity: string; // Editable as string
-  price: string;    // Editable as string
+  price: string; // Editable as string
   sku?: string | null; // Store SKU match from API
   originalName?: string; // Store original parsed name from API
 }
@@ -45,25 +49,22 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   const { theme } = useTheme();
   const styles = useThemedStyles(createStyles);
   const [step, setStep] = useState<'capture' | 'spinning' | 'review' | 'submitting'>('capture');
-  const [capturedImage, setCapturedImage] = useState<any>(null); // Placeholder for image data
+  const [_capturedImage, _setCapturedImage] = useState<unknown>(null); // Placeholder for image data
   const [parsedItems, setParsedItems] = useState<ReceiptItem[]>([]);
 
-  const requestCameraPermission = async () => {
+  const _requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
       try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          {
-            title: 'Camera Permission',
-            message: 'This app needs access to camera to scan receipts',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
+        const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
+          title: 'Camera Permission',
+          message: 'This app needs access to camera to scan receipts',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        });
         return granted === PermissionsAndroid.RESULTS.GRANTED;
       } catch (err) {
-        console.warn(err);
+        logger.warn(err);
         return false;
       }
     }
@@ -74,7 +75,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     // For now, show an alert that camera scanning is temporarily disabled
     // This prevents crashes while the feature is being properly integrated
     Alert.alert(
-      'Camera Scanning', 
+      'Camera Scanning',
       'Receipt scanning via camera is currently being integrated. For now, you can manually add items using the + button.',
       [
         {
@@ -86,12 +87,12 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
               { id: '2', name: 'Bread', quantity: '1', price: '2.20', sku: null },
             ]);
             setStep('review');
-          }
+          },
         },
-        { text: 'Cancel', style: 'cancel' }
+        { text: 'Cancel', style: 'cancel' },
       ]
     );
-    
+
     // TODO: Implement proper camera integration when react-native-image-picker is configured
     /*
     try {
@@ -112,7 +113,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
 
       launchCamera(options, (response: ImagePickerResponse) => {
         if (response.didCancel || response.errorMessage) {
-          console.log('Camera cancelled or error:', response.errorMessage);
+          logger.info('Camera cancelled or error:', response.errorMessage);
           return;
         }
 
@@ -126,22 +127,34 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
         }
       });
     } catch (error) {
-      console.error('Camera error:', error);
+      logger.error('Camera error:', error);
       Alert.alert('Camera Error', 'Unable to access camera. Please try again.');
     }
     */
   };
 
-  const processReceiptImage = async (base64Image: string) => {
+  const _processReceiptImage = async (_base64Image: string) => {
     // Temporarily disabled API call to prevent crashes
     try {
       // Simulate processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // Mock response for testing
       const mockApiResponse: ScannedItemAPIResponse[] = [
-        { name: 'Scanned Item 1', quantity: 2, price: 5.99, sku_match: null, raw_text_name: 'Item 1' },
-        { name: 'Scanned Item 2', quantity: 1, price: 12.50, sku_match: 'SKU123', raw_text_name: 'Item 2' },
+        {
+          name: 'Scanned Item 1',
+          quantity: 2,
+          price: 5.99,
+          sku_match: null,
+          raw_text_name: 'Item 1',
+        },
+        {
+          name: 'Scanned Item 2',
+          quantity: 1,
+          price: 12.5,
+          sku_match: 'SKU123',
+          raw_text_name: 'Item 2',
+        },
       ];
 
       const clientReceiptItems: ReceiptItem[] = mockApiResponse.map((item, index) => ({
@@ -156,11 +169,11 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
       setParsedItems(clientReceiptItems);
       setStep('review');
     } catch (error) {
-      console.error('Error scanning receipt via API:', error);
+      logger.error('Error scanning receipt via API:', error);
       Alert.alert('Error Processing Receipt', 'Could not process the receipt. Please try again.');
       setStep('capture'); // Go back to capture step on error
     }
-    
+
     // TODO: Implement real API call when backend is properly connected
     /*
     try {
@@ -178,7 +191,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
       setParsedItems(clientReceiptItems);
       setStep('review');
     } catch (error) {
-      console.error('Error scanning receipt via API:', error);
+      logger.error('Error scanning receipt via API:', error);
       Alert.alert('Error Processing Receipt', error.message || 'Could not process the receipt. Please try again.');
       setStep('capture'); // Go back to capture step on error
     }
@@ -186,20 +199,20 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   };
 
   const handleItemChange = (id: string, field: 'name' | 'quantity' | 'price', value: string) => {
-    setParsedItems(prevItems =>
-      prevItems.map(item => (item.id === id ? { ...item, [field]: value } : item))
+    setParsedItems((prevItems) =>
+      prevItems.map((item) => (item.id === id ? { ...item, [field]: value } : item))
     );
   };
 
   const handleAddItem = () => {
-    setParsedItems(prevItems => [
+    setParsedItems((prevItems) => [
       ...prevItems,
       { id: Date.now().toString(), name: '', quantity: '1', price: '0.00' },
     ]);
   };
 
   const handleRemoveItem = (id: string) => {
-    setParsedItems(prevItems => prevItems.filter(item => item.id !== id));
+    setParsedItems((prevItems) => prevItems.filter((item) => item.id !== id));
   };
 
   const handleSubmit = async () => {
@@ -222,13 +235,13 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     setStep('submitting');
     try {
       // Simulate submission
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       onSubmit(parsedItems);
       Alert.alert('Success', 'Receipt items submitted successfully!');
       onClose(); // Close modal on successful submission
     } catch (error) {
       Alert.alert('Error', 'Failed to submit items. Please try again.');
-      console.error('Submission error:', error);
+      logger.error('Submission error:', error);
     } finally {
       // Reset state if modal is kept open, or handled by onClose re-initializing.
       // For now, onClose will reset it when InventoryScreen re-renders modal.
@@ -262,27 +275,27 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     <View style={styles.stepContainer}>
       <Text style={styles.modalTitle}>Review Items</Text>
       <ScrollView style={styles.itemList}>
-        {parsedItems.map((item, index) => (
+        {parsedItems.map((item, _index) => (
           <View key={item.id} style={styles.itemRow}>
             <View style={styles.itemInputs}>
               <TextInput
                 style={[styles.input, styles.nameInput]}
                 placeholder="Item Name"
                 value={item.name}
-                onChangeText={text => handleItemChange(item.id, 'name', text)}
+                onChangeText={(text) => handleItemChange(item.id, 'name', text)}
               />
               <TextInput
                 style={[styles.input, styles.quantityInput]}
                 placeholder="Qty"
                 value={item.quantity}
-                onChangeText={text => handleItemChange(item.id, 'quantity', text)}
+                onChangeText={(text) => handleItemChange(item.id, 'quantity', text)}
                 keyboardType="numeric"
               />
               <TextInput
                 style={[styles.input, styles.priceInput]}
                 placeholder="Price"
                 value={item.price}
-                onChangeText={text => handleItemChange(item.id, 'price', text)}
+                onChangeText={(text) => handleItemChange(item.id, 'price', text)}
                 keyboardType="decimal-pad"
               />
             </View>
@@ -309,7 +322,6 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     </View>
   );
 
-
   return (
     <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
@@ -327,147 +339,150 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   );
 };
 
-const createStyles = (theme: any) => StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    width: '90%',
-    maxHeight: '85%',
-    backgroundColor: theme.colors.white,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  closeButton: {
-    alignSelf: 'flex-end',
-    padding: 5,
-  },
-  stepContainer: {
-    alignItems: 'center',
-    width: '100%',
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: theme.colors.text,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  cameraPreviewPlaceholder: {
-    width: '100%',
-    height: 200, // Adjust as needed
-    backgroundColor: theme.colors.lightGray,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  placeholderText: {
-    color: theme.colors.darkGray,
-    marginTop: 10,
-  },
-  captureButton: {
-    flexDirection: 'row',
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  submitButton: {
-    backgroundColor: theme.colors.success[500], // Or primary
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 15,
-    width: '100%',
-  },
-  buttonText: {
-    color: theme.colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  loadingText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.colors.text,
-    marginTop: 15,
-    marginBottom: 5,
-  },
-  loadingSubtitle: {
-    fontSize: 14,
-    color: theme.colors.darkGray,
-    marginBottom: 20,
-  },
-  itemList: {
-    width: '100%',
-    maxHeight: 350, // Adjust based on screen
-    marginBottom: 10,
-  },
-  itemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  itemInputs: {
-    flex: 1,
-    flexDirection: 'row',
-    gap: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    fontSize: 14,
-    backgroundColor: theme.colors.white, // Ensure input background is white
-  },
-  nameInput: {
-    flex: 0.5, // Takes 50% of space in itemInputs
-  },
-  quantityInput: {
-    flex: 0.2, // Takes 20%
-    textAlign: 'center',
-  },
-  priceInput: {
-    flex: 0.3, // Takes 30%
-    textAlign: 'right',
-  },
-  deleteButton: {
-    padding: 5,
-    marginLeft: 10,
-  },
-  addItemButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: theme.colors.primary,
-    alignSelf: 'flex-start',
-    marginBottom: 15,
-  },
-  addItemButtonText: {
-    color: theme.colors.primary,
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 6,
-  },
-});
+const createStyles = (theme: unknown) =>
+  StyleSheet.create({
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContainer: {
+      width: '90%',
+      maxHeight: '85%',
+      backgroundColor: theme.colors.white,
+      borderRadius: 16,
+      padding: 20,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+    closeButton: {
+      alignSelf: 'flex-end',
+      padding: 5,
+    },
+    stepContainer: {
+      alignItems: 'center',
+      width: '100%',
+    },
+    modalTitle: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      color: theme.colors.text,
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+    cameraPreviewPlaceholder: {
+      width: '100%',
+      height: 200, // Adjust as needed
+      backgroundColor: theme.colors.lightGray,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 8,
+      marginBottom: 20,
+    },
+    placeholderText: {
+      color: theme.colors.darkGray,
+      marginTop: 10,
+    },
+    captureButton: {
+      flexDirection: 'row',
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 12,
+      paddingHorizontal: 30,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    submitButton: {
+      backgroundColor: theme.colors.success[500], // Or primary
+      paddingVertical: 12,
+      paddingHorizontal: 30,
+      borderRadius: 8,
+      alignItems: 'center',
+      marginTop: 15,
+      width: '100%',
+    },
+    buttonText: {
+      color: theme.colors.white,
+      fontSize: 16,
+      fontWeight: '600',
+      marginLeft: 8,
+    },
+    loadingText: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginTop: 15,
+      marginBottom: 5,
+    },
+    loadingSubtitle: {
+      fontSize: 14,
+      color: theme.colors.darkGray,
+      marginBottom: 20,
+    },
+    itemList: {
+      width: '100%',
+      maxHeight: 350, // Adjust based on screen
+      marginBottom: 10,
+    },
+    itemRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 10,
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    itemInputs: {
+      flex: 1,
+      flexDirection: 'row',
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 6,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      fontSize: 14,
+      backgroundColor: theme.colors.white, // Ensure input background is white
+    },
+    nameInput: {
+      flex: 0.5, // Takes 50% of space in itemInputs
+      marginRight: 4,
+    },
+    quantityInput: {
+      flex: 0.2, // Takes 20%
+      textAlign: 'center',
+      marginHorizontal: 4,
+    },
+    priceInput: {
+      flex: 0.3, // Takes 30%
+      textAlign: 'right',
+      marginLeft: 4,
+    },
+    deleteButton: {
+      padding: 5,
+      marginLeft: 10,
+    },
+    addItemButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 10,
+      paddingHorizontal: 15,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+      alignSelf: 'flex-start',
+      marginBottom: 15,
+    },
+    addItemButtonText: {
+      color: theme.colors.primary,
+      fontSize: 14,
+      fontWeight: '600',
+      marginLeft: 6,
+    },
+  });
 
 export default ReceiptScanModal;

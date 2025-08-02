@@ -11,7 +11,7 @@ const issues = {
   dollarSign: { found: false, details: [] },
   giftCard: { found: false, details: [] },
   themeColors: { found: false, details: [] },
-  profileCrash: { found: false, details: [] }
+  profileCrash: { found: false, details: [] },
 };
 
 // Helper function to read file
@@ -32,22 +32,22 @@ if (paymentContent) {
   // Check if useEffect has proper dependencies
   const useEffectMatch = paymentContent.match(/useEffect\(\(\) => \{[\s\S]*?\}, \[(.*?)\]\)/g);
   if (useEffectMatch) {
-    const hasProperDeps = useEffectMatch.some(match => 
-      match.includes('enabledPaymentMethods') && match.includes('selectedPaymentMethod')
+    const hasProperDeps = useEffectMatch.some(
+      (match) => match.includes('enabledPaymentMethods') && match.includes('selectedPaymentMethod')
     );
     if (!hasProperDeps) {
       issues.paymentMethodStuck.found = true;
       issues.paymentMethodStuck.details.push('useEffect missing proper dependencies');
     }
   }
-  
+
   // Check if payment methods are selectable
   const hasOnPress = paymentContent.includes('onPress={() => setSelectedPaymentMethod');
   if (!hasOnPress) {
     issues.paymentMethodStuck.found = true;
     issues.paymentMethodStuck.details.push('Payment methods missing onPress handlers');
   }
-  
+
   console.log(issues.paymentMethodStuck.found ? '❌ Issue found' : '✅ Looks good');
 }
 
@@ -57,14 +57,14 @@ const screenDirs = [
   '../src/screens/main',
   '../src/screens/payment',
   '../src/screens/orders',
-  '../src/components'
+  '../src/components',
 ];
 
-screenDirs.forEach(dir => {
+screenDirs.forEach((dir) => {
   const fullPath = path.join(__dirname, dir);
   if (fs.existsSync(fullPath)) {
     const files = fs.readdirSync(fullPath);
-    files.forEach(file => {
+    files.forEach((file) => {
       if (file.endsWith('.tsx') || file.endsWith('.ts')) {
         const content = readFile(path.join(fullPath, file));
         if (content && content.includes('$')) {
@@ -84,7 +84,10 @@ console.log(issues.dollarSign.found ? '❌ Dollar signs found' : '✅ Using £ c
 
 // 3. Check for Gift Card
 console.log('\n3️⃣ Checking for Gift Card references...');
-const paymentMethodsPath = path.join(__dirname, '../src/screens/settings/business/PaymentMethodsScreen.tsx');
+const paymentMethodsPath = path.join(
+  __dirname,
+  '../src/screens/settings/business/PaymentMethodsScreen.tsx'
+);
 const paymentMethodsContent = readFile(paymentMethodsPath);
 
 if (paymentMethodsContent) {
@@ -92,12 +95,12 @@ if (paymentMethodsContent) {
     issues.giftCard.found = true;
     issues.giftCard.details.push('Gift card still present in PaymentMethodsScreen');
   }
-  
+
   if (!paymentMethodsContent.includes('QR Code Payment')) {
     issues.giftCard.found = true;
     issues.giftCard.details.push('QR Code Payment not found');
   }
-  
+
   console.log(issues.giftCard.found ? '❌ Gift card still present' : '✅ QR Code implemented');
 }
 
@@ -108,24 +111,31 @@ const themeContent = readFile(themeSwitcherPath);
 
 if (themeContent) {
   const colorThemes = [
-    'Fynlo Green', 'Ocean Blue', 'Royal Purple', 'Sunset Orange',
-    'Cherry Red', 'Emerald Teal', 'Deep Indigo', 'Rose Pink',
-    'Fresh Lime', 'Golden Amber'
+    'Fynlo Green',
+    'Ocean Blue',
+    'Royal Purple',
+    'Sunset Orange',
+    'Cherry Red',
+    'Emerald Teal',
+    'Deep Indigo',
+    'Rose Pink',
+    'Fresh Lime',
+    'Golden Amber',
   ];
-  
-  const foundThemes = colorThemes.filter(theme => themeContent.includes(theme));
-  
+
+  const foundThemes = colorThemes.filter((theme) => themeContent.includes(theme));
+
   if (foundThemes.length < 10) {
     issues.themeColors.found = true;
     issues.themeColors.details.push(`Only ${foundThemes.length}/10 color themes found`);
   }
-  
+
   // Check if colors variant is implemented
   if (!themeContent.includes("variant === 'colors'")) {
     issues.themeColors.found = true;
     issues.themeColors.details.push('Colors variant not implemented');
   }
-  
+
   console.log(issues.themeColors.found ? '❌ Missing color themes' : '✅ All 10 colors present');
 }
 
@@ -140,21 +150,24 @@ if (profileContent) {
     issues.profileCrash.found = true;
     issues.profileCrash.details.push('Unsafe profile.photo access');
   }
-  
+
   // Check for user null check
   if (!profileContent.includes('if (!user)')) {
     issues.profileCrash.found = true;
     issues.profileCrash.details.push('Missing user null check');
   }
-  
+
   // Check form validation
-  const hasValidation = profileContent.includes('?.trim()') || profileContent.includes('?.includes');
+  const hasValidation =
+    profileContent.includes('?.trim()') || profileContent.includes('?.includes');
   if (!hasValidation) {
     issues.profileCrash.found = true;
     issues.profileCrash.details.push('Missing null-safe form validation');
   }
-  
-  console.log(issues.profileCrash.found ? '❌ Potential crash issues' : '✅ Null safety implemented');
+
+  console.log(
+    issues.profileCrash.found ? '❌ Potential crash issues' : '✅ Null safety implemented'
+  );
 }
 
 // Summary Report
@@ -167,7 +180,7 @@ Object.entries(issues).forEach(([key, value]) => {
   if (value.found) {
     totalIssues++;
     console.log(`❌ ${key}:`);
-    value.details.forEach(detail => console.log(`   - ${detail}`));
+    value.details.forEach((detail) => console.log(`   - ${detail}`));
     console.log('');
   }
 });

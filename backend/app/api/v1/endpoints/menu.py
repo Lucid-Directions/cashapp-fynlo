@@ -4,18 +4,6 @@ Menu API endpoints for Fynlo POS - Dedicated menu endpoints for frontend compati
 
 from typing import Optional
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy.orm import Session
-from sqlalchemy import and_
-import time
-import logging
-
-from app.core.database import get_db, Product, Category, User
-from app.core.auth import get_current_user
-from app.core.redis_client import get_redis, RedisClient
-from app.core.responses import APIResponseHelper
-from app.api.v1.endpoints.products import ProductResponse
-from app.core.onboarding_helper import OnboardingHelper
 from app.core.cache_service import cached
 
 router = APIRouter()

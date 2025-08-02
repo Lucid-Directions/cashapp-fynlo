@@ -4,11 +4,11 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import tokenManager from '../utils/tokenManager';
 
 // API Configuration and robust networking
 import API_CONFIG from '../config/api';
 import NetworkUtils from '../utils/NetworkUtils';
+import tokenManager from '../utils/tokenManager';
 const API_BASE_URL = API_CONFIG.FULL_API_URL;
 
 interface ServiceChargeConfig {
@@ -30,7 +30,7 @@ interface PaymentConfig {
 interface PlatformSettings {
   serviceCharge: ServiceChargeConfig;
   payments: PaymentConfig;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 class SharedDataStore {
@@ -49,18 +49,18 @@ class SharedDataStore {
   // Service Charge Management
   async getServiceChargeConfig(): Promise<ServiceChargeConfig> {
     try {
-      console.log('💰 SharedDataStore - Loading service charge config...');
-      
+      logger.info('💰 SharedDataStore - Loading service charge config...');
+
       // Try to get from real backend API first using robust networking
       const networkResult = await NetworkUtils.getServiceChargeConfig();
 
       if (networkResult.success && networkResult.data) {
-        console.log('✅ Service charge config received from API:', networkResult.data);
-        
+        logger.info('✅ Service charge config received from API:', networkResult.data);
+
         // Handle different API response formats
         let config: ServiceChargeConfig;
         const result = networkResult.data;
-        
+
         if (result.data && result.data.service_charge) {
           // API response with wrapped data
           const serviceChargeData = result.data.service_charge;
@@ -87,14 +87,14 @@ class SharedDataStore {
             lastUpdated: new Date().toISOString(),
           };
         }
-        
+
         // Cache the result and save to AsyncStorage for offline use
         this.cache.set('serviceCharge', config);
         await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(config));
-        console.log('✅ Service charge config cached locally:', config);
+        logger.info('✅ Service charge config cached locally:', config);
         return config;
       } else {
-        console.warn('⚠️ API request failed:', networkResult.error);
+        logger.warn('⚠️ API request failed:', networkResult.error);
       }
 
       // Fallback to AsyncStorage if API fails
@@ -102,7 +102,7 @@ class SharedDataStore {
       if (stored) {
         const config = JSON.parse(stored);
         this.cache.set('serviceCharge', config);
-        console.log('✅ Service charge config from local storage (API fallback):', config);
+        logger.info('✅ Service charge config from local storage (API fallback):', config);
         return config;
       }
 
@@ -117,8 +117,8 @@ class SharedDataStore {
       await this.setServiceChargeConfig(defaultConfig);
       return defaultConfig;
     } catch (error) {
-      console.error('❌ Failed to get service charge config:', error);
-      
+      logger.error('❌ Failed to get service charge config:', error);
+
       // Emergency fallback to default
       return {
         enabled: true,
@@ -140,12 +140,12 @@ class SharedDataStore {
       try {
         // Get auth token for API requests
         const authToken = await tokenManager.getTokenWithRefresh();
-        const headers: any = {
+        const headers: unknown = {
           'Content-Type': 'application/json',
         };
-        
+
         if (authToken) {
-          headers['Authorization'] = `Bearer ${authToken}`;
+          headers.Authorization = `Bearer ${authToken}`;
         }
 
         // Prepare the request body to match backend schema
@@ -153,7 +153,7 @@ class SharedDataStore {
           enabled: config.enabled,
           rate: config.rate,
           description: config.description,
-          currency: 'GBP' // Default currency
+          currency: 'GBP', // Default currency
         };
 
         const response = await fetch(`${API_BASE_URL}/platform/service-charge`, {
@@ -164,35 +164,35 @@ class SharedDataStore {
 
         if (response.ok) {
           const result = await response.json();
-          console.log('✅ Service charge saved to API:', result);
-          
+          logger.info('✅ Service charge saved to API:', result);
+
           // Update cache with confirmed data
           this.cache.set('serviceCharge', configWithTimestamp);
-          
+
           // Also save locally as backup
           await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(configWithTimestamp));
-          
+
           // Trigger sync event for real-time updates
           this.notifySubscribers('serviceCharge', configWithTimestamp);
           return;
         } else {
           const errorText = await response.text();
-          console.error('❌ API response error:', response.status, errorText);
+          logger.error('❌ API response error:', response.status, errorText);
         }
       } catch (apiError) {
-        console.warn('⚠️ API save failed, using local storage:', apiError);
+        logger.warn('⚠️ API save failed, using local storage:', apiError);
       }
 
       // Fallback to AsyncStorage if API fails
       await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(configWithTimestamp));
       this.cache.set('serviceCharge', configWithTimestamp);
-      
-      console.log('✅ Service charge config saved locally (API fallback):', configWithTimestamp);
-      
+
+      logger.info('✅ Service charge config saved locally (API fallback):', configWithTimestamp);
+
       // Trigger sync event for real-time updates
       this.notifySubscribers('serviceCharge', configWithTimestamp);
     } catch (error) {
-      console.error('❌ Failed to save service charge config:', error);
+      logger.error('❌ Failed to save service charge config:', error);
       throw error;
     }
   }
@@ -225,7 +225,7 @@ class SharedDataStore {
       await this.setPaymentConfig(defaultConfig);
       return defaultConfig;
     } catch (error) {
-      console.error('❌ Failed to get payment config:', error);
+      logger.error('❌ Failed to get payment config:', error);
       throw error;
     }
   }
@@ -239,17 +239,17 @@ class SharedDataStore {
 
       await AsyncStorage.setItem('platform.payments', JSON.stringify(configWithTimestamp));
       this.cache.set('payments', configWithTimestamp);
-      
-      console.log('✅ Payment config saved:', configWithTimestamp);
+
+      logger.info('✅ Payment config saved:', configWithTimestamp);
       this.notifySubscribers('payments', configWithTimestamp);
     } catch (error) {
-      console.error('❌ Failed to save payment config:', error);
+      logger.error('❌ Failed to save payment config:', error);
       throw error;
     }
   }
 
   // Generic platform setting management
-  async getPlatformSetting(key: string): Promise<any> {
+  async getPlatformSetting(key: string): Promise<unknown> {
     try {
       const cached = this.cache.get(key);
       if (cached) {
@@ -265,12 +265,12 @@ class SharedDataStore {
 
       return null;
     } catch (error) {
-      console.error(`❌ Failed to get platform setting ${key}:`, error);
+      logger.error(`❌ Failed to get platform setting ${key}:`, error);
       return null;
     }
   }
 
-  async setPlatformSetting(key: string, value: any): Promise<void> {
+  async setPlatformSetting(key: string, value: unknown): Promise<void> {
     try {
       const valueWithTimestamp = {
         data: value,
@@ -279,25 +279,25 @@ class SharedDataStore {
 
       await AsyncStorage.setItem(`platform.${key}`, JSON.stringify(valueWithTimestamp));
       this.cache.set(key, valueWithTimestamp);
-      
-      console.log(`✅ Platform setting ${key} saved:`, valueWithTimestamp);
+
+      logger.info(`✅ Platform setting ${key} saved:`, valueWithTimestamp);
       this.notifySubscribers(key, valueWithTimestamp);
     } catch (error) {
-      console.error(`❌ Failed to save platform setting ${key}:`, error);
+      logger.error(`❌ Failed to save platform setting ${key}:`, error);
       throw error;
     }
   }
 
   // Real-time subscription system
-  private subscribers: Map<string, Set<(data: any) => void>> = new Map();
+  private subscribers: Map<string, Set<(data: unknown) => void>> = new Map();
 
-  subscribe(key: string, callback: (data: any) => void): () => void {
+  subscribe(key: string, callback: (data: unknown) => void): () => void {
     if (!this.subscribers.has(key)) {
       this.subscribers.set(key, new Set());
     }
-    
+
     this.subscribers.get(key)!.add(callback);
-    
+
     // Return unsubscribe function
     return () => {
       const subs = this.subscribers.get(key);
@@ -307,14 +307,14 @@ class SharedDataStore {
     };
   }
 
-  private notifySubscribers(key: string, data: any): void {
+  private notifySubscribers(key: string, data: unknown): void {
     const subs = this.subscribers.get(key);
     if (subs) {
-      subs.forEach(callback => {
+      subs.forEach((callback) => {
         try {
           callback(data);
         } catch (error) {
-          console.error(`❌ Subscriber callback error for ${key}:`, error);
+          logger.error(`❌ Subscriber callback error for ${key}:`, error);
         }
       });
     }
@@ -324,14 +324,14 @@ class SharedDataStore {
   async clearAll(): Promise<void> {
     try {
       const keys = await AsyncStorage.getAllKeys();
-      const platformKeys = keys.filter(key => key.startsWith('platform.'));
-      
+      const platformKeys = keys.filter((key) => key.startsWith('platform.'));
+
       await AsyncStorage.multiRemove(platformKeys);
       this.cache.clear();
-      
-      console.log('✅ All platform data cleared');
+
+      logger.info('✅ All platform data cleared');
     } catch (error) {
-      console.error('❌ Failed to clear platform data:', error);
+      logger.error('❌ Failed to clear platform data:', error);
       throw error;
     }
   }
@@ -347,7 +347,7 @@ class SharedDataStore {
         payments,
       };
     } catch (error) {
-      console.error('❌ Failed to get all platform settings:', error);
+      logger.error('❌ Failed to get all platform settings:', error);
       throw error;
     }
   }

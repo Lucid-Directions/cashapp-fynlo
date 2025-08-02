@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+
 import {
   View,
   Text,
@@ -14,26 +15,28 @@ import {
   Dimensions,
   BackHandler,
 } from 'react-native';
-import { useTheme } from '../../design-system/ThemeProvider';
+
 import { Button } from '../../components/ui';
+import { useTheme } from '../../design-system/ThemeProvider';
 import SquareService from '../../services/SquareService';
 
 // Square SDK imports - conditionally loaded
-let SQIPCardEntry: any;
+let SQIPCardEntry: unknown;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   SQIPCardEntry = require('react-native-square-in-app-payments').SQIPCardEntry;
-} catch (error) {
-  console.warn('Square SDK not available in SquareCardPaymentScreen');
+} catch (_error) {
+  logger.warn('Square SDK not available in SquareCardPaymentScreen');
 }
 
 interface SquareCardPaymentScreenProps {
-  navigation: any;
+  navigation: unknown;
   route: {
     params: {
       amount: number;
       currency?: string;
       description?: string;
-      onPaymentComplete: (result: any) => void;
+      onPaymentComplete: (result: unknown) => void;
       onPaymentCancelled: () => void;
     };
   };
@@ -47,12 +50,15 @@ interface PaymentState {
   paymentNonce: string | null;
 }
 
-const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({
-  navigation,
-  route,
-}) => {
+const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navigation, route }) => {
   const { theme } = useTheme();
-  const { amount, currency = 'GBP', description, onPaymentComplete, onPaymentCancelled } = route.params;
+  const {
+    amount,
+    currency = 'GBP',
+    description,
+    onPaymentComplete,
+    onPaymentCancelled,
+  } = route.params;
 
   const [paymentState, setPaymentState] = useState<PaymentState>({
     loading: true,
@@ -77,7 +83,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({
 
   const initializeSquare = async () => {
     try {
-      setPaymentState(prev => ({ ...prev, loading: true }));
+      setPaymentState((prev) => ({ ...prev, loading: true }));
 
       // Check if Square is properly initialized
       const status = await SquareService.getIntegrationStatus();
@@ -87,18 +93,17 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({
 
       // Square SDK is now available
       setSquareInitialized(true);
-      setPaymentState(prev => ({ 
-        ...prev, 
+      setPaymentState((prev) => ({
+        ...prev,
         loading: false,
-        errorMessage: null
+        errorMessage: null,
       }));
-
     } catch (error) {
-      console.error('Failed to initialize Square:', error);
-      setPaymentState(prev => ({ 
-        ...prev, 
+      logger.error('Failed to initialize Square:', error);
+      setPaymentState((prev) => ({
+        ...prev,
         loading: false,
-        errorMessage: error instanceof Error ? error.message : 'Failed to initialize payment'
+        errorMessage: error instanceof Error ? error.message : 'Failed to initialize payment',
       }));
     }
   };
@@ -117,45 +122,37 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({
   }, [paymentState.processing]);
 
   const handleCancelPayment = () => {
-    Alert.alert(
-      'Cancel Payment',
-      'Are you sure you want to cancel this payment?',
-      [
-        { text: 'Continue Payment', style: 'cancel' },
-        { 
-          text: 'Cancel', 
-          style: 'destructive',
-          onPress: () => {
-            onPaymentCancelled();
-            navigation.goBack();
-          }
-        }
-      ]
-    );
+    Alert.alert('Cancel Payment', 'Are you sure you want to cancel this payment?', [
+      { text: 'Continue Payment', style: 'cancel' },
+      {
+        text: 'Cancel',
+        style: 'destructive',
+        onPress: () => {
+          onPaymentCancelled();
+          navigation.goBack();
+        },
+      },
+    ]);
   };
 
   const handleCardInputChange = (cardValid: boolean) => {
-    setPaymentState(prev => ({ 
-      ...prev, 
+    setPaymentState((prev) => ({
+      ...prev,
       cardValid,
-      errorMessage: null
+      errorMessage: null,
     }));
   };
 
   const processPayment = async () => {
     try {
-      setPaymentState(prev => ({ ...prev, processing: true, errorMessage: null }));
+      setPaymentState((prev) => ({ ...prev, processing: true, errorMessage: null }));
 
       // TODO: Get card nonce from Square SDK when available
       // const cardResult = await SQIPCardEntry.completeCardEntry();
       // const nonce = cardResult.nonce;
 
       // For now, simulate the payment process
-      const paymentResult = await SquareService.processCardPayment(
-        amount,
-        currency,
-        description
-      );
+      const paymentResult = await SquareService.processCardPayment(amount, currency, description);
 
       if (paymentResult.status === 'completed') {
         // Success - navigate back with result
@@ -163,25 +160,24 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({
           success: true,
           paymentMethod: 'square_card',
           transactionId: paymentResult.id,
-          amount: amount,
-          currency: currency,
+          amount,
+          currency,
         });
         navigation.goBack();
       } else {
         // Payment failed
-        setPaymentState(prev => ({ 
-          ...prev, 
+        setPaymentState((prev) => ({
+          ...prev,
           processing: false,
-          errorMessage: paymentResult.errorMessage || 'Payment failed'
+          errorMessage: paymentResult.errorMessage || 'Payment failed',
         }));
       }
-
     } catch (error) {
-      console.error('Payment processing failed:', error);
-      setPaymentState(prev => ({ 
-        ...prev, 
+      logger.error('Payment processing failed:', error);
+      setPaymentState((prev) => ({
+        ...prev,
         processing: false,
-        errorMessage: error instanceof Error ? error.message : 'Payment processing failed'
+        errorMessage: error instanceof Error ? error.message : 'Payment processing failed',
       }));
     }
   };
@@ -209,13 +205,13 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({
         </View>
       );
     }
-    
+
     return (
       <SQIPCardEntry
         style={styles.cardEntry}
         onCardInputChange={handleCardInputChange}
         onCardEntryError={(error) => {
-          setPaymentState(prev => ({ ...prev, errorMessage: error.message }));
+          setPaymentState((prev) => ({ ...prev, errorMessage: error.message }));
         }}
       />
     );
@@ -259,7 +255,9 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({
 
   if (paymentState.loading) {
     return (
-      <View style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}
+      >
         <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={[styles.loadingText, { color: theme.colors.text }]}>
           Initializing Square Payment
@@ -272,9 +270,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.colors.surface }]}>
-        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
-          Square Card Payment
-        </Text>
+        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Square Card Payment</Text>
         <Text style={[styles.headerSubtitle, { color: theme.colors.textSecondary }]}>
           Enter your card details to complete payment
         </Text>
@@ -285,9 +281,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({
 
       {/* Card Entry */}
       <View style={styles.cardSection}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-          Card Details
-        </Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Card Details</Text>
         {renderCardEntry()}
       </View>
 
@@ -307,7 +301,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({
           style={[styles.button, styles.cancelButton]}
         />
         <Button
-          title={paymentState.processing ? "Processing..." : `Pay ${currency} ${amount.toFixed(2)}`}
+          title={paymentState.processing ? 'Processing...' : `Pay ${currency} ${amount.toFixed(2)}`}
           onPress={processPayment}
           disabled={!paymentState.cardValid || paymentState.processing}
           loading={paymentState.processing}
@@ -318,7 +312,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({
   );
 };
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {

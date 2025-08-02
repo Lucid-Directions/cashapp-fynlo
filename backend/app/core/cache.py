@@ -5,12 +5,14 @@ Uses Valkey (Redis) for high-performance caching.
 
 import logging
 from typing import Any, Optional, Dict
+<<<<<<< HEAD
 from datetime import datetime, timedelta
+=======
+>>>>>>> origin/main
 
 from app.core.redis_client import redis_client
 
 logger = logging.getLogger(__name__)
-
 
 async def cache_data(key: str, data: Any, ttl: int = 300) -> bool:
     """
@@ -33,7 +35,6 @@ async def cache_data(key: str, data: Any, ttl: int = 300) -> bool:
         logger.error(f"Failed to cache data for key {key}: {e}")
         return False
 
-
 def get_cached_data(key: str) -> Optional[Any]:
     """
     Get cached data synchronously (for use in sync endpoints).
@@ -50,7 +51,6 @@ def get_cached_data(key: str) -> Optional[Any]:
     # Return None to avoid runtime errors
     # The platform API endpoints should be updated to use async version
     return None
-
 
 async def get_cached_data_async(key: str) -> Optional[Any]:
     """
@@ -71,7 +71,6 @@ async def get_cached_data_async(key: str) -> Optional[Any]:
         logger.error(f"Failed to get cached data for key {key}: {e}")
         return None
 
-
 async def delete_cache(key: str) -> bool:
     """
     Delete a specific cache key.
@@ -91,7 +90,6 @@ async def delete_cache(key: str) -> bool:
         logger.error(f"Failed to delete cache key {key}: {e}")
         return False
 
-
 async def delete_cache_pattern(pattern: str) -> int:
     """
     Delete all cache keys matching a pattern.
@@ -110,7 +108,6 @@ async def delete_cache_pattern(pattern: str) -> int:
     except Exception as e:
         logger.error(f"Failed to delete cache pattern {pattern}: {e}")
         return 0
-
 
 # Platform-specific cache functions
 
@@ -133,7 +130,6 @@ async def cache_platform_analytics(
     key = f"platform:analytics:{metric}"
     return await cache_data(key, data, ttl)
 
-
 async def get_platform_analytics(metric: str) -> Optional[Dict[str, Any]]:
     """
     Get cached platform analytics data.
@@ -146,7 +142,6 @@ async def get_platform_analytics(metric: str) -> Optional[Dict[str, Any]]:
     """
     key = f"platform:analytics:{metric}"
     return await get_cached_data_async(key)
-
 
 async def cache_platform_report(
     report_type: str,
@@ -171,7 +166,6 @@ async def cache_platform_report(
     key = f"platform:report:{report_type}:{param_str}"
     return await cache_data(key, data, ttl)
 
-
 async def get_platform_report(
     report_type: str,
     params: Dict[str, Any]
@@ -189,7 +183,6 @@ async def get_platform_report(
     param_str = ":".join(f"{k}={v}" for k, v in sorted(params.items()))
     key = f"platform:report:{report_type}:{param_str}"
     return await get_cached_data_async(key)
-
 
 async def invalidate_platform_cache() -> int:
     """
@@ -211,7 +204,6 @@ async def invalidate_platform_cache() -> int:
     logger.info(f"Invalidated {total_deleted} platform cache entries")
     return total_deleted
 
-
 async def cache_restaurant_metrics(
     restaurant_id: str,
     metrics: Dict[str, Any],
@@ -231,7 +223,6 @@ async def cache_restaurant_metrics(
     key = f"platform:restaurant:{restaurant_id}:metrics"
     return await cache_data(key, metrics, ttl)
 
-
 async def get_restaurant_metrics(restaurant_id: str) -> Optional[Dict[str, Any]]:
     """
     Get cached restaurant metrics.
@@ -244,7 +235,6 @@ async def get_restaurant_metrics(restaurant_id: str) -> Optional[Dict[str, Any]]
     """
     key = f"platform:restaurant:{restaurant_id}:metrics"
     return await get_cached_data_async(key)
-
 
 async def cache_subscription_summary(
     summary: Dict[str, Any],
@@ -263,7 +253,6 @@ async def cache_subscription_summary(
     key = "platform:subscriptions:summary"
     return await cache_data(key, summary, ttl)
 
-
 async def get_subscription_summary() -> Optional[Dict[str, Any]]:
     """
     Get cached subscription summary.
@@ -273,7 +262,6 @@ async def get_subscription_summary() -> Optional[Dict[str, Any]]:
     """
     key = "platform:subscriptions:summary"
     return await get_cached_data_async(key)
-
 
 # Dashboard-specific cache functions
 
@@ -296,7 +284,6 @@ async def cache_dashboard_widget(
     key = f"platform:dashboard:widget:{widget_name}"
     return await cache_data(key, data, ttl)
 
-
 async def get_dashboard_widget(widget_name: str) -> Optional[Any]:
     """
     Get cached dashboard widget data.
@@ -309,7 +296,6 @@ async def get_dashboard_widget(widget_name: str) -> Optional[Any]:
     """
     key = f"platform:dashboard:widget:{widget_name}"
     return await get_cached_data_async(key)
-
 
 # Real-time metrics cache (shorter TTL)
 
@@ -331,7 +317,6 @@ async def cache_realtime_metric(
     """
     key = f"platform:realtime:{metric}"
     return await cache_data(key, value, ttl)
-
 
 async def get_realtime_metric(metric: str) -> Optional[Any]:
     """

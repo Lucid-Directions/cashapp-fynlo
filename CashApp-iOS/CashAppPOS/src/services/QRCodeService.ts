@@ -3,7 +3,7 @@
  * Provides utilities for creating QR codes and managing real-time payment status
  */
 
-import { SumUpQRPayment } from './SumUpService';
+import type { SumUpQRPayment } from './SumUpService';
 
 export interface QRCodeOptions {
   size: number;
@@ -41,7 +41,7 @@ class QRCodeServiceClass {
    */
   getOptimalQRCodeOptions(deviceType: 'phone' | 'tablet' = 'phone'): QRCodeOptions {
     const baseSize = deviceType === 'tablet' ? 300 : 200;
-    
+
     return {
       size: baseSize,
       backgroundColor: '#FFFFFF',
@@ -54,18 +54,21 @@ class QRCodeServiceClass {
   /**
    * Start tracking a QR payment
    */
-  startPaymentTracking(payment: SumUpQRPayment, statusCallback: (payment: SumUpQRPayment) => void): void {
+  startPaymentTracking(
+    payment: SumUpQRPayment,
+    statusCallback: (payment: SumUpQRPayment) => void
+  ): void {
     const tracking: QRPaymentTracking = {
       id: payment.id,
       startTime: new Date(),
       lastStatusCheck: new Date(),
       statusCheckCount: 0,
     };
-    
+
     this.activePayments.set(payment.id, tracking);
     this.statusCallbacks.set(payment.id, statusCallback);
-    
-    console.log(`Started tracking QR payment: ${payment.id}`);
+
+    logger.info(`Started tracking QR payment: ${payment.id}`);
   }
 
   /**
@@ -74,8 +77,8 @@ class QRCodeServiceClass {
   stopPaymentTracking(paymentId: string): void {
     this.activePayments.delete(paymentId);
     this.statusCallbacks.delete(paymentId);
-    
-    console.log(`Stopped tracking QR payment: ${paymentId}`);
+
+    logger.info(`Stopped tracking QR payment: ${paymentId}`);
   }
 
   /**
@@ -84,22 +87,22 @@ class QRCodeServiceClass {
   updatePaymentStatus(payment: SumUpQRPayment): void {
     const tracking = this.activePayments.get(payment.id);
     if (!tracking) return;
-    
+
     tracking.lastStatusCheck = new Date();
     tracking.statusCheckCount += 1;
-    
+
     // Detect when scanning likely started (status changed to 'scanning')
     if (payment.status === 'scanning' && !tracking.estimatedScanTime) {
       tracking.estimatedScanTime = new Date();
     }
-    
+
     // Detect completion
     if (payment.status === 'completed' && !tracking.completionTime) {
       tracking.completionTime = new Date();
     }
-    
+
     this.activePayments.set(payment.id, tracking);
-    
+
     // Notify callback
     const callback = this.statusCallbacks.get(payment.id);
     if (callback) {
@@ -118,15 +121,15 @@ class QRCodeServiceClass {
   } | null {
     const tracking = this.activePayments.get(paymentId);
     if (!tracking) return null;
-    
+
     const now = new Date();
     const duration = now.getTime() - tracking.startTime.getTime();
-    
+
     let scanDuration: number | undefined;
     if (tracking.estimatedScanTime && tracking.completionTime) {
       scanDuration = tracking.completionTime.getTime() - tracking.estimatedScanTime.getTime();
     }
-    
+
     return {
       duration,
       statusChecks: tracking.statusCheckCount,
@@ -148,7 +151,7 @@ class QRCodeServiceClass {
   cleanupExpiredPayments(): void {
     const now = new Date();
     const expiredPayments: string[] = [];
-    
+
     this.activePayments.forEach((tracking, paymentId) => {
       // Remove payments older than 1 hour
       const age = now.getTime() - tracking.startTime.getTime();
@@ -156,13 +159,13 @@ class QRCodeServiceClass {
         expiredPayments.push(paymentId);
       }
     });
-    
-    expiredPayments.forEach(paymentId => {
+
+    expiredPayments.forEach((paymentId) => {
       this.stopPaymentTracking(paymentId);
     });
-    
+
     if (expiredPayments.length > 0) {
-      console.log(`Cleaned up ${expiredPayments.length} expired QR payments`);
+      logger.info(`Cleaned up ${expiredPayments.length} expired QR payments`);
     }
   }
 
@@ -177,14 +180,11 @@ class QRCodeServiceClass {
       'Confirm the payment amount',
       'Complete the payment in your app',
     ];
-    
+
     if (bankingApp) {
-      return [
-        `Open ${bankingApp}`,
-        ...baseInstructions.slice(1),
-      ];
+      return [`Open ${bankingApp}`, ...baseInstructions.slice(1)];
     }
-    
+
     return baseInstructions;
   }
 
@@ -194,7 +194,7 @@ class QRCodeServiceClass {
   getTroubleshootingTips(): string[] {
     return [
       'Ensure good lighting on the QR code',
-      'Hold your phone steady and at arm\'s length',
+      "Hold your phone steady and at arm's length",
       'Make sure the entire QR code is visible in your camera',
       'Try cleaning your camera lens',
       'Close and reopen your banking app',
@@ -213,10 +213,10 @@ class QRCodeServiceClass {
         new URL(data); // This will throw if invalid URL
         return true;
       }
-      
+
       // Add other validation patterns as needed
       return false;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -236,19 +236,19 @@ class QRCodeServiceClass {
   getOptimalPollingInterval(payment: SumUpQRPayment): number {
     const tracking = this.activePayments.get(payment.id);
     if (!tracking) return 2000; // Default 2 seconds
-    
+
     const age = new Date().getTime() - tracking.startTime.getTime();
-    
+
     // More frequent polling in first 30 seconds
     if (age < 30000) {
       return 1000; // 1 second
     }
-    
+
     // Standard polling for next 2 minutes
     if (age < 120000) {
       return 2000; // 2 seconds
     }
-    
+
     // Slower polling after 2 minutes
     return 5000; // 5 seconds
   }
@@ -284,7 +284,7 @@ class QRCodeServiceClass {
       const now = new Date();
       return Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / 1000));
     } catch (error) {
-      console.error('Failed to calculate time remaining:', error);
+      logger.error('Failed to calculate time remaining:', error);
       return 0;
     }
   }

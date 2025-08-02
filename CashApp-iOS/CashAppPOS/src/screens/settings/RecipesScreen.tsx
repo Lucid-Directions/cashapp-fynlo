@@ -1,12 +1,23 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, RefreshControl } from 'react-native';
+// TODO: Unused import - import React, { useState, useEffect, useCallback } from 'react';
+
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
+
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // import { Icon } from 'react-native-elements'; // Or your preferred icon library
 
+import { fetchRecipes, deleteRecipe } from '../../services/ApiService'; // Assuming ApiService will be updated
 import useAppStore from '../../store/useAppStore'; // For user/auth state if needed
 // import { Recipe, RecipeIngredient } from '../../types'; // Assuming these types exist or will be created
-import { fetchRecipes, deleteRecipe } from '../../services/ApiService'; // Assuming ApiService will be updated
 
 // Placeholder types, replace with actual types from '../../types'
 interface RecipeIngredient {
@@ -42,8 +53,8 @@ const RecipesScreen = () => {
       const fetchedRecipes: Recipe[] = await fetchRecipes(); // Using simplified fetch for now
       setRecipes(fetchedRecipes);
     } catch (error) {
-      console.error("Failed to load recipes:", error);
-      Alert.alert("Error", "Failed to load recipes. Please try again.");
+      logger.error('Failed to load recipes:', error);
+      Alert.alert('Error', 'Failed to load recipes. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -60,59 +71,56 @@ const RecipesScreen = () => {
   }, [loadRecipes]);
 
   const handleAddRecipe = () => {
-    // @ts-ignore
+    // @ts-expect-error
     navigation.navigate('RecipeFormScreen'); // Navigate to form for new recipe
   };
 
   const handleEditRecipe = (recipe: Recipe) => {
-    // @ts-ignore
+    // @ts-expect-error
     navigation.navigate('RecipeFormScreen', { recipe }); // Navigate to form with existing recipe data
   };
 
   const handleDeleteRecipe = (itemId: string) => {
-    Alert.alert(
-      "Confirm Delete",
-      "Are you sure you want to delete this recipe?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setIsLoading(true);
-              await deleteRecipe(itemId);
-              Alert.alert("Success", "Recipe deleted successfully.");
-              loadRecipes(); // Refresh list
-            } catch (error) {
-              console.error("Failed to delete recipe:", error);
-              Alert.alert("Error", "Failed to delete recipe.");
-              setIsLoading(false);
-            }
-          },
+    Alert.alert('Confirm Delete', 'Are you sure you want to delete this recipe?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            setIsLoading(true);
+            await deleteRecipe(itemId);
+            Alert.alert('Success', 'Recipe deleted successfully.');
+            loadRecipes(); // Refresh list
+          } catch (error) {
+            logger.error('Failed to delete recipe:', error);
+            Alert.alert('Error', 'Failed to delete recipe.');
+            setIsLoading(false);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const renderRecipeItem = ({ item }: { item: Recipe }) => (
     <View style={styles.recipeItem}>
       <View style={styles.recipeInfo}>
         <Text style={styles.recipeName}>{item.item_name || item.item_id}</Text>
-        <Text style={styles.recipeIngredients}>
-          {item.ingredients.length} ingredient(s)
-        </Text>
+        <Text style={styles.recipeIngredients}>{item.ingredients.length} ingredient(s)</Text>
         {/* Optionally list some ingredients: */}
         {/* <Text>{item.ingredients.slice(0, 2).map(ing => `${ing.ingredient_name || ing.ingredient_sku} (${ing.qty_g}g)`).join(', ')}</Text> */}
       </View>
       <View style={styles.recipeActions}>
         <TouchableOpacity onPress={() => handleEditRecipe(item)} style={styles.actionButton}>
           {/* <Icon name="edit" type="material" size={24} color="#007AFF" /> */}
-          <Text style={{color: "#007AFF"}}>Edit</Text>
+          <Text style={styles.editButtonText}>Edit</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDeleteRecipe(item.item_id)} style={styles.actionButton}>
+        <TouchableOpacity
+          onPress={() => handleDeleteRecipe(item.item_id)}
+          style={styles.actionButton}
+        >
           {/* <Icon name="delete" type="material" size={24} color="#FF3B30" /> */}
-           <Text style={{color: "#FF3B30"}}>Delete</Text>
+          <Text style={styles.deleteButtonText}>Delete</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -148,9 +156,7 @@ const RecipesScreen = () => {
           renderItem={renderRecipeItem}
           keyExtractor={(item) => item.item_id.toString()}
           contentContainerStyle={styles.listContentContainer}
-          refreshControl={
-            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
         />
       )}
     </View>
@@ -228,6 +234,12 @@ const styles = StyleSheet.create({
     padding: 8,
     marginLeft: 12,
   },
+  editButtonText: {
+    color: '#007AFF',
+  },
+  deleteButtonText: {
+    color: '#FF3B30',
+  },
   emptyText: {
     fontSize: 18,
     color: '#333',
@@ -236,7 +248,7 @@ const styles = StyleSheet.create({
   emptySubText: {
     fontSize: 14,
     color: '#777',
-  }
+  },
 });
 
 export default RecipesScreen;

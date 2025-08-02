@@ -12,17 +12,17 @@ const TIMEOUT = 10000; // 10 seconds
 
 async function testMenuLoading() {
   console.log('🧪 Testing menu loading from production API...\n');
-  
+
   // Test 1: Health check
   console.log('1️⃣ Testing health endpoint...');
   try {
     const healthController = new AbortController();
     const healthTimeoutId = setTimeout(() => healthController.abort(), 5000);
-    
+
     const healthResponse = await fetch(`${API_BASE_URL}/health`, {
-      signal: healthController.signal
+      signal: healthController.signal,
     });
-    
+
     clearTimeout(healthTimeoutId);
     if (healthResponse.ok) {
       console.log('✅ Health check passed\n');
@@ -36,30 +36,32 @@ async function testMenuLoading() {
   // Test 2: Public Menu items endpoint (no auth required)
   console.log('2️⃣ Testing PUBLIC menu items endpoint...');
   const startTime = Date.now();
-  
+
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/v1/public/menu/items`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        Accept: 'application/json',
       },
-      signal: controller.signal
+      signal: controller.signal,
     });
-    
+
     clearTimeout(timeoutId);
     const elapsed = Date.now() - startTime;
-    
+
     if (response.ok) {
       const data = await response.json();
       console.log(`✅ Menu items loaded in ${elapsed}ms`);
       console.log(`   - Response has 'data' field: ${data.hasOwnProperty('data') ? 'Yes' : 'No'}`);
       console.log(`   - Items count: ${data.data ? data.data.length : 'N/A'}`);
       if (data.data && data.data.length > 0) {
-        console.log(`   - First item: ${JSON.stringify(data.data[0], null, 2).substring(0, 200)}...`);
+        console.log(
+          `   - First item: ${JSON.stringify(data.data[0], null, 2).substring(0, 200)}...`
+        );
       }
     } else {
       console.log(`❌ Menu items request failed with status: ${response.status}`);
@@ -79,18 +81,18 @@ async function testMenuLoading() {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/v1/public/menu/categories`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        Accept: 'application/json',
       },
-      signal: controller.signal
+      signal: controller.signal,
     });
-    
+
     clearTimeout(timeoutId);
-    
+
     if (response.ok) {
       const data = await response.json();
       console.log('✅ Menu categories loaded');
@@ -112,16 +114,16 @@ async function testMenuLoading() {
   try {
     const authController = new AbortController();
     const authTimeoutId = setTimeout(() => authController.abort(), 3000);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/v1/menu/items`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        Accept: 'application/json',
       },
-      signal: authController.signal
+      signal: authController.signal,
     });
-    
+
     clearTimeout(authTimeoutId);
     const authElapsed = Date.now() - authStartTime;
     console.log(`❌ OLD endpoint returned ${response.status} in ${authElapsed}ms`);

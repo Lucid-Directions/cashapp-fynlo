@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import Column, String, DateTime, DECIMAL, Text
 import uuid
 import logging
-from enum import Enum
 
 from app.core.database import Base
 from app.core.exceptions import FynloException

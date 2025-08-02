@@ -7,6 +7,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 app = FastAPI(title="Network Test Server")
 
@@ -28,6 +32,6 @@ async def health():
     return {"status": "healthy", "server": "test", "timestamp": datetime.now().isoformat()}
 
 if __name__ == "__main__":
-    print("🧪 Starting Network Test Server...")
-    print("🌐 Testing network binding to 0.0.0.0:8001")
+    logger.info("🧪 Starting Network Test Server...")
+    logger.info("🌐 Testing network binding to 0.0.0.0:8001")
     uvicorn.run(app, host="0.0.0.0", port=8001, log_level="debug")

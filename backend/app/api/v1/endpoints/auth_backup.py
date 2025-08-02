@@ -17,7 +17,6 @@ from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper, iOSResponseHelper
 from app.core.exceptions import (
     AuthenticationException,
-    ValidationException,
     ConflictException,
     iOSErrorHelper
 )

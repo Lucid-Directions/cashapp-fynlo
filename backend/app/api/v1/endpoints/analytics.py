@@ -6,9 +6,9 @@ Real-time dashboard metrics optimized for mobile consumption
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, Query, Path
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, desc
+from sqlalchemy import func, and_
 from datetime import datetime, timedelta
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app.core.database import get_db, Order, Customer, User, Restaurant
 from app.core.auth import get_current_user

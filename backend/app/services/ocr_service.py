@@ -1,4 +1,8 @@
 from typing import List, Dict, Any
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Placeholder for ScannedItemResponse if not centrally defined
 # from app.api.v1.endpoints.inventory import ScannedItemResponse

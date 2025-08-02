@@ -7,12 +7,9 @@ from datetime import datetime
 import asyncio
 import json
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
 from redis import Redis
 
-from app.core.database import get_db
 from app.core.redis_client import redis_client as global_redis_client
-from app.models import Restaurant, Product, Category, Order, User
 from app.core.exceptions import FynloException
 import logging
 
@@ -81,7 +78,7 @@ class SyncService:
             
         except Exception as e:
             logger.error(f"Error queuing sync event: {str(e)}")
-            raise FynloException(f"Sync failed: {str(e)}", status_code=500)
+            raise FynloException(f"Sync failed: {str(e)}", status_error_code=500)
     
     async def _process_sync_queue(self):
         """Background task to process sync events"""

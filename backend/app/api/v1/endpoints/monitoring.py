@@ -5,7 +5,10 @@ Enhanced with strict input validation and security measures.
 """
 
 from fastapi import APIRouter, Depends, BackgroundTasks, Body, Request
+<<<<<<< HEAD
 from pydantic import BaseModel, Field
+=======
+>>>>>>> origin/main
 from datetime import datetime, timezone
 from typing import Dict, Any, List
 import logging
@@ -29,7 +32,6 @@ from app.middleware.rate_limit_middleware import limiter, DEFAULT_RATE
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
 
 @router.get("/replicas")
 @limiter.limit(DEFAULT_RATE)
@@ -131,7 +133,6 @@ async def get_replica_status(
         message="Replica status retrieved successfully"
     )
 
-
 @router.get("/metrics")
 @limiter.limit(DEFAULT_RATE)
 async def get_monitoring_metrics(
@@ -154,7 +155,6 @@ async def get_monitoring_metrics(
         data=metrics,
         message="Monitoring metrics retrieved"
     )
-
 
 @router.post("/replicas/refresh")
 @limiter.limit("10/minute")  # Stricter limit for refresh operations
@@ -198,7 +198,6 @@ async def refresh_replica_count(
         message="Replica status refreshed"
     )
 
-
 @router.get("/deployments")
 @limiter.limit(DEFAULT_RATE)
 async def get_recent_deployments(
@@ -239,7 +238,6 @@ async def get_recent_deployments(
         message="Deployment history retrieved"
     )
 
-
 @router.post("/deployments/trigger")
 @limiter.limit("2/hour")  # Very strict limit for deployment triggers
 async def trigger_deployment(
@@ -276,7 +274,6 @@ async def trigger_deployment(
         message="Deployment triggered successfully"
     )
 
-
 # Helper functions
 
 def _generate_recommendations(
@@ -312,7 +309,6 @@ def _generate_recommendations(
     
     return recommendations
 
-
 def _get_overall_status(active: int, configured: int) -> str:
     """Determine overall system status."""
     if active == configured:
@@ -323,7 +319,6 @@ def _get_overall_status(active: int, configured: int) -> str:
         return "critical"
     else:
         return "under_provisioned"
-
 
 def _is_instance_active(instance: Dict[str, Any]) -> bool:
     """Check if an instance is considered active based on heartbeat."""
@@ -337,7 +332,6 @@ def _is_instance_active(instance: Dict[str, Any]) -> bool:
         return age_seconds <= 60  # Active if heartbeat within 60 seconds
     except Exception as e:
         return False
-
 
 def _sanitize_instance_data(instance: Dict[str, Any], full_access: bool) -> Dict[str, Any]:
     """Sanitize instance data based on user access level."""

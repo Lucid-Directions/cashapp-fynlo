@@ -4,14 +4,12 @@ Implements decorator pattern for easy endpoint caching and cache invalidation.
 """
 
 import hashlib
-import json
 import logging
 from functools import wraps
-from typing import Any, Callable, Optional, Dict, List, Union
+from typing import Any, Callable, Optional, Dict, List
 import inspect
 
 from app.core.redis_client import redis_client
-from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 

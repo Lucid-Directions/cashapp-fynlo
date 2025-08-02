@@ -9,7 +9,10 @@ import logging
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timezone
 import httpx
+<<<<<<< HEAD
 from functools import lru_cache
+=======
+>>>>>>> origin/main
 from pybreaker import CircuitBreaker, CircuitBreakerError
 
 from app.core.config import settings
@@ -25,11 +28,10 @@ do_circuit_breaker = CircuitBreaker(
     name="DigitalOceanAPI"
 )
 
-
 class DigitalOceanMonitorError(Exception):
     """Base exception for DigitalOcean monitoring errors."""
-    pass
 
+    pass
 
 class DigitalOceanAPIError(DigitalOceanMonitorError):
     """Raised when DigitalOcean API returns an error."""
@@ -37,11 +39,10 @@ class DigitalOceanAPIError(DigitalOceanMonitorError):
         self.status_code = status_code
         super().__init__(f"DO API error {status_code}: {message}")
 
-
 class DigitalOceanConfigError(DigitalOceanMonitorError):
     """Raised when DigitalOcean monitoring is not properly configured."""
-    pass
 
+    pass
 
 class DigitalOceanMonitor:
     """
@@ -476,10 +477,8 @@ class DigitalOceanMonitor:
             await self._client.aclose()
             self._client = None
 
-
 # Global monitor instance
 _do_monitor: Optional[DigitalOceanMonitor] = None
-
 
 def get_do_monitor() -> DigitalOceanMonitor:
     """Get or create the global DigitalOcean monitor instance."""
@@ -487,7 +486,6 @@ def get_do_monitor() -> DigitalOceanMonitor:
     if _do_monitor is None:
         _do_monitor = DigitalOceanMonitor()
     return _do_monitor
-
 
 async def close_do_monitor():
     """Close the global DigitalOcean monitor instance."""

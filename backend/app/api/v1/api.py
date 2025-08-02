@@ -4,7 +4,6 @@ API Router for Fynlo POS Backend
 
 from fastapi import APIRouter
 
-
 from app.api.v1.endpoints import (
     auth, restaurants, products, orders, payments, customers,
     analytics, files, platform, platform_settings, platform_settings_public, payment_configurations,
@@ -24,7 +23,6 @@ from app.api.v1.platform import platform_router
 # Specific routes can override this with their own @limiter.limit decorator.
 # api_router = APIRouter(dependencies=[Depends(limiter.limit(DEFAULT_RATE))])
 api_router = APIRouter()
-
 
 # Include all endpoint routers
 # Routes that have their own @limiter.limit decorator (e.g., auth, payments)

@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from typing import Dict, Any, Optional
+from typing import Optional
 
 from app.core.database import get_db
 from app.core.exceptions import FynloException, ResourceNotFoundException, ValidationException
@@ -17,6 +17,7 @@ from app.services.service_charge_calculator import ServiceChargeCalculator
 from app.services.payment_config_service import PaymentConfigService
 from app.services.financial_records_service import FinancialRecordsService # New service
 from pydantic import BaseModel, Field
+from app.core.exceptions import ValidationException, FynloException, ResourceNotFoundException
 
 router = APIRouter()
 
@@ -103,8 +104,11 @@ async def calculate_fees_for_order(
 
     if not payment_method_setting:
         # This should ideally not happen if defaults are seeded for all PaymentMethodEnums
-        raise ResourceNotFoundException(resource="Resource", message=f"Fee configuration not found for payment method {request.payment_method.value} for restaurant {request.restaurant_id or 'unknown'}")
-
+        raise ResourceNotFoundException(
+            resource="Fee configuration",
+            resource_id=request.payment_method.value,
+            details={"restaurant_id": request.restaurant_id or "platform default"}
+        )
     # Determine who pays processor fees
     customer_pays_processor_fees = payment_method_setting.customer_pays_default
     if request.force_customer_pays_processor_fees is not None:
@@ -112,8 +116,8 @@ async def calculate_fees_for_order(
             customer_pays_processor_fees = request.force_customer_pays_processor_fees
         else:
             # Client tried to override but not allowed
-            raise ValidationException(message=f"Toggling who pays processor fee is not allowed for payment method {request.payment_method.value}.")
-
+            raise ValidationException(message=f"Toggling who pays processor fee is not allowed for payment method {request.payment_method.value}."
+            )
     include_processor_fee_in_sc = payment_method_setting.include_processor_fee_in_service_charge
 
     # 2. Calculate final Service Charge

@@ -4,14 +4,11 @@ Tracks metrics, health, and sends alerts for payment-related issues
 """
 
 import logging
-import asyncio
 import time
 from datetime import datetime, timedelta
-from decimal import Decimal
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
-import json
 import httpx
 from sqlalchemy.orm import Session
 

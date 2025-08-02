@@ -4,11 +4,13 @@ Activity logging service for Fynlo Portal - Audit trail for portal actions
 
 from typing import Optional, Dict, Any
 from datetime import datetime
-import json
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db, User, Restaurant
 from app.models.activity_log import PortalActivityLog
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class ActivityLogger:
     """Service for logging portal activities"""

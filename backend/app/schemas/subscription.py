@@ -40,7 +40,7 @@ class SubscriptionPlanResponse(SubscriptionPlanBase):
     
     @validator('yearly_savings', pre=False, always=True)
     def calculate_yearly_savings(cls, v, values):
-        """Calculate yearly savings based on monthly vs yearly pricing"""
+            """Calculate yearly savings based on monthly vs yearly pricing"""
         if 'price_monthly' in values and 'price_yearly' in values:
             monthly_yearly_cost = values['price_monthly'] * 12
             return monthly_yearly_cost - values['price_yearly']
@@ -48,7 +48,7 @@ class SubscriptionPlanResponse(SubscriptionPlanBase):
     
     @validator('yearly_discount_percentage', pre=False, always=True)
     def calculate_yearly_discount_percentage(cls, v, values):
-        """Calculate discount percentage for yearly plans"""
+            """Calculate discount percentage for yearly plans"""
         if 'price_monthly' in values and 'price_yearly' in values and values['price_monthly'] > 0:
             monthly_yearly_cost = values['price_monthly'] * 12
             discount = (monthly_yearly_cost - values['price_yearly']) / monthly_yearly_cost * 100
@@ -77,11 +77,13 @@ class SubscriptionCreateRequest(BaseModel):
     stripe_customer_id: Optional[str] = None
     
     @validator('plan_id')
+    def validate_method(cls, v):
         if v <= 0:
             raise ValueError('Plan ID must be positive')
         return v
     
     @validator('restaurant_id')
+    def validate_method(cls, v):
         if v <= 0:
             raise ValueError('Restaurant ID must be positive')
         return v
@@ -94,6 +96,7 @@ class PlanChangeRequest(BaseModel):
     immediate: bool = True  # Whether to change immediately or at next billing cycle
     
     @validator('new_plan_id')
+    def validate_method(cls, v):
         if v <= 0:
             raise ValueError('New plan ID must be positive')
         return v
@@ -118,21 +121,25 @@ class RestaurantSubscriptionResponse(RestaurantSubscriptionBase):
         from_attributes = True
     
     @validator('is_active', pre=False, always=True)
+    def validate_method(cls, v):
         if 'status' in values:
             return values['status'] in ['active', 'trial']
         return v
     
     @validator('is_trial', pre=False, always=True)
+    def validate_method(cls, v):
         if 'status' in values:
             return values['status'] == 'trial'
         return v
     
     @validator('is_expired', pre=False, always=True)
+    def validate_method(cls, v):
         if 'current_period_end' in values:
             return datetime.utcnow() > values['current_period_end']
         return v
     
     @validator('days_until_renewal', pre=False, always=True)
+    def validate_method(cls, v):
         if 'current_period_end' in values:
             delta = values['current_period_end'] - datetime.utcnow()
             return max(0, delta.days)
@@ -167,6 +174,7 @@ class SubscriptionUsageResponse(SubscriptionUsageBase):
         from_attributes = True
     
     @validator('orders_percentage', pre=False, always=True)
+    def validate_method(cls, v):
         if 'limits' in values and values['limits'] and 'orders_count' in values:
             limit = values['limits'].get('orders')
             if limit and limit > 0:
@@ -174,6 +182,7 @@ class SubscriptionUsageResponse(SubscriptionUsageBase):
         return 0.0
     
     @validator('staff_percentage', pre=False, always=True)
+    def validate_method(cls, v):
         if 'limits' in values and values['limits'] and 'staff_count' in values:
             limit = values['limits'].get('staff')
             if limit and limit > 0:
@@ -181,6 +190,7 @@ class SubscriptionUsageResponse(SubscriptionUsageBase):
         return 0.0
     
     @validator('menu_items_percentage', pre=False, always=True)
+    def validate_method(cls, v):
         if 'limits' in values and values['limits'] and 'menu_items_count' in values:
             limit = values['limits'].get('menu_items')
             if limit and limit > 0:
@@ -195,11 +205,13 @@ class UsageIncrementRequest(BaseModel):
     amount: int = 1
     
     @validator('usage_type')
+    def validate_method(cls, v):
         if v not in ['orders', 'staff', 'menu_items']:
             raise ValueError('Usage type must be one of: orders, staff, menu_items')
         return v
     
     @validator('amount')
+    def validate_method(cls, v):
         if v <= 0:
             raise ValueError('Amount must be positive')
         return v
@@ -228,6 +240,7 @@ class LimitCheckRequest(BaseModel):
     current_usage: int
     
     @validator('limit_type')
+    def validate_method(cls, v):
         if v not in ['orders', 'staff', 'menu_items']:
             raise ValueError('Limit type must be one of: orders, staff, menu_items')
         return v

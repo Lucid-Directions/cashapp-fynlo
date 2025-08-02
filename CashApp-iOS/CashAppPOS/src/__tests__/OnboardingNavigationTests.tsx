@@ -1,8 +1,10 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+// TODO: Unused import - import React from 'react';
+
 import { Alert } from 'react-native';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// TODO: Unused import - import { NavigationContainer } from '@react-navigation/native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 
 // Mock the navigation
 const mockNavigate = jest.fn();
@@ -33,21 +35,24 @@ describe('Onboarding Navigation Tests', () => {
 
   describe('HelpScreen Onboarding Section', () => {
     it('should navigate to RestaurantSetup through Settings when Continue Setup is pressed', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const HelpScreen = require('../screens/support/HelpScreen').default;
-      
+
       // Mock restaurant config not completed
-      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify({
-        onboardingCompleted: false,
-        setupSteps: {
-          restaurantInfo: false,
-          menuSetup: false,
-          paymentSetup: false,
-          staffSetup: false,
-        }
-      }));
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(
+        JSON.stringify({
+          onboardingCompleted: false,
+          setupSteps: {
+            restaurantInfo: false,
+            menuSetup: false,
+            paymentSetup: false,
+            staffSetup: false,
+          },
+        })
+      );
 
       const { getByText } = render(<HelpScreen />);
-      
+
       // Wait for the component to load
       await waitFor(() => {
         expect(getByText('Continue Setup')).toBeTruthy();
@@ -58,27 +63,30 @@ describe('Onboarding Navigation Tests', () => {
 
       // Should navigate to Settings with RestaurantSetup as screen param
       expect(mockNavigate).toHaveBeenCalledWith('Settings', {
-        screen: 'RestaurantSetup'
+        screen: 'RestaurantSetup',
       });
     });
 
     it('should show Edit Setup when onboarding is completed', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const HelpScreen = require('../screens/support/HelpScreen').default;
-      
+
       // Mock restaurant config completed
-      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify({
-        onboardingCompleted: true,
-        restaurantName: 'Test Restaurant',
-        setupSteps: {
-          restaurantInfo: true,
-          menuSetup: true,
-          paymentSetup: true,
-          staffSetup: true,
-        }
-      }));
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(
+        JSON.stringify({
+          onboardingCompleted: true,
+          restaurantName: 'Test Restaurant',
+          setupSteps: {
+            restaurantInfo: true,
+            menuSetup: true,
+            paymentSetup: true,
+            staffSetup: true,
+          },
+        })
+      );
 
       const { getByText } = render(<HelpScreen />);
-      
+
       await waitFor(() => {
         expect(getByText('Edit Setup')).toBeTruthy();
       });
@@ -87,10 +95,11 @@ describe('Onboarding Navigation Tests', () => {
 
   describe('RestaurantSetupScreen Navigation', () => {
     it('should have working back button', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const RestaurantSetupScreen = require('../screens/onboarding/RestaurantSetupScreen').default;
-      
+
       const { getByTestId } = render(<RestaurantSetupScreen />);
-      
+
       // Find and press back button
       const backButton = getByTestId('back-button');
       fireEvent.press(backButton);
@@ -99,14 +108,18 @@ describe('Onboarding Navigation Tests', () => {
     });
 
     it('should navigate through all 3 steps', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const RestaurantSetupScreen = require('../screens/onboarding/RestaurantSetupScreen').default;
-      
+
       const { getByText, getByPlaceholderText } = render(<RestaurantSetupScreen />);
 
       // Step 1: Fill restaurant info
-      fireEvent.changeText(getByPlaceholderText('e.g., Maria\'s Mexican Kitchen'), 'Test Restaurant');
-      fireEvent.changeText(getByPlaceholderText('e.g., Maria\'s Kitchen'), 'Test Display');
-      
+      fireEvent.changeText(
+        getByPlaceholderText("e.g., Maria's Mexican Kitchen"),
+        'Test Restaurant'
+      );
+      fireEvent.changeText(getByPlaceholderText("e.g., Maria's Kitchen"), 'Test Display');
+
       // Press Next
       fireEvent.press(getByText('Next'));
 
@@ -146,8 +159,9 @@ describe('Onboarding Navigation Tests', () => {
     });
 
     it('should validate required fields before allowing navigation', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const RestaurantSetupScreen = require('../screens/onboarding/RestaurantSetupScreen').default;
-      
+
       const { getByText } = render(<RestaurantSetupScreen />);
 
       // Try to press Next without filling fields
@@ -163,10 +177,11 @@ describe('Onboarding Navigation Tests', () => {
 
   describe('Business Settings Navigation', () => {
     it('should navigate to RestaurantProfile when clicked', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const BusinessSettingsScreen = require('../screens/settings/BusinessSettingsScreen').default;
-      
+
       const { getByText } = render(<BusinessSettingsScreen />);
-      
+
       // Find and press Restaurant Profile option
       fireEvent.press(getByText('Restaurant Profile'));
 
@@ -174,10 +189,11 @@ describe('Onboarding Navigation Tests', () => {
     });
 
     it('should navigate to BusinessInformation when clicked', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const BusinessSettingsScreen = require('../screens/settings/BusinessSettingsScreen').default;
-      
+
       const { getByText } = render(<BusinessSettingsScreen />);
-      
+
       // Find and press Business Information option
       fireEvent.press(getByText('Business Information'));
 
@@ -187,15 +203,18 @@ describe('Onboarding Navigation Tests', () => {
 
   describe('RestaurantProfileScreen', () => {
     it('should load restaurant data from config', async () => {
-      const RestaurantProfileScreen = require('../screens/settings/RestaurantProfileScreen').default;
-      
+      const RestaurantProfileScreen =
+        require('../screens/settings/RestaurantProfileScreen').default;
+
       // Mock existing restaurant data
-      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify({
-        restaurantName: 'Existing Restaurant',
-        displayName: 'Existing Display',
-        phone: '+44 987654321',
-        email: 'existing@test.com',
-      }));
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(
+        JSON.stringify({
+          restaurantName: 'Existing Restaurant',
+          displayName: 'Existing Display',
+          phone: '+44 987654321',
+          email: 'existing@test.com',
+        })
+      );
 
       const { getByDisplayValue } = render(<RestaurantProfileScreen />);
 
@@ -208,8 +227,9 @@ describe('Onboarding Navigation Tests', () => {
     });
 
     it('should save changes when Save button is pressed', async () => {
-      const RestaurantProfileScreen = require('../screens/settings/RestaurantProfileScreen').default;
-      
+      const RestaurantProfileScreen =
+        require('../screens/settings/RestaurantProfileScreen').default;
+
       const { getByText, getByDisplayValue } = render(<RestaurantProfileScreen />);
 
       // Wait for data to load
@@ -241,9 +261,10 @@ describe('Onboarding Navigation Tests', () => {
 
     screensToTest.forEach(({ name, path }) => {
       it(`${name} should have working back button`, () => {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const Screen = require(path).default;
         const { getAllByTestId } = render(<Screen />);
-        
+
         // Find back button (usually the first touchable in header)
         const backButtons = getAllByTestId('back-button');
         if (backButtons.length > 0) {

@@ -6,21 +6,23 @@ Pre-populates cache with frequently accessed data to improve performance.
 import asyncio
 import logging
 from datetime import datetime
+<<<<<<< HEAD
 from typing import List, Optional, Dict
+=======
+>>>>>>> origin/main
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
 from app.core.cache_service import cache_service
-from app.core.database import get_db
 from app.models import Restaurant, Product, Category
-from app.core.config import settings
 
 logger = logging.getLogger(__name__)
-
 
 class CacheWarmer:
     """Manages cache warming operations"""
     
+    pass
+
     def __init__(self):
         self.is_warming = False
         self.last_warm_time = None
@@ -241,10 +243,8 @@ class CacheWarmer:
         elapsed = (datetime.utcnow() - self.last_warm_time).total_seconds()
         return elapsed >= self.warm_interval
 
-
 # Global cache warmer instance
 cache_warmer = CacheWarmer()
-
 
 async def warm_cache_task():
     """
@@ -272,7 +272,6 @@ async def warm_cache_task():
             # Sleep for 1 minute on error
             await asyncio.sleep(60)
 
-
 async def warm_cache_on_startup(db: Session):
     """
     Warm cache on application startup.
@@ -285,4 +284,3 @@ async def warm_cache_on_startup(db: Session):
     except Exception as e:
         logger.error(f"Failed to warm cache on startup: {e}")
         # Don't fail startup if cache warming fails
-        pass

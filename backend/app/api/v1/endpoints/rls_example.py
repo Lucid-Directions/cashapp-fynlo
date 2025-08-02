@@ -3,8 +3,11 @@ Example endpoint showing proper RLS implementation
 This file demonstrates how to use RLS session variable isolation
 """
 
+<<<<<<< HEAD
 from typing import List
 from pydantic import BaseModel
+=======
+>>>>>>> origin/main
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -16,7 +19,6 @@ from app.middleware.rls_middleware import set_rls_context, get_rls_context
 from app.core.responses import APIResponseHelper
 
 router = APIRouter()
-
 
 @router.get("/orders/with-rls")
 async def get_orders_with_rls(
@@ -57,7 +59,6 @@ async def get_orders_with_rls(
     except Exception as e:
         return APIResponseHelper.error(f"Error fetching orders: {str(e)}")
 
-
 @router.get("/products/count-by-restaurant")
 async def count_products_by_restaurant(
     db: Session = Depends(get_db),
@@ -80,7 +81,6 @@ async def count_products_by_restaurant(
             "user_role": current_user.role
         }
     )
-
 
 @router.post("/test-rls-isolation")
 async def test_rls_isolation(
@@ -127,7 +127,6 @@ async def test_rls_isolation(
         return APIResponseHelper.error(f"RLS isolation check failed: {str(e)}", status_code=500)
     except Exception as e:
         return APIResponseHelper.error(f"Error testing RLS: {str(e)}", status_code=500)
-
 
 # Example of using RLS in a background task
 from app.middleware.rls_middleware import with_rls_context

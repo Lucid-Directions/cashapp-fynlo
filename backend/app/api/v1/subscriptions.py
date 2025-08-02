@@ -14,9 +14,6 @@ from app.core.database import get_db
 from app.models.subscription import SubscriptionPlan, RestaurantSubscription, SubscriptionUsage
 from app.core.responses import APIResponseHelper
 from app.schemas.subscription import (
-    SubscriptionPlanResponse,
-    RestaurantSubscriptionResponse,
-    SubscriptionUsageResponse,
     SubscriptionCreateRequest,
     PlanChangeRequest
 )

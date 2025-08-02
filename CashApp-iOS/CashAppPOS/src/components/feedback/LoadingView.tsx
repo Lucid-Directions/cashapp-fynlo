@@ -1,12 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, SafeAreaView } from 'react-native';
+
+import { _View, Text, StyleSheet, ActivityIndicator, SafeAreaView } from 'react-native';
+
 import { useTheme } from '../../design-system/ThemeProvider';
 
 interface LoadingViewProps {
   message?: string;
 }
 
-const LoadingView: React.FC<LoadingViewProps> = ({ message = "Loading..." }) => {
+const LoadingView: React.FC<LoadingViewProps> = ({ message = 'Loading...' }) => {
   const { theme } = useTheme(); // Use theme if available
 
   return (

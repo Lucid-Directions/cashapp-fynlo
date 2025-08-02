@@ -3,7 +3,7 @@
 export enum XeroSyncDirection {
   TO_XERO = 'to_xero',
   FROM_XERO = 'from_xero',
-  BIDIRECTIONAL = 'bidirectional'
+  BIDIRECTIONAL = 'bidirectional',
 }
 
 export enum XeroSyncStatus {
@@ -11,7 +11,7 @@ export enum XeroSyncStatus {
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  PARTIAL = 'partial'
+  PARTIAL = 'partial',
 }
 
 export enum XeroEntityType {
@@ -19,14 +19,14 @@ export enum XeroEntityType {
   ITEM = 'item',
   INVOICE = 'invoice',
   PAYMENT = 'payment',
-  CREDIT_NOTE = 'credit_note'
+  CREDIT_NOTE = 'credit_note',
 }
 
 export enum XeroConflictResolution {
   XERO_WINS = 'xero_wins',
   POS_WINS = 'pos_wins',
   LATEST_WINS = 'latest_wins',
-  MANUAL = 'manual'
+  MANUAL = 'manual',
 }
 
 // Base Sync Interfaces
@@ -280,11 +280,14 @@ export interface XeroCacheStatistics {
   expiredEntries: number;
   oldestEntry?: Date;
   newestEntry?: Date;
-  byEntityType: Record<XeroEntityType, {
-    count: number;
-    size: number;
-    hitRate: number;
-  }>;
+  byEntityType: Record<
+    XeroEntityType,
+    {
+      count: number;
+      size: number;
+      hitRate: number;
+    }
+  >;
 }
 
 // Integration Health Models
@@ -383,13 +386,8 @@ export type {
   XeroCacheStatistics,
   XeroIntegrationHealth,
   XeroHealthAlert,
-  XeroUserPreferences
+  XeroUserPreferences,
 };
 
 // Export enums for external use
-export {
-  XeroSyncDirection,
-  XeroSyncStatus,
-  XeroEntityType,
-  XeroConflictResolution
-};
+export { XeroSyncDirection, XeroSyncStatus, XeroEntityType, XeroConflictResolution };

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -10,8 +11,9 @@ import {
   Alert,
   Linking, // Added Linking
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation, useRoute } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const Colors = {
   primary: '#2C3E50',
@@ -36,7 +38,8 @@ const mockOrder = {
   subtotal: 30.97,
   tax: 2.48,
   total: 33.45,
-  customer: { // Updated to use customer object
+  customer: {
+    // Updated to use customer object
     id: 'cust_123',
     name: 'John Doe',
     email: 'john.doe@example.com',
@@ -63,20 +66,16 @@ const OrderDetailsScreen: React.FC = () => {
   };
 
   const handleStatusUpdate = (newStatus: string) => {
-    Alert.alert(
-      'Update Status',
-      `Change order status to ${newStatus}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Update', 
-          onPress: () => {
-            // Update order status
-            Alert.alert('Success', `Order status updated to ${newStatus}`);
-          }
+    Alert.alert('Update Status', `Change order status to ${newStatus}?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Update',
+        onPress: () => {
+          // Update order status
+          Alert.alert('Success', `Order status updated to ${newStatus}`);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const OrderItemCard = ({ item }: { item: any }) => (
@@ -84,13 +83,11 @@ const OrderDetailsScreen: React.FC = () => {
       <Text style={styles.itemEmoji}>{item.emoji}</Text>
       <View style={styles.itemDetails}>
         <Text style={styles.itemName}>{item.name}</Text>
-                    <Text style={styles.itemPrice}>£{item.price.toFixed(2)} each</Text>
+        <Text style={styles.itemPrice}>£{item.price.toFixed(2)} each</Text>
       </View>
       <View style={styles.itemQuantity}>
         <Text style={styles.quantityText}>x{item.quantity}</Text>
-        <Text style={styles.itemTotal}>
-          £{(item.price * item.quantity).toFixed(2)}
-        </Text>
+        <Text style={styles.itemTotal}>£{(item.price * item.quantity).toFixed(2)}</Text>
       </View>
     </View>
   );
@@ -98,13 +95,10 @@ const OrderDetailsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Order #{mockOrder.id}</Text>
@@ -117,12 +111,12 @@ const OrderDetailsScreen: React.FC = () => {
         {/* Order Status */}
         <View style={styles.statusSection}>
           <View style={styles.statusHeader}>
-            <View style={[styles.statusIndicator, { backgroundColor: statusColors[mockOrder.status] }]} />
+            <View
+              style={[styles.statusIndicator, { backgroundColor: statusColors[mockOrder.status] }]}
+            />
             <Text style={styles.statusText}>{mockOrder.status.toUpperCase()}</Text>
           </View>
-          <Text style={styles.orderTime}>
-            {mockOrder.createdAt.toLocaleString()}
-          </Text>
+          <Text style={styles.orderTime}>{mockOrder.createdAt.toLocaleString()}</Text>
         </View>
 
         {/* Customer Info */}
@@ -136,7 +130,9 @@ const OrderDetailsScreen: React.FC = () => {
               </Text>
             </View>
             {mockOrder.customer?.email && (
-              <TouchableOpacity onPress={() => Linking.openURL(`mailto:${mockOrder.customer?.email}`)}>
+              <TouchableOpacity
+                onPress={() => Linking.openURL(`mailto:${mockOrder.customer?.email}`)}
+              >
                 <View style={styles.customerRow}>
                   <Icon name="email" size={20} color={Colors.secondary} />
                   <Text style={[styles.customerText, styles.emailLink]}>
@@ -152,12 +148,16 @@ const OrderDetailsScreen: React.FC = () => {
               </View>
             )}
             <View style={styles.customerRow}>
-              <Icon 
-                name={mockOrder.paymentMethod === 'cash' ? 'money' : 
-                      mockOrder.paymentMethod === 'card' ? 'credit-card' : 
-                      'phone-android'} 
-                size={20} 
-                color={Colors.secondary} 
+              <Icon
+                name={
+                  mockOrder.paymentMethod === 'cash'
+                    ? 'money'
+                    : mockOrder.paymentMethod === 'card'
+                    ? 'credit-card'
+                    : 'phone-android'
+                }
+                size={20}
+                color={Colors.secondary}
               />
               <Text style={styles.customerText}>
                 {mockOrder.paymentMethod?.replace('_', ' ').toUpperCase()}
@@ -218,7 +218,7 @@ const OrderDetailsScreen: React.FC = () => {
                 <Text style={styles.actionButtonText}>Mark as Ready</Text>
               </TouchableOpacity>
             )}
-            
+
             {mockOrder.status === 'ready' && (
               <TouchableOpacity
                 style={[styles.actionButton, { backgroundColor: Colors.secondary }]}
@@ -234,9 +234,7 @@ const OrderDetailsScreen: React.FC = () => {
               onPress={() => Alert.alert('Coming Soon', 'Print receipt feature coming soon')}
             >
               <Icon name="print" size={20} color={Colors.text} />
-              <Text style={[styles.actionButtonText, { color: Colors.text }]}>
-                Print Receipt
-              </Text>
+              <Text style={[styles.actionButtonText, { color: Colors.text }]}>Print Receipt</Text>
             </TouchableOpacity>
           </View>
         </View>

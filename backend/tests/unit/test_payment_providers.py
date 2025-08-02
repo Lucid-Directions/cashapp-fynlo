@@ -1,14 +1,13 @@
 """
 Unit tests for payment providers
 """
-import pytest
 from unittest.mock import Mock, patch
 from decimal import Decimal
 from app.services.payment_providers.base import PaymentProvider
 from app.services.payment_providers.cash_provider import CashPaymentProvider
 from app.services.payment_providers.stripe_provider import StripePaymentProvider
 from app.services.payment_providers.sumup_provider import SumUpPaymentProvider
-from app.services.payment_providers import PaymentStatus, PaymentMethod
+from app.services.payment_providers import PaymentStatus
 
 
 class TestPaymentProvider:

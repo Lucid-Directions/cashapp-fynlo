@@ -5,8 +5,6 @@ Revises: 003_add_floor_plan_and_pos_tables, 006_add_foreign_key_constraints
 Create Date: 2025-06-21 08:48:51.172366
 
 """
-from alembic import op
-import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.

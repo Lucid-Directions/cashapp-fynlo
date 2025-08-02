@@ -1,11 +1,12 @@
 /**
  * Secure Payment Method Selector Component
- * 
+ *
  * Displays available payment methods with fee transparency
  * Shows real-time fee calculations and provider information
  */
 
 import React, { useState, useEffect } from 'react';
+
 import {
   View,
   Text,
@@ -15,9 +16,25 @@ import {
   ScrollView,
   RefreshControl,
 } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import { useTheme } from '../../hooks/useTheme';
-import SecurePaymentConfig, { PaymentMethod } from '../../services/SecurePaymentConfig';
+import { logger } from '../../services/logger';
+import SecurePaymentConfig from '../../services/SecurePaymentConfig';
+
+import type { PaymentMethod } from '../../services/SecurePaymentConfig';
+
+// Helper function to create theme-aware text styles
+const createThemedStyles = (theme: any) =>
+  StyleSheet.create({
+    textPrimary: { color: theme.colors.text },
+    textSecondary: { color: theme.colors.textSecondary },
+    textAccent: { color: theme.colors.accent },
+    textError: { color: theme.colors.error },
+    textOnPrimary: { color: theme.colors.onPrimary },
+    textPrimaryColor: { color: theme.colors.primary },
+  });
 
 interface PaymentMethodSelectorProps {
   amount: number;
@@ -30,13 +47,16 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   amount,
   onMethodSelected,
   selectedMethod,
-  disabled = false
+  disabled = false,
 }) => {
   const { theme } = useTheme();
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Create theme-aware styles
+  const themedStyles = createThemedStyles(theme);
 
   const loadPaymentMethods = async (forceRefresh = false) => {
     try {
@@ -49,7 +69,7 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       const availableMethods = SecurePaymentConfig.getAvailableMethods();
       setMethods(availableMethods);
     } catch (err) {
-      console.error('Error loading payment methods:', err);
+      logger.error('Error loading payment methods:', err);
       setError('Failed to load payment methods');
     } finally {
       setLoading(false);
@@ -63,11 +83,11 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
   const getMethodIcon = (methodId: string): string => {
     const icons: Record<string, string> = {
-      'card': 'credit-card',
-      'cash': 'cash-multiple',
-      'qr_code': 'qrcode',
-      'apple_pay': 'apple',
-      'google_pay': 'google',
+      card: 'credit-card',
+      cash: 'cash-multiple',
+      qr_code: 'qrcode',
+      apple_pay: 'apple',
+      google_pay: 'google',
     };
     return icons[methodId] || 'help-circle';
   };
@@ -78,11 +98,9 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
     return (
       <View style={styles.feeInfo}>
-        <Text style={[styles.feeText, { color: theme.colors.textSecondary }]}>
-          {feeDisplay}
-        </Text>
+        <Text style={[styles.feeText, themedStyles.textSecondary]}>{feeDisplay}</Text>
         {amount > 0 && fees.totalFee > 0 && (
-          <Text style={[styles.feeAmount, { color: theme.colors.accent }]}>
+          <Text style={[styles.feeAmount, themedStyles.textAccent]}>
             Fee: £{fees.totalFee.toFixed(2)}
           </Text>
         )}
@@ -103,7 +121,7 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
             backgroundColor: isSelected ? theme.colors.primaryLight : theme.colors.surface,
             borderColor: isSelected ? theme.colors.primary : theme.colors.border,
           },
-          disabled && styles.disabledCard
+          disabled && styles.disabledCard,
         ]}
         onPress={() => !disabled && onMethodSelected(method)}
         disabled={disabled}
@@ -115,23 +133,18 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
             color={isSelected ? theme.colors.primary : theme.colors.text}
           />
           <View style={styles.methodInfo}>
-            <Text style={[
-              styles.methodName,
-              { color: theme.colors.text }
-            ]}>
-              {method.name}
-            </Text>
+            <Text style={[styles.methodName, themedStyles.textPrimary]}>{method.name}</Text>
             {renderFeeInfo(method)}
           </View>
           {amount > 0 && (
             <View style={styles.netAmountContainer}>
-              <Text style={[styles.netAmountLabel, { color: theme.colors.textSecondary }]}>
-                You receive:
-              </Text>
-              <Text style={[
-                styles.netAmount,
-                { color: isSelected ? theme.colors.primary : theme.colors.text }
-              ]}>
+              <Text style={[styles.netAmountLabel, themedStyles.textSecondary]}>You receive:</Text>
+              <Text
+                style={[
+                  styles.netAmount,
+                  isSelected ? themedStyles.textPrimaryColor : themedStyles.textPrimary,
+                ]}
+              >
                 £{fees.netAmount.toFixed(2)}
               </Text>
             </View>
@@ -153,7 +166,7 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     return (
       <View style={[styles.container, styles.centerContent]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+        <Text style={[styles.loadingText, themedStyles.textSecondary]}>
           Loading payment methods...
         </Text>
       </View>
@@ -164,16 +177,9 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     return (
       <View style={[styles.container, styles.centerContent]}>
         <Icon name="alert-circle" size={48} color={theme.colors.error} />
-        <Text style={[styles.errorText, { color: theme.colors.error }]}>
-          {error}
-        </Text>
-        <TouchableOpacity
-          style={[styles.retryButton, { backgroundColor: theme.colors.primary }]}
-          onPress={() => loadPaymentMethods(true)}
-        >
-          <Text style={[styles.retryButtonText, { color: theme.colors.onPrimary }]}>
-            Retry
-          </Text>
+        <Text style={[styles.errorText, themedStyles.textError]}>{error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={() => loadPaymentMethods(true)}>
+          <Text style={[styles.retryButtonText, themedStyles.textOnPrimary]}>Retry</Text>
         </TouchableOpacity>
       </View>
     );
@@ -183,7 +189,7 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     return (
       <View style={[styles.container, styles.centerContent]}>
         <Icon name="credit-card-off" size={48} color={theme.colors.textSecondary} />
-        <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
+        <Text style={[styles.emptyText, themedStyles.textSecondary]}>
           No payment methods available
         </Text>
       </View>
@@ -202,23 +208,19 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       }
     >
       <View style={styles.header}>
-        <Text style={[styles.title, { color: theme.colors.text }]}>
-          Select Payment Method
-        </Text>
+        <Text style={[styles.title, themedStyles.textPrimary]}>Select Payment Method</Text>
         {amount > 0 && (
-          <Text style={[styles.amountText, { color: theme.colors.primary }]}>
+          <Text style={[styles.amountText, themedStyles.textPrimaryColor]}>
             Amount: £{amount.toFixed(2)}
           </Text>
         )}
       </View>
 
-      <View style={styles.methodsList}>
-        {methods.map(renderPaymentMethod)}
-      </View>
+      <View style={styles.methodsList}>{methods.map(renderPaymentMethod)}</View>
 
-      <View style={[styles.infoBox, { backgroundColor: theme.colors.surfaceLight }]}>
+      <View style={styles.infoBox}>
         <Icon name="information" size={20} color={theme.colors.primary} />
-        <Text style={[styles.infoText, { color: theme.colors.textSecondary }]}>
+        <Text style={[styles.infoText, themedStyles.textSecondary]}>
           Processing fees are shown for transparency. The customer pays the full amount.
         </Text>
       </View>
@@ -318,6 +320,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
+    backgroundColor: '#4C6EF5', // Primary color
   },
   retryButtonText: {
     fontSize: 16,
@@ -334,6 +337,7 @@ const styles = StyleSheet.create({
     padding: 16,
     margin: 16,
     borderRadius: 8,
+    backgroundColor: '#F5F5F5', // Surface light color
     gap: 12,
   },
   infoText: {

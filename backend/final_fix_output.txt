@@ -1,0 +1,4 @@
+  File "/Users/arnauddecube/Documents/Fynlo/cashapp-fynlo/backend/fix_all_syntax_final.py", line 99
+    """Remove orphaned """ lines that cause syntax errors."""
+                           ^^^^^
+SyntaxError: invalid syntax

@@ -5,7 +5,6 @@ Tests for Redis fallback security - ensures fail-closed behavior
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
 import time
-from fastapi import HTTPException
 
 from app.core.redis_client import RedisClient
 from app.core.exceptions import ServiceUnavailableError
@@ -183,7 +182,6 @@ class TestRedisFallbackSecurity:
         redis_client._mock_storage = {"test": "data"}
         
         # Import function after mocking
-        from app.core.redis_client import get_redis_health
         
         # Run synchronously (the actual function is async but we're testing structure)
         # In real test would use pytest.mark.asyncio

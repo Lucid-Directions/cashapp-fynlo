@@ -7,7 +7,10 @@ from typing import List, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, desc
 from datetime import datetime, timedelta
+<<<<<<< HEAD
 from decimal import Decimal
+=======
+>>>>>>> origin/main
 
 from app.core.database import Platform, Restaurant, Order, Customer
 from app.core.exceptions import FynloException, ErrorCodes
@@ -15,6 +18,8 @@ from app.core.exceptions import FynloException, ErrorCodes
 class PlatformService:
     """Service for platform management operations"""
     
+    pass
+
     def __init__(self, db: Session):
         self.db = db
     

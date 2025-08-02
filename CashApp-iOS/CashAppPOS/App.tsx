@@ -4,20 +4,23 @@
  */
 
 import React, { useEffect, useState } from 'react';
+
 import { LogBox, View, Text, StyleSheet, ActivityIndicator, TextInput } from 'react-native';
+
 import 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import ErrorBoundary from './src/components/ErrorBoundary';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { ThemeProvider } from './src/design-system/ThemeProvider';
+import { supabase } from './src/lib/supabase';
 import AppNavigator from './src/navigation/AppNavigator';
 import ErrorTrackingService from './src/services/ErrorTrackingService';
-import ErrorBoundary from './src/components/ErrorBoundary';
 import SumUpNativeService from './src/services/SumUpNativeService';
-import { supabase } from './src/lib/supabase';
 import { useAuthStore } from './src/store/useAuthStore';
 import { clearAuthStorage } from './src/utils/clearAuthStorage';
-import tokenManager from './src/utils/tokenManager';
 import { ensureComponentsLoaded } from './src/utils/componentRegistry';
+import tokenManager from './src/utils/tokenManager';
 
 // Suppress specific warnings for development
 LogBox.ignoreLogs([
@@ -38,11 +41,11 @@ const App: React.FC = () => {
       try {
         console.log('🚀 Fynlo POS App Starting...');
         console.log('📱 BUNDLE VERSION: 2025-01-08-v10 - FIXED TextInput');
-        
+
         // Ensure critical React Native components are not tree-shaken
         // This prevents ReferenceError in production iOS builds
         ensureComponentsLoaded();
-        
+
         // Clear any stored authentication on app startup
         console.log('🧹 Clearing stored authentication...');
         await AsyncStorage.multiRemove([
@@ -52,61 +55,59 @@ const App: React.FC = () => {
           'supabase_session',
           'mock_session',
           '@auth_user',
-          '@auth_business'
+          '@auth_business',
         ]);
-        
+
         // Initialize error tracking service
         const errorTrackingService = ErrorTrackingService.getInstance();
         errorTrackingService.initialize();
-        
+
         // Initialize SumUp Native SDK (configuration will be fetched from backend when needed)
         console.log('🔧 Initializing SumUp Native SDK...');
         const sumUpService = SumUpNativeService.getInstance();
         const sumUpInitialized = await sumUpService.initialize();
-        
+
         if (sumUpInitialized) {
           console.log('✅ SumUp Native SDK initialized successfully');
         } else {
           console.warn('⚠️ SumUp Native SDK initialization failed - continuing without SumUp');
         }
-        
+
         // Check Supabase auth state
         console.log('🔐 Checking authentication state...');
         const authStore = useAuthStore.getState();
         await authStore.checkAuth();
-        
+
         // Listen for auth state changes
-        const { data: authListener } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
-            console.log('🔐 Auth state changed:', event);
-            
-            // Handle token refresh events
-            if (event === 'TOKEN_REFRESHED' && session) {
-              console.log('🔄 Token refreshed, updating stored token...');
-              // The token manager will handle storing the new token
-              // But we ensure it happens by calling getAuthToken which syncs storage
-              await tokenManager.getAuthToken();
-            }
-            
-            if (event === 'SIGNED_OUT') {
-              // Clear any stored data
-              authStore.clearError();
-              await tokenManager.clearTokens();
-            }
-            
-            if (event === 'SIGNED_IN' && session) {
-              // Ensure token is stored for other services
-              await tokenManager.getAuthToken();
-            }
+        const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log('🔐 Auth state changed:', event);
+
+          // Handle token refresh events
+          if (event === 'TOKEN_REFRESHED' && session) {
+            console.log('🔄 Token refreshed, updating stored token...');
+            // The token manager will handle storing the new token
+            // But we ensure it happens by calling getAuthToken which syncs storage
+            await tokenManager.getAuthToken();
           }
-        );
-        
+
+          if (event === 'SIGNED_OUT') {
+            // Clear any stored data
+            authStore.clearError();
+            await tokenManager.clearTokens();
+          }
+
+          if (event === 'SIGNED_IN' && session) {
+            // Ensure token is stored for other services
+            await tokenManager.getAuthToken();
+          }
+        });
+
         // Add small delay to ensure all modules are loaded
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         console.log('✅ App initialization complete');
         setIsAppReady(true);
-        
+
         // Cleanup function
         return () => {
           authListener?.subscription.unsubscribe();
@@ -114,15 +115,15 @@ const App: React.FC = () => {
       } catch (err) {
         console.error('❌ App initialization failed:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
-        
+
         // Track initialization error
         const errorTrackingService = ErrorTrackingService.getInstance();
         errorTrackingService.captureError(err instanceof Error ? err : new Error(`${err}`), {
           action: 'app_initialization',
-          additionalData: { 
+          additionalData: {
             initializationError: true,
-            errorType: 'app_startup_failure'
-          }
+            errorType: 'app_startup_failure',
+          },
         });
       }
     };

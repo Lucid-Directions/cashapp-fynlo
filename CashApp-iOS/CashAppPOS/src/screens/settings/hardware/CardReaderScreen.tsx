@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -9,8 +10,9 @@ import {
   Switch,
   TextInput,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -43,7 +45,7 @@ interface CardReader {
 
 const CardReaderScreen: React.FC = () => {
   const navigation = useNavigation();
-  
+
   const [cardReaders, setCardReaders] = useState<CardReader[]>([
     {
       id: 'reader1',
@@ -92,14 +94,14 @@ const CardReaderScreen: React.FC = () => {
 
   // Supported card types
   const [cardTypes, setCardTypes] = useState({
-    'Visa': true,
-    'Mastercard': true,
+    Visa: true,
+    Mastercard: true,
     'American Express': true,
-    'Discover': true,
+    Discover: true,
     'Diners Club': false,
-    'JCB': false,
+    JCB: false,
     'Union Pay': false,
-    'Maestro': true,
+    Maestro: true,
   });
 
   const getStatusColor = (status: string) => {
@@ -164,7 +166,7 @@ const CardReaderScreen: React.FC = () => {
 
   const handleScanForReaders = async () => {
     setScanning(true);
-    
+
     // Simulate scanning
     setTimeout(() => {
       setScanning(false);
@@ -183,46 +185,47 @@ const CardReaderScreen: React.FC = () => {
     }
 
     // Simulate test transaction
-    setCardReaders(prev => prev.map(r => 
-      r.id === reader.id ? { ...r, status: 'processing' } : r
-    ));
+    setCardReaders((prev) =>
+      prev.map((r) => (r.id === reader.id ? { ...r, status: 'processing' } : r))
+    );
 
     setTimeout(() => {
-      setCardReaders(prev => prev.map(r => 
-        r.id === reader.id ? { ...r, status: 'connected' } : r
-      ));
+      setCardReaders((prev) =>
+        prev.map((r) => (r.id === reader.id ? { ...r, status: 'connected' } : r))
+      );
       Alert.alert('Success', 'Test transaction completed successfully!');
     }, 3000);
   };
 
   const handleUpdateFirmware = (reader: CardReader) => {
-    Alert.alert(
-      'Update Firmware',
-      `Check for firmware updates for ${reader.name}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Check Updates', onPress: () => {
+    Alert.alert('Update Firmware', `Check for firmware updates for ${reader.name}?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Check Updates',
+        onPress: () => {
           Alert.alert('Info', 'Firmware is up to date.');
-        }}
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const toggleReaderStatus = (readerId: string) => {
-    setCardReaders(prev => prev.map(reader => 
-      reader.id === readerId 
-        ? { 
-            ...reader, 
-            status: reader.status === 'connected' ? 'disconnected' : 'connected' 
-          }
-        : reader
-    ));
+    setCardReaders((prev) =>
+      prev.map((reader) =>
+        reader.id === readerId
+          ? {
+              ...reader,
+              status: reader.status === 'connected' ? 'disconnected' : 'connected',
+            }
+          : reader
+      )
+    );
   };
 
   const toggleCardType = (type: string) => {
-    setCardTypes(prev => ({
+    setCardTypes((prev) => ({
       ...prev,
-      [type]: !prev[type as keyof typeof prev]
+      [type]: !prev[type as keyof typeof prev],
     }));
   };
 
@@ -231,26 +234,14 @@ const CardReaderScreen: React.FC = () => {
       <View style={styles.readerHeader}>
         <View style={styles.readerInfo}>
           <View style={styles.readerTitleRow}>
-            <Icon 
-              name={getTypeIcon(reader.type)} 
-              size={20} 
-              color={Colors.primary} 
-            />
+            <Icon name={getTypeIcon(reader.type)} size={20} color={Colors.primary} />
             <Text style={styles.readerName}>{reader.name}</Text>
           </View>
           <View style={styles.readerDetails}>
-            <Icon 
-              name={getConnectionIcon(reader.connection)} 
-              size={16} 
-              color={Colors.lightText} 
-            />
-            <Text style={styles.readerConnection}>
-              {reader.connection.toUpperCase()}
-            </Text>
+            <Icon name={getConnectionIcon(reader.connection)} size={16} color={Colors.lightText} />
+            <Text style={styles.readerConnection}>{reader.connection.toUpperCase()}</Text>
           </View>
-          {reader.model && (
-            <Text style={styles.readerModel}>{reader.model}</Text>
-          )}
+          {reader.model && <Text style={styles.readerModel}>{reader.model}</Text>}
           {reader.serialNumber && (
             <Text style={styles.readerSerial}>S/N: {reader.serialNumber}</Text>
           )}
@@ -263,19 +254,13 @@ const CardReaderScreen: React.FC = () => {
             </Text>
           )}
         </View>
-        
+
         <View style={styles.readerStatus}>
           <View style={[styles.statusBadge, { backgroundColor: getStatusColor(reader.status) }]}>
-            <Icon 
-              name={getStatusIcon(reader.status)} 
-              size={12} 
-              color={Colors.white} 
-            />
-            <Text style={styles.statusText}>
-              {reader.status.toUpperCase()}
-            </Text>
+            <Icon name={getStatusIcon(reader.status)} size={12} color={Colors.white} />
+            <Text style={styles.statusText}>{reader.status.toUpperCase()}</Text>
           </View>
-          
+
           <Switch
             value={reader.status === 'connected'}
             onValueChange={() => toggleReaderStatus(reader.id)}
@@ -288,37 +273,46 @@ const CardReaderScreen: React.FC = () => {
 
       <View style={styles.readerActions}>
         <TouchableOpacity
-          style={[styles.actionButton, reader.status !== 'connected' && styles.actionButtonDisabled]}
+          style={[
+            styles.actionButton,
+            reader.status !== 'connected' && styles.actionButtonDisabled,
+          ]}
           onPress={() => handleTestReader(reader)}
           disabled={reader.status !== 'connected'}
         >
-          <Icon name="payment" size={16} color={reader.status === 'connected' ? Colors.primary : Colors.mediumGray} />
-          <Text style={[styles.actionButtonText, reader.status !== 'connected' && styles.actionButtonTextDisabled]}>
+          <Icon
+            name="payment"
+            size={16}
+            color={reader.status === 'connected' ? Colors.primary : Colors.mediumGray}
+          />
+          <Text
+            style={[
+              styles.actionButtonText,
+              reader.status !== 'connected' && styles.actionButtonTextDisabled,
+            ]}
+          >
             {reader.status === 'processing' ? 'Testing...' : 'Test Payment'}
           </Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => handleUpdateFirmware(reader)}
-        >
+
+        <TouchableOpacity style={styles.actionButton} onPress={() => handleUpdateFirmware(reader)}>
           <Icon name="system-update" size={16} color={Colors.secondary} />
           <Text style={styles.actionButtonText}>Update</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[styles.actionButton, styles.removeButton]}
           onPress={() => {
-            Alert.alert(
-              'Remove Reader',
-              `Remove ${reader.name}?`,
-              [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Remove', style: 'destructive', onPress: () => {
-                  setCardReaders(prev => prev.filter(r => r.id !== reader.id));
-                }}
-              ]
-            );
+            Alert.alert('Remove Reader', `Remove ${reader.name}?`, [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Remove',
+                style: 'destructive',
+                onPress: () => {
+                  setCardReaders((prev) => prev.filter((r) => r.id !== reader.id));
+                },
+              },
+            ]);
           }}
         >
           <Icon name="delete" size={16} color={Colors.danger} />
@@ -336,12 +330,12 @@ const CardReaderScreen: React.FC = () => {
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Card Reader</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.addButton}
           onPress={handleScanForReaders}
           disabled={scanning}
         >
-          <Icon name={scanning ? "hourglass-empty" : "search"} size={24} color={Colors.white} />
+          <Icon name={scanning ? 'hourglass-empty' : 'search'} size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
 
@@ -355,16 +349,16 @@ const CardReaderScreen: React.FC = () => {
               onPress={handleScanForReaders}
               disabled={scanning}
             >
-              <Icon 
-                name={scanning ? "hourglass-empty" : "search"} 
-                size={24} 
-                color={scanning ? Colors.mediumGray : Colors.primary} 
+              <Icon
+                name={scanning ? 'hourglass-empty' : 'search'}
+                size={24}
+                color={scanning ? Colors.mediumGray : Colors.primary}
               />
               <Text style={[styles.quickActionText, scanning && styles.quickActionTextDisabled]}>
                 {scanning ? 'Scanning...' : 'Scan for Readers'}
               </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={styles.quickActionButton}
               onPress={() => Alert.alert('Info', 'Manual reader setup would open here')}
@@ -372,12 +366,12 @@ const CardReaderScreen: React.FC = () => {
               <Icon name="add-circle-outline" size={24} color={Colors.secondary} />
               <Text style={styles.quickActionText}>Add Manually</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={styles.quickActionButton}
               onPress={() => {
-                const connectedReaders = cardReaders.filter(r => r.status === 'connected');
-                connectedReaders.forEach(reader => handleTestReader(reader));
+                const connectedReaders = cardReaders.filter((r) => r.status === 'connected');
+                connectedReaders.forEach((reader) => handleTestReader(reader));
               }}
             >
               <Icon name="payment" size={24} color={Colors.success} />
@@ -408,9 +402,7 @@ const CardReaderScreen: React.FC = () => {
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Contactless payments</Text>
-                <Text style={styles.settingDescription}>
-                  Accept tap-to-pay and mobile wallets
-                </Text>
+                <Text style={styles.settingDescription}>Accept tap-to-pay and mobile wallets</Text>
               </View>
               <Switch
                 value={contactlessEnabled && cardPaymentsEnabled}
@@ -424,9 +416,7 @@ const CardReaderScreen: React.FC = () => {
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Chip and PIN</Text>
-                <Text style={styles.settingDescription}>
-                  Accept EMV chip card payments
-                </Text>
+                <Text style={styles.settingDescription}>Accept EMV chip card payments</Text>
               </View>
               <Switch
                 value={chipEnabled && cardPaymentsEnabled}
@@ -440,9 +430,7 @@ const CardReaderScreen: React.FC = () => {
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Magnetic stripe</Text>
-                <Text style={styles.settingDescription}>
-                  Accept swipe payments (fallback only)
-                </Text>
+                <Text style={styles.settingDescription}>Accept swipe payments (fallback only)</Text>
               </View>
               <Switch
                 value={magneticStripeEnabled && cardPaymentsEnabled}
@@ -510,9 +498,7 @@ const CardReaderScreen: React.FC = () => {
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Tip prompt</Text>
-                <Text style={styles.settingDescription}>
-                  Show tip selection on card reader
-                </Text>
+                <Text style={styles.settingDescription}>Show tip selection on card reader</Text>
               </View>
               <Switch
                 value={tipPromptEnabled}
@@ -525,9 +511,7 @@ const CardReaderScreen: React.FC = () => {
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Receipt prompt</Text>
-                <Text style={styles.settingDescription}>
-                  Ask customer for receipt preference
-                </Text>
+                <Text style={styles.settingDescription}>Ask customer for receipt preference</Text>
               </View>
               <Switch
                 value={receiptPromptEnabled}
@@ -546,10 +530,7 @@ const CardReaderScreen: React.FC = () => {
             {Object.entries(cardTypes).map(([type, enabled]) => (
               <TouchableOpacity
                 key={type}
-                style={[
-                  styles.cardTypeButton,
-                  enabled && styles.cardTypeButtonActive
-                ]}
+                style={[styles.cardTypeButton, enabled && styles.cardTypeButtonActive]}
                 onPress={() => toggleCardType(type)}
               >
                 <Icon
@@ -557,10 +538,7 @@ const CardReaderScreen: React.FC = () => {
                   size={20}
                   color={enabled ? Colors.primary : Colors.mediumGray}
                 />
-                <Text style={[
-                  styles.cardTypeText,
-                  enabled && styles.cardTypeTextActive
-                ]}>
+                <Text style={[styles.cardTypeText, enabled && styles.cardTypeTextActive]}>
                   {type}
                 </Text>
               </TouchableOpacity>
@@ -571,7 +549,7 @@ const CardReaderScreen: React.FC = () => {
         {/* Connected Card Readers */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Card Readers ({cardReaders.length})</Text>
-          {cardReaders.map(reader => (
+          {cardReaders.map((reader) => (
             <CardReaderCard key={reader.id} reader={reader} />
           ))}
         </View>

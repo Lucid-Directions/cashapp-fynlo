@@ -162,6 +162,8 @@ class TestErrorHandlingSecurity:
 class TestSensitiveLoggingFilter:
     """Test that sensitive data is filtered from logs"""
     
+    pass
+
     def test_password_filtered_from_logs(self):
         """Test passwords are filtered from log messages"""
         from app.core.logging_filters import SensitiveDataFilter
@@ -241,8 +243,11 @@ class TestSensitiveLoggingFilter:
 if __name__ == "__main__":
     # Run tests manually
     import asyncio
+
+logger = logging.getLogger(__name__)
+
     
-    print("Running error handling security tests...\n")
+    logger.error("Running error handling security tests...\n")
     
     test_error = TestErrorHandlingSecurity()
     test_logging = TestSensitiveLoggingFilter()
@@ -250,33 +255,33 @@ if __name__ == "__main__":
     # Run async tests
     loop = asyncio.get_event_loop()
     
-    print("Testing FynloException in production mode...")
+    logger.error("Testing FynloException in production mode...")
     loop.run_until_complete(test_error.test_fynlo_exception_no_details_in_production())
-    print("✓ Passed")
+    logger.info("✓ Passed")
     
-    print("\nTesting HTTPException in production mode...")
+    logger.error("\nTesting HTTPException in production mode...")
     loop.run_until_complete(test_error.test_http_exception_generic_in_production())
-    print("✓ Passed")
+    logger.info("✓ Passed")
     
-    print("\nTesting development mode shows details...")
+    logger.info("\nTesting development mode shows details...")
     loop.run_until_complete(test_error.test_development_mode_shows_details())
-    print("✓ Passed")
+    logger.info("✓ Passed")
     
-    print("\nTesting inventory error hides stock levels...")
+    logger.error("\nTesting inventory error hides stock levels...")
     loop.run_until_complete(test_error.test_inventory_error_no_stock_levels())
-    print("✓ Passed")
+    logger.info("✓ Passed")
     
     # Run sync tests
-    print("\nTesting password filtering in logs...")
+    logger.info("\nTesting password filtering in logs...")
     test_logging.test_password_filtered_from_logs()
-    print("✓ Passed")
+    logger.info("✓ Passed")
     
-    print("\nTesting database URL filtering...")
+    logger.info("\nTesting database URL filtering...")
     test_logging.test_database_url_filtered()
-    print("✓ Passed")
+    logger.info("✓ Passed")
     
-    print("\nTesting file path filtering...")
+    logger.info("\nTesting file path filtering...")
     test_logging.test_file_paths_filtered()
-    print("✓ Passed")
+    logger.info("✓ Passed")
     
-    print("\n✅ All tests passed!")
+    logger.info("\n✅ All tests passed!")

@@ -34,7 +34,7 @@ def get_redis_client(redis_url):
 
 def analyze_memory_usage(client):
     """Analyze Redis memory usage"""
-    print("\n=== REDIS MEMORY ANALYSIS ===")
+    logger.info("\n=== REDIS MEMORY ANALYSIS ===")
     
     try:
         # Get memory info
@@ -45,39 +45,39 @@ def analyze_memory_usage(client):
         used_memory_peak = info['used_memory_peak']
         used_memory_peak_human = info['used_memory_peak_human']
         
-        print(f"Current memory usage: {used_memory_human}")
-        print(f"Peak memory usage: {used_memory_peak_human}")
-        print(f"Memory fragmentation ratio: {info.get('mem_fragmentation_ratio', 'N/A')}")
+        logger.info(f"Current memory usage: {used_memory_human}")
+        logger.info(f"Peak memory usage: {used_memory_peak_human}")
+        logger.info(f"Memory fragmentation ratio: {info.get('mem_fragmentation_ratio', 'N/A')}")
         
         # Get maxmemory setting
         maxmemory = client.config_get('maxmemory')['maxmemory']
         if maxmemory == '0':
-            print("Max memory: Not set (using all available)")
+            logger.info("Max memory: Not set (using all available)")
             recommendation_memory = '512mb'
         else:
-            print(f"Max memory: {int(maxmemory) / 1024 / 1024:.0f} MB")
+            logger.info(f"Max memory: {int(maxmemory) / 1024 / 1024:.0f} MB")
             recommendation_memory = '512mb' if int(maxmemory) > 536870912 else None
         
         # Calculate usage percentage
         if maxmemory != '0':
             usage_percent = (used_memory / int(maxmemory)) * 100
-            print(f"Memory usage: {usage_percent:.1f}%")
+            logger.info(f"Memory usage: {usage_percent:.1f}%")
         
         # Memory usage by data type
-        print("\nMemory by data type:")
+        logger.info("\nMemory by data type:")
         for key in ['used_memory_scripts', 'used_memory_startup']:
             if key in info:
-                print(f"  {key}: {info[key] / 1024:.2f} KB")
+                logger.info(f"  {key}: {info[key] / 1024:.2f} KB")
         
         return used_memory, recommendation_memory
         
     except Exception as e:
-        print(f"Error analyzing memory: {str(e)}")
+        logger.error(f"Error analyzing memory: {str(e)}")
         return 0, None
 
 def analyze_key_patterns(client):
     """Analyze key patterns and TTLs"""
-    print("\n=== KEY PATTERN ANALYSIS ===")
+    logger.info("\n=== KEY PATTERN ANALYSIS ===")
     
     try:
         # Sample keys (careful in production with large datasets)
@@ -91,7 +91,7 @@ def analyze_key_patterns(client):
             if cursor == 0:
                 break
         
-        print(f"Sampled {len(keys)} keys")
+        logger.info(f"Sampled {len(keys)} keys")
         
         # Analyze key patterns
         patterns = {}
@@ -119,71 +119,71 @@ def analyze_key_patterns(client):
                 patterns[pattern]['no_ttl'] += 1
                 no_ttl_count += 1
         
-        print("\nKey patterns found:")
+        logger.info("\nKey patterns found:")
         for pattern, stats in patterns.items():
-            print(f"\n  {pattern}:* ({stats['count']} keys)")
-            print(f"    Types: {stats['types']}")
-            print(f"    Without TTL: {stats['no_ttl']}")
+            logger.info(f"\n  {pattern}:* ({stats['count']} keys)")
+            logger.info(f"    Types: {stats['types']}")
+            logger.info(f"    Without TTL: {stats['no_ttl']}")
         
         if no_ttl_count > len(keys) * 0.5:
-            print(f"\n⚠️  Warning: {no_ttl_count}/{len(keys)} sampled keys have no TTL!")
-            print("   Consider setting expiration for cache keys")
+            logger.warning(f"\n⚠️  Warning: {no_ttl_count}/{len(keys)} sampled keys have no TTL!")
+            logger.info("   Consider setting expiration for cache keys")
         
         return patterns
         
     except Exception as e:
-        print(f"Error analyzing keys: {str(e)}")
+        logger.error(f"Error analyzing keys: {str(e)}")
         return {}
 
 def check_persistence(client):
     """Check Redis persistence configuration"""
-    print("\n=== PERSISTENCE CONFIGURATION ===")
+    logger.info("\n=== PERSISTENCE CONFIGURATION ===")
     
     try:
         # Check AOF
         aof_enabled = client.config_get('appendonly')['appendonly']
-        print(f"AOF (Append Only File): {aof_enabled}")
+        logger.info(f"AOF (Append Only File): {aof_enabled}")
         
         # Check RDB
         save_config = client.config_get('save')['save']
-        print(f"RDB snapshots: {save_config if save_config else 'Disabled'}")
+        logger.info(f"RDB snapshots: {save_config if save_config else 'Disabled'}")
         
         # Last save time
         last_save = client.lastsave()
-        print(f"Last save: {datetime.fromtimestamp(last_save)}")
+        logger.info(f"Last save: {datetime.fromtimestamp(last_save)}")
         
     except Exception as e:
-        print(f"Error checking persistence: {str(e)}")
+        logger.error(f"Error checking persistence: {str(e)}")
 
 def configure_eviction_policy(client, dry_run=True):
     """Configure optimal eviction policy"""
-    print("\n=== EVICTION POLICY CONFIGURATION ===")
+    logger.info("\n=== EVICTION POLICY CONFIGURATION ===")
     
     try:
         # Get current policy
         current_policy = client.config_get('maxmemory-policy')['maxmemory-policy']
-        print(f"Current eviction policy: {current_policy}")
+        logger.info(f"Current eviction policy: {current_policy}")
         
         # Recommended policy for cache
         recommended_policy = 'allkeys-lru'
         
         if current_policy != recommended_policy:
-            print(f"Recommended policy: {recommended_policy}")
-            print("  - Evicts least recently used keys when memory is full")
-            print("  - Best for general caching scenarios")
+            logger.info(f"Recommended policy: {recommended_policy}")
+            logger.info("  - Evicts least recently used keys when memory is full")
+            logger.info("  - Best for general caching scenarios")
             
             if not dry_run:
                 client.config_set('maxmemory-policy', recommended_policy)
-                print(f"✅ Updated eviction policy to {recommended_policy}")
+                logger.info(f"✅ Updated eviction policy to {recommended_policy}")
         else:
-            print("✅ Eviction policy is already optimal")
+            logger.info("✅ Eviction policy is already optimal")
             
     except Exception as e:
-        print(f"Error configuring eviction: {str(e)}")
+        logger.error(f"Error configuring eviction: {str(e)}")
 
 def check_cache_performance(client):
     """Check cache hit rates and performance"""
-    print("\n=== CACHE PERFORMANCE ===")
+    logger.info("\n=== CACHE PERFORMANCE ===")
     
     try:
         stats = client.info('stats')
@@ -193,27 +193,27 @@ def check_cache_performance(client):
         
         if keyspace_hits + keyspace_misses > 0:
             hit_rate = (keyspace_hits / (keyspace_hits + keyspace_misses)) * 100
-            print(f"Cache hit rate: {hit_rate:.2f}%")
-            print(f"Total hits: {keyspace_hits:,}")
-            print(f"Total misses: {keyspace_misses:,}")
+            logger.info(f"Cache hit rate: {hit_rate:.2f}%")
+            logger.info(f"Total hits: {keyspace_hits:,}")
+            logger.info(f"Total misses: {keyspace_misses:,}")
             
             if hit_rate < 80:
-                print("⚠️  Cache hit rate is below 80% - review caching strategy")
+                logger.info("⚠️  Cache hit rate is below 80% - review caching strategy")
             else:
-                print("✅ Cache hit rate is good")
+                logger.info("✅ Cache hit rate is good")
         else:
-            print("No cache statistics available yet")
+            logger.info("No cache statistics available yet")
             
         # Check command stats
         total_commands = int(stats.get('total_commands_processed', 0))
-        print(f"\nTotal commands processed: {total_commands:,}")
+        logger.info(f"\nTotal commands processed: {total_commands:,}")
         
     except Exception as e:
-        print(f"Error checking performance: {str(e)}")
+        logger.error(f"Error checking performance: {str(e)}")
 
 def generate_redis_config(memory_mb=512):
     """Generate optimized Redis configuration"""
-    print("\n=== RECOMMENDED REDIS CONFIGURATION ===")
+    logger.info("\n=== RECOMMENDED REDIS CONFIGURATION ===")
     
     config = f"""
 # Fynlo POS Redis Configuration
@@ -248,72 +248,72 @@ rename-command FLUSHALL ""
 rename-command CONFIG ""
 """
     
-    print(config)
+    logger.info(config)
     
     # Save to file
     with open('redis-optimized.conf', 'w') as f:
         f.write(config)
     
-    print(f"\nConfiguration saved to: redis-optimized.conf")
+    logger.info(f"\nConfiguration saved to: redis-optimized.conf")
 
 def generate_recommendations(used_memory, recommendation_memory):
     """Generate optimization recommendations"""
-    print("\n" + "="*60)
-    print("REDIS OPTIMIZATION RECOMMENDATIONS")
-    print("="*60)
+    logger.info("\n" + "="*60)
+    logger.info("REDIS OPTIMIZATION RECOMMENDATIONS")
+    logger.info("="*60)
     
     used_memory_mb = used_memory / 1024 / 1024
     
     recommendations = []
     
     if used_memory_mb < 200:
-        print(f"\n1. REDIS SIZE")
-        print(f"   Current: 1GB plan ($15/month)")
-        print(f"   Actual usage: {used_memory_mb:.2f} MB")
-        print(f"   Recommendation: Downsize to 512MB plan ($7/month)")
-        print(f"   Monthly savings: $8")
+        logger.info(f"\n1. REDIS SIZE")
+        logger.info(f"   Current: 1GB plan ($15/month)")
+        logger.info(f"   Actual usage: {used_memory_mb:.2f} MB")
+        logger.info(f"   Recommendation: Downsize to 512MB plan ($7/month)")
+        logger.info(f"   Monthly savings: $8")
         recommendations.append("Downsize Redis from 1GB to 512MB")
     
-    print(f"\n2. EVICTION POLICY")
-    print(f"   Set maxmemory-policy to 'allkeys-lru'")
-    print(f"   This ensures old cache entries are removed automatically")
+    logger.info(f"\n2. EVICTION POLICY")
+    logger.info(f"   Set maxmemory-policy to 'allkeys-lru'")
+    logger.info(f"   This ensures old cache entries are removed automatically")
     
-    print(f"\n3. KEY EXPIRATION")
-    print(f"   Implement TTLs for all cache keys:")
-    print(f"   - Session data: 24 hours")
-    print(f"   - API cache: 5-15 minutes")
-    print(f"   - Static data: 1 hour")
+    logger.info(f"\n3. KEY EXPIRATION")
+    logger.info(f"   Implement TTLs for all cache keys:")
+    logger.info(f"   - Session data: 24 hours")
+    logger.info(f"   - API cache: 5-15 minutes")
+    logger.info(f"   - Static data: 1 hour")
     
-    print(f"\n4. CONNECTION POOLING")
-    print(f"   Use connection pooling in your application")
-    print(f"   Recommended pool size: 10-20 connections")
+    logger.info(f"\n4. CONNECTION POOLING")
+    logger.info(f"   Use connection pooling in your application")
+    logger.info(f"   Recommended pool size: 10-20 connections")
     
     return recommendations
 
 def main():
     """Run Redis optimization analysis"""
-    print("="*60)
-    print("Fynlo POS Redis Optimization")
-    print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("="*60)
+    logger.info("="*60)
+    logger.info("Fynlo POS Redis Optimization")
+    logger.info(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    logger.info("="*60)
     
     # For DigitalOcean managed Redis, you would need the connection details
-    print("\nTo run this script, you need:")
-    print("1. Redis connection URL from DigitalOcean")
-    print("2. Format: rediss://default:password@host:port")
-    print("\nExample usage:")
-    print("python optimize_redis.py --redis-url 'rediss://default:password@redis-host:25061'")
+    logger.info("\nTo run this script, you need:")
+    logger.info("1. Redis connection URL from DigitalOcean")
+    logger.info("2. Format: rediss://default:password@host:port")
+    logger.info("\nExample usage:")
+    logger.info("python optimize_redis.py --redis-url 'rediss://default:password@redis-host:25061'")
     
     # Check if Redis URL is provided via environment
     redis_url = os.environ.get('REDIS_URL')
     
     if not redis_url:
-        print("\n❌ REDIS_URL environment variable not set")
-        print("\nManual recommendations for DigitalOcean Managed Redis:")
-        print("\n1. Check memory usage in DigitalOcean dashboard")
-        print("2. If < 200MB used, downsize to 512MB plan")
-        print("3. Configure eviction policy via dashboard")
-        print("4. Monitor cache hit rates")
+        logger.info("\n❌ REDIS_URL environment variable not set")
+        logger.info("\nManual recommendations for DigitalOcean Managed Redis:")
+        logger.info("\n1. Check memory usage in DigitalOcean dashboard")
+        logger.info("2. If < 200MB used, downsize to 512MB plan")
+        logger.info("3. Configure eviction policy via dashboard")
+        logger.info("4. Monitor cache hit rates")
         
         # Generate config anyway
         generate_redis_config(512)
@@ -325,7 +325,7 @@ def main():
         
         # Test connection
         client.ping()
-        print("✅ Connected to Redis successfully")
+        logger.info("✅ Connected to Redis successfully")
         
         # Run analysis
         used_memory, recommendation_memory = analyze_memory_usage(client)
@@ -347,11 +347,15 @@ def main():
         with open(f"redis-optimization-{datetime.now().strftime('%Y%m%d-%H%M%S')}.json", 'w') as f:
             json.dump(report, f, indent=2)
         
-        print("\n✅ Redis optimization analysis complete!")
+        logger.info("\n✅ Redis optimization analysis complete!")
         
     except Exception as e:
-        print(f"\n❌ Error: {str(e)}")
+        logger.error(f"\n❌ Error: {str(e)}")
         import traceback
+import logging
+
+logger = logging.getLogger(__name__)
+
         traceback.print_exc()
 
 if __name__ == "__main__":

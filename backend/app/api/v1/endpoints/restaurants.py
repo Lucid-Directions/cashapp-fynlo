@@ -13,7 +13,7 @@ import logging
 from app.core.database import get_db, Restaurant, Platform, User, Order, Customer, Section, Table
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
-from app.core.exceptions import AuthorizationException, FynloException, ResourceNotFoundException, ValidationException
+from app.core.exceptions import ValidationException, FynloException, ResourceNotFoundException, ServiceUnavailableError, AuthorizationException
 from app.core.validation import (
     validate_model_jsonb_fields,
     validate_email,
@@ -180,8 +180,7 @@ async def get_current_restaurant(
     ).first()
     
     if not restaurant:
-        raise ResourceNotFoundException(resource="Restaurant")
-    
+        raise ResourceNotFoundException(resource="Restaurant", resource_id=restaurant_id)    
     return RestaurantResponse(
         id=str(restaurant.id),
         platform_id=str(restaurant.platform_id) if restaurant.platform_id else None,
@@ -209,16 +208,14 @@ async def create_restaurant(
     """Create a new restaurant (platform owners only)"""
     
     if current_user.role != "platform_owner":
-        raise AuthorizationException(message="Only platform owners can create restaurants")
-    
+        raise AuthorizationException(message="Only platform owners can create restaurants", details={"required_role": "platform_owner"})
     # Use user's platform if not specified
     platform_id = platform_id or str(current_user.platform_id)
     
     # Verify platform exists
     platform = db.query(Platform).filter(Platform.id == platform_id).first()
     if not platform:
-        raise ResourceNotFoundException(resource="Resource", message="Platform not found")
-    
+        raise ResourceNotFoundException(resource="Platform", resource_id=platform_id)    
     # Validate and sanitize JSONB fields
     try:
         validated_address = validate_model_jsonb_fields('restaurant', 'address', restaurant_data.address)
@@ -293,15 +290,14 @@ async def create_restaurant_onboarding(
     
     # Check if user already has a restaurant
     if current_user.restaurant_id:
-        raise ValidationException(message="User already has a restaurant associated")
-    
+        raise ValidationException(message="User already has a restaurant associated", field="restaurant_id")    
     # Get user's platform (should be set during auth)
     platform_id = str(current_user.platform_id) if current_user.platform_id else None
     if not platform_id:
         # If no platform, use default platform
         default_platform = db.query(Platform).filter(Platform.name == "Fynlo").first()
         if not default_platform:
-            raise FynloException(message="No default platform found", status_code=500)
+            raise ServiceUnavailableError(message="No default platform found", service_name="Platform")
         platform_id = str(default_platform.id)
     
     # Validate and sanitize JSONB fields
@@ -472,12 +468,11 @@ async def update_restaurant(
     
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
-        raise ResourceNotFoundException(resource="Restaurant")
-    
+        raise ResourceNotFoundException(resource="Restaurant", resource_id=restaurant_id)    
     # Platform owners can update any restaurant in their platform
     if current_user.role == "platform_owner":
         if str(restaurant.platform_id) != str(current_user.platform_id):
-            raise AuthorizationException(message="Access denied")
+            raise AuthorizationException(message="Access denied", details={"reason": "Restaurant not in user's platform"})
     else:
         # Restaurant users - validate access to the specific restaurant
         await TenantSecurity.validate_restaurant_access(
@@ -488,8 +483,7 @@ async def update_restaurant(
         
         # Additional check for managers - they can only update settings, not critical fields
         if current_user.role == "manager" and any(key in restaurant_data.dict(exclude_unset=True) for key in ['is_active', 'payment_methods']):
-            raise AuthorizationException(message="Managers cannot modify critical settings")
-    
+            raise AuthorizationException(message="Managers cannot modify critical settings", details={"restricted_fields": ["is_active", "payment_methods"]})
     # Validate and sanitize fields if provided
     update_data = restaurant_data.dict(exclude_unset=True)
     
@@ -576,12 +570,11 @@ async def get_restaurant_stats(
     
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
-        raise ResourceNotFoundException(resource="Restaurant")
-    
+        raise ResourceNotFoundException(resource="Restaurant", resource_id=restaurant_id)    
     # Platform owners can view stats for any restaurant in their platform
     if current_user.role == "platform_owner":
         if str(restaurant.platform_id) != str(current_user.platform_id):
-            raise AuthorizationException(message="Access denied")
+            raise AuthorizationException(message="Access denied", details={"reason": "Restaurant not in user's platform"})
     else:
         # Restaurant users - validate access to the specific restaurant
         await TenantSecurity.validate_restaurant_access(
@@ -662,8 +655,7 @@ async def get_platform_stats(
     """Get platform-wide statistics (platform owners only)"""
     
     if current_user.role != "platform_owner":
-        raise AuthorizationException(message="Platform owners only")
-    
+        raise AuthorizationException(message="Platform owners only", details={"required_role": "platform_owner"})    
     platform_id = platform_id or str(current_user.platform_id)
     
     # Get all restaurants in platform
@@ -761,12 +753,11 @@ async def get_restaurant(
     
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
-        raise ResourceNotFoundException(resource="Restaurant")
-    
+        raise ResourceNotFoundException(resource="Restaurant", resource_id=restaurant_id)    
     # Platform owners can view any restaurant in their platform
     if current_user.role == "platform_owner":
         if str(restaurant.platform_id) != str(current_user.platform_id):
-            raise AuthorizationException(message="Access denied")
+            raise AuthorizationException(message="Access denied", details={"reason": "Restaurant not in user's platform"})
     else:
         # Restaurant users - validate access to the specific restaurant
         await TenantSecurity.validate_restaurant_access(
@@ -1205,89 +1196,94 @@ async def update_table_server(
     )
 
 # Layout Management Endpoints
-class FloorPlanLayoutUpdate(BaseModel):
-    layout: dict
+# COMMENTED OUT: Floor plan layout endpoints temporarily disabled 
+# The floor_plan_layout column was removed from the database
+# These endpoints need to be updated to use a different storage mechanism
+# before they can be re-enabled
 
-@router.get("/floor-plan/layout")
-async def get_floor_plan_layout(
-    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Get restaurant floor plan layout"""
-    
-    # Validate restaurant access
-    await TenantSecurity.validate_restaurant_access(
-        current_user, 
-        current_restaurant_id or current_user.restaurant_id, 
-        db=db
-    )
-    # Use the provided restaurant_id or fall back to user's default
-    restaurant_id = current_restaurant_id or current_user.restaurant_id
-    
-    restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
-    
-    if not restaurant:
-        raise FynloException(
-            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
-            detail="Restaurant not found"
-        )
-    
-    return APIResponseHelper.success(
-        data={
-            "layout": restaurant.floor_plan_layout or {},
-            "restaurant_id": str(restaurant.id)
-        },
-        message="Floor plan layout retrieved successfully"
-    )
+# class FloorPlanLayoutUpdate(BaseModel):
+#     layout: dict
 
-@router.put("/floor-plan/layout")
-async def update_floor_plan_layout(
-    layout_data: FloorPlanLayoutUpdate,
-    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Update restaurant floor plan layout"""
-    
-    # Validate restaurant access
-    await TenantSecurity.validate_restaurant_access(
-        current_user, 
-        current_restaurant_id or current_user.restaurant_id, 
-        db=db
-    )
-    # Use the provided restaurant_id or fall back to user's default
-    restaurant_id = current_restaurant_id or current_user.restaurant_id
-    
-    restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
-    
-    if not restaurant:
-        raise FynloException(
-            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
-            detail="Restaurant not found"
-        )
-    
-    # Validate layout JSON
-    try:
-        validated_layout = validate_model_jsonb_fields('restaurant', 'floor_plan_layout', layout_data.layout)
-    except ValidationErr as e:
-        raise FynloException(
-            error_code=ErrorCodes.VALIDATION_ERROR,
-            detail=f"Layout validation failed: {str(e)}"
-        )
-    
-    restaurant.floor_plan_layout = validated_layout
-    restaurant.updated_at = datetime.utcnow()
-    db.commit()
-    db.refresh(restaurant)
-    
-    return APIResponseHelper.success(
-        data={
-            "layout": restaurant.floor_plan_layout,
-            "restaurant_id": str(restaurant.id)
-        },
-        message="Floor plan layout updated successfully"
-    )
+# @router.get("/floor-plan/layout")
+# async def get_floor_plan_layout(
+#     current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
+#     current_user: User = Depends(get_current_user),
+#     db: Session = Depends(get_db)
+# ):
+#     """Get restaurant floor plan layout"""
+#     
+#     # Validate restaurant access
+#     await TenantSecurity.validate_restaurant_access(
+#         current_user, 
+#         current_restaurant_id or current_user.restaurant_id, 
+#         db=db
+#     )
+#     # Use the provided restaurant_id or fall back to user's default
+#     restaurant_id = current_restaurant_id or current_user.restaurant_id
+#     
+#     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+#     
+#     if not restaurant:
+#         raise FynloException(
+#             error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+#             detail="Restaurant not found"
+#         )
+#     
+#     return APIResponseHelper.success(
+#         data={
+#             "layout": restaurant.floor_plan_layout or {},
+#             "restaurant_id": str(restaurant.id)
+#         },
+#         message="Floor plan layout retrieved successfully"
+#     )
+
+# @router.put("/floor-plan/layout")
+# async def update_floor_plan_layout(
+#     layout_data: FloorPlanLayoutUpdate,
+#     current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
+#     current_user: User = Depends(get_current_user),
+#     db: Session = Depends(get_db)
+# ):
+#     """Update restaurant floor plan layout"""
+#     
+#     # Validate restaurant access
+#     await TenantSecurity.validate_restaurant_access(
+#         current_user, 
+#         current_restaurant_id or current_user.restaurant_id, 
+#         db=db
+#     )
+#     # Use the provided restaurant_id or fall back to user's default
+#     restaurant_id = current_restaurant_id or current_user.restaurant_id
+#     
+#     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+#     
+#     if not restaurant:
+#         raise FynloException(
+#             error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+#             detail="Restaurant not found"
+#         )
+#     
+#     # Validate layout JSON
+#     try:
+#         validated_layout = validate_model_jsonb_fields('restaurant', 'floor_plan_layout', layout_data.layout)
+#     except ValidationErr as e:
+#         raise FynloException(
+#             error_code=ErrorCodes.VALIDATION_ERROR,
+#             detail=f"Layout validation failed: {str(e)}"
+#         )
+#     
+#     restaurant.floor_plan_layout = validated_layout
+#     restaurant.updated_at = datetime.utcnow()
+#     db.commit()
+#     db.refresh(restaurant)
+#     
+#     return APIResponseHelper.success(
+#         data={
+#             "layout": restaurant.floor_plan_layout,
+#             "restaurant_id": str(restaurant.id)
+#         },
+#         message="Floor plan layout updated successfully"
+#     )
 
 # Table Position Updates
 class TablePositionUpdate(BaseModel):

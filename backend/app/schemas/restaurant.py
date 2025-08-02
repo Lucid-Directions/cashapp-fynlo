@@ -20,7 +20,6 @@ class RestaurantBase(BaseModel):
 
 class RestaurantCreate(RestaurantBase):
     """Schema for creating a restaurant"""
-    pass
 
 
 class RestaurantOnboardingCreate(BaseModel):

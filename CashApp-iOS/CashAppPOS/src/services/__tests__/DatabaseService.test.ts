@@ -3,9 +3,9 @@
  * Testing API interactions, error handling, and data management
  */
 
-import DatabaseService from '../DatabaseService';
 import { mockApiResponses, mockMenuItems, mockCategories } from '../../__tests__/fixtures/mockData';
 import { createMockFetch } from '../../__tests__/utils/testUtils';
+import DatabaseService from '../DatabaseService';
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () =>
@@ -31,14 +31,14 @@ describe('DatabaseService', () => {
     it('should return the same instance', () => {
       const instance1 = DatabaseService.getInstance();
       const instance2 = DatabaseService.getInstance();
-      
+
       expect(instance1).toBe(instance2);
     });
 
     it('should maintain state across getInstance calls', () => {
       const instance1 = DatabaseService.getInstance();
       const instance2 = DatabaseService.getInstance();
-      
+
       // Both should reference the same object
       expect(instance1).toEqual(instance2);
     });
@@ -135,7 +135,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockApiResponses.productsSuccess]);
       global.fetch = mockFetch;
 
-      const products = await service.getProductsByCategory(1);
+      const _products = await service.getProductsByCategory(1);
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/products/category/1'),
@@ -366,11 +366,13 @@ describe('DatabaseService', () => {
   describe('Offline Data Sync', () => {
     it('should sync offline data when available', async () => {
       // Mock AsyncStorage with offline orders
-      const mockAsyncStorage = require('@react-native-async-storage/async-storage');
-      mockAsyncStorage.getItem.mockResolvedValue(JSON.stringify([
-        { items: [{ product_id: 1, quantity: 1 }] },
-        { items: [{ product_id: 2, quantity: 2 }] },
-      ]));
+      import mockAsyncStorage from '@react-native-async-storage/async-storage';
+      mockAsyncStorage.getItem.mockResolvedValue(
+        JSON.stringify([
+          { items: [{ product_id: 1, quantity: 1 }] },
+          { items: [{ product_id: 2, quantity: 2 }] },
+        ])
+      );
 
       const mockFetch = createMockFetch([
         { success: true, data: { id: 1 } },
@@ -386,7 +388,7 @@ describe('DatabaseService', () => {
     });
 
     it('should handle sync when no offline data exists', async () => {
-      const mockAsyncStorage = require('@react-native-async-storage/async-storage');
+      import mockAsyncStorage from '@react-native-async-storage/async-storage';
       mockAsyncStorage.getItem.mockResolvedValue(null);
 
       await service.syncOfflineData();
@@ -396,7 +398,7 @@ describe('DatabaseService', () => {
     });
 
     it('should handle sync errors gracefully', async () => {
-      const mockAsyncStorage = require('@react-native-async-storage/async-storage');
+      import mockAsyncStorage from '@react-native-async-storage/async-storage';
       mockAsyncStorage.getItem.mockRejectedValue(new Error('Storage error'));
 
       // Should not throw error
@@ -409,10 +411,10 @@ describe('DatabaseService', () => {
       // Set auth token
       const mockAsyncStorage = require('@react-native-async-storage/async-storage');
       mockAsyncStorage.getItem.mockResolvedValue('test-token-123');
-      
+
       // Reinitialize service to load token
       service = DatabaseService.getInstance();
-      await new Promise(resolve => setTimeout(resolve, 100)); // Wait for token loading
+      await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for token loading
 
       const mockFetch = createMockFetch([{ success: true, data: [] }]);
       global.fetch = mockFetch;
@@ -423,7 +425,7 @@ describe('DatabaseService', () => {
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
-            'Authorization': 'Bearer test-token-123',
+            Authorization: 'Bearer test-token-123',
           }),
         })
       );

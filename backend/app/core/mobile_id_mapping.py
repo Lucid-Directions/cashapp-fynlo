@@ -7,7 +7,10 @@ import hashlib
 from typing import Dict, Optional, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import Column, String, Integer, DateTime, func, PrimaryKeyConstraint
+<<<<<<< HEAD
 from sqlalchemy.ext.declarative import declarative_base
+=======
+>>>>>>> origin/main
 from app.core.database import Base, engine
 from app.core.redis_client import RedisClient
 import logging

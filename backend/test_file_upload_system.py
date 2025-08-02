@@ -24,18 +24,22 @@ except ImportError:
 try:
     import magic
     MAGIC_AVAILABLE = True
-    print("✅ python-magic imported successfully")
+    logger.info("✅ python-magic imported successfully")
 except ImportError as e:
     MAGIC_AVAILABLE = False
-    print(f"❌ python-magic import failed: {e}")
+    logger.error(f"❌ python-magic import failed: {e}")
 
 try:
     from app.core.file_upload import FileUploadService, FileUploadConfig
     from app.core.exceptions import FynloException
+import logging
+
+logger = logging.getLogger(__name__)
+
     UPLOAD_SERVICE_AVAILABLE = True
 except ImportError as e:
     UPLOAD_SERVICE_AVAILABLE = False
-    print(f"❌ FileUploadService import failed: {e}")
+    logger.error(f"❌ FileUploadService import failed: {e}")
 
 class FileUploadTester:
     def __init__(self):
@@ -45,7 +49,7 @@ class FileUploadTester:
             try:
                 self.upload_service = FileUploadService()
             except Exception as e:
-                print(f"⚠️ FileUploadService initialization failed: {e}")
+                logger.error(f"⚠️ FileUploadService initialization failed: {e}")
     
     def log_test(self, test_name, success, message="An error occurred processing the request", details=None):
         """Log test results"""
@@ -56,16 +60,16 @@ class FileUploadTester:
             "message": message,
             "details": details
         })
-        print(f"{status}: {test_name}")
+        logger.info(f"{status}: {test_name}")
         if message:
-            print(f"    {message}")
+            logger.info(f"    {message}")
         if details:
-            print(f"    Details: {details}")
+            logger.info(f"    Details: {details}")
     
     def test_dependencies(self):
         """Test all required dependencies"""
-        print("🔍 Testing File Upload Dependencies")
-        print("=" * 40)
+        logger.info("🔍 Testing File Upload Dependencies")
+        logger.info("=" * 40)
         
         # Test PIL/Pillow
         if PIL_AVAILABLE:
@@ -117,8 +121,8 @@ class FileUploadTester:
     
     def test_upload_service_functionality(self):
         """Test the FileUploadService functionality"""
-        print("\\n📁 Testing FileUploadService Functionality")
-        print("=" * 45)
+        logger.info("\\n📁 Testing FileUploadService Functionality")
+        logger.info("=" * 45)
         
         if not self.upload_service:
             self.log_test("Upload Service Initialization", False, "Service not available")
@@ -166,8 +170,8 @@ class FileUploadTester:
     
     def test_mime_type_detection(self):
         """Test MIME type detection methods"""
-        print("\\n🔍 Testing MIME Type Detection")
-        print("=" * 35)
+        logger.info("\\n🔍 Testing MIME Type Detection")
+        logger.info("=" * 35)
         
         if PIL_AVAILABLE:
             # Create test images of different formats
@@ -205,8 +209,8 @@ class FileUploadTester:
     
     def test_fallback_methods(self):
         """Test fallback methods when dependencies are missing"""
-        print("\\n🔄 Testing Fallback Methods")
-        print("=" * 30)
+        logger.info("\\n🔄 Testing Fallback Methods")
+        logger.info("=" * 30)
         
         # Test extension-based MIME detection
         test_cases = [
@@ -234,8 +238,8 @@ class FileUploadTester:
     
     def test_upload_directory_permissions(self):
         """Test upload directory permissions and access"""
-        print("\\n📂 Testing Upload Directory Permissions")
-        print("=" * 40)
+        logger.info("\\n📂 Testing Upload Directory Permissions")
+        logger.info("=" * 40)
         
         if not self.upload_service:
             self.log_test("Directory Permissions", False, "Upload service not available")
@@ -278,8 +282,8 @@ class FileUploadTester:
     
     def generate_dependency_fix_report(self):
         """Generate a report with specific fix instructions"""
-        print("\\n🔧 Dependency Fix Report")
-        print("=" * 30)
+        logger.info("\\n🔧 Dependency Fix Report")
+        logger.info("=" * 30)
         
         fixes_needed = []
         
@@ -305,20 +309,20 @@ class FileUploadTester:
             })
         
         if fixes_needed:
-            print("\\n❌ Issues Found:")
+            logger.info("\\n❌ Issues Found:")
             for i, fix in enumerate(fixes_needed, 1):
-                print(f"\\n{i}. {fix['issue']}")
-                print(f"   Fix: {fix['fix']}")
-                print(f"   Why: {fix['description']}")
+                logger.info(f"\\n{i}. {fix['issue']}")
+                logger.info(f"   Fix: {fix['fix']}")
+                logger.info(f"   Why: {fix['description']}")
         else:
-            print("\\n✅ All dependencies are available!")
+            logger.info("\\n✅ All dependencies are available!")
         
         return fixes_needed
     
     def run_all_tests(self):
         """Run all file upload tests"""
-        print("🧪 Starting File Upload System Tests")
-        print("=" * 50)
+        logger.info("🧪 Starting File Upload System Tests")
+        logger.info("=" * 50)
         
         self.test_dependencies()
         self.test_upload_service_functionality()
@@ -331,20 +335,20 @@ class FileUploadTester:
         failed = sum(1 for result in self.test_results if "❌ FAIL" in result["status"])
         total = len(self.test_results)
         
-        print(f"\\n📊 Test Results Summary")
-        print("=" * 30)
-        print(f"Total Tests: {total}")
-        print(f"Passed: {passed}")
-        print(f"Failed: {failed}")
-        print(f"Success Rate: {(passed/total*100):.1f}%" if total > 0 else "0%")
+        logger.info(f"\\n📊 Test Results Summary")
+        logger.info("=" * 30)
+        logger.info(f"Total Tests: {total}")
+        logger.info(f"Passed: {passed}")
+        logger.error(f"Failed: {failed}")
+        logger.info(f"Success Rate: {(passed/total*100):.1f}%" if total > 0 else "0%")
         
         # Generate fix report
         fixes = self.generate_dependency_fix_report()
         
         if failed == 0:
-            print("\\n🎉 All file upload tests passed! System is ready.")
+            logger.info("\\n🎉 All file upload tests passed! System is ready.")
         else:
-            print(f"\\n⚠️ {failed} test(s) failed. Review issues above.")
+            logger.error(f"\\n⚠️ {failed} test(s) failed. Review issues above.")
         
         return failed == 0, fixes
 
@@ -354,13 +358,13 @@ def main():
     success, fixes = tester.run_all_tests()
     
     if not success and fixes:
-        print("\\n💡 Recommended Actions:")
-        print("1. Install missing dependencies:")
+        logger.info("\\n💡 Recommended Actions:")
+        logger.info("1. Install missing dependencies:")
         for fix in fixes:
             if "pip install" in fix["fix"]:
-                print(f"   {fix['fix']}")
-        print("2. Re-run this test to verify fixes")
-        print("3. Test file upload endpoints manually")
+                logger.info(f"   {fix['fix']}")
+        logger.info("2. Re-run this test to verify fixes")
+        logger.info("3. Test file upload endpoints manually")
     
     return success
 

@@ -1,21 +1,23 @@
-import React from 'react';
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
-import { NavigationContainer } from '@react-navigation/native';
+// TODO: Unused import - import React from 'react';
+
 import { Alert } from 'react-native';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NavigationContainer } from '@react-navigation/native';
+import { render, fireEvent, waitFor, _act } from '@testing-library/react-native';
 
 // Import all screens
-import POSScreen from '../screens/main/POSScreen';
-import DashboardScreen from '../screens/main/DashboardScreen';
-import OrdersScreen from '../screens/orders/OrdersScreen';
 import InventoryScreen from '../screens/inventory/InventoryScreen';
-import SettingsScreen from '../screens/settings/SettingsScreen';
-import EnhancedPaymentScreen from '../screens/payment/EnhancedPaymentScreen';
-import UserProfileScreen from '../screens/settings/user/UserProfileScreen';
-import ThemeOptionsScreen from '../screens/settings/user/ThemeOptionsScreen';
+// TODO: Unused import - import DashboardScreen from '../screens/main/DashboardScreen';
+import POSScreen from '../screens/main/POSScreen';
+import OrdersScreen from '../screens/orders/OrdersScreen';
+// TODO: Unused import - import EnhancedPaymentScreen from '../screens/payment/EnhancedPaymentScreen';
+// TODO: Unused import - import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
+// TODO: Unused import - import BusinessInformationScreen from '../screens/settings/business/BusinessInformationScreen';
 import PaymentMethodsScreen from '../screens/settings/business/PaymentMethodsScreen';
-import BusinessInformationScreen from '../screens/settings/business/BusinessInformationScreen';
-import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
+import SettingsScreen from '../screens/settings/SettingsScreen';
+import ThemeOptionsScreen from '../screens/settings/user/ThemeOptionsScreen';
+import UserProfileScreen from '../screens/settings/user/UserProfileScreen';
 
 // Mock all dependencies
 jest.mock('@react-native-async-storage/async-storage');
@@ -117,7 +119,7 @@ const testProduct = {
   available: true,
 };
 
-const testOrder = {
+const _testOrder = {
   id: 'ORD001',
   items: [{ ...testProduct, quantity: 2 }],
   total: 21.98,
@@ -132,22 +134,22 @@ describe('Comprehensive App Test Suite', () => {
 
   describe('POS Screen Tests', () => {
     it('should render POS screen correctly', () => {
-      const { getByText, getByTestId } = render(
+      const { getByText, _getByTestId } = render(
         <NavigationContainer>
           <POSScreen />
         </NavigationContainer>
       );
-      
+
       expect(getByText('Point of Sale')).toBeTruthy();
     });
 
     it('should add items to cart', async () => {
-      const { getByText, getAllByText } = render(
+      const { _getByText, getAllByText } = render(
         <NavigationContainer>
           <POSScreen />
         </NavigationContainer>
       );
-      
+
       // Find and click a product
       await waitFor(() => {
         const addButton = getAllByText('+')[0];
@@ -161,7 +163,7 @@ describe('Comprehensive App Test Suite', () => {
           <POSScreen />
         </NavigationContainer>
       );
-      
+
       // Check for payment options
       await waitFor(() => {
         expect(getByText(/Card/i)).toBeTruthy();
@@ -176,7 +178,7 @@ describe('Comprehensive App Test Suite', () => {
           <POSScreen />
         </NavigationContainer>
       );
-      
+
       await waitFor(() => {
         // Should have £ not $
         expect(getByText(/£/)).toBeTruthy();
@@ -192,7 +194,7 @@ describe('Comprehensive App Test Suite', () => {
           <UserProfileScreen />
         </NavigationContainer>
       );
-      
+
       expect(getByText('User Profile')).toBeTruthy();
       expect(getByText('Test User')).toBeTruthy();
     });
@@ -203,11 +205,11 @@ describe('Comprehensive App Test Suite', () => {
           <UserProfileScreen />
         </NavigationContainer>
       );
-      
+
       // Find and click edit button
       const editButton = getByTestId('edit-button');
       fireEvent.press(editButton);
-      
+
       // Check if in edit mode
       await waitFor(() => {
         expect(getByText('Save Changes')).toBeTruthy();
@@ -220,25 +222,22 @@ describe('Comprehensive App Test Suite', () => {
           <UserProfileScreen />
         </NavigationContainer>
       );
-      
+
       // Enter edit mode
       const editButton = getByTestId('edit-button');
       fireEvent.press(editButton);
-      
+
       // Clear required field
       const firstNameInput = getByPlaceholderText('Enter first name');
       fireEvent.changeText(firstNameInput, '');
-      
+
       // Try to save
       const saveButton = getByTestId('save-button');
       fireEvent.press(saveButton);
-      
+
       // Should show error
       await waitFor(() => {
-        expect(Alert.alert).toHaveBeenCalledWith(
-          'Error',
-          expect.stringContaining('required')
-        );
+        expect(Alert.alert).toHaveBeenCalledWith('Error', expect.stringContaining('required'));
       });
     });
   });
@@ -250,7 +249,7 @@ describe('Comprehensive App Test Suite', () => {
           <ThemeOptionsScreen />
         </NavigationContainer>
       );
-      
+
       expect(getByText('Theme & Display')).toBeTruthy();
       expect(getByText('Color Theme')).toBeTruthy();
     });
@@ -261,7 +260,7 @@ describe('Comprehensive App Test Suite', () => {
           <ThemeOptionsScreen />
         </NavigationContainer>
       );
-      
+
       await waitFor(() => {
         expect(getByText('Fynlo Green')).toBeTruthy();
         expect(getByText('Ocean Blue')).toBeTruthy();
@@ -284,7 +283,7 @@ describe('Comprehensive App Test Suite', () => {
           <PaymentMethodsScreen />
         </NavigationContainer>
       );
-      
+
       await waitFor(() => {
         expect(getByText('QR Code Payment')).toBeTruthy();
         expect(queryByText(/Gift Card/i)).toBeFalsy();
@@ -297,11 +296,11 @@ describe('Comprehensive App Test Suite', () => {
           <PaymentMethodsScreen />
         </NavigationContainer>
       );
-      
+
       await waitFor(() => {
         const switches = getAllByTestId('payment-method-switch');
         expect(switches.length).toBeGreaterThan(0);
-        
+
         // Toggle first switch
         fireEvent(switches[0], 'onValueChange', true);
       });
@@ -310,16 +309,16 @@ describe('Comprehensive App Test Suite', () => {
 
   describe('Navigation Tests', () => {
     it('should navigate between screens', async () => {
-      const { getByText, getByTestId } = render(
+      const { getByText, _getByTestId } = render(
         <NavigationContainer>
           <SettingsScreen />
         </NavigationContainer>
       );
-      
+
       // Click on User Settings
       const userSettingsButton = getByText('User Settings');
       fireEvent.press(userSettingsButton);
-      
+
       expect(mockNavigate).toHaveBeenCalledWith('UserSettings');
     });
 
@@ -329,21 +328,24 @@ describe('Comprehensive App Test Suite', () => {
           <UserProfileScreen />
         </NavigationContainer>
       );
-      
+
       const backButton = getByTestId('back-button');
       fireEvent.press(backButton);
-      
+
       expect(mockGoBack).toHaveBeenCalled();
     });
   });
 
   describe('Data Persistence Tests', () => {
     it('should save user preferences', async () => {
-      await AsyncStorage.setItem('userPreferences', JSON.stringify({
-        theme: 'dark',
-        language: 'en',
-      }));
-      
+      await AsyncStorage.setItem(
+        'userPreferences',
+        JSON.stringify({
+          theme: 'dark',
+          language: 'en',
+        })
+      );
+
       const saved = await AsyncStorage.getItem('userPreferences');
       expect(JSON.parse(saved)).toEqual({
         theme: 'dark',
@@ -356,13 +358,13 @@ describe('Comprehensive App Test Suite', () => {
     it('should handle network errors gracefully', async () => {
       // Mock network error
       global.fetch = jest.fn(() => Promise.reject(new Error('Network error')));
-      
+
       const { getByText } = render(
         <NavigationContainer>
           <OrdersScreen />
         </NavigationContainer>
       );
-      
+
       await waitFor(() => {
         // Should show error state or empty state
         expect(getByText(/No orders/i)).toBeTruthy();
@@ -373,16 +375,16 @@ describe('Comprehensive App Test Suite', () => {
   describe('Performance Tests', () => {
     it('should render large lists efficiently', async () => {
       const startTime = Date.now();
-      
-      const { getByTestId } = render(
+
+      const { _getByTestId } = render(
         <NavigationContainer>
           <InventoryScreen />
         </NavigationContainer>
       );
-      
+
       const endTime = Date.now();
       const renderTime = endTime - startTime;
-      
+
       // Should render in less than 1 second
       expect(renderTime).toBeLessThan(1000);
     });

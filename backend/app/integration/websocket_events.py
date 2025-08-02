@@ -7,6 +7,10 @@ from typing import Dict, Any
 from datetime import datetime
 
 from app.core.websocket import (
+import logging
+
+logger = logging.getLogger(__name__)
+
     websocket_manager,
     notify_order_created,
     notify_order_status_changed,
@@ -19,6 +23,8 @@ from app.core.websocket import (
 class WebSocketEventService:
     """Service to integrate backend events with WebSocket notifications"""
     
+    pass
+
     @staticmethod
     async def on_order_created(order_data: Dict[str, Any]):
         """Handle new order creation event"""

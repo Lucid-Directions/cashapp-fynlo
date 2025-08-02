@@ -1,12 +1,8 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
+
+import type { ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, _TextStyle } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Clover POS Color Scheme
@@ -65,28 +61,20 @@ const SettingsCard: React.FC<SettingsCardProps> = ({
       {/* Main content */}
       <View style={styles.content}>
         <View style={styles.titleRow}>
-          <Text style={[styles.title, disabled && styles.disabledText]}>
-            {title}
-          </Text>
+          <Text style={[styles.title, disabled && styles.disabledText]}>{title}</Text>
           {badge && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{badge}</Text>
             </View>
           )}
         </View>
-        
+
         {description && (
-          <Text style={[styles.description, disabled && styles.disabledText]}>
-            {description}
-          </Text>
+          <Text style={[styles.description, disabled && styles.disabledText]}>{description}</Text>
         )}
-        
-        {value && (
-          <Text style={[styles.value, disabled && styles.disabledText]}>
-            {value}
-          </Text>
-        )}
-        
+
+        {value && <Text style={[styles.value, disabled && styles.disabledText]}>{value}</Text>}
+
         {children}
       </View>
 
@@ -94,10 +82,10 @@ const SettingsCard: React.FC<SettingsCardProps> = ({
       {(showChevron || value) && (
         <View style={styles.rightSection}>
           {showChevron && onPress && (
-            <Icon 
-              name="chevron-right" 
-              size={24} 
-              color={disabled ? Colors.lightGray : Colors.mediumGray} 
+            <Icon
+              name="chevron-right"
+              size={24}
+              color={disabled ? Colors.lightGray : Colors.mediumGray}
             />
           )}
         </View>
@@ -107,11 +95,7 @@ const SettingsCard: React.FC<SettingsCardProps> = ({
 
   if (onPress && !disabled) {
     return (
-      <TouchableOpacity 
-        onPress={onPress}
-        activeOpacity={0.7}
-        style={styles.touchable}
-      >
+      <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.touchable}>
         {cardContent}
       </TouchableOpacity>
     );

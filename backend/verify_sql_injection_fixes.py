@@ -25,7 +25,7 @@ from app.core.security_utils import (
 
 def test_sql_injection_validation():
     """Test that SQL injection patterns are detected"""
-    print("\n=== Testing SQL Injection Detection ===")
+    logger.info("\n=== Testing SQL Injection Detection ===")
     
     sql_injection_patterns = [
         "' OR '1'='1",
@@ -39,25 +39,25 @@ def test_sql_injection_validation():
     for pattern in sql_injection_patterns:
         try:
             validate_no_sql_injection(pattern, "test")
-            print(f"❌ FAILED: Pattern not detected: {pattern}")
+            logger.error(f"❌ FAILED: Pattern not detected: {pattern}")
             return False
         except ValueError as e:
-            print(f"✅ PASSED: Detected SQL injection in: {pattern}")
+            logger.info(f"✅ PASSED: Detected SQL injection in: {pattern}")
     
     return True
 
 def test_search_input_validation():
     """Test search input validation"""
-    print("\n=== Testing Search Input Validation ===")
+    logger.info("\n=== Testing Search Input Validation ===")
     
     # Valid inputs should pass
     valid_inputs = ["hello world", "test@example.com", "product name"]
     for inp in valid_inputs:
         try:
             result = validate_search_input(inp)
-            print(f"✅ PASSED: Valid input accepted: {inp}")
+            logger.info(f"✅ PASSED: Valid input accepted: {inp}")
         except:
-            print(f"❌ FAILED: Valid input rejected: {inp}")
+            logger.error(f"❌ FAILED: Valid input rejected: {inp}")
             return False
     
     # SQL injection attempts should be blocked
@@ -65,16 +65,16 @@ def test_search_input_validation():
     for inp in invalid_inputs:
         try:
             result = validate_search_input(inp)
-            print(f"❌ FAILED: SQL injection not blocked: {inp}")
+            logger.error(f"❌ FAILED: SQL injection not blocked: {inp}")
             return False
         except ValueError:
-            print(f"✅ PASSED: SQL injection blocked: {inp}")
+            logger.info(f"✅ PASSED: SQL injection blocked: {inp}")
     
     return True
 
 def test_uuid_validation():
     """Test UUID format validation"""
-    print("\n=== Testing UUID Validation ===")
+    logger.info("\n=== Testing UUID Validation ===")
     
     # Valid UUIDs
     valid_uuids = [
@@ -85,9 +85,9 @@ def test_uuid_validation():
     for uuid in valid_uuids:
         try:
             validate_uuid_format(uuid)
-            print(f"✅ PASSED: Valid UUID accepted: {uuid}")
+            logger.info(f"✅ PASSED: Valid UUID accepted: {uuid}")
         except:
-            print(f"❌ FAILED: Valid UUID rejected: {uuid}")
+            logger.error(f"❌ FAILED: Valid UUID rejected: {uuid}")
             return False
     
     # Invalid UUIDs
@@ -100,76 +100,80 @@ def test_uuid_validation():
     for uuid in invalid_uuids:
         try:
             validate_uuid_format(uuid)
-            print(f"❌ FAILED: Invalid UUID accepted: {uuid}")
+            logger.error(f"❌ FAILED: Invalid UUID accepted: {uuid}")
             return False
         except ValueError:
-            print(f"✅ PASSED: Invalid UUID rejected: {uuid}")
+            logger.info(f"✅ PASSED: Invalid UUID rejected: {uuid}")
     
     return True
 
 def test_sanitization_functions():
     """Test sanitization utilities"""
-    print("\n=== Testing Sanitization Functions ===")
+    logger.info("\n=== Testing Sanitization Functions ===")
     
     # Test LIKE pattern sanitization
     assert sanitize_sql_like_pattern("test%") == "test\\%"
     assert sanitize_sql_like_pattern("_test") == "\\_test"
-    print("✅ PASSED: LIKE pattern sanitization working")
+    logger.info("✅ PASSED: LIKE pattern sanitization working")
     
     # Test SQL identifier validation
     allowed = ["users", "orders", "products"]
     try:
         sanitize_sql_identifier("users", allowed)
-        print("✅ PASSED: Valid identifier accepted")
+        logger.info("✅ PASSED: Valid identifier accepted")
     except:
-        print("❌ FAILED: Valid identifier rejected")
+        logger.error("❌ FAILED: Valid identifier rejected")
         return False
     
     try:
         sanitize_sql_identifier("invalid_table", allowed)
-        print("❌ FAILED: Invalid identifier accepted")
+        logger.error("❌ FAILED: Invalid identifier accepted")
         return False
     except ValueError:
-        print("✅ PASSED: Invalid identifier rejected")
+        logger.info("✅ PASSED: Invalid identifier rejected")
     
     return True
 
 def test_pydantic_schemas():
     """Test Pydantic schema validation"""
-    print("\n=== Testing Pydantic Schema Validation ===")
+    logger.info("\n=== Testing Pydantic Schema Validation ===")
     
     from app.schemas.search_schemas import CustomerSearchRequest
+import logging
+
+logger = logging.getLogger(__name__)
+
     
     # Valid request
     try:
         schema = CustomerSearchRequest(search="john", page=1)
-        print("✅ PASSED: Valid search request accepted")
+        logger.info("✅ PASSED: Valid search request accepted")
     except:
-        print("❌ FAILED: Valid search request rejected")
+        logger.error("❌ FAILED: Valid search request rejected")
         return False
     
     # SQL injection attempt
     try:
         schema = CustomerSearchRequest(search="'; DROP TABLE--", page=1)
-        print("❌ FAILED: SQL injection in schema not blocked")
+        logger.error("❌ FAILED: SQL injection in schema not blocked")
         return False
     except ValueError:
-        print("✅ PASSED: SQL injection in schema blocked")
+        logger.info("✅ PASSED: SQL injection in schema blocked")
     
     # Invalid sort field
     try:
         schema = CustomerSearchRequest(search="test", sort_by="password", page=1)
-        print("❌ FAILED: Invalid sort field accepted")
+        logger.error("❌ FAILED: Invalid sort field accepted")
         return False
     except ValueError:
-        print("✅ PASSED: Invalid sort field rejected")
+        logger.info("✅ PASSED: Invalid sort field rejected")
     
     return True
 
 def main():
     """Run all tests"""
-    print("SQL Injection Security Fix Verification")
-    print("=" * 50)
+    logger.info("SQL Injection Security Fix Verification")
+    logger.info("=" * 50)
     
     all_passed = True
     
@@ -186,14 +190,14 @@ def main():
             if not test():
                 all_passed = False
         except Exception as e:
-            print(f"❌ ERROR in {test.__name__}: {e}")
+            logger.error(f"❌ ERROR in {test.__name__}: {e}")
             all_passed = False
     
-    print("\n" + "=" * 50)
+    logger.info("\n" + "=" * 50)
     if all_passed:
-        print("✅ ALL TESTS PASSED - SQL injection fixes are working correctly!")
+        logger.info("✅ ALL TESTS PASSED - SQL injection fixes are working correctly!")
     else:
-        print("❌ SOME TESTS FAILED - Please check the output above")
+        logger.error("❌ SOME TESTS FAILED - Please check the output above")
     
     return 0 if all_passed else 1
 

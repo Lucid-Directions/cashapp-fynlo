@@ -19,17 +19,6 @@ from app.api.mobile.endpoints import router as mobile_router
 from app.core.redis_client import close_redis
 from app.core.websocket import websocket_manager
 from app.core.exceptions import FynloException, ErrorCodes
-from app.middleware.rate_limit_middleware import init_fastapi_limiter
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
-from app.core.responses import APIResponseHelper
-from app.core.mobile_middleware import (
-    MobileCompatibilityMiddleware,
-    MobileDataOptimizationMiddleware
-)
-from app.middleware.version_middleware import APIVersionMiddleware
-from app.middleware.security_headers_middleware import SecurityHeadersMiddleware
 from app.middleware.sql_injection_waf import SQLInjectionWAFMiddleware
 from app.core.auth import get_current_user
 from datetime import datetime

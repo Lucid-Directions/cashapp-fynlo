@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -11,33 +12,35 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
-  Image,
+  _Image,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
-import { useAuthStore } from '../../store/useAuthStore';
-import Logo from '../../components/Logo';
 
-const { width, height } = Dimensions.get('window');
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import Logo from '../../components/Logo';
+import { useAuthStore } from '../../store/useAuthStore';
+
+const { _width, _height } = Dimensions.get('window');
 
 // Clover POS Color Scheme
 const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue  
+  primary: '#00A651', // Clover Green
+  secondary: '#0066CC', // Clover Blue
   success: '#00A651',
-  background: '#F5F5F5',   // Light Gray Background
+  background: '#F5F5F5', // Light Gray Background
   white: '#FFFFFF',
   lightGray: '#E5E5E5',
-  text: '#333333',         // Dark Gray Text
-  lightText: '#666666',    // Medium Gray Text
-  accent: '#0066CC',       // Clover Blue Accent
+  text: '#333333', // Dark Gray Text
+  lightText: '#666666', // Medium Gray Text
+  accent: '#0066CC', // Clover Blue Accent
 };
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation();
-  const signIn = useAuthStore(state => state.signIn);
-  const authLoading = useAuthStore(state => state.isLoading);
-  
+  const signIn = useAuthStore((state) => state.signIn);
+  const authLoading = useAuthStore((state) => state.isLoading);
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -46,7 +49,7 @@ const LoginScreen: React.FC = () => {
   const handleLogin = async (quickUsername?: string, quickPassword?: string) => {
     const loginUsername = quickUsername || username;
     const loginPassword = quickPassword || password;
-    
+
     if (!loginUsername.trim() || !loginPassword.trim()) {
       Alert.alert('Error', 'Please enter both username and password');
       return;
@@ -55,12 +58,12 @@ const LoginScreen: React.FC = () => {
     setIsLoading(true);
 
     try {
-      console.log('🚀 Attempting login with:', loginUsername);
+      logger.info('🚀 Attempting login with:', loginUsername);
       await signIn(loginUsername.trim(), loginPassword);
-      console.log('✅ Login successful, navigation will happen automatically');
+      logger.info('✅ Login successful, navigation will happen automatically');
       // Navigation happens automatically via AppNavigator
-    } catch (error: any) {
-      console.error('Login error:', error);
+    } catch (error: unknown) {
+      logger.error('Login error:', error);
       Alert.alert('Login Failed', error.message || 'Invalid username or password');
     } finally {
       setIsLoading(false);
@@ -74,7 +77,7 @@ const LoginScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
-      
+
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -122,19 +125,16 @@ const LoginScreen: React.FC = () => {
                 style={styles.passwordToggle}
                 onPress={() => setShowPassword(!showPassword)}
               >
-                <Icon 
-                  name={showPassword ? "visibility-off" : "visibility"} 
-                  size={20} 
-                  color={Colors.lightText} 
+                <Icon
+                  name={showPassword ? 'visibility-off' : 'visibility'}
+                  size={20}
+                  color={Colors.lightText}
                 />
               </TouchableOpacity>
             </View>
 
             {/* Forgot Password */}
-            <TouchableOpacity
-              style={styles.forgotPasswordButton}
-              onPress={handleForgotPassword}
-            >
+            <TouchableOpacity style={styles.forgotPasswordButton} onPress={handleForgotPassword}>
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
@@ -144,7 +144,7 @@ const LoginScreen: React.FC = () => {
               onPress={() => handleLogin()}
               disabled={isLoading || authLoading}
             >
-              {(isLoading || authLoading) ? (
+              {isLoading || authLoading ? (
                 <Text style={styles.loginButtonText}>Signing In...</Text>
               ) : (
                 <>
@@ -157,9 +157,7 @@ const LoginScreen: React.FC = () => {
 
           {/* Footer */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              Fynlo POS System • Secure Payment Processing
-            </Text>
+            <Text style={styles.footerText}>Fynlo POS System • Secure Payment Processing</Text>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -229,12 +227,6 @@ const styles = StyleSheet.create({
     color: Colors.text,
     paddingVertical: 16,
   },
-  textInput: {
-    flex: 1,
-    fontSize: 16,
-    color: Colors.text,
-    paddingVertical: 16,
-  },
   passwordToggle: {
     padding: 4,
   },
@@ -269,24 +261,6 @@ const styles = StyleSheet.create({
     color: Colors.white,
     marginRight: 8,
   },
-  demoSection: {
-    backgroundColor: Colors.lightGray,
-    borderRadius: 12,
-    padding: 20,
-    marginTop: 30,
-    alignItems: 'center',
-  },
-  demoTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  demoText: {
-    fontSize: 14,
-    color: Colors.lightText,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-  },
   footer: {
     alignItems: 'center',
     paddingBottom: 20,
@@ -295,60 +269,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.lightText,
     textAlign: 'center',
-  },
-  quickSignInSection: {
-    marginTop: 20,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: Colors.lightGray,
-  },
-  quickSignInTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.text,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  quickButtonsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  quickButton: {
-    width: '48%',
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-    marginBottom: 8,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-  quickButtonTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.white,
-    textAlign: 'center',
-    marginBottom: 2,
-  },
-  quickButtonSubtitle: {
-    fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.8)',
-    textAlign: 'center',
-  },
-  simpleInput: {
-    flex: 1,
-    padding: 16,
-    fontSize: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E1E1E1',
-    color: '#333333',
   },
 });
 

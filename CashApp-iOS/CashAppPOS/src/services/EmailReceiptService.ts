@@ -49,4 +49,4 @@ class EmailReceiptService {
   }
 }
 
-export default EmailReceiptService.getInstance(); 
+export default EmailReceiptService.getInstance();

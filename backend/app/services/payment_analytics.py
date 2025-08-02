@@ -12,13 +12,18 @@ from sqlalchemy import func
 from collections import defaultdict
 
 from app.core.database import Payment, Order
+<<<<<<< HEAD
 from app.services.payment_providers import PaymentProvider
+=======
+>>>>>>> origin/main
 
 logger = logging.getLogger(__name__)
 
 class PaymentAnalyticsService:
     """Service for analyzing payment data and generating insights"""
     
+    pass
+
     def __init__(self, db: Session):
         self.db = db
     

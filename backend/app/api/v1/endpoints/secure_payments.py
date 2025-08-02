@@ -5,7 +5,6 @@ Handles payment processing with comprehensive security measures
 import uuid
 from typing import Dict, Any, Optional, List
 from decimal import Decimal
-from datetime import datetime
 from fastapi import APIRouter, Depends, Request, Header, Query, Path
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
@@ -38,6 +37,8 @@ class PaymentRequest(BaseModel):
     
     @validator('amount')
     def validate_amount(cls, v):
+    """TODO: Implement function."""
+    pass
         # Ensure proper decimal places
         if v.as_tuple().exponent < -2:
             raise ValueError("Amount cannot have more than 2 decimal places")
@@ -45,6 +46,8 @@ class PaymentRequest(BaseModel):
     
     @validator('payment_method')
     def validate_payment_method(cls, v):
+    """TODO: Implement function."""
+    pass
         valid_methods = ['card', 'cash', 'qr_code', 'apple_pay', 'google_pay']
         if v not in valid_methods:
             raise ValueError(f"Invalid payment method. Must be one of: {', '.join(valid_methods)}")
@@ -378,8 +381,8 @@ async def get_payment_status(
 
 @router.post("/webhook/{provider}")
 async def handle_payment_webhook(
-    provider: str,
     request: Request,
+    provider: str = Path(..., description="Payment provider name"),
     db: Session = Depends(get_db),
     webhook_signature: Optional[str] = Header(None, alias="stripe-signature")
 ):

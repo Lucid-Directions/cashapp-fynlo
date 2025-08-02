@@ -1,12 +1,12 @@
-import QRCode from 'react-native-qrcode-svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// TODO: Unused import - import QRCode from 'react-native-qrcode-svg';
 
 export interface PaymentRequest {
   amount: number;
   currency: string;
   orderId: string;
   description?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PaymentResult {
@@ -53,7 +53,7 @@ class PaymentServiceClass {
 
   async initialize(config: PaymentProviderConfig): Promise<void> {
     this.config = config;
-    
+
     // Initialize Stripe
     try {
       if (config.stripe.publishableKey) {
@@ -62,23 +62,25 @@ class PaymentServiceClass {
         this.stripeInitialized = true;
       }
     } catch (error) {
-      console.error('Failed to initialize Stripe:', error);
+      logger.error('Failed to initialize Stripe:', error);
     }
   }
 
   /**
    * Get available payment methods prioritized with SumUp first
    */
-  async getAvailablePaymentMethods(): Promise<Array<{
-    id: string;
-    name: string;
-    icon: string;
-    color: string;
-    enabled: boolean;
-    requiresAuth: boolean;
-    feeInfo: string;
-    isRecommended?: boolean;
-  }>> {
+  async getAvailablePaymentMethods(): Promise<
+    Array<{
+      id: string;
+      name: string;
+      icon: string;
+      color: string;
+      enabled: boolean;
+      requiresAuth: boolean;
+      feeInfo: string;
+      isRecommended?: boolean;
+    }>
+  > {
     return [
       {
         id: 'sumup',
@@ -138,14 +140,17 @@ class PaymentServiceClass {
         throw new Error('PaymentService not initialized');
       }
 
-      const response = await fetch(`${this.config.backend.baseUrl}/api/v1/payments/optimal-provider`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
-        },
-        body: JSON.stringify({ amount }),
-      });
+      const response = await fetch(
+        `${this.config.backend.baseUrl}/api/v1/payments/optimal-provider`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.config.backend.apiKey}`,
+          },
+          body: JSON.stringify({ amount }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -154,7 +159,7 @@ class PaymentServiceClass {
       const data = await response.json();
       return data.provider;
     } catch (error) {
-      console.error('Failed to get optimal provider:', error);
+      logger.error('Failed to get optimal provider:', error);
       // Fallback to SumUp as primary, then QR code
       return 'sumup';
     }
@@ -173,7 +178,7 @@ class PaymentServiceClass {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
+          Authorization: `Bearer ${this.config.backend.apiKey}`,
         },
         body: JSON.stringify({
           ...request,
@@ -187,7 +192,7 @@ class PaymentServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         success: true,
         transactionId: data.transaction_id,
@@ -196,7 +201,7 @@ class PaymentServiceClass {
         fee: data.fee,
       };
     } catch (error) {
-      console.error('Payment processing failed:', error);
+      logger.error('Payment processing failed:', error);
       return {
         success: false,
         provider: 'unknown',
@@ -220,7 +225,7 @@ class PaymentServiceClass {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
+          Authorization: `Bearer ${this.config.backend.apiKey}`,
         },
         body: JSON.stringify({
           order_id: request.orderId,
@@ -234,7 +239,7 @@ class PaymentServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         qrPaymentId: data.qr_payment_id,
         qrCodeData: data.qr_code_data,
@@ -246,7 +251,7 @@ class PaymentServiceClass {
         status: data.status,
       };
     } catch (error) {
-      console.error('QR payment generation failed:', error);
+      logger.error('QR payment generation failed:', error);
       throw error;
     }
   }
@@ -260,12 +265,15 @@ class PaymentServiceClass {
         throw new Error('PaymentService not initialized');
       }
 
-      const response = await fetch(`${this.config.backend.baseUrl}/api/v1/payments/qr/${qrPaymentId}/status`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
-        },
-      });
+      const response = await fetch(
+        `${this.config.backend.baseUrl}/api/v1/payments/qr/${qrPaymentId}/status`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${this.config.backend.apiKey}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -277,7 +285,7 @@ class PaymentServiceClass {
         expired: data.data.expired,
       };
     } catch (error) {
-      console.error('QR payment status check failed:', error);
+      logger.error('QR payment status check failed:', error);
       throw error;
     }
   }
@@ -291,13 +299,16 @@ class PaymentServiceClass {
         throw new Error('PaymentService not initialized');
       }
 
-      const response = await fetch(`${this.config.backend.baseUrl}/api/v1/payments/qr/${qrPaymentId}/confirm`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
-        },
-      });
+      const response = await fetch(
+        `${this.config.backend.baseUrl}/api/v1/payments/qr/${qrPaymentId}/confirm`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.config.backend.apiKey}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -305,7 +316,7 @@ class PaymentServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         success: true,
         transactionId: data.data.payment_id,
@@ -314,7 +325,7 @@ class PaymentServiceClass {
         fee: 0,
       };
     } catch (error) {
-      console.error('QR payment confirmation failed:', error);
+      logger.error('QR payment confirmation failed:', error);
       return {
         success: false,
         provider: 'qr_code',
@@ -328,7 +339,10 @@ class PaymentServiceClass {
   /**
    * Process cash payment
    */
-  async processCashPayment(request: PaymentRequest, receivedAmount: number): Promise<PaymentResult> {
+  async processCashPayment(
+    request: PaymentRequest,
+    receivedAmount: number
+  ): Promise<PaymentResult> {
     try {
       if (!this.config) {
         throw new Error('PaymentService not initialized');
@@ -343,7 +357,7 @@ class PaymentServiceClass {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
+          Authorization: `Bearer ${this.config.backend.apiKey}`,
         },
         body: JSON.stringify({
           order_id: request.orderId,
@@ -359,7 +373,7 @@ class PaymentServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         success: true,
         transactionId: data.payment_id,
@@ -368,7 +382,7 @@ class PaymentServiceClass {
         fee: data.fee_amount,
       };
     } catch (error) {
-      console.error('Cash payment processing failed:', error);
+      logger.error('Cash payment processing failed:', error);
       return {
         success: false,
         provider: 'cash',
@@ -388,16 +402,19 @@ class PaymentServiceClass {
         throw new Error('PaymentService not initialized');
       }
 
-      const response = await fetch(`${this.config.backend.baseUrl}/api/v1/payments/refund/${transactionId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
-        },
-        body: JSON.stringify({
-          amount: amount,
-        }),
-      });
+      const response = await fetch(
+        `${this.config.backend.baseUrl}/api/v1/payments/refund/${transactionId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.config.backend.apiKey}`,
+          },
+          body: JSON.stringify({
+            amount,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -405,7 +422,7 @@ class PaymentServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         success: true,
         transactionId: data.refund_id,
@@ -414,7 +431,7 @@ class PaymentServiceClass {
         fee: data.fee,
       };
     } catch (error) {
-      console.error('Refund processing failed:', error);
+      logger.error('Refund processing failed:', error);
       return {
         success: false,
         provider: 'unknown',
@@ -428,18 +445,21 @@ class PaymentServiceClass {
   /**
    * Get payment analytics
    */
-  async getPaymentAnalytics(startDate: string, endDate: string): Promise<any> {
+  async getPaymentAnalytics(startDate: string, endDate: string): Promise<unknown> {
     try {
       if (!this.config) {
         throw new Error('PaymentService not initialized');
       }
 
-      const response = await fetch(`${this.config.backend.baseUrl}/api/v1/payments/analytics?start_date=${startDate}&end_date=${endDate}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
-        },
-      });
+      const response = await fetch(
+        `${this.config.backend.baseUrl}/api/v1/payments/analytics?start_date=${startDate}&end_date=${endDate}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${this.config.backend.apiKey}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -447,7 +467,7 @@ class PaymentServiceClass {
 
       return await response.json();
     } catch (error) {
-      console.error('Failed to get payment analytics:', error);
+      logger.error('Failed to get payment analytics:', error);
       throw error;
     }
   }
@@ -460,7 +480,7 @@ class PaymentServiceClass {
       await AsyncStorage.setItem('payment_config', JSON.stringify(config));
       this.config = config;
     } catch (error) {
-      console.error('Failed to save payment config:', error);
+      logger.error('Failed to save payment config:', error);
       throw error;
     }
   }
@@ -478,7 +498,7 @@ class PaymentServiceClass {
       }
       return null;
     } catch (error) {
-      console.error('Failed to load payment config:', error);
+      logger.error('Failed to load payment config:', error);
       return null;
     }
   }

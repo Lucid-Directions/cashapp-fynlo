@@ -14,6 +14,10 @@ try:
 except (ImportError, OSError):
     # This should not happen with python-magic-bin, but keep fallback for safety
     MAGIC_AVAILABLE = False
+<<<<<<< HEAD
+=======
+    logger.warning("Warning: libmagic not available. Using fallback MIME type detection.")
+>>>>>>> origin/main
 from typing import Optional, Tuple
 from PIL import Image, ImageOps
 from io import BytesIO
@@ -21,7 +25,6 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from app.core.exceptions import FynloException, ErrorCodes
-from app.core.responses import APIResponseHelper
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -78,6 +81,8 @@ class ImageUploadResponse(BaseModel):
 class FileUploadService:
     """Service for handling file uploads with iOS optimization"""
     
+    pass
+
     def __init__(self):
         self.config = FileUploadConfig()
         self._ensure_directories()

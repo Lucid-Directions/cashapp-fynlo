@@ -16,15 +16,12 @@ logger = logging.getLogger(__name__)
 
 class TransactionError(Exception):
     """Custom exception for transaction failures"""
-    pass
 
 class RetryableTransactionError(TransactionError):
     """Exception for transactions that can be retried"""
-    pass
 
 class NonRetryableTransactionError(TransactionError):
     """Exception for transactions that should not be retried"""
-    pass
 
 
 class TransactionManager:

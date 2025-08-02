@@ -9,6 +9,9 @@ import io
 import base64
 from datetime import datetime, timedelta
 from typing import Optional, Tuple
+=======
+from fastapi import status
+>>>>>>> origin/main
 
 from app.core.redis_client import RedisClient
 from app.models import User
@@ -21,12 +24,13 @@ TOTP_WINDOW = 1  # Allow 1 time window before/after for clock skew
 BACKUP_CODES_COUNT = 10
 RECOVERY_CODE_LENGTH = 8
 
-
 class TwoFactorAuth:
     """
     Manages 2FA for platform owners
     """
     
+    pass
+
     def __init__(self, redis_client: Optional[RedisClient] = None):
         self.redis = redis_client
     
@@ -81,6 +85,7 @@ class TwoFactorAuth:
         # Only platform owners require 2FA
         if not TenantSecurity.is_platform_owner(user):
             raise AuthenticationException(
+<<<<<<< HEAD
                 message="2FA is only required for platform owners",
                 error_code="ACCESS_DENIED"
             )
@@ -260,7 +265,6 @@ class TwoFactorAuth:
             await self.redis.set(user_2fa_key, user_2fa_data)
         
         return new_codes
-
 
 # Global 2FA instance
 two_factor_auth = TwoFactorAuth()

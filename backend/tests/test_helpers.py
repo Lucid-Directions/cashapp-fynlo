@@ -9,14 +9,12 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 import json
 import random
-import string
 from unittest.mock import Mock, AsyncMock, MagicMock
 import asyncio
 from contextlib import asynccontextmanager
 
 from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
-import httpx
 import redis
 
 from app.models.user import User

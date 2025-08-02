@@ -6,8 +6,10 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PaymentRequest, PaymentResult } from './PaymentService';
+
 import SumUpNativeService from './SumUpNativeService';
+
+import type { PaymentRequest, PaymentResult } from './PaymentService';
 
 export interface SumUpConfig {
   apiKey: string;
@@ -100,8 +102,8 @@ class SumUpServiceClass {
 
       const checkoutData = {
         checkout_reference: this.generateCheckoutReference(),
-        amount: amount,
-        currency: currency,
+        amount,
+        currency,
         merchant_code: this.config.merchantCode,
         description: description || 'Fynlo POS Payment',
         return_url: returnUrl,
@@ -110,7 +112,7 @@ class SumUpServiceClass {
       const response = await fetch(`${this.config.baseUrl}/v0.1/checkouts`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          Authorization: `Bearer ${this.config.apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(checkoutData),
@@ -122,7 +124,7 @@ class SumUpServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         checkoutId: data.id,
         checkoutUrl: data.checkout_url,
@@ -133,7 +135,7 @@ class SumUpServiceClass {
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes
       };
     } catch (error) {
-      console.error('Failed to create SumUp checkout:', error);
+      logger.error('Failed to create SumUp checkout:', error);
       throw error;
     }
   }
@@ -159,10 +161,10 @@ class SumUpServiceClass {
         transactionId: checkout.checkoutId,
         provider: 'sumup',
         amount: request.amount,
-        fee: fee,
+        fee,
       };
     } catch (error) {
-      console.error('SumUp payment processing failed:', error);
+      logger.error('SumUp payment processing failed:', error);
       return {
         success: false,
         provider: 'sumup',
@@ -187,14 +189,14 @@ class SumUpServiceClass {
       }
 
       const paymentId = this.generatePaymentId();
-      
-      console.log('🔄 Using Native SumUp SDK for contactless payment');
-      
+
+      logger.info('🔄 Using Native SumUp SDK for contactless payment');
+
       // Use native SumUp SDK for contactless payment
       const result = await SumUpNativeService.checkout({
-        amount: amount,
+        amount,
         title: description || 'Fynlo POS Contactless Payment',
-        currency: currency,
+        currency,
         foreignTransactionID: paymentId,
         useTapToPay: true,
       });
@@ -202,8 +204,8 @@ class SumUpServiceClass {
       if (result.success) {
         return {
           id: paymentId,
-          amount: amount,
-          currency: currency,
+          amount,
+          currency,
           status: 'completed',
           paymentMethod: result.usedTapToPay ? 'nfc' : 'apple_pay',
         };
@@ -211,11 +213,11 @@ class SumUpServiceClass {
         throw new Error(result.message || 'Contactless payment failed');
       }
     } catch (error) {
-      console.error('Contactless payment failed:', error);
+      logger.error('Contactless payment failed:', error);
       return {
         id: this.generatePaymentId(),
-        amount: amount,
-        currency: currency,
+        amount,
+        currency,
         status: 'failed',
         paymentMethod: 'nfc',
         errorMessage: error instanceof Error ? error.message : 'Contactless payment failed',
@@ -238,19 +240,19 @@ class SumUpServiceClass {
 
       // Create checkout for QR payment
       const checkout = await this.createCheckout(amount, currency, description);
-      
+
       return {
         id: checkout.checkoutId,
         qrCode: checkout.checkoutUrl,
-        amount: amount,
-        currency: currency,
+        amount,
+        currency,
         status: 'created',
         expiresAt: checkout.expiresAt,
         pollInterval: 2000, // Poll every 2 seconds
         statusUrl: `${this.config.baseUrl}/v0.1/checkouts/${checkout.checkoutId}`,
       };
     } catch (error) {
-      console.error('QR payment creation failed:', error);
+      logger.error('QR payment creation failed:', error);
       throw error;
     }
   }
@@ -267,7 +269,7 @@ class SumUpServiceClass {
       const response = await fetch(qrPayment.statusUrl, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          Authorization: `Bearer ${this.config.apiKey}`,
         },
       });
 
@@ -276,13 +278,13 @@ class SumUpServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         ...qrPayment,
         status: this.mapCheckoutStatus(data.status),
       };
     } catch (error) {
-      console.error('QR payment status poll failed:', error);
+      logger.error('QR payment status poll failed:', error);
       return {
         ...qrPayment,
         status: 'failed',
@@ -299,7 +301,7 @@ class SumUpServiceClass {
       // This would typically use device capabilities
       return true; // Assume supported for now
     } catch (error) {
-      console.error('Failed to check contactless support:', error);
+      logger.error('Failed to check contactless support:', error);
       return false;
     }
   }
@@ -315,9 +317,8 @@ class SumUpServiceClass {
     if (volumeDecimal >= this.feeStructure.volumeThreshold) {
       const transactionFee = amountDecimal * this.feeStructure.highVolumeRate;
       // Add proportional monthly fee
-      const monthlyFeePerTransaction = volumeDecimal > 0 
-        ? this.feeStructure.monthlyFee / (volumeDecimal / amountDecimal)
-        : 0;
+      const monthlyFeePerTransaction =
+        volumeDecimal > 0 ? this.feeStructure.monthlyFee / (volumeDecimal / amountDecimal) : 0;
       return transactionFee + monthlyFeePerTransaction;
     } else {
       // Standard rate for low volume
@@ -342,17 +343,17 @@ class SumUpServiceClass {
     savings?: number;
   } {
     const volume = monthlyVolume;
-    
+
     if (volume >= this.feeStructure.volumeThreshold) {
       // High volume pricing
       const transactionFees = volume * this.feeStructure.highVolumeRate;
       const totalCost = transactionFees + this.feeStructure.monthlyFee;
       const effectiveRate = totalCost / volume;
-      
+
       // Calculate savings vs standard rate
       const standardCost = volume * this.feeStructure.standardRate;
       const savings = standardCost - totalCost;
-      
+
       return {
         totalCost,
         effectiveRate,
@@ -363,7 +364,7 @@ class SumUpServiceClass {
       // Standard pricing
       const totalCost = volume * this.feeStructure.standardRate;
       const effectiveRate = this.feeStructure.standardRate;
-      
+
       return {
         totalCost,
         effectiveRate,
@@ -378,10 +379,10 @@ class SumUpServiceClass {
   isOptimalForVolume(monthlyVolume: number, compareRates: { [provider: string]: number }): boolean {
     const sumupCost = this.calculateMonthlyCost(monthlyVolume);
     const sumupRate = sumupCost.effectiveRate;
-    
+
     // Compare with other providers
     const lowestCompetitorRate = Math.min(...Object.values(compareRates));
-    
+
     return sumupRate <= lowestCompetitorRate;
   }
 
@@ -406,7 +407,7 @@ class SumUpServiceClass {
     merchantCode?: string;
   }> {
     const config = await this.loadConfig();
-    
+
     return {
       isConfigured: !!config,
       hasApiKeys: !!(config?.apiKey && config?.merchantCode),
@@ -428,13 +429,13 @@ class SumUpServiceClass {
       const response = await fetch(`${this.config.baseUrl}/v0.1/me`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          Authorization: `Bearer ${this.config.apiKey}`,
         },
       });
 
       return response.ok;
     } catch (error) {
-      console.error('Failed to validate SumUp credentials:', error);
+      logger.error('Failed to validate SumUp credentials:', error);
       return false;
     }
   }
@@ -460,7 +461,7 @@ class SumUpServiceClass {
   /**
    * Detect payment method from SumUp result
    */
-  private detectPaymentMethod(result: any): 'nfc' | 'apple_pay' | 'google_pay' {
+  private detectPaymentMethod(result: unknown): 'nfc' | 'apple_pay' | 'google_pay' {
     // This would analyze the payment result to determine method
     // For now, default to NFC
     if (result.paymentMethod?.includes('apple_pay')) {
@@ -497,7 +498,7 @@ class SumUpServiceClass {
     try {
       await AsyncStorage.setItem('sumup_config', JSON.stringify(config));
     } catch (error) {
-      console.error('Failed to save SumUp config:', error);
+      logger.error('Failed to save SumUp config:', error);
       throw error;
     }
   }
@@ -515,7 +516,7 @@ class SumUpServiceClass {
       }
       return null;
     } catch (error) {
-      console.error('Failed to load SumUp config:', error);
+      logger.error('Failed to load SumUp config:', error);
       return null;
     }
   }
@@ -528,7 +529,7 @@ class SumUpServiceClass {
       await AsyncStorage.removeItem('sumup_config');
       this.config = null;
     } catch (error) {
-      console.error('Failed to clear SumUp config:', error);
+      logger.error('Failed to clear SumUp config:', error);
       throw error;
     }
   }

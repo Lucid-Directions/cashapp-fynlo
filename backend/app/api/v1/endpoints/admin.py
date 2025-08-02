@@ -18,6 +18,7 @@ from app.crud.payments import get_provider_analytics, create_payment_analytics_r
 from app.core.responses import APIResponseHelper
 from app.services.audit_logger import AuditLoggerService
 from app.models.audit_log import AuditEventType, AuditEventStatus
+from app.core.exceptions import FynloException, ResourceNotFoundException
 
 router = APIRouter()
 
@@ -48,8 +49,7 @@ async def get_providers_status(
             details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."},
             commit=True
         )
-        raise AuthorizationException(message="Forbidden: Insufficient privileges.")
-
+        raise AuthorizationException(message="Forbidden: Insufficient privileges.", details={"required_roles": ADMIN_ROLES})
     await audit_service.create_audit_log(
         event_type=AuditEventType.ACCESS_GRANTED,
         event_status=AuditEventStatus.SUCCESS,
@@ -103,8 +103,7 @@ async def test_provider(
             ip_address=ip_address, user_agent=user_agent,
             details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
         )
-        raise AuthorizationException(message="Forbidden: Insufficient privileges.")
-
+        raise AuthorizationException(message="Forbidden: Insufficient privileges.", details={"required_roles": ADMIN_ROLES})
     await audit_service.create_audit_log(
         event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
         action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
@@ -115,8 +114,7 @@ async def test_provider(
     if not provider:
         # Log this attempt to test non-existent provider as a form of admin action failure?
         # For now, let the HTTP exception suffice.
-        raise ResourceNotFoundException(resource="Provider")
-    
+        raise ResourceNotFoundException(resource="Payment provider", resource_id=provider_name)    
     try:
         # Test with small amount
         result = await provider.create_checkout(
@@ -161,8 +159,7 @@ async def get_provider_analytics_endpoint(
             ip_address=ip_address, user_agent=user_agent,
             details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
         )
-        raise AuthorizationException(message="Forbidden: Insufficient privileges.")
-
+        raise AuthorizationException(message="Forbidden: Insufficient privileges.", details={"required_roles": ADMIN_ROLES})
     await audit_service.create_audit_log(
         event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
         action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
@@ -206,8 +203,7 @@ async def get_cost_comparison(
             ip_address=ip_address, user_agent=user_agent,
             details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
         )
-        raise AuthorizationException(message="Forbidden: Insufficient privileges.")
-
+        raise AuthorizationException(message="Forbidden: Insufficient privileges.", details={"required_roles": ADMIN_ROLES})
     await audit_service.create_audit_log(
         event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
         action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
@@ -270,8 +266,7 @@ async def get_provider_performance(
             ip_address=ip_address, user_agent=user_agent,
             details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
         )
-        raise AuthorizationException(message="Forbidden: Insufficient privileges.")
-
+        raise AuthorizationException(message="Forbidden: Insufficient privileges.", details={"required_roles": ADMIN_ROLES})
     await audit_service.create_audit_log(
         event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
         action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
@@ -313,8 +308,7 @@ async def get_cost_optimization(
             ip_address=ip_address, user_agent=user_agent,
             details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
         )
-        raise AuthorizationException(message="Forbidden: Insufficient privileges.")
-
+        raise AuthorizationException(message="Forbidden: Insufficient privileges.", details={"required_roles": ADMIN_ROLES})
     await audit_service.create_audit_log(
         event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
         action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,

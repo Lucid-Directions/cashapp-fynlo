@@ -14,7 +14,10 @@ from app.core.database import get_db, Platform, Restaurant, User, Order, Custome
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
+<<<<<<< HEAD
 from app.core.validation import validate_model_jsonb_fields
+=======
+>>>>>>> origin/main
 from app.api.v1.endpoints import platform_settings
 
 router = APIRouter()

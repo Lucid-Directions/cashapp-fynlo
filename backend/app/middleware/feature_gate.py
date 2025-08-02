@@ -8,17 +8,21 @@ to features based on subscription plans.
 from functools import wraps
 from fastapi import Request, Depends
 from sqlalchemy.orm import Session
-from typing import Callable, Optional, List, Tuple
+from typing import Optional, List, Tuple
 
 from app.core.database import get_db
 from app.models.subscription import RestaurantSubscription, SubscriptionUsage
+<<<<<<< HEAD
 from app.core.auth import get_current_user
 from app.core.exceptions import FynloException
-
+=======
+>>>>>>> origin/main
 
 class FeatureGateError(FynloException):
     """Custom exception for feature gate violations"""
     
+    pass
+
     def __init__(self, feature_name: str, current_plan: str = None, required_plans: List[str] = None):
         self.feature_name = feature_name
         self.current_plan = current_plan
@@ -35,10 +39,11 @@ class FeatureGateError(FynloException):
         
         super().__init__(status_code=403, detail=detail)
 
-
 class UsageLimitError(FynloException):
     """Custom exception for usage limit violations"""
     
+    pass
+
     def __init__(self, limit_type: str, current_usage: int, limit: int, current_plan: str = None):
         self.limit_type = limit_type
         self.current_usage = current_usage
@@ -57,14 +62,12 @@ class UsageLimitError(FynloException):
         
         super().__init__(status_code=429, detail=detail)
 
-
 def get_restaurant_subscription(restaurant_id: int, db: Session) -> Optional[RestaurantSubscription]:
     """Get active subscription for a restaurant"""
     return db.query(RestaurantSubscription).filter(
         RestaurantSubscription.restaurant_id == restaurant_id,
         RestaurantSubscription.status.in_(['active', 'trial'])
     ).first()
-
 
 def check_feature_access(restaurant_id: int, feature_name: str, db: Session) -> bool:
     """Check if restaurant has access to a specific feature"""
@@ -74,7 +77,6 @@ def check_feature_access(restaurant_id: int, feature_name: str, db: Session) -> 
         return False  # No active subscription
     
     return subscription.has_feature(feature_name)
-
 
 def check_usage_limit(restaurant_id: int, limit_type: str, db: Session) -> Tuple[bool, int, Optional[int]]:
     """
@@ -112,7 +114,6 @@ def check_usage_limit(restaurant_id: int, limit_type: str, db: Session) -> Tuple
     
     return current_usage >= plan_limit, current_usage, plan_limit
 
-
 def require_feature(feature_name: str):
     """
     FastAPI-compatible dependency factory for feature gating.
@@ -147,7 +148,6 @@ def require_feature(feature_name: str):
         return True  # Return something to indicate success
     
     return feature_dependency
-
 
 def require_usage_limit(limit_type: str, increment: int = 1):
     """
@@ -201,7 +201,6 @@ def require_usage_limit(limit_type: str, increment: int = 1):
     
     return usage_dependency
 
-
 # Convenience decorators for common features
 require_advanced_analytics = require_feature('advanced_analytics')
 require_inventory_management = require_feature('inventory_management')
@@ -214,10 +213,11 @@ require_order_limit = require_usage_limit('orders')
 require_staff_limit = require_usage_limit('staff')
 require_menu_limit = require_usage_limit('menu_items')
 
-
 class FeatureGateService:
     """Service class for feature gating operations"""
     
+    pass
+
     def __init__(self, db: Session):
         self.db = db
     

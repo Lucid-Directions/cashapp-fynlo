@@ -3,9 +3,11 @@
  * Global setup and utilities for end-to-end testing
  */
 
-const detox = require('detox');
-const config = require('../package.json').detox;
-const adapter = require('detox/runners/jest/adapter');
+import detox from 'detox';
+
+import config from '../package.json'.detox;
+
+import adapter from 'detox/runners/jest/adapter';
 
 jest.setTimeout(120000);
 jasmine.getEnv().addReporter(adapter);
@@ -34,7 +36,7 @@ global.loginAsTestUser = async () => {
   await element(by.id('username-input')).typeText('demo');
   await element(by.id('password-input')).typeText('demo123');
   await element(by.id('login-button')).tap();
-  
+
   // Wait for main screen to load
   await waitFor(element(by.id('pos-screen')))
     .toBeVisible()

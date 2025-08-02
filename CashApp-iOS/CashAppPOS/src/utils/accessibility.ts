@@ -1,4 +1,4 @@
-import { AccessibilityRole, AccessibilityState, AccessibilityProps } from 'react-native';
+import type { AccessibilityRole, AccessibilityState, AccessibilityProps } from 'react-native';
 
 // Accessibility utility functions and constants
 
@@ -33,23 +33,26 @@ export const createAccessibilityState = (options: {
   busy?: boolean;
 }): AccessibilityState => {
   const state: AccessibilityState = {};
-  
+
   if (options.selected !== undefined) state.selected = options.selected;
   if (options.disabled !== undefined) state.disabled = options.disabled;
   if (options.checked !== undefined) state.checked = options.checked;
   if (options.expanded !== undefined) state.expanded = options.expanded;
   if (options.busy !== undefined) state.busy = options.busy;
-  
+
   return state;
 };
 
 // Currency formatting for screen readers
-export const formatCurrencyForAccessibility = (amount: number, currency: string = 'GBP'): string => {
+export const formatCurrencyForAccessibility = (
+  amount: number,
+  currency: string = 'GBP'
+): string => {
   const formatter = new Intl.NumberFormat('en-GB', {
     style: 'currency',
     currency,
   });
-  
+
   return formatter.format(amount).replace('£', 'pounds ');
 };
 
@@ -65,28 +68,25 @@ export const createFieldLabel = (
   error?: string
 ): string => {
   let accessibleLabel = label;
-  
+
   if (required) {
     accessibleLabel += ', required';
   }
-  
+
   if (error) {
     accessibleLabel += `, error: ${error}`;
   }
-  
+
   return accessibleLabel;
 };
 
 // Create accessible hint for form fields
-export const createFieldHint = (
-  helper?: string,
-  format?: string
-): string | undefined => {
+export const createFieldHint = (helper?: string, format?: string): string | undefined => {
   const hints: string[] = [];
-  
+
   if (helper) hints.push(helper);
   if (format) hints.push(`Format: ${format}`);
-  
+
   return hints.length > 0 ? hints.join('. ') : undefined;
 };
 
@@ -136,18 +136,18 @@ export const createMenuItemAccessibility = (options: {
   total?: number;
 }): AccessibilityProps => {
   let label = options.label;
-  
+
   if (options.price !== undefined) {
     label += `, ${formatCurrencyForAccessibility(options.price)}`;
   }
-  
+
   let hint = options.description;
-  
+
   if (options.index !== undefined && options.total !== undefined) {
     const position = `Item ${options.index + 1} of ${options.total}`;
     hint = hint ? `${hint}. ${position}` : position;
   }
-  
+
   return {
     accessible: true,
     accessibilityRole: ACCESSIBILITY_ROLES.BUTTON,
@@ -169,25 +169,25 @@ export const createListItemAccessibility = (options: {
   onPress?: () => void;
 }): AccessibilityProps => {
   let label = options.title;
-  
+
   if (options.subtitle) {
     label += `, ${options.subtitle}`;
   }
-  
+
   if (options.value) {
     label += `, ${options.value}`;
   }
-  
+
   let hint: string | undefined;
-  
+
   if (options.index !== undefined && options.total !== undefined) {
     hint = `Item ${options.index + 1} of ${options.total}`;
   }
-  
+
   if (options.onPress) {
     hint = hint ? `${hint}. Double tap to select` : 'Double tap to select';
   }
-  
+
   return {
     accessible: true,
     accessibilityRole: options.onPress ? ACCESSIBILITY_ROLES.BUTTON : ACCESSIBILITY_ROLES.TEXT,
@@ -204,7 +204,7 @@ export const createTabAccessibility = (options: {
   total: number;
 }): AccessibilityProps => {
   const hint = `Tab ${options.index + 1} of ${options.total}`;
-  
+
   return {
     accessible: true,
     accessibilityRole: ACCESSIBILITY_ROLES.TAB,
@@ -234,7 +234,7 @@ export const createModalAccessibility = (options: {
 export const announceForAccessibility = (message: string) => {
   // This would typically use AccessibilityInfo.announceForAccessibility
   // but that's only available in React Native, not in TypeScript files
-  console.log(`Accessibility announcement: ${message}`);
+  logger.info(`Accessibility announcement: ${message}`);
 };
 
 // Screen reader optimized time formatting
@@ -244,14 +244,14 @@ export const formatTimeForAccessibility = (date: Date): string => {
     minute: '2-digit',
     hour12: true,
   });
-  
+
   const dateFormatter = new Intl.DateTimeFormat('en-GB', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
-  
+
   return `${timeFormatter.format(date)} on ${dateFormatter.format(date)}`;
 };
 

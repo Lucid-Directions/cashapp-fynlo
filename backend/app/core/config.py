@@ -145,6 +145,8 @@ class Settings(BaseSettings):
     
     @property
     def cors_origins_list(self) -> List[str]:
+    """TODO: Implement function."""
+    pass
         """Get CORS origins as a list"""
         if not self.CORS_ORIGINS:
             return []
@@ -158,6 +160,10 @@ class Settings(BaseSettings):
         # Try to parse as JSON first
         try:
             import json
+import logging
+
+logger = logging.getLogger(__name__)
+
             parsed = json.loads(v)
             if isinstance(parsed, list):
                 return [str(item) for item in parsed if item]
@@ -173,6 +179,8 @@ class Settings(BaseSettings):
     
     @property
     def platform_owner_emails_list(self) -> List[str]:
+    """TODO: Implement function."""
+    pass
         """Get platform owner emails as a list"""
         if not self.PLATFORM_OWNER_EMAILS:
             return []
@@ -274,8 +282,13 @@ def validate_production_settings(s: Settings):
             )
             # In a real scenario, you might want to log this with high priority as well.
             # For now, raising an exception is the primary goal to prevent startup.
+            logger.info("\n" + "="*80)
+            logger.error(error_message)
+            logger.info("="*80 + "\n")
             raise ValueError(f"Application startup aborted due to insecure production configuration: {'; '.join(errors)}")
 
 # Perform validation after settings are fully initialized
 validate_production_settings(settings)
 
+# logger.info(f"Settings validated for {settings.ENVIRONMENT} environment.")
+# logger.info(f"Settings.SECRET_KEY: {settings.SECRET_KEY[:10]}...") # Print only a part for security

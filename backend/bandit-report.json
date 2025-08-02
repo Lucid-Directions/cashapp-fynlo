@@ -1,7 +1,83 @@
 {
   "errors": [
     {
+      "filename": "app/api/v1/api.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/api/v1/endpoints/config.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/api/v1/endpoints/inventory.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/api/v1/endpoints/monitoring.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/api/v1/endpoints/platform.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/api/v1/endpoints/platform_settings.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/api/v1/endpoints/restaurant_deletion.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/api/v1/endpoints/rls_example.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
       "filename": "app/api/v1/endpoints/secure_payments.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/api/v1/endpoints/websocket_portal.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/api/v1/endpoints/websocket_secure.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/api/v1/platform/analytics.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/api/v1/platform/restaurants.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/core/cache.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/core/cache_warmer.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/core/config.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/core/file_upload.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/core/mobile_id_mapping.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/core/platform_service.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/core/production_guard.py",
       "reason": "syntax error while parsing AST from file"
     },
     {
@@ -9,7 +85,47 @@
       "reason": "syntax error while parsing AST from file"
     },
     {
+      "filename": "app/core/tenant_security.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
       "filename": "app/core/tenant_security_current.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/core/two_factor_auth.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/integration/notification_events.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/integration/websocket_events.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/main_minimal.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/middleware/feature_gate.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/middleware/rate_limit_middleware.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/middleware/version_middleware.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/models/financial_records.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/models/payment_config.py",
       "reason": "syntax error while parsing AST from file"
     },
     {
@@ -17,30 +133,54 @@
       "reason": "syntax error while parsing AST from file"
     },
     {
-      "filename": "app/schemas/search_schemas.py",
+      "filename": "app/schemas/subscription.py",
       "reason": "syntax error while parsing AST from file"
     },
     {
-      "filename": "app/schemas/subscription.py",
+      "filename": "app/scripts/initialize_platform_defaults.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/scripts/migrate_to_platform_settings.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/scripts/validate_migration.py",
       "reason": "syntax error while parsing AST from file"
     },
     {
       "filename": "app/services/activity_logger.py",
       "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/services/cache_service.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/services/digitalocean_monitor.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/services/payment_analytics.py",
+      "reason": "syntax error while parsing AST from file"
+    },
+    {
+      "filename": "app/services/secure_payment_config.py",
+      "reason": "syntax error while parsing AST from file"
     }
   ],
-  "generated_at": "2025-08-02T22:36:08Z",
+  "generated_at": "2025-08-02T22:55:55Z",
   "metrics": {
     "_totals": {
-      "CONFIDENCE.HIGH": 41,
+      "CONFIDENCE.HIGH": 36,
       "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 11,
+      "CONFIDENCE.MEDIUM": 10,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 3,
-      "SEVERITY.LOW": 45,
-      "SEVERITY.MEDIUM": 4,
+      "SEVERITY.LOW": 40,
+      "SEVERITY.MEDIUM": 3,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 43009,
+      "loc": 43346,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -110,15 +250,7 @@
       "skipped_tests": 0
     },
     "app/api/v1/api.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 53,
+      "loc": 56,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -144,7 +276,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 400,
+      "loc": 401,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -170,7 +302,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 472,
+      "loc": 479,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -183,20 +315,12 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 376,
+      "loc": 375,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/config.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 384,
+      "loc": 461,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -209,7 +333,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 470,
+      "loc": 468,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -222,7 +346,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 342,
+      "loc": 348,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -235,7 +359,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 439,
+      "loc": 430,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -248,7 +372,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 58,
+      "loc": 57,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -261,7 +385,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 143,
+      "loc": 149,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -292,15 +416,7 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/inventory.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 290,
+      "loc": 294,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -313,7 +429,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 197,
+      "loc": 186,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -331,15 +447,7 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/monitoring.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 276,
+      "loc": 279,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -365,7 +473,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 833,
+      "loc": 839,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -378,7 +486,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 170,
+      "loc": 176,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -396,15 +504,7 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/platform.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 512,
+      "loc": 515,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -417,20 +517,12 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 124,
+      "loc": 125,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/platform_settings.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 438,
+      "loc": 517,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -443,7 +535,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 189,
+      "loc": 188,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -456,7 +548,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 119,
+      "loc": 120,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -495,7 +587,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 152,
+      "loc": 153,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -508,7 +600,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 162,
+      "loc": 161,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -521,20 +613,12 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 138,
+      "loc": 141,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/restaurant_deletion.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 266,
+      "loc": 270,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -560,20 +644,12 @@
       "SEVERITY.LOW": 3,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1281,
+      "loc": 1215,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/rls_example.py": {
-      "CONFIDENCE.HIGH": 3,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 3,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 120,
+      "loc": 123,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -591,7 +667,7 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/secure_payments.py": {
-      "loc": 328,
+      "loc": 331,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -617,7 +693,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 221,
+      "loc": 220,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -643,7 +719,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 84,
+      "loc": 85,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -656,7 +732,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 999,
+      "loc": 998,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -674,15 +750,7 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/websocket_portal.py": {
-      "CONFIDENCE.HIGH": 2,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 2,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 244,
+      "loc": 249,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -700,15 +768,7 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/websocket_secure.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 133,
+      "loc": 137,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -726,15 +786,7 @@
       "skipped_tests": 0
     },
     "app/api/v1/platform/analytics.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 187,
+      "loc": 190,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -752,15 +804,7 @@
       "skipped_tests": 0
     },
     "app/api/v1/platform/restaurants.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 217,
+      "loc": 220,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -773,7 +817,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 235,
+      "loc": 234,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -799,7 +843,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 386,
+      "loc": 383,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -825,7 +869,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 669,
+      "loc": 667,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -838,20 +882,12 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 220,
+      "loc": 219,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/core/cache.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 263,
+      "loc": 266,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -864,33 +900,17 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 279,
+      "loc": 277,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/core/cache_warmer.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 203,
+      "loc": 204,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/core/config.py": {
-      "CONFIDENCE.HIGH": 1,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 1,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 173,
+      "loc": 182,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -903,20 +923,20 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 437,
+      "loc": 436,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/core/database_security.py": {
-      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.HIGH": 1,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
+      "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 257,
+      "loc": 260,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -960,15 +980,7 @@
       "skipped_tests": 0
     },
     "app/core/file_upload.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 357,
+      "loc": 361,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -986,15 +998,7 @@
       "skipped_tests": 0
     },
     "app/core/mobile_id_mapping.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 231,
+      "loc": 234,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1025,28 +1029,12 @@
       "skipped_tests": 0
     },
     "app/core/platform_service.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 295,
+      "loc": 299,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/core/production_guard.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 39,
+      "loc": 31,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1059,7 +1047,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 526,
+      "loc": 524,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1072,7 +1060,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 170,
+      "loc": 169,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1085,7 +1073,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 120,
+      "loc": 119,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1168,7 +1156,7 @@
       "skipped_tests": 0
     },
     "app/core/security.py": {
-      "loc": 380,
+      "loc": 379,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1181,7 +1169,7 @@
       "SEVERITY.LOW": 2,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 266,
+      "loc": 265,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1220,20 +1208,12 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 508,
+      "loc": 506,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/core/tenant_security.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 193,
+      "loc": 227,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1251,20 +1231,12 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 230,
+      "loc": 227,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/core/two_factor_auth.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 191,
+      "loc": 220,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1277,7 +1249,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 550,
+      "loc": 548,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1303,7 +1275,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 466,
+      "loc": 467,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1316,7 +1288,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 183,
+      "loc": 182,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1346,6 +1318,19 @@
       "nosec": 0,
       "skipped_tests": 0
     },
+    "app/debug_deployment.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 43,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
     "app/integration/__init__.py": {
       "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
@@ -1360,28 +1345,12 @@
       "skipped_tests": 0
     },
     "app/integration/notification_events.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 241,
+      "loc": 244,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/integration/websocket_events.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 124,
+      "loc": 127,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1394,20 +1363,12 @@
       "SEVERITY.LOW": 3,
       "SEVERITY.MEDIUM": 1,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 476,
+      "loc": 465,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/main_minimal.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 1,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 1,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 110,
+      "loc": 116,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1438,28 +1399,12 @@
       "skipped_tests": 0
     },
     "app/middleware/feature_gate.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 207,
+      "loc": 217,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/middleware/rate_limit_middleware.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 85,
+      "loc": 88,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1472,7 +1417,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 95,
+      "loc": 94,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1516,15 +1461,7 @@
       "skipped_tests": 0
     },
     "app/middleware/version_middleware.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 133,
+      "loc": 138,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1607,28 +1544,12 @@
       "skipped_tests": 0
     },
     "app/models/financial_records.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 36,
+      "loc": 39,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/models/payment_config.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 24,
+      "loc": 27,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1724,7 +1645,7 @@
       "skipped_tests": 0
     },
     "app/schemas/employee_schemas.py": {
-      "loc": 256,
+      "loc": 252,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1776,17 +1697,25 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 73,
+      "loc": 72,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/schemas/search_schemas.py": {
-      "loc": 148,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 163,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/schemas/subscription.py": {
-      "loc": 206,
+      "loc": 219,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1804,41 +1733,17 @@
       "skipped_tests": 0
     },
     "app/scripts/initialize_platform_defaults.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 161,
+      "loc": 180,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/scripts/migrate_to_platform_settings.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 352,
+      "loc": 373,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/scripts/validate_migration.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 423,
+      "loc": 436,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1861,15 +1766,7 @@
       "skipped_tests": 0
     },
     "app/services/cache_service.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 64,
+      "loc": 66,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1887,15 +1784,7 @@
       "skipped_tests": 0
     },
     "app/services/digitalocean_monitor.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 384,
+      "loc": 387,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1908,7 +1797,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 139,
+      "loc": 138,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1921,7 +1810,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 663,
+      "loc": 662,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1973,7 +1862,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 411,
+      "loc": 408,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1986,20 +1875,12 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 50,
+      "loc": 52,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/services/payment_analytics.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 434,
+      "loc": 438,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2025,7 +1906,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 200,
+      "loc": 198,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2051,7 +1932,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 89,
+      "loc": 86,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2077,7 +1958,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 213,
+      "loc": 206,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2090,7 +1971,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 65,
+      "loc": 64,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2199,15 +2080,7 @@
       "skipped_tests": 0
     },
     "app/services/secure_payment_config.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 267,
+      "loc": 274,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2220,7 +2093,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 305,
+      "loc": 304,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2285,7 +2158,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 263,
+      "loc": 260,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2383,7 +2256,7 @@
   },
   "results": [
     {
-      "code": "204             return None\n205     except Exception:\n206         # If Redis is unavailable, continue without blacklist check\n207         pass\n208     \n",
+      "code": "203             return None\n204     except Exception:\n205         # If Redis is unavailable, continue without blacklist check\n206         pass\n207     \n",
       "col_offset": 4,
       "end_col_offset": 12,
       "filename": "app/api/v1/endpoints/auth_backup.py",
@@ -2394,18 +2267,18 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 205,
+      "line_number": 204,
       "line_range": [
+        204,
         205,
-        206,
-        207
+        206
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",
       "test_name": "try_except_pass"
     },
     {
-      "code": "441         )\n442     except Exception as e:\n443         # Don't fail if WebSocket fails\n444         pass\n445     \n",
+      "code": "437         )\n438     except Exception as e:\n439         # Don't fail if WebSocket fails\n440         pass\n441     \n",
       "col_offset": 4,
       "end_col_offset": 12,
       "filename": "app/api/v1/endpoints/restaurants.py",
@@ -2416,18 +2289,18 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 442,
+      "line_number": 438,
       "line_range": [
-        442,
-        443,
-        444
+        438,
+        439,
+        440
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",
       "test_name": "try_except_pass"
     },
     {
-      "code": "1366         )\n1367     except Exception as e:\n1368         # Don't fail the request if WebSocket fails\n1369         pass\n1370     \n",
+      "code": "1362         )\n1363     except Exception as e:\n1364         # Don't fail the request if WebSocket fails\n1365         pass\n1366     \n",
       "col_offset": 4,
       "end_col_offset": 12,
       "filename": "app/api/v1/endpoints/restaurants.py",
@@ -2438,18 +2311,18 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 1367,
+      "line_number": 1363,
       "line_range": [
-        1367,
-        1368,
-        1369
+        1363,
+        1364,
+        1365
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",
       "test_name": "try_except_pass"
     },
     {
-      "code": "1479         )\n1480     except Exception as e:\n1481         pass\n1482     \n",
+      "code": "1475         )\n1476     except Exception as e:\n1477         pass\n1478     \n",
       "col_offset": 4,
       "end_col_offset": 12,
       "filename": "app/api/v1/endpoints/restaurants.py",
@@ -2460,119 +2333,17 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 1480,
+      "line_number": 1476,
       "line_range": [
-        1480,
-        1481
+        1476,
+        1477
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",
       "test_name": "try_except_pass"
     },
     {
-      "code": "105         # Verify they match the current user\n106         assert session_info.user_id == str(current_user.id), \"User ID mismatch\"\n107         assert session_info.restaurant_id == str(current_user.restaurant_id), \"Restaurant ID mismatch\"\n",
-      "col_offset": 8,
-      "end_col_offset": 79,
-      "filename": "app/api/v1/endpoints/rls_example.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
-      "line_number": 106,
-      "line_range": [
-        106
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b101_assert_used.html",
-      "test_id": "B101",
-      "test_name": "assert_used"
-    },
-    {
-      "code": "106         assert session_info.user_id == str(current_user.id), \"User ID mismatch\"\n107         assert session_info.restaurant_id == str(current_user.restaurant_id), \"Restaurant ID mismatch\"\n108         assert session_info.user_role == current_user.role, \"Role mismatch\"\n",
-      "col_offset": 8,
-      "end_col_offset": 102,
-      "filename": "app/api/v1/endpoints/rls_example.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
-      "line_number": 107,
-      "line_range": [
-        107
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b101_assert_used.html",
-      "test_id": "B101",
-      "test_name": "assert_used"
-    },
-    {
-      "code": "107         assert session_info.restaurant_id == str(current_user.restaurant_id), \"Restaurant ID mismatch\"\n108         assert session_info.user_role == current_user.role, \"Role mismatch\"\n109         \n",
-      "col_offset": 8,
-      "end_col_offset": 75,
-      "filename": "app/api/v1/endpoints/rls_example.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
-      "line_number": 108,
-      "line_range": [
-        108
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b101_assert_used.html",
-      "test_id": "B101",
-      "test_name": "assert_used"
-    },
-    {
-      "code": "121             await websocket.close(code=4000, reason=f\"Connection error: {str(e)}\")\n122         except Exception as e:\n123             pass\n124     finally:\n",
-      "col_offset": 8,
-      "end_col_offset": 16,
-      "filename": "app/api/v1/endpoints/websocket_portal.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 122,
-      "line_range": [
-        122,
-        123
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "235             await websocket.close(code=4000, reason=f\"Platform connection error: {str(e)}\")\n236         except Exception as e:\n237             pass\n238     finally:\n",
-      "col_offset": 8,
-      "end_col_offset": 16,
-      "filename": "app/api/v1/endpoints/websocket_portal.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 236,
-      "line_range": [
-        236,
-        237
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "43             restaurant_id = kwargs.get('restaurant_id', 'global')\n44             key_hash = hashlib.md5(key_data.encode()).hexdigest()\n45             return f\"{prefix}:restaurant_id={restaurant_id}:hash:{key_hash}\"\n",
+      "code": "41             restaurant_id = kwargs.get('restaurant_id', 'global')\n42             key_hash = hashlib.md5(key_data.encode()).hexdigest()\n43             return f\"{prefix}:restaurant_id={restaurant_id}:hash:{key_hash}\"\n",
       "col_offset": 23,
       "end_col_offset": 53,
       "filename": "app/core/cache_service.py",
@@ -2583,19 +2354,19 @@
       },
       "issue_severity": "HIGH",
       "issue_text": "Use of weak MD5 hash for security. Consider usedforsecurity=False",
-      "line_number": 44,
+      "line_number": 42,
       "line_range": [
-        44
+        42
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b324_hashlib.html",
       "test_id": "B324",
       "test_name": "hashlib"
     },
     {
-      "code": "163                 return [str(item) for item in parsed if item]\n164         except Exception as e:\n165             pass\n166         \n",
-      "col_offset": 8,
-      "end_col_offset": 16,
-      "filename": "app/core/config.py",
+      "code": "78                     cursor.execute(\"SET log_min_duration_statement = '1000'\")  # 1 second\n79                 except Exception:\n80                     # Ignore if we don't have permission (e.g., DigitalOcean managed DB)\n81                     pass\n82         \n",
+      "col_offset": 16,
+      "end_col_offset": 24,
+      "filename": "app/core/database_security.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 703,
@@ -2603,17 +2374,18 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 164,
+      "line_number": 79,
       "line_range": [
-        164,
-        165
+        79,
+        80,
+        81
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",
       "test_name": "try_except_pass"
     },
     {
-      "code": "510             import random\n511             success = random.random() < 0.95\n512             \n",
+      "code": "508             import random\n509             success = random.random() < 0.95\n510             \n",
       "col_offset": 22,
       "end_col_offset": 37,
       "filename": "app/core/push_notifications.py",
@@ -2624,9 +2396,9 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 511,
+      "line_number": 509,
       "line_range": [
-        511
+        509
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
@@ -2738,7 +2510,7 @@
       "test_name": "try_except_pass"
     },
     {
-      "code": "24     LOGOUT = \"logout\"\n25     TOKEN_EXPIRED = \"token_expired\"\n26     TOKEN_INVALID = \"token_invalid\"\n",
+      "code": "23     LOGOUT = \"logout\"\n24     TOKEN_EXPIRED = \"token_expired\"\n25     TOKEN_INVALID = \"token_invalid\"\n",
       "col_offset": 20,
       "end_col_offset": 35,
       "filename": "app/core/security_monitor.py",
@@ -2749,16 +2521,16 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Possible hardcoded password: 'token_expired'",
-      "line_number": 25,
+      "line_number": 24,
       "line_range": [
-        25
+        24
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b105_hardcoded_password_string.html",
       "test_id": "B105",
       "test_name": "hardcoded_password_string"
     },
     {
-      "code": "25     TOKEN_EXPIRED = \"token_expired\"\n26     TOKEN_INVALID = \"token_invalid\"\n27     \n",
+      "code": "24     TOKEN_EXPIRED = \"token_expired\"\n25     TOKEN_INVALID = \"token_invalid\"\n26     \n",
       "col_offset": 20,
       "end_col_offset": 35,
       "filename": "app/core/security_monitor.py",
@@ -2769,16 +2541,16 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Possible hardcoded password: 'token_invalid'",
-      "line_number": 26,
+      "line_number": 25,
       "line_range": [
-        26
+        25
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b105_hardcoded_password_string.html",
       "test_id": "B105",
       "test_name": "hardcoded_password_string"
     },
     {
-      "code": "394     for i in range(20):\n395         order_time = datetime.now() - timedelta(minutes=random.randint(0, 1440))\n396         orders.append({\n",
+      "code": "383     for i in range(20):\n384         order_time = datetime.now() - timedelta(minutes=random.randint(0, 1440))\n385         orders.append({\n",
       "col_offset": 56,
       "end_col_offset": 79,
       "filename": "app/main.py",
@@ -2789,16 +2561,16 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 395,
+      "line_number": 384,
       "line_range": [
-        395
+        384
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
       "test_name": "blacklist"
     },
     {
-      "code": "404             \"total\": 12.00 + (i * 2.5),\n405             \"status\": random.choice(statuses),\n406             \"createdAt\": order_time.isoformat(),\n",
+      "code": "393             \"total\": 12.00 + (i * 2.5),\n394             \"status\": random.choice(statuses),\n395             \"createdAt\": order_time.isoformat(),\n",
       "col_offset": 22,
       "end_col_offset": 45,
       "filename": "app/main.py",
@@ -2809,16 +2581,16 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 405,
+      "line_number": 394,
       "line_range": [
-        405
+        394
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
       "test_name": "blacklist"
     },
     {
-      "code": "406             \"createdAt\": order_time.isoformat(),\n407             \"completedAt\": (order_time + timedelta(minutes=15)).isoformat() if random.choice(statuses) == \"completed\" else None\n408         })\n",
+      "code": "395             \"createdAt\": order_time.isoformat(),\n396             \"completedAt\": (order_time + timedelta(minutes=15)).isoformat() if random.choice(statuses) == \"completed\" else None\n397         })\n",
       "col_offset": 79,
       "end_col_offset": 102,
       "filename": "app/main.py",
@@ -2829,16 +2601,16 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 407,
+      "line_number": 396,
       "line_range": [
-        407
+        396
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
       "test_name": "blacklist"
     },
     {
-      "code": "600         \"app.main:app\",\n601         host=\"0.0.0.0\",\n602         port=port,\n",
+      "code": "589         \"app.main:app\",\n590         host=\"0.0.0.0\",\n591         port=port,\n",
       "col_offset": 13,
       "end_col_offset": 22,
       "filename": "app/main.py",
@@ -2849,29 +2621,9 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible binding to all interfaces.",
-      "line_number": 601,
+      "line_number": 590,
       "line_range": [
-        601
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b104_hardcoded_bind_all_interfaces.html",
-      "test_id": "B104",
-      "test_name": "hardcoded_bind_all_interfaces"
-    },
-    {
-      "code": "126     port = int(os.environ.get(\"PORT\", 8000))\n127     uvicorn.run(app, host=\"0.0.0.0\", port=port)\n",
-      "col_offset": 26,
-      "end_col_offset": 35,
-      "filename": "app/main_minimal.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 605,
-        "link": "https://cwe.mitre.org/data/definitions/605.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible binding to all interfaces.",
-      "line_number": 127,
-      "line_range": [
-        127
+        590
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b104_hardcoded_bind_all_interfaces.html",
       "test_id": "B104",
@@ -2958,7 +2710,7 @@
       "test_name": "hardcoded_password_string"
     },
     {
-      "code": "58                 ]\n59         except Exception:\n60             pass # Ignore if it's not easily decodable for a simple check\n61 \n",
+      "code": "62                 ]\n63         except Exception:\n64             pass # Ignore if it's not easily decodable for a simple check\n65 \n",
       "col_offset": 8,
       "end_col_offset": 16,
       "filename": "app/services/ocr_service.py",
@@ -2969,10 +2721,10 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 59,
+      "line_number": 63,
       "line_range": [
-        59,
-        60
+        63,
+        64
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",

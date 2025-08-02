@@ -8,9 +8,8 @@ import re
 import hmac
 import hashlib
 import secrets
-from typing import Dict, List, Optional, Set, Any, Union
+from typing import Dict, List, Optional, Set, Any
 from datetime import datetime, timezone
-from functools import lru_cache
 import logging
 from enum import Enum
 
@@ -377,7 +376,7 @@ class InstanceIdentifier(BaseModel):
     
     @validator('instance_id')
     def validate_instance_id_field(cls, v):
-        return InputValidator.validate_instance_id(v)
+            return InputValidator.validate_instance_id(v)
 
 
 class RefreshRequest(BaseModel):
@@ -387,7 +386,7 @@ class RefreshRequest(BaseModel):
     
     @validator('reason')
     def validate_reason(cls, v):
-        if v:
+            if v:
             return InputValidator.sanitize_string(v, context="general", max_length=200)
         return v
 
@@ -439,11 +438,11 @@ class DeploymentTriggerRequest(BaseModel):
     
     @validator('reason')
     def validate_reason_field(cls, v):
-        return InputValidator.sanitize_string(v, context="general", max_length=500)
+            return InputValidator.sanitize_string(v, context="general", max_length=500)
     
     @validator('confirm')
     def validate_confirm_field(cls, v):
-        if not v:
+            if not v:
             raise ValueError("Explicit confirmation required for deployment trigger")
         return v
     
@@ -480,7 +479,7 @@ class InstanceHeartbeatRequest(BaseModel):
     
     @validator('instance_id')
     def validate_instance_id_field(cls, v):
-        return InputValidator.validate_instance_id(v)
+            return InputValidator.validate_instance_id(v)
     
     @validator('hostname')
         return InputValidator.sanitize_string(v, context="general", max_length=255)
@@ -532,9 +531,9 @@ class FilePathValidator(BaseModel):
 class RequestContext(BaseModel):
     """Context for request tracking and correlation."""
     request_id: str = Field(default_factory=lambda: TokenEncryption.generate_secure_token(16))
-    correlation_id: Optional[str] = Field(None, pattern="^[a-zA-Z0-9\-]{1,64}$")
+    correlation_id: Optional[str] = Field(None, pattern=r"^[a-zA-Z0-9\-]{1,64}$")
     user_agent: Optional[str] = Field(None, max_length=500)
-    ip_address: Optional[str] = Field(None, pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$|^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$")
+    ip_address: Optional[str] = Field(None, pattern=r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$|^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$")
     
     class Config:
         extra = "forbid"
