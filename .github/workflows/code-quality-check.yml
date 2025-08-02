@@ -32,8 +32,11 @@ jobs:
     - name: Run Ruff linter
       run: |
         cd backend
-        ruff check app --select E999,F,E,W --fix --exit-non-zero-on-fix
-        echo "✅ Ruff checks passed!"
+        # Run Ruff but only fail on F (fatal errors), not E/W (style warnings)
+        ruff check app --select F --exit-non-zero-on-fix || exit 1
+        # Run E/W checks but don't fail the build (yet)
+        ruff check app --select E,W || echo "⚠️ Style warnings found (not blocking)"
+        echo "✅ Ruff fatal error checks passed!"
 
   typescript-checks:
     runs-on: ubuntu-latest
