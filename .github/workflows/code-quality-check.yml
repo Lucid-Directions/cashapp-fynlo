@@ -32,7 +32,7 @@ jobs:
     - name: Run Ruff linter
       run: |
         cd backend
-        ruff check app --select E999,F,E,W --fix --exit-non-zero-on-fix
+        ruff check app --select F,E,W --fix --exit-non-zero-on-fix
         echo "✅ Ruff checks passed!"
 
   typescript-checks:
