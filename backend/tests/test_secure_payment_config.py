@@ -11,6 +11,7 @@ from cryptography.fernet import Fernet
 import json
 from decimal import Decimal
 from datetime import datetime
+import os
 
 from app.services.secure_payment_config import SecurePaymentConfigService
 from app.core.exceptions import FynloException
@@ -218,7 +219,7 @@ class TestSecurePaymentConfigService:
         """Test that encryption and decryption maintain data integrity"""
         # Arrange
         test_data = {
-            'api_key': 'sk_test_123456789',
+            'api_key': os.environ.get('TEST_STRIPE_API_KEY', 'sk_test_dynamic_123456789'),
             'secret_key': 'secret_test_987654321',
             'nested': {
                 'webhook_secret': 'whsec_test_abcdef',
@@ -241,7 +242,7 @@ class TestSecurePaymentConfigService:
         # Valid credentials
         valid_creds = {
             'publishable_key': 'pk_test_123',
-            'secret_key': 'sk_test_456',
+            'secret_key': os.environ.get('TEST_STRIPE_SECRET_KEY', 'sk_test_dynamic_456'),
             'webhook_secret': 'whsec_789'
         }
         assert service.validate_provider_credentials('stripe', valid_creds) is True

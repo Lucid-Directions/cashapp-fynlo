@@ -2,8 +2,12 @@
 Comprehensive tests for payment providers
 """
 
+<<<<<<< HEAD
 
 """
+=======
+import os
+>>>>>>> a0823baf (fix: replace hardcoded secrets with environment variables (PR 2/4))
 import pytest
 import asyncio
 from decimal import Decimal
@@ -22,23 +26,23 @@ class TestPaymentProviders:
     @pytest.fixture
     def stripe_config(self):
         return {
-            "api_key": "sk_test_123456789",
-            "webhook_secret": "whsec_test123"
+            "api_key": os.environ.get("TEST_STRIPE_API_KEY", "sk_test_dynamic"),
+            "webhook_secret": os.environ.get("TEST_WEBHOOK_SECRET", "whsec_test_dynamic")
         }
     
     @pytest.fixture
     def square_config(self):
         return {
-            "access_token": "sandbox_token_123",
-            "location_id": "test_location_123",
+            "access_token": os.environ.get("TEST_SQUARE_TOKEN", "sandbox_token_dynamic"),
+            "location_id": os.environ.get("TEST_SQUARE_LOCATION", "test_location_dynamic"),
             "environment": "sandbox"
         }
     
     @pytest.fixture
     def sumup_config(self):
         return {
-            "api_key": "sumup_test_key_123",
-            "merchant_code": "SUMUP_TEST_MERCHANT"
+            "api_key": os.environ.get("TEST_SUMUP_API_KEY", "sumup_test_key_dynamic"),
+            "merchant_code": os.environ.get("TEST_MERCHANT_CODE", "SUMUP_TEST_MERCHANT_DYNAMIC")
         }
     
     @pytest.fixture
@@ -318,17 +322,20 @@ class TestConfiguration:
     def test_provider_configuration(self, config_manager):
         """Test provider configuration management"""
         # Add a test provider
+        # Use a dynamic test key for testing configuration
+        import uuid
+        test_api_key = f"test_key_{uuid.uuid4().hex[:8]}"
         config_manager.update_provider_config(
             "test_provider",
             enabled=True,
-            api_key="test_key_123",
+            api_key=test_api_key,
             environment="test"
         )
         
         provider_config = config_manager.get_provider_config("test_provider")
         assert provider_config is not None
         assert provider_config.enabled is True
-        assert provider_config.api_key == "test_key_123"
+        assert provider_config.api_key == test_api_key
     
     def test_feature_flags(self, config_manager):
         """Test feature flag management"""

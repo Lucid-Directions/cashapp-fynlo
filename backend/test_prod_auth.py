@@ -12,8 +12,10 @@ import json
 url = 'https://fynlopos-9eg2c.ondigitalocean.app/api/v1/auth/verify'
 
 # Test with a fake token to see the error response
+import uuid
+fake_token = f"fake-token-{uuid.uuid4().hex[:8]}"
 headers = {
-    'Authorization': 'Bearer fake-token-12345',
+    'Authorization': f'Bearer {fake_token}',
     'Content-Type': 'application/json'
 }
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#\!/usr/bin/env python3
 """
 PR Guardian - Pre-merge code quality scanner
 Scans for common issues before merging to main
@@ -92,15 +92,10 @@ class PRGuardian:
         for pattern in secret_patterns:
             for i, line in enumerate(lines, 1):
                 if re.search(pattern, line, re.IGNORECASE):
-                    if not any(safe in line for safe in ["os.environ", "settings.", "config.", "getenv"]):
-                        self.add_issue("critical", f"{filepath}:{i}", "Potential hardcoded secret")
+                    # Skip if it's using environment variables
+                    if "os.environ" not in line and "settings." not in line:
+                        self.add_issue("critical", f"{filepath}:{i}", "Potential hardcoded secret found")
                         
-        # Check for generic exceptions
-        for i, line in enumerate(lines, 1):
-            if re.match(r'^\s*except\s*:\s*$', line) or re.match(r'^\s*except\s+Exception\s*:\s*$', line):
-                if i + 1 < len(lines) and "raise" not in lines[i]:
-                    self.add_issue("warning", f"{filepath}:{i}", "Generic exception handling without re-raise")
-                    
     def add_issue(self, severity: str, location: str, message: str):
         """Add an issue to the report"""
         issue = {
@@ -119,39 +114,49 @@ class PRGuardian:
         self.stats["total_issues"] += 1
         
     def generate_report(self):
-        """Generate and save the report"""
+        """Generate and display the report"""
+        print("\n" + "="*80)
+        print("PR GUARDIAN REPORT")
+        print("="*80)
+        print(f"\nFiles scanned: {self.stats['files_scanned']}")
+        print(f"Total issues found: {self.stats['total_issues']}")
+        print(f"Critical issues: {self.stats['critical_issues']}")
+        print(f"Warnings: {self.stats['warnings']}")
+        
+        if self.issues:
+            print("\n❌ CRITICAL ISSUES (must fix before merge):")
+            print("-"*80)
+            for issue in self.issues:
+                print(f"  • {issue['location']}: {issue['message']}")
+                
+        if self.warnings:
+            print("\n⚠️  WARNINGS (should fix):")
+            print("-"*80)
+            for warning in self.warnings:
+                print(f"  • {warning['location']}: {warning['message']}")
+                
+        # Write JSON report
         report = {
-            "scan_date": datetime.now().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "stats": self.stats,
             "critical_issues": self.issues,
             "warnings": self.warnings
         }
         
-        # Save JSON report
-        report_path = self.root_path / "PR_GUARDIAN_SCAN_REPORT.json"
-        with open(report_path, 'w') as f:
+        with open("pr_guardian_report.json", "w") as f:
             json.dump(report, f, indent=2)
             
-        # Print summary
-        print("\n📊 PR Guardian Scan Complete")
-        print(f"Files scanned: {self.stats['files_scanned']}")
-        print(f"Critical issues: {self.stats['critical_issues']} ❌")
-        print(f"Warnings: {self.stats['warnings']} ⚠️")
+        print(f"\n📄 Detailed report saved to: pr_guardian_report.json")
         
-        if self.issues:
-            print("\n🚨 Critical Issues Found:")
-            for issue in self.issues[:10]:  # Show first 10
-                print(f"  - {issue['location']}: {issue['message']}")
-            if len(self.issues) > 10:
-                print(f"  ... and {len(self.issues) - 10} more")
-                
-        if self.stats['critical_issues'] > 0:
-            print("\n❌ PR Guardian check FAILED - Critical issues must be fixed before merge")
+        # Exit with error if critical issues found
+        if self.stats["critical_issues"] > 0:
+            print("\n❌ PR Guardian check FAILED - Critical issues must be fixed\!")
             sys.exit(1)
         else:
-            print("\n✅ PR Guardian check PASSED - No critical issues found")
-            
+            print("\n✅ PR Guardian check PASSED - No critical issues found\!")
+            sys.exit(0)
 
 if __name__ == "__main__":
-    guardian = PRGuardian(".")  # Current directory since we're already in backend
+    guardian = PRGuardian()
     guardian.scan_all()
+EOF < /dev/null

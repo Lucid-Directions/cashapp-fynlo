@@ -9,6 +9,8 @@ Tests Odoo-style endpoints and mobile optimization features
 import requests
 import json
 import base64
+import os
+import uuid
 from datetime import datetime
 
 # Test configuration
@@ -59,7 +61,7 @@ def test_mobile_menu_endpoint():
     
     headers = {
         "User-Agent": MOBILE_USER_AGENT,
-        "Authorization": "Bearer test_token"
+        "Authorization": f"Bearer {os.getenv('TEST_AUTH_TOKEN', f'test_token_{uuid.uuid4().hex[:8]}')}"
     }
     
     params = {
@@ -86,7 +88,7 @@ def test_daily_sales_report():
     
     headers = {
         "User-Agent": MOBILE_USER_AGENT,
-        "Authorization": "Bearer test_token"
+        "Authorization": f"Bearer {os.getenv('TEST_AUTH_TOKEN', f'test_token_{uuid.uuid4().hex[:8]}')}"
     }
     
     params = {
@@ -113,7 +115,7 @@ def test_mobile_orders():
     
     headers = {
         "User-Agent": MOBILE_USER_AGENT,
-        "Authorization": "Bearer test_token"
+        "Authorization": f"Bearer {os.getenv('TEST_AUTH_TOKEN', f'test_token_{uuid.uuid4().hex[:8]}')}"
     }
     
     params = {

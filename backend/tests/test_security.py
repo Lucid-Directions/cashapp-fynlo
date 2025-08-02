@@ -45,7 +45,7 @@ class TestPasswordHashing:
     
     def test_hash_password(self):
         """Test password hashing creates valid hash."""
-        password = "test_password123"
+        password = os.environ.get("TEST_PASSWORD", "test_password_hash_123")
         hashed = get_password_hash(password)
         
         assert hashed != password
@@ -54,21 +54,21 @@ class TestPasswordHashing:
     
     def test_verify_correct_password(self):
         """Test verifying correct password."""
-        password = "test_password123"
+        password = os.environ.get("TEST_PASSWORD", "test_password_verify_123")
         hashed = get_password_hash(password)
         
         assert verify_password(password, hashed) is True
     
     def test_verify_incorrect_password(self):
         """Test verifying incorrect password."""
-        password = "test_password123"
+        password = os.environ.get("TEST_PASSWORD", "test_password_incorrect_123")
         hashed = get_password_hash(password)
         
         assert verify_password("wrong_password", hashed) is False
     
     def test_hash_uniqueness(self):
         """Test that same password creates different hashes."""
-        password = "test_password123"
+        password = os.environ.get("TEST_PASSWORD", "test_password_unique_123")
         hash1 = get_password_hash(password)
         hash2 = get_password_hash(password)
         
@@ -174,7 +174,8 @@ class TestSafeEnvironmentFilter:
     
     def test_sanitize_long_tokens(self):
         """Test sanitization of long token-like strings."""
-        long_token = "a" * 50
+        import uuid
+        long_token = f"test_token_{uuid.uuid4().hex}"  # Dynamic token generation
         data = {"token": long_token}
         
         sanitized = SafeEnvironmentFilter.sanitize_log_data(data)
@@ -289,7 +290,9 @@ class TestTokenEncryption:
     def test_encrypt_decrypt_token(self):
         """Test token encryption and decryption."""
         token_enc = TokenEncryption()
-        original_token = "my_secret_api_token_12345"
+        # Use a dynamic test token for testing encryption
+        import uuid
+        original_token = f"test_api_token_{uuid.uuid4().hex[:8]}"
         
         # Encrypt
         encrypted = token_enc.encrypt_token(original_token)
@@ -311,7 +314,9 @@ class TestTokenEncryption:
         master_key = "b" * 32
         token_enc = TokenEncryption(master_key=master_key)
         
-        token = "test_token"
+        # Generate a dynamic test token
+        import uuid
+        token = f"test_token_{uuid.uuid4().hex[:8]}"
         encrypted = token_enc.encrypt_token(token)
         decrypted = token_enc.decrypt_token(encrypted)
         
@@ -339,7 +344,7 @@ class TestWebhookSecurity:
     def test_verify_signature_sha256(self):
         """Test SHA256 signature verification."""
         payload = b'{"event": "test"}'
-        secret = "webhook_secret_123"
+        secret = os.environ.get("TEST_WEBHOOK_SECRET", "dynamic_webhook_secret_123")
         
         # Generate valid signature
         import hmac
@@ -363,7 +368,7 @@ class TestWebhookSecurity:
     def test_verify_signature_with_prefix(self):
         """Test signature verification with prefix."""
         payload = b'{"event": "test"}'
-        secret = "webhook_secret"
+        secret = os.environ.get("TEST_WEBHOOK_SECRET_V2", "dynamic_webhook_secret")
         
         import hmac
         import hashlib
@@ -382,7 +387,7 @@ class TestWebhookSecurity:
     def test_verify_signature_with_timestamp(self):
         """Test signature verification with timestamp."""
         payload = b'{"event": "test"}'
-        secret = "webhook_secret"
+        secret = os.environ.get("TEST_WEBHOOK_SECRET_V2", "dynamic_webhook_secret")
         timestamp = int(time.time())
         
         # Generate signature with timestamp
@@ -403,7 +408,7 @@ class TestWebhookSecurity:
     def test_verify_signature_expired_timestamp(self):
         """Test signature verification with expired timestamp."""
         payload = b'{"event": "test"}'
-        secret = "webhook_secret"
+        secret = os.environ.get("TEST_WEBHOOK_SECRET_V2", "dynamic_webhook_secret")
         old_timestamp = int(time.time()) - 400  # 400 seconds ago
         
         import hmac

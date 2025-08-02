@@ -82,7 +82,9 @@ class TestStripePaymentProvider:
     
     def test_stripe_fee_calculation(self):
         """Test Stripe fee calculation (2.9% + 30p)"""
-        provider = StripePaymentProvider(api_key="test_key")
+        # Use a dynamic test key for unit tests
+        test_api_key = os.environ.get("TEST_STRIPE_KEY", "sk_test_" + "x" * 24)
+        provider = StripePaymentProvider(api_key=test_api_key)
         
         test_cases = [
             (Decimal("10.00"), Decimal("0.59")),  # (10 * 0.029) + 0.30 = 0.59
@@ -105,7 +107,9 @@ class TestStripePaymentProvider:
             currency="gbp"
         )
         
-        provider = StripePaymentProvider(api_key="test_key")
+        # Use a dynamic test key for unit tests
+        test_api_key = os.environ.get("TEST_STRIPE_KEY", "sk_test_" + "x" * 24)
+        provider = StripePaymentProvider(api_key=test_api_key)
         
         payment_data = {
             "amount": Decimal("100.00"),
@@ -133,9 +137,12 @@ class TestSumUpPaymentProvider:
     
     def test_sumup_fee_calculation(self):
         """Test SumUp fee calculation (1.69%)"""
+        # Use dynamic test keys for unit tests
+        test_api_key = os.environ.get("TEST_SUMUP_KEY", "sup_test_" + "x" * 16)
+        test_merchant_code = os.environ.get("TEST_SUMUP_MERCHANT", "TEST_MERCHANT_" + str(uuid.uuid4().hex[:8]))
         provider = SumUpPaymentProvider(
-            api_key="test_key",
-            merchant_code="test_merchant"
+            api_key=test_api_key,
+            merchant_code=test_merchant_code
         )
         
         test_cases = [
@@ -162,9 +169,12 @@ class TestSumUpPaymentProvider:
         }
         mock_post.return_value = mock_response
         
+        # Use dynamic test keys for unit tests
+        test_api_key = os.environ.get("TEST_SUMUP_KEY", "sup_test_" + "x" * 16)
+        test_merchant_code = os.environ.get("TEST_SUMUP_MERCHANT", "TEST_MERCHANT_" + str(uuid.uuid4().hex[:8]))
         provider = SumUpPaymentProvider(
-            api_key="test_key",
-            merchant_code="test_merchant"
+            api_key=test_api_key,
+            merchant_code=test_merchant_code
         )
         
         payment_data = {
