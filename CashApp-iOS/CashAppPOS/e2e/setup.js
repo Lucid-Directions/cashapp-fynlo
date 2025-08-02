@@ -3,11 +3,11 @@
  * Global setup and utilities for end-to-end testing
  */
 
+/* eslint-disable @typescript-eslint/no-var-requires */
 const detox = require('detox');
-
 const config = require('../package.json').detox;
-
 const adapter = require('detox/runners/jest/adapter');
+/* eslint-enable @typescript-eslint/no-var-requires */
 
 jest.setTimeout(120000);
 jasmine.getEnv().addReporter(adapter);

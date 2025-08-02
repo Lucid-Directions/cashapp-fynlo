@@ -286,11 +286,11 @@ class OfflineHandler {
 
     if (!wasOnline && this.isOnline) {
       // Just came back online
-      console.log('Device back online - processing queued actions');
+      logger.info('Device back online - processing queued actions');
       this.onBackOnline();
     } else if (wasOnline && !this.isOnline) {
       // Just went offline
-      console.log('Device went offline');
+      logger.info('Device went offline');
       this.onGoOffline();
     }
   }
@@ -379,7 +379,7 @@ class OfflineHandler {
 
   private async syncOrderToServer(orderData: any): Promise<void> {
     // This would be replaced with actual API call
-    console.log('Syncing order to server:', orderData);
+    logger.info('Syncing order to server:', orderData);
 
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -387,12 +387,12 @@ class OfflineHandler {
 
   private async syncCustomerToServer(customerData: any): Promise<void> {
     // This would be replaced with actual API call
-    console.log('Syncing customer to server:', customerData);
+    logger.info('Syncing customer to server:', customerData);
   }
 
   private async syncInventoryToServer(inventoryData: any): Promise<void> {
     // This would be replaced with actual API call
-    console.log('Syncing inventory to server:', inventoryData);
+    logger.info('Syncing inventory to server:', inventoryData);
   }
 
   private async loadQueuedActions(): Promise<void> {
@@ -496,5 +496,6 @@ export const useOfflineStatus = () => {
 
 // Add React import for the hook
 import React from 'react';
+import { logger } from '../utils/logger';
 
 export default offlineHandler;

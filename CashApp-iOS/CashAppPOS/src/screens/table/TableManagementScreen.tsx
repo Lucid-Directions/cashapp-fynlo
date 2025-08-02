@@ -22,6 +22,7 @@ import LazyLoadingWrapper from '../../components/performance/LazyLoadingWrapper'
 import { TableSkeleton } from '../../components/performance/SkeletonLoader';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { usePerformanceMonitor, performanceUtils } from '../../hooks/usePerformanceMonitor';
+import { logger } from '../../utils/logger';
 
 // Get screen dimensions
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -306,7 +307,7 @@ const TableManagementScreen: React.FC = () => {
       layout,
     };
 
-    console.log('Saving layout:', layoutData);
+    logger.info('Saving layout:', layoutData);
     // In real app: await saveFloorPlanLayout(layoutData);
 
     Alert.alert('Layout Saved', 'Floor plan layout has been saved successfully.');

@@ -1,4 +1,5 @@
 import type { AccessibilityRole, AccessibilityState, AccessibilityProps } from 'react-native';
+import { logger } from '../utils/logger';
 
 // Accessibility utility functions and constants
 
@@ -234,7 +235,7 @@ export const createModalAccessibility = (options: {
 export const announceForAccessibility = (message: string) => {
   // This would typically use AccessibilityInfo.announceForAccessibility
   // but that's only available in React Native, not in TypeScript files
-  console.log(`Accessibility announcement: ${message}`);
+  logger.info(`Accessibility announcement: ${message}`);
 };
 
 // Screen reader optimized time formatting

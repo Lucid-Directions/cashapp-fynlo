@@ -45,10 +45,10 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
   title,
 }) => {
   const [selectedHour, setSelectedHour] = useState(
-    currentTime ? parseInt(currentTime.split(':')[0]) : 9
+    currentTime ? parseInt(currentTime.split(':', 10)[0]) : 9
   );
   const [selectedMinute, setSelectedMinute] = useState(
-    currentTime ? parseInt(currentTime.split(':')[1]) : 0
+    currentTime ? parseInt(currentTime.split(':', 10)[1]) : 0
   );
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
@@ -205,7 +205,7 @@ const OperatingHoursScreen: React.FC = () => {
 
   const formatTime = (time: string): string => {
     const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours);
+    const hour = parseInt(hours, 10);
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
     return `${displayHour}:${minutes} ${ampm}`;

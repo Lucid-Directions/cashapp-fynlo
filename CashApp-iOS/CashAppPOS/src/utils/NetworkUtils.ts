@@ -6,6 +6,7 @@
 import API_CONFIG from '../config/api';
 
 import tokenManager from './tokenManager';
+import { logger } from '../utils/logger';
 
 interface NetworkRequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -47,7 +48,7 @@ class NetworkUtils {
 
     for (let attempt = 0; attempt <= retryAttempts; attempt++) {
       try {
-        console.log(
+        logger.info(
           `🌐 Network request (attempt ${attempt + 1}/${retryAttempts + 1}): ${method} ${url}`
         );
 
@@ -68,7 +69,7 @@ class NetworkUtils {
 
         if (response.ok) {
           const data = await response.json();
-          console.log(`✅ Network request successful: ${method} ${url}`);
+          logger.info(`✅ Network request successful: ${method} ${url}`);
           return {
             success: true,
             data,
@@ -91,7 +92,7 @@ class NetworkUtils {
 
         // Don't retry on the last attempt
         if (attempt < retryAttempts) {
-          console.log(`🔄 Retrying in ${retryDelay}ms...`);
+          logger.info(`🔄 Retrying in ${retryDelay}ms...`);
           await this.delay(retryDelay);
         }
       }

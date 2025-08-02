@@ -11,8 +11,6 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Dimensions,
-  Image,
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
@@ -20,8 +18,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import Logo from '../../components/Logo';
 import { useAuthStore } from '../../store/useAuthStore';
-
-const { width, height } = Dimensions.get('window');
+import { logger } from '../../utils/logger';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -58,9 +55,9 @@ const LoginScreen: React.FC = () => {
     setIsLoading(true);
 
     try {
-      console.log('🚀 Attempting login with:', loginUsername);
+      logger.info('🚀 Attempting login with:', loginUsername);
       await signIn(loginUsername.trim(), loginPassword);
-      console.log('✅ Login successful, navigation will happen automatically');
+      logger.info('✅ Login successful, navigation will happen automatically');
       // Navigation happens automatically via AppNavigator
     } catch (error: any) {
       console.error('Login error:', error);
@@ -227,12 +224,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
     paddingVertical: 16,
   },
-  textInput: {
-    flex: 1,
-    fontSize: 16,
-    color: Colors.text,
-    paddingVertical: 16,
-  },
+
   passwordToggle: {
     padding: 4,
   },
@@ -267,24 +259,7 @@ const styles = StyleSheet.create({
     color: Colors.white,
     marginRight: 8,
   },
-  demoSection: {
-    backgroundColor: Colors.lightGray,
-    borderRadius: 12,
-    padding: 20,
-    marginTop: 30,
-    alignItems: 'center',
-  },
-  demoTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  demoText: {
-    fontSize: 14,
-    color: Colors.lightText,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-  },
+
   footer: {
     alignItems: 'center',
     paddingBottom: 20,
@@ -294,60 +269,7 @@ const styles = StyleSheet.create({
     color: Colors.lightText,
     textAlign: 'center',
   },
-  quickSignInSection: {
-    marginTop: 20,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: Colors.lightGray,
-  },
-  quickSignInTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.text,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  quickButtonsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  quickButton: {
-    width: '48%',
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-    marginBottom: 8,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-  quickButtonTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.white,
-    textAlign: 'center',
-    marginBottom: 2,
-  },
-  quickButtonSubtitle: {
-    fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.8)',
-    textAlign: 'center',
-  },
-  simpleInput: {
-    flex: 1,
-    padding: 16,
-    fontSize: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E1E1E1',
-    color: '#333333',
-  },
+
 });
 
 export default LoginScreen;

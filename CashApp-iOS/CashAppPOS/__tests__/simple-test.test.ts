@@ -10,10 +10,11 @@ describe('Jest Setup Verification', () => {
   });
 
   it('should have React Native components available', () => {
-    const { View, Text, TouchableOpacity } = require('react-native');
-    expect(View).toBeDefined();
-    expect(Text).toBeDefined();
-    expect(TouchableOpacity).toBeDefined();
+    // Use dynamic import for React Native components
+    const RN = jest.requireActual('react-native');
+    expect(RN.View).toBeDefined();
+    expect(RN.Text).toBeDefined();
+    expect(RN.TouchableOpacity).toBeDefined();
   });
 
   it('should have testing utilities available', () => {

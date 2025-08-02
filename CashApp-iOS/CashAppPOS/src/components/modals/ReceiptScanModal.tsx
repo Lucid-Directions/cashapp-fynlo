@@ -17,6 +17,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
+import { logger } from '../../utils/logger';
 // import { scanReceipt, ScannedItemAPIResponse } from '../../services/InventoryApiService'; // Temporarily disabled
 // import { launchCamera, ImagePickerResponse, MediaType } from 'react-native-image-picker'; // Temporarily disabled
 
@@ -112,7 +113,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
 
       launchCamera(options, (response: ImagePickerResponse) => {
         if (response.didCancel || response.errorMessage) {
-          console.log('Camera cancelled or error:', response.errorMessage);
+          logger.info('Camera cancelled or error:', response.errorMessage);
           return;
         }
 

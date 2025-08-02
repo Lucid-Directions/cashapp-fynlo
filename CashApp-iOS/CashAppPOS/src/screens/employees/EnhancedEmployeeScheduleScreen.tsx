@@ -720,8 +720,8 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
         <View style={styles.timelineContainer}>
           {hours.map((hour) => {
             const hourShifts = dayShifts.filter((shift) => {
-              const startHour = parseInt(shift.startTime.split(':')[0]);
-              const endHour = parseInt(shift.endTime.split(':')[0]);
+              const startHour = parseInt(shift.startTime.split(':', 10)[0]);
+              const endHour = parseInt(shift.endTime.split(':', 10)[0]);
               return hour >= startHour && hour < endHour;
             });
 

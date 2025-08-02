@@ -12,6 +12,7 @@ import APITestingService from './APITestingService';
 import authInterceptor from './auth/AuthInterceptor';
 import BackendCompatibilityService from './BackendCompatibilityService';
 import DatabaseService from './DatabaseService';
+import { logger } from '../utils/logger';
 
 // Feature flags for controlling data sources
 export interface FeatureFlags {
@@ -84,7 +85,7 @@ class DataService {
         this.featureFlags = { ...DEFAULT_FLAGS, ...JSON.parse(stored) };
       }
     } catch (error) {
-      console.log('Using default feature flags');
+      logger.info('Using default feature flags');
     }
   }
 
@@ -117,7 +118,7 @@ class DataService {
       try {
         await this.apiTestingService.testEndpoint(endpoint, method, data);
       } catch (error) {
-        console.log(`API test failed for ${endpoint}:`, error);
+        logger.info(`API test failed for ${endpoint}:`, error);
       }
     }
   }
@@ -163,13 +164,13 @@ class DataService {
 
       // Log status changes
       if (wasAvailable !== this.isBackendAvailable) {
-        console.log(
+        logger.info(
           `Backend status changed: ${this.isBackendAvailable ? 'Available' : 'Unavailable'}`
         );
       }
     } catch (error) {
       this.isBackendAvailable = false;
-      console.log('Backend not available, using mock data');
+      logger.info('Backend not available, using mock data');
 
       // Still test the endpoint in test mode to record the failure
       if (this.featureFlags.TEST_API_MODE) {
@@ -219,7 +220,7 @@ class DataService {
           return products;
         }
       } catch (error) {
-        console.log('Failed to fetch products from API, using mock data');
+        logger.info('Failed to fetch products from API, using mock data');
       }
     }
     return this.db.getProducts();
@@ -230,7 +231,7 @@ class DataService {
       try {
         return await this.db.getProductsByCategory(categoryId);
       } catch (error) {
-        console.log('Failed to fetch products by category, using mock data');
+        logger.info('Failed to fetch products by category, using mock data');
       }
     }
     return this.db.getProductsByCategory(categoryId);
@@ -245,7 +246,7 @@ class DataService {
           console.warn('⚠️ API returned null/undefined categories');
           return [];
         }
-        console.log('✅ Loaded categories from API:', categories.length);
+        logger.info('✅ Loaded categories from API:', categories.length);
         return categories;
       } catch (error) {
         console.error('❌ Failed to fetch categories from API:', error);
@@ -273,13 +274,13 @@ class DataService {
         if (menuItems && menuItems.length > 0) {
           // Apply compatibility transformation if needed
           if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
-            console.log('🔄 Applying menu compatibility transformation');
+            logger.info('🔄 Applying menu compatibility transformation');
             return BackendCompatibilityService.transformMenuItems(menuItems);
           }
           return menuItems;
         }
       } catch (error) {
-        console.log('Failed to fetch menu items from API, using mock data');
+        logger.info('Failed to fetch menu items from API, using mock data');
       }
     }
     return this.db.getMenuItems();
@@ -298,7 +299,7 @@ class DataService {
           return categories;
         }
       } catch (error) {
-        console.log('Failed to fetch menu categories from API, using mock data');
+        logger.info('Failed to fetch menu categories from API, using mock data');
       }
     }
     return this.db.getMenuCategories();
@@ -315,7 +316,7 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.createCategory(categoryData);
-        console.log('✅ Category created via API:', result);
+        logger.info('✅ Category created via API:', result);
         return result;
       } catch (error) {
         console.error('❌ API category creation failed:', error);
@@ -343,7 +344,7 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.updateCategory(categoryId, categoryData);
-        console.log('✅ Category updated via API:', result);
+        logger.info('✅ Category updated via API:', result);
         return result;
       } catch (error) {
         console.error('❌ API category update failed:', error);
@@ -361,7 +362,7 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         await this.db.deleteCategory(categoryId);
-        console.log('✅ Category deleted via API:', categoryId);
+        logger.info('✅ Category deleted via API:', categoryId);
         return;
       } catch (error) {
         console.error('❌ API category deletion failed:', error);
@@ -464,7 +465,7 @@ class DataService {
         const result = await this.db.createOrder(order);
         if (result) return result;
       } catch (error) {
-        console.log('Failed to create order via API, using mock');
+        logger.info('Failed to create order via API, using mock');
       }
     }
     return this.db.createOrder(order);
@@ -475,7 +476,7 @@ class DataService {
       try {
         return await this.db.updateOrder(orderId, updates);
       } catch (error) {
-        console.log('Failed to update order via API');
+        logger.info('Failed to update order via API');
       }
     }
     return this.db.updateOrder(orderId, updates);
@@ -489,7 +490,7 @@ class DataService {
           return orders;
         }
       } catch (error) {
-        console.log('Failed to fetch orders from API, using mock data');
+        logger.info('Failed to fetch orders from API, using mock data');
       }
     }
     return this.db.getRecentOrders(limit);
@@ -512,18 +513,18 @@ class DataService {
       this.isBackendAvailable
     ) {
       try {
-        console.log(`Processing real payment: ${paymentMethod} for £${amount} (Order: ${orderId})`);
+        logger.info(`Processing real payment: ${paymentMethod} for £${amount} (Order: ${orderId})`);
         const result = await this.db.processPayment(orderId, paymentMethod, amount);
 
         if (result) {
-          console.log('✅ Real payment processed successfully');
+          logger.info('✅ Real payment processed successfully');
           return true;
         } else {
-          console.log('❌ Real payment failed - no result returned');
+          logger.info('❌ Real payment failed - no result returned');
           throw new Error('Payment processing failed');
         }
       } catch (error) {
-        console.log('❌ Real payment failed, falling back to mock:', error);
+        logger.info('❌ Real payment failed, falling back to mock:', error);
         // Don't fall back for payment processing - we want to see the real error
         throw error;
       }
@@ -531,12 +532,12 @@ class DataService {
 
     // If payments disabled or no backend, simulate success for demo
     if (!this.featureFlags.ENABLE_PAYMENTS) {
-      console.log(`🎭 Demo mode payment: ${paymentMethod} for £${amount}`);
+      logger.info(`🎭 Demo mode payment: ${paymentMethod} for £${amount}`);
       return this.db.processPayment(orderId, paymentMethod, amount);
     }
 
     // Fallback to mock if no backend available
-    console.log(`⚠️  No backend available, using mock payment: ${paymentMethod} for £${amount}`);
+    logger.info(`⚠️  No backend available, using mock payment: ${paymentMethod} for £${amount}`);
     return this.db.processPayment(orderId, paymentMethod, amount);
   }
 
@@ -549,7 +550,7 @@ class DataService {
           return floorPlan;
         }
       } catch (error) {
-        console.log('Failed to fetch floor plan from API, using mock data');
+        logger.info('Failed to fetch floor plan from API, using mock data');
       }
     }
     return this.db.getRestaurantFloorPlan(sectionId ?? undefined);
@@ -560,7 +561,7 @@ class DataService {
       try {
         return await this.db.updateTableStatus(tableId, status, additionalData);
       } catch (error) {
-        console.log('Failed to update table status via API');
+        logger.info('Failed to update table status via API');
       }
     }
     return this.db.updateTableStatus(tableId, status, additionalData);
@@ -575,7 +576,7 @@ class DataService {
           return report;
         }
       } catch (error) {
-        console.log('Failed to fetch daily report from API, using mock data');
+        logger.info('Failed to fetch daily report from API, using mock data');
       }
     }
     return this.db.getDailySalesReport(date);
@@ -589,7 +590,7 @@ class DataService {
           return summary;
         }
       } catch (error) {
-        console.log('Failed to fetch sales summary from API, using mock data');
+        logger.info('Failed to fetch sales summary from API, using mock data');
       }
     }
     return this.db.getSalesSummary(dateFrom ?? undefined, dateTo ?? undefined);
@@ -601,7 +602,7 @@ class DataService {
       try {
         return await this.db.getCurrentSession();
       } catch (error) {
-        console.log('Failed to get session from API');
+        logger.info('Failed to get session from API');
       }
     }
     return this.db.getCurrentSession();
@@ -612,7 +613,7 @@ class DataService {
       try {
         return await this.db.createSession(configId);
       } catch (error) {
-        console.log('Failed to create session via API');
+        logger.info('Failed to create session via API');
       }
     }
     return this.db.createSession(configId);
@@ -621,21 +622,21 @@ class DataService {
   // Hardware operations (always mock for now)
   async printReceipt(order: any): Promise<boolean> {
     if (this.featureFlags.ENABLE_HARDWARE) {
-      console.log('Hardware printing not yet implemented');
+      logger.info('Hardware printing not yet implemented');
     }
     return this.db.printReceipt(order);
   }
 
   async openCashDrawer(): Promise<boolean> {
     if (this.featureFlags.ENABLE_HARDWARE) {
-      console.log('Hardware cash drawer not yet implemented');
+      logger.info('Hardware cash drawer not yet implemented');
     }
     return this.db.openCashDrawer();
   }
 
   async scanBarcode(): Promise<string | null> {
     if (this.featureFlags.ENABLE_HARDWARE) {
-      console.log('Hardware barcode scanning not yet implemented');
+      logger.info('Hardware barcode scanning not yet implemented');
     }
     return this.db.scanBarcode();
   }
@@ -654,13 +655,13 @@ class DataService {
     await this.updateFeatureFlag('USE_REAL_API', false);
     await this.updateFeatureFlag('ENABLE_PAYMENTS', false);
     await this.updateFeatureFlag('ENABLE_HARDWARE', false);
-    console.log('Reset to mock data mode');
+    logger.info('Reset to mock data mode');
   }
 
   async enableRealAPI(): Promise<void> {
     await this.updateFeatureFlag('USE_REAL_API', true);
     await this.checkBackendAvailability();
-    console.log('Enabled real API mode');
+    logger.info('Enabled real API mode');
   }
 
   getConnectionStatus(): { mode: string; backend: boolean; flags: FeatureFlags } {
@@ -675,7 +676,7 @@ class DataService {
   // TODO(real API): Implement actual API calls for these methods
 
   async getCustomers(): Promise<any[]> {
-    console.log('🌐 DataService.getCustomers - fetching from API');
+    logger.info('🌐 DataService.getCustomers - fetching from API');
 
     try {
       const response = await authInterceptor.get(`${API_CONFIG.FULL_API_URL}/customers`);
@@ -683,7 +684,7 @@ class DataService {
       if (response.ok) {
         const result = await response.json();
         const customers = result.data || result;
-        console.log(
+        logger.info(
           '✅ API customers received:',
           Array.isArray(customers) ? customers.length : 'not an array'
         );
@@ -699,13 +700,13 @@ class DataService {
   }
 
   async getInventory(): Promise<any[]> {
-    console.log('🌐 DataService.getInventory - fetching from API');
+    logger.info('🌐 DataService.getInventory - fetching from API');
 
     try {
       const inventoryItems = await this.db.getInventoryItems();
       if (inventoryItems && inventoryItems.length >= 0) {
         // Allow empty arrays
-        console.log('✅ API inventory received:', inventoryItems.length, 'items');
+        logger.info('✅ API inventory received:', inventoryItems.length, 'items');
         return inventoryItems;
       } else {
         throw new Error('Invalid inventory data received from API');
@@ -717,7 +718,7 @@ class DataService {
   }
 
   async getEmployees(): Promise<any[]> {
-    console.log('🌐 DataService.getEmployees - fetching from API');
+    logger.info('🌐 DataService.getEmployees - fetching from API');
 
     try {
       const response = await authInterceptor.get(`${API_CONFIG.FULL_API_URL}/employees`);
@@ -725,7 +726,7 @@ class DataService {
       if (response.ok) {
         const result = await response.json();
         const employees = result.data || result;
-        console.log(
+        logger.info(
           '✅ API employees received:',
           Array.isArray(employees) ? employees.length : 'not an array'
         );
@@ -735,7 +736,7 @@ class DataService {
           Array.isArray(employees) &&
           BackendCompatibilityService.needsEmployeeTransformation(employees)
         ) {
-          console.log('🔄 Applying employee compatibility transformation');
+          logger.info('🔄 Applying employee compatibility transformation');
           return BackendCompatibilityService.transformEmployees(employees);
         }
 
@@ -755,11 +756,11 @@ class DataService {
   }
 
   async getWeekSchedule(weekStart: Date, employees: any[]): Promise<any | null> {
-    console.log('🌐 DataService.getWeekSchedule - fetching from API', { weekStart });
+    logger.info('🌐 DataService.getWeekSchedule - fetching from API', { weekStart });
 
     try {
       const schedule = await this.db.getWeekSchedule(weekStart, employees);
-      console.log('✅ API schedule received:', schedule?.shifts?.length || 0, 'shifts');
+      logger.info('✅ API schedule received:', schedule?.shifts?.length || 0, 'shifts');
       return schedule;
     } catch (error) {
       console.error('❌ Failed to fetch schedule from API:', error);
@@ -768,7 +769,7 @@ class DataService {
   }
 
   async getOrders(dateRange: string): Promise<any[]> {
-    console.log('DataService.getOrders called', {
+    logger.info('DataService.getOrders called', {
       dateRange,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
@@ -776,7 +777,7 @@ class DataService {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch orders from API...');
+        logger.info('🌐 Attempting to fetch orders from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/orders?date_range=${dateRange}`, {
           method: 'GET',
@@ -789,7 +790,7 @@ class DataService {
         if (response.ok) {
           const result = await response.json();
           const orders = result.data || result;
-          console.log(
+          logger.info(
             '✅ API orders received:',
             Array.isArray(orders) ? orders.length : 'not an array'
           );
@@ -806,7 +807,7 @@ class DataService {
   }
 
   async getFinancialReportDetail(period: string): Promise<any | null> {
-    console.log('DataService.getFinancialReportDetail called', {
+    logger.info('DataService.getFinancialReportDetail called', {
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
@@ -814,7 +815,7 @@ class DataService {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch financial data from API...');
+        logger.info('🌐 Attempting to fetch financial data from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(
           `${API_CONFIG.FULL_API_URL}/analytics/financial?period=${period}`,
@@ -830,7 +831,7 @@ class DataService {
         if (response.ok) {
           const result = await response.json();
           const financialData = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API financial data received');
+          logger.info('✅ API financial data received');
           return financialData;
         } else {
           console.error('❌ API error:', response.status, response.statusText);
@@ -844,7 +845,7 @@ class DataService {
   }
 
   async getSalesReportDetail(period: string): Promise<any[]> {
-    console.log('🌐 DataService.getSalesReportDetail - fetching from API', { period });
+    logger.info('🌐 DataService.getSalesReportDetail - fetching from API', { period });
 
     try {
       const authToken = await this.getAuthToken();
@@ -867,10 +868,10 @@ class DataService {
         if (salesData && !Array.isArray(salesData)) {
           // Convert API format to SalesData array format
           const transformedData = this.transformApiDataToArray(salesData, period);
-          console.log('✅ API sales data transformed for frontend');
+          logger.info('✅ API sales data transformed for frontend');
           return transformedData;
         } else if (Array.isArray(salesData)) {
-          console.log('✅ API sales data received in array format');
+          logger.info('✅ API sales data received in array format');
           return salesData;
         } else {
           throw new Error('Invalid sales data format received from API');
@@ -918,7 +919,7 @@ class DataService {
 
   async getStaffReportDetail(period: string): Promise<any[]> {
     // Should return StaffMember[]
-    console.log('DataService.getStaffReportDetail called', {
+    logger.info('DataService.getStaffReportDetail called', {
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
@@ -926,7 +927,7 @@ class DataService {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch staff data from API...');
+        logger.info('🌐 Attempting to fetch staff data from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(
           `${API_CONFIG.FULL_API_URL}/analytics/employees?timeframe=${period}`,
@@ -942,7 +943,7 @@ class DataService {
         if (response.ok) {
           const result = await response.json();
           const staffData = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API staff data received');
+          logger.info('✅ API staff data received');
           return staffData;
         } else {
           console.error('❌ API error:', response.status, response.statusText);
@@ -956,7 +957,7 @@ class DataService {
   }
 
   async getLaborReport(period: string): Promise<any> {
-    console.log('DataService.getLaborReport called', {
+    logger.info('DataService.getLaborReport called', {
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
@@ -964,7 +965,7 @@ class DataService {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch labor data from API...');
+        logger.info('🌐 Attempting to fetch labor data from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(
           `${API_CONFIG.FULL_API_URL}/analytics/labor?period=${period}`,
@@ -980,7 +981,7 @@ class DataService {
         if (response.ok) {
           const result = await response.json();
           const laborData = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API labor data received');
+          logger.info('✅ API labor data received');
           return laborData;
         } else {
           console.error('❌ API error:', response.status, response.statusText);
@@ -997,14 +998,14 @@ class DataService {
   }
 
   async getReportsDashboardData(): Promise<any | null> {
-    console.log('DataService.getReportsDashboardData called', {
+    logger.info('DataService.getReportsDashboardData called', {
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
     });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch reports from API...');
+        logger.info('🌐 Attempting to fetch reports from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/dashboard/mobile`, {
           method: 'GET',
@@ -1017,7 +1018,7 @@ class DataService {
         if (response.ok) {
           const result = await response.json();
           const dashboardData = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API reports received');
+          logger.info('✅ API reports received');
           return dashboardData;
         } else {
           console.error('❌ API error:', response.status, response.statusText);
@@ -1061,7 +1062,7 @@ class DataService {
     startDate?: string;
     permissions?: string[];
   }): Promise<any> {
-    console.log('🌐 DataService.createEmployee - creating employee via API', employeeData);
+    logger.info('🌐 DataService.createEmployee - creating employee via API', employeeData);
 
     try {
       const response = await authInterceptor.post(`${API_CONFIG.FULL_API_URL}/employees`, {
@@ -1079,7 +1080,7 @@ class DataService {
       if (response.ok) {
         const result = await response.json();
         const newEmployee = result.data || result;
-        console.log('✅ Employee created successfully:', newEmployee.id);
+        logger.info('✅ Employee created successfully:', newEmployee.id);
         return newEmployee;
       } else {
         const errorText = await response.text();
@@ -1096,7 +1097,7 @@ class DataService {
    * Delete an employee from the system
    */
   async deleteEmployee(employeeId: number | string): Promise<void> {
-    console.log('🌐 DataService.deleteEmployee - deleting employee via API', { employeeId });
+    logger.info('🌐 DataService.deleteEmployee - deleting employee via API', { employeeId });
 
     try {
       const response = await authInterceptor.delete(
@@ -1104,7 +1105,7 @@ class DataService {
       );
 
       if (response.ok) {
-        console.log('✅ Employee deleted successfully');
+        logger.info('✅ Employee deleted successfully');
         return;
       } else {
         const errorText = await response.text();
@@ -1118,14 +1119,14 @@ class DataService {
   }
 
   async getInventoryReport(): Promise<any[]> {
-    console.log('DataService.getInventoryReport called', {
+    logger.info('DataService.getInventoryReport called', {
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
     });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch inventory data from API...');
+        logger.info('🌐 Attempting to fetch inventory data from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/inventory`, {
           method: 'GET',
@@ -1138,7 +1139,7 @@ class DataService {
         if (response.ok) {
           const result = await response.json();
           const inventoryData = result.data || result;
-          console.log('✅ API inventory data received');
+          logger.info('✅ API inventory data received');
           return Array.isArray(inventoryData) ? inventoryData : [];
         } else {
           console.error('❌ API error:', response.status, response.statusText);
@@ -1159,7 +1160,7 @@ class DataService {
   // ===========================================================================
 
   async getSubscriptionPlans(): Promise<any> {
-    console.log('DataService.getSubscriptionPlans called');
+    logger.info('DataService.getSubscriptionPlans called');
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1192,7 +1193,7 @@ class DataService {
   }
 
   async getCurrentSubscription(restaurantId: number): Promise<any> {
-    console.log('DataService.getCurrentSubscription called', { restaurantId });
+    logger.info('DataService.getCurrentSubscription called', { restaurantId });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1234,7 +1235,7 @@ class DataService {
   }
 
   async createSubscription(subscriptionData: any): Promise<any> {
-    console.log('DataService.createSubscription called', subscriptionData);
+    logger.info('DataService.createSubscription called', subscriptionData);
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1277,7 +1278,7 @@ class DataService {
   }
 
   async changeSubscriptionPlan(changeData: any): Promise<any> {
-    console.log('DataService.changeSubscriptionPlan called', changeData);
+    logger.info('DataService.changeSubscriptionPlan called', changeData);
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1320,7 +1321,7 @@ class DataService {
   }
 
   async cancelSubscription(restaurantId: number): Promise<any> {
-    console.log('DataService.cancelSubscription called', { restaurantId });
+    logger.info('DataService.cancelSubscription called', { restaurantId });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1365,7 +1366,7 @@ class DataService {
   }
 
   async incrementUsage(restaurantId: number, usageType: string, amount: number = 1): Promise<any> {
-    console.log('DataService.incrementUsage called', { restaurantId, usageType, amount });
+    logger.info('DataService.incrementUsage called', { restaurantId, usageType, amount });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {

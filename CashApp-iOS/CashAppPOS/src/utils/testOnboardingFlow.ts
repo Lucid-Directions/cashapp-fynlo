@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger';
+
 /**
  * Manual test script for onboarding flow
  * Run this to verify all navigation paths work correctly
@@ -73,20 +75,20 @@ export const onboardingTestCases = [
 ];
 
 export function logTestStart(testCase: (typeof onboardingTestCases)[0]) {
-  console.log(`\n========================================`);
-  console.log(`TEST: ${testCase.name}`);
-  console.log(`ID: ${testCase.id}`);
-  console.log(`========================================`);
-  console.log('\nSteps to perform:');
-  testCase.steps.forEach((step) => console.log(step));
-  console.log(`\nExpected Result: ${testCase.expectedResult}`);
-  console.log(`========================================\n`);
+  logger.info(`\n========================================`);
+  logger.info(`TEST: ${testCase.name}`);
+  logger.info(`ID: ${testCase.id}`);
+  logger.info(`========================================`);
+  logger.info('\nSteps to perform:');
+  testCase.steps.forEach((step) => logger.info(step));
+  logger.info(`\nExpected Result: ${testCase.expectedResult}`);
+  logger.info(`========================================\n`);
 }
 
 export function runAllTests() {
-  console.log('ONBOARDING FLOW TEST SUITE');
-  console.log('===========================');
-  console.log('Please perform each test manually and verify results\n');
+  logger.info('ONBOARDING FLOW TEST SUITE');
+  logger.info('===========================');
+  logger.info('Please perform each test manually and verify results\n');
 
   onboardingTestCases.forEach((testCase, index) => {
     setTimeout(() => {
@@ -98,9 +100,9 @@ export function runAllTests() {
 // Navigation state logger for debugging
 export function logCurrentNavigationState(navigation: any) {
   const state = navigation.getState();
-  console.log('\nCurrent Navigation State:');
-  console.log('-------------------------');
-  console.log('Current Route:', state.routes[state.index].name);
-  console.log('Route Stack:', state.routes.map((r: any) => r.name).join(' -> '));
-  console.log('-------------------------\n');
+  logger.info('\nCurrent Navigation State:');
+  logger.info('-------------------------');
+  logger.info('Current Route:', state.routes[state.index].name);
+  logger.info('Route Stack:', state.routes.map((r: any) => r.name).join(' -> '));
+  logger.info('-------------------------\n');
 }

@@ -7,6 +7,7 @@
  */
 
 import { TextInput, ScrollView, KeyboardAvoidingView, FlatList } from 'react-native';
+import { logger } from '../utils/logger';
 
 // Global registry to prevent tree-shaking
 const ComponentRegistry = {
@@ -22,7 +23,7 @@ export const ensureComponentsLoaded = () => {
 
   components.forEach((name) => {
     if (ComponentRegistry[name as keyof typeof ComponentRegistry]) {
-      console.log(`✅ ${name} component registered`);
+      logger.info(`✅ ${name} component registered`);
     } else {
       console.error(`❌ ${name} component not found!`);
     }

@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger';
+
 /**
  * Enhanced Error Logger for Better Debugging
  * Provides detailed error information with context
@@ -51,14 +53,14 @@ ${JSON.stringify(context.metadata || {}, null, 2)}
     `);
 
     // Also log a simplified version for quick scanning
-    console.log(`🚨 ${context.operation} failed: ${errorDetails.message}`);
+    logger.info(`🚨 ${context.operation} failed: ${errorDetails.message}`);
   }
 
   /**
    * Log API request details for debugging
    */
   logAPIRequest(method: string, url: string, options?: any): void {
-    console.log(`
+    logger.info(`
 🌐 ======== API REQUEST ========
 📍 ${method} ${url}
 ⏰ Time: ${new Date().toISOString()}
@@ -73,7 +75,7 @@ ${JSON.stringify(context.metadata || {}, null, 2)}
    */
   logAPIResponse(url: string, status: number, duration: number, data?: any): void {
     const statusEmoji = status >= 200 && status < 300 ? '✅' : '❌';
-    console.log(`
+    logger.info(`
 ${statusEmoji} ======== API RESPONSE ========
 📍 URL: ${url}
 📊 Status: ${status}

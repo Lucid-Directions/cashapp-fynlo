@@ -10,8 +10,9 @@ import { AUTH_CONFIG } from '../../config/auth.config';
 
 import { mockAuthService } from './mockAuth';
 import { authService as supabaseAuthService } from './supabaseAuth';
+import { logger } from '../../utils/logger';
 
 // Export the appropriate auth service based on configuration
 export const authService = AUTH_CONFIG.USE_MOCK_AUTH ? mockAuthService : supabaseAuthService;
 
-console.log(`🔐 Using ${AUTH_CONFIG.USE_MOCK_AUTH ? 'MOCK' : 'SUPABASE'} authentication service`);
+logger.info(`🔐 Using ${AUTH_CONFIG.USE_MOCK_AUTH ? 'MOCK' : 'SUPABASE'} authentication service`);

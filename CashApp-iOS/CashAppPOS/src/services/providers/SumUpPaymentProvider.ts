@@ -1,3 +1,5 @@
+import { logger } from '../../utils/logger';
+
 // Note: This is a placeholder implementation since SumUp SDK for React Native
 // would need to be obtained from SumUp directly.
 
@@ -25,7 +27,7 @@ class SumUpPaymentProviderClass {
       // await SumUpSDK.init(config.affiliateKey);
 
       this.initialized = true;
-      console.log('SumUp payment provider initialized (placeholder)');
+      logger.info('SumUp payment provider initialized (placeholder)');
     } catch (error) {
       console.error('Failed to initialize SumUp:', error);
       throw error;

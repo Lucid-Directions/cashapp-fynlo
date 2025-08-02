@@ -13,6 +13,7 @@ import ComprehensiveRestaurantOnboardingScreen from '../screens/onboarding/Compr
 import { useAuthStore } from '../store/useAuthStore';
 
 import MainNavigator from './MainNavigator';
+import { logger } from '../utils/logger';
 
 const Stack = createStackNavigator();
 
@@ -26,7 +27,7 @@ const AppNavigator: React.FC = () => {
     authStoreUser?.needs_onboarding ||
     (!authStoreUser?.restaurant_id && authStoreUser?.role !== 'platform_owner');
 
-  console.log(
+  logger.info(
     'AppNavigator - User:',
     user?.email,
     'Role:',

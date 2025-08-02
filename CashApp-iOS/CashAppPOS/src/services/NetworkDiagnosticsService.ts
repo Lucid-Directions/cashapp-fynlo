@@ -8,6 +8,7 @@ import { Alert } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 
 import API_CONFIG from '../config/api';
+import { logger } from '../utils/logger';
 
 export interface NetworkDiagnostics {
   isConnected: boolean;
@@ -45,12 +46,12 @@ class NetworkDiagnosticsService {
    */
   async performFullNetworkDiagnostics(): Promise<NetworkDiagnostics> {
     const startTime = Date.now();
-    console.log('🔍 Starting comprehensive network diagnostics...');
+    logger.info('🔍 Starting comprehensive network diagnostics...');
 
     try {
       // 1. Check basic network connectivity
       const netInfo = await NetInfo.fetch();
-      console.log('📡 Network info:', {
+      logger.info('📡 Network info:', {
         type: netInfo.type,
         isConnected: netInfo.isConnected,
         isInternetReachable: netInfo.isInternetReachable,
@@ -84,7 +85,7 @@ class NetworkDiagnosticsService {
         );
       }
 
-      console.log('✅ Network diagnostics complete:', diagnostics);
+      logger.info('✅ Network diagnostics complete:', diagnostics);
       return diagnostics;
     } catch (error) {
       console.error('❌ Network diagnostics failed:', error);
@@ -278,7 +279,7 @@ class NetworkDiagnosticsService {
   async findMacLanIP(): Promise<string | null> {
     const commonIPRanges = ['192.168.1.', '192.168.0.', '192.168.68.', '10.0.0.', '172.16.'];
 
-    console.log('🔍 Searching for Mac LAN IP...');
+    logger.info('🔍 Searching for Mac LAN IP...');
 
     for (const range of commonIPRanges) {
       for (let i = 100; i <= 110; i++) {
@@ -286,7 +287,7 @@ class NetworkDiagnosticsService {
         try {
           const result = await this.testEndpoint(`http://${testIP}:8000/health`, 2000);
           if (result.status === 'success') {
-            console.log(`✅ Found Mac LAN IP: ${testIP}`);
+            logger.info(`✅ Found Mac LAN IP: ${testIP}`);
             return testIP;
           }
         } catch {
@@ -295,7 +296,7 @@ class NetworkDiagnosticsService {
       }
     }
 
-    console.log('❌ Could not find Mac LAN IP');
+    logger.info('❌ Could not find Mac LAN IP');
     return null;
   }
 }

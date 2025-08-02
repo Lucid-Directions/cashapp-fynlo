@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SumUpNativeService from './SumUpNativeService';
 
 import type { PaymentRequest, PaymentResult } from './PaymentService';
+import { logger } from '../utils/logger';
 
 export interface SumUpConfig {
   apiKey: string;
@@ -190,7 +191,7 @@ class SumUpServiceClass {
 
       const paymentId = this.generatePaymentId();
 
-      console.log('🔄 Using Native SumUp SDK for contactless payment');
+      logger.info('🔄 Using Native SumUp SDK for contactless payment');
 
       // Use native SumUp SDK for contactless payment
       const result = await SumUpNativeService.checkout({

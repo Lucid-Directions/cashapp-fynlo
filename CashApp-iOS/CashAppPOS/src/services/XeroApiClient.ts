@@ -1,4 +1,5 @@
 import XeroAuthService, { XeroTokens } from './XeroAuthService';
+import { logger } from '../utils/logger';
 
 export interface XeroApiResponse<T = any> {
   data: T;
@@ -129,7 +130,7 @@ export class XeroApiClient {
       // Check rate limits
       if (!this.canMakeRequest()) {
         const waitTime = this.getWaitTime();
-        console.log(`Rate limit reached. Waiting ${waitTime}ms`);
+        logger.info(`Rate limit reached. Waiting ${waitTime}ms`);
         await this.delay(waitTime);
         continue;
       }
@@ -251,7 +252,7 @@ export class XeroApiClient {
       request.retryCount++;
       const delay = this.calculateRetryDelay(request.retryCount);
 
-      console.log(`Retrying request in ${delay}ms (attempt ${request.retryCount})`);
+      logger.info(`Retrying request in ${delay}ms (attempt ${request.retryCount})`);
 
       setTimeout(() => {
         this.requestQueue.unshift(request); // Add back to front of queue

@@ -146,7 +146,8 @@ describe('EnhancedPOSScreen', () => {
       const mockAddToCart = jest.fn();
 
       // Mock the store to return the mocked function
-      require('../../src/store/useAppStore').default.mockReturnValue({
+      const useAppStore = jest.requireMock('../../src/store/useAppStore');
+      useAppStore.default.mockReturnValue({
         cart: [],
         addToCart: mockAddToCart,
         removeFromCart: jest.fn(),
@@ -172,7 +173,8 @@ describe('EnhancedPOSScreen', () => {
 
     it('should show quantity badge for items in cart', () => {
       // Mock cart with items
-      require('../../src/store/useAppStore').default.mockReturnValue({
+      const useAppStore = jest.requireMock('../../src/store/useAppStore');
+      useAppStore.default.mockReturnValue({
         cart: [{ id: 1, name: 'Burger', quantity: 2 }],
         addToCart: jest.fn(),
         removeFromCart: jest.fn(),
@@ -190,7 +192,8 @@ describe('EnhancedPOSScreen', () => {
 
   describe('Cart Functionality', () => {
     it('should display cart badge with correct count', () => {
-      require('../../src/store/useAppStore').default.mockReturnValue({
+      const useAppStore = jest.requireMock('../../src/store/useAppStore');
+      useAppStore.default.mockReturnValue({
         cart: [
           { id: 1, name: 'Burger', quantity: 1 },
           { id: 2, name: 'Fries', quantity: 2 },
@@ -232,7 +235,8 @@ describe('EnhancedPOSScreen', () => {
     it('should handle test barcode scan', () => {
       const mockAddToCart = jest.fn();
 
-      require('../../src/store/useAppStore').default.mockReturnValue({
+      const useAppStore2 = jest.requireMock('../../src/store/useAppStore');
+      useAppStore2.default.mockReturnValue({
         cart: [],
         addToCart: mockAddToCart,
         removeFromCart: jest.fn(),
@@ -331,7 +335,8 @@ describe('EnhancedPOSScreen', () => {
     it('should complete full order flow', async () => {
       const mockAddToCart = jest.fn();
 
-      require('../../src/store/useAppStore').default.mockReturnValue({
+      const useAppStore3 = jest.requireMock('../../src/store/useAppStore');
+      useAppStore3.default.mockReturnValue({
         cart: [],
         addToCart: mockAddToCart,
         removeFromCart: jest.fn(),

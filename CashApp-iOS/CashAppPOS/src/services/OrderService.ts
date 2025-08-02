@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../config/api';
 
 import type { Order, OrderItem } from '../types';
+import { logger } from '../utils/logger';
 // TEMPORARY: WebSocketService import commented out until file is created
 // import { webSocketService } from './websocket/WebSocketService';
 
@@ -67,7 +68,7 @@ class OrderService {
    */
   async saveOrder(orderData: OrderCreateRequest): Promise<Order> {
     try {
-      console.log('💾 Saving order to backend...', {
+      logger.info('💾 Saving order to backend...', {
         items: orderData.items.length,
         total: orderData.total,
         customer: orderData.customerMetadata.email,
@@ -103,7 +104,7 @@ class OrderService {
       }
 
       const savedOrder = await response.json();
-      console.log('✅ Order saved successfully:', savedOrder.id);
+      logger.info('✅ Order saved successfully:', savedOrder.id);
 
       // Convert backend response to frontend Order format
       const order: Order = {
@@ -168,7 +169,7 @@ class OrderService {
       await this.cacheOrder(fallbackOrder);
       await this.saveToSyncQueue(orderData);
 
-      console.log('💾 Order saved locally for later sync');
+      logger.info('💾 Order saved locally for later sync');
       return fallbackOrder;
     }
   }
@@ -178,7 +179,7 @@ class OrderService {
    */
   async getOrders(filters?: OrderFilters): Promise<Order[]> {
     try {
-      console.log('📋 Fetching orders...', filters);
+      logger.info('📋 Fetching orders...', filters);
 
       const params = new URLSearchParams();
       if (filters?.status) params.append('status', filters.status);
@@ -223,7 +224,7 @@ class OrderService {
         notes: o.notes,
       }));
 
-      console.log(`✅ Fetched ${orders.length} orders`);
+      logger.info(`✅ Fetched ${orders.length} orders`);
       return orders;
     } catch (error) {
       console.error('❌ Failed to fetch orders:', error);
@@ -312,7 +313,7 @@ class OrderService {
    */
   private async sendEmailReceipt(order: Order): Promise<void> {
     try {
-      console.log('📧 Sending email receipt to:', order.customerEmail);
+      logger.info('📧 Sending email receipt to:', order.customerEmail);
 
       await fetch(`${API_CONFIG.BASE_URL}/api/v1/receipts/email`, {
         method: 'POST',
@@ -326,7 +327,7 @@ class OrderService {
         }),
       });
 
-      console.log('✅ Email receipt sent successfully');
+      logger.info('✅ Email receipt sent successfully');
     } catch (error) {
       console.error('❌ Failed to send email receipt:', error);
     }

@@ -4,6 +4,7 @@
  */
 
 import type { SumUpQRPayment } from './SumUpService';
+import { logger } from '../utils/logger';
 
 export interface QRCodeOptions {
   size: number;
@@ -68,7 +69,7 @@ class QRCodeServiceClass {
     this.activePayments.set(payment.id, tracking);
     this.statusCallbacks.set(payment.id, statusCallback);
 
-    console.log(`Started tracking QR payment: ${payment.id}`);
+    logger.info(`Started tracking QR payment: ${payment.id}`);
   }
 
   /**
@@ -78,7 +79,7 @@ class QRCodeServiceClass {
     this.activePayments.delete(paymentId);
     this.statusCallbacks.delete(paymentId);
 
-    console.log(`Stopped tracking QR payment: ${paymentId}`);
+    logger.info(`Stopped tracking QR payment: ${paymentId}`);
   }
 
   /**
@@ -165,7 +166,7 @@ class QRCodeServiceClass {
     });
 
     if (expiredPayments.length > 0) {
-      console.log(`Cleaned up ${expiredPayments.length} expired QR payments`);
+      logger.info(`Cleaned up ${expiredPayments.length} expired QR payments`);
     }
   }
 

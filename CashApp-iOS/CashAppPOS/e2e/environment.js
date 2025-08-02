@@ -3,6 +3,7 @@
  * Custom Jest environment for Detox testing
  */
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const {
   DetoxCircusEnvironment,
   SpecReporter,

@@ -1,4 +1,5 @@
 import { Dimensions, PixelRatio } from 'react-native';
+import { logger } from '../utils/logger';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const pixelRatio = PixelRatio.get();
@@ -120,7 +121,7 @@ export class ImageOptimizer {
 
     try {
       await Promise.all(preloadPromises);
-      console.log(`Successfully preloaded ${urls.length} images`);
+      logger.info(`Successfully preloaded ${urls.length} images`);
     } catch (error) {
       console.warn('Some images failed to preload:', error);
     }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { InteractionManager, Platform } from 'react-native';
+import { logger } from '../utils/logger';
 
 interface PerformanceMetrics {
   renderTime: number;
@@ -51,7 +52,7 @@ export const usePerformanceMonitor = (
       setIsReady(true);
 
       if (logToConsole) {
-        console.log(
+        logger.info(
           `[Performance] ${componentName} - Interaction completed in ${interactionTime}ms`
         );
       }
@@ -72,7 +73,7 @@ export const usePerformanceMonitor = (
     }));
 
     if (logToConsole) {
-      console.log(`[Performance] ${componentName} - Rendered in ${renderTime}ms`);
+      logger.info(`[Performance] ${componentName} - Rendered in ${renderTime}ms`);
     }
   });
 
@@ -90,7 +91,7 @@ export const usePerformanceMonitor = (
         }));
 
         if (logToConsole) {
-          console.log(
+          logger.info(
             `[Performance] ${componentName} - Memory usage: ${estimatedUsage.toFixed(2)}MB`
           );
         }
@@ -152,7 +153,7 @@ export const performanceUtils = {
     const executionTime = Date.now() - startTime;
 
     if (__DEV__ && label) {
-      console.log(`[Performance] ${label} executed in ${executionTime}ms`);
+      logger.info(`[Performance] ${label} executed in ${executionTime}ms`);
     }
 
     return { result, executionTime };

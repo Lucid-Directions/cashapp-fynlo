@@ -26,6 +26,7 @@ import DataService from '../../services/DataService'; // Added
 
 // import * as InventoryApiService from '../../services/InventoryApiService'; // Temporarily disabled to prevent crashes
 import type { InventoryData, ReceiptItem as ScannedReceiptItem } from '../../types'; // Updated import path, added ReceiptItem
+import { logger } from '../../utils/logger';
 
 // Mock ENV flag (would typically come from an env config file)
 const ENV = {
@@ -182,7 +183,7 @@ const InventoryScreen: React.FC = () => {
   };
 
   const handleReceiptSubmit = async (items: ScannedReceiptItem[]) => {
-    console.log('Receipt items submitted to InventoryScreen:', items);
+    logger.info('Receipt items submitted to InventoryScreen:', items);
     // Here, you would typically call an API service to process these items.
     // For example, update inventory based on these items.
     // This is a placeholder for the actual logic (INT-1).
@@ -210,7 +211,7 @@ const InventoryScreen: React.FC = () => {
         // SKU matched by backend
         try {
           // TODO: Implement InventoryApiService.adjustStock when backend is properly connected
-          console.log(`Would adjust stock for SKU ${item.sku} by ${quantity} (simulated)`);
+          logger.info(`Would adjust stock for SKU ${item.sku} by ${quantity} (simulated)`);
           // await InventoryApiService.adjustStock(item.sku, quantity, 'receipt_scan_import');
           successCount++;
         } catch (apiError) {
@@ -220,7 +221,7 @@ const InventoryScreen: React.FC = () => {
         }
       } else {
         // No SKU match, pre-populate New Item form (placeholder)
-        console.log(
+        logger.info(
           `Item "${item.name}" (Qty: ${quantity}, Price: ${item.price}) has no SKU. Would pre-populate new item form.`
         );
         // In a real app, you'd navigate to a "Create New Item" screen/modal here,
@@ -296,9 +297,9 @@ const InventoryScreen: React.FC = () => {
     if (!selectedItem) return;
 
     // Validate input
-    const currentStock = parseInt(editFormData.currentStock);
-    const minimumStock = parseInt(editFormData.minimumStock);
-    const maximumStock = parseInt(editFormData.maximumStock);
+    const currentStock = parseInt(editFormData.currentStock, 10);
+    const minimumStock = parseInt(editFormData.minimumStock, 10);
+    const maximumStock = parseInt(editFormData.maximumStock, 10);
     const unitCost = parseFloat(editFormData.unitCost);
 
     if (isNaN(currentStock) || isNaN(minimumStock) || isNaN(maximumStock) || isNaN(unitCost)) {
@@ -341,9 +342,9 @@ const InventoryScreen: React.FC = () => {
 
   const handleAddNewItem = () => {
     // Validate input
-    const currentStock = parseInt(newItemFormData.currentStock);
-    const minimumStock = parseInt(newItemFormData.minimumStock);
-    const maximumStock = parseInt(newItemFormData.maximumStock);
+    const currentStock = parseInt(newItemFormData.currentStock, 10);
+    const minimumStock = parseInt(newItemFormData.minimumStock, 10);
+    const maximumStock = parseInt(newItemFormData.maximumStock, 10);
     const unitCost = parseFloat(newItemFormData.unitCost);
 
     if (isNaN(currentStock) || isNaN(minimumStock) || isNaN(maximumStock) || isNaN(unitCost)) {

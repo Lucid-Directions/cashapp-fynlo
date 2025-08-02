@@ -5,6 +5,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } fr
 import { SumUpProvider, useSumUp } from 'sumup-react-native-alpha';
 
 import sumUpConfigService from '../../services/SumUpConfigService';
+import { logger } from '../../utils/logger';
 
 interface SumUpTestProps {
   onResult: (message: string) => void;
@@ -14,7 +15,7 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
   const sumUpHooks = useSumUp();
 
   useEffect(() => {
-    console.log('🧪 SumUp Test - Hooks available:', {
+    logger.info('🧪 SumUp Test - Hooks available:', {
       hasHooks: !!sumUpHooks,
       initPaymentSheet: typeof sumUpHooks?.initPaymentSheet,
       presentPaymentSheet: typeof sumUpHooks?.presentPaymentSheet,
@@ -34,7 +35,7 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
         return;
       }
 
-      console.log('🧪 Testing SumUp initialization...');
+      logger.info('🧪 Testing SumUp initialization...');
 
       const result = await sumUpHooks.initPaymentSheet({
         amount: 1.0,
@@ -44,7 +45,7 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
         skipScreenOptions: false,
       });
 
-      console.log('🧪 SumUp init result:', result);
+      logger.info('🧪 SumUp init result:', result);
 
       if (result.error) {
         Alert.alert('SumUp Init Failed', result.error.message);
@@ -86,7 +87,7 @@ const SumUpTestComponent: React.FC<SumUpTestProps> = (props) => {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        console.log('🔄 Fetching SumUp configuration for test component...');
+        logger.info('🔄 Fetching SumUp configuration for test component...');
         const config = await sumUpConfigService.fetchConfiguration();
         setSumUpConfig({
           appId: config.appId,

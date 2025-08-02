@@ -10,6 +10,7 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { PaymentRequest, PaymentResult } from './PaymentService';
+import { logger } from '../utils/logger';
 
 // Square SDK imports - conditionally loaded to prevent crashes
 let SQIPCore: any;
@@ -115,7 +116,7 @@ class SquareServiceClass {
 
       this.initialized = true;
       await this.saveConfig(config);
-      console.log('Square service initialized successfully');
+      logger.info('Square service initialized successfully');
     } catch (error) {
       console.error('Failed to initialize Square service:', error);
       throw error;

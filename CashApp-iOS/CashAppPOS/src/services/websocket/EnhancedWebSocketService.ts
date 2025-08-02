@@ -6,6 +6,7 @@ import { WebSocketEvent } from '../../types/websocket';
 import tokenManager from '../../utils/enhancedTokenManager';
 
 import type { WebSocketMessage, WebSocketConfig } from '../../types/websocket';
+import { logger } from '../../utils/logger';
 
 type ConnectionState =
   | 'DISCONNECTED'
@@ -57,11 +58,11 @@ export class EnhancedWebSocketService {
     this.networkUnsubscribe = NetInfo.addEventListener((state) => {
       if (state.isConnected && state.isInternetReachable) {
         if (this.state === 'DISCONNECTED') {
-          console.log('📱 Network restored, reconnecting WebSocket...');
+          logger.info('📱 Network restored, reconnecting WebSocket...');
           this.connect();
         }
       } else if (this.state === 'CONNECTED') {
-        console.log('📱 Network lost, WebSocket will reconnect when available');
+        logger.info('📱 Network lost, WebSocket will reconnect when available');
         this.handleDisconnect(4001, 'Network unavailable');
       }
     });
@@ -69,7 +70,7 @@ export class EnhancedWebSocketService {
 
   async connect(): Promise<void> {
     if (this.state !== 'DISCONNECTED' && this.state !== 'RECONNECTING') {
-      console.log(`⚠️ WebSocket already ${this.state}`);
+      logger.info(`⚠️ WebSocket already ${this.state}`);
       return;
     }
 
@@ -91,7 +92,7 @@ export class EnhancedWebSocketService {
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
       const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}`;
 
-      console.log('🔌 Connecting to WebSocket:', wsUrl);
+      logger.info('🔌 Connecting to WebSocket:', wsUrl);
 
       this.ws = new WebSocket(wsUrl);
       this.setupEventHandlers();
@@ -107,7 +108,7 @@ export class EnhancedWebSocketService {
 
       this.ws.onopen = () => {
         clearTimeout(connectionTimeout);
-        console.log('✅ WebSocket connected, authenticating...');
+        logger.info('✅ WebSocket connected, authenticating...');
         this.authenticate();
       };
     } catch (error) {
@@ -177,7 +178,7 @@ export class EnhancedWebSocketService {
     };
 
     this.ws.onclose = (event) => {
-      console.log(`🔌 WebSocket disconnected: ${event.code} - ${event.reason}`);
+      logger.info(`🔌 WebSocket disconnected: ${event.code} - ${event.reason}`);
       this.handleDisconnect(event.code, event.reason);
     };
 
@@ -221,7 +222,7 @@ export class EnhancedWebSocketService {
   }
 
   private handleAuthenticated(): void {
-    console.log('✅ WebSocket authenticated successfully');
+    logger.info('✅ WebSocket authenticated successfully');
     this.setState('CONNECTED');
     this.reconnectAttempts = 0;
 
@@ -341,7 +342,7 @@ export class EnhancedWebSocketService {
 
     const delay = this.calculateBackoff(this.reconnectAttempts);
 
-    console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`);
+    logger.info(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`);
     this.setState('RECONNECTING');
 
     this.reconnectTimer = setTimeout(() => {
@@ -366,7 +367,7 @@ export class EnhancedWebSocketService {
       // Queue message for later (with size limit)
       if (this.messageQueue.length < this.maxQueueSize) {
         this.messageQueue.push(fullMessage);
-        console.log(`📦 Message queued (${this.messageQueue.length} in queue)`);
+        logger.info(`📦 Message queued (${this.messageQueue.length} in queue)`);
       } else {
         console.warn(`⚠️ Message queue full (${this.maxQueueSize} messages), dropping oldest`);
         this.messageQueue.shift(); // Remove oldest
@@ -378,7 +379,7 @@ export class EnhancedWebSocketService {
   private processMessageQueue(): void {
     if (this.messageQueue.length === 0) return;
 
-    console.log(`📤 Processing ${this.messageQueue.length} queued messages`);
+    logger.info(`📤 Processing ${this.messageQueue.length} queued messages`);
 
     while (this.messageQueue.length > 0) {
       const message = this.messageQueue.shift()!;
@@ -387,7 +388,7 @@ export class EnhancedWebSocketService {
   }
 
   disconnect(): void {
-    console.log('👋 Disconnecting WebSocket...');
+    logger.info('👋 Disconnecting WebSocket...');
 
     this.stopHeartbeat();
 
@@ -460,7 +461,7 @@ export class EnhancedWebSocketService {
         return;
       }
 
-      console.log(`🔄 WebSocket state: ${this.state} → ${newState}`);
+      logger.info(`🔄 WebSocket state: ${this.state} → ${newState}`);
       this.state = newState;
     }
   }

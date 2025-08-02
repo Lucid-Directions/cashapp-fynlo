@@ -21,6 +21,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import HeaderWithBackButton from '../../../components/navigation/HeaderWithBackButton';
 import { useTheme } from '../../../design-system/ThemeProvider';
 import DataService from '../../../services/DataService';
+import { logger } from '../../../utils/logger';
 
 interface MenuItem {
   id: string;
@@ -445,7 +446,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                 'Copy this template and modify with your menu items:\n\n' + template,
                 [
                   { text: 'OK' },
-                  { text: 'Copy Example', onPress: () => console.log('Template:', template) },
+                  { text: 'Copy Example', onPress: () => logger.info('Template:', template) },
                 ]
               );
             },
@@ -734,7 +735,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
           {
             text: 'View Data',
             onPress: () => {
-              console.log('📋 Export Data:', JSON.stringify(exportData, null, 2));
+              logger.info('📋 Export Data:', JSON.stringify(exportData, null, 2));
               Alert.alert(
                 'Export Data',
                 'Export data logged to console for debugging. In production, this would download a file.'

@@ -1,5 +1,6 @@
 // testDataService.ts - Practical testing script for DataService
 import DataService from '../services/DataService';
+import { logger } from '../utils/logger';
 
 /**
  * Comprehensive test suite for DataService functionality
@@ -14,7 +15,7 @@ export class DataServiceTester {
   }
 
   async runAllTests(): Promise<{ passed: number; failed: number; results: any }> {
-    console.log('🧪 Starting DataService comprehensive tests...\n');
+    logger.info('🧪 Starting DataService comprehensive tests...\n');
 
     // Test 1: Feature flags functionality
     await this.testFeatureFlags();
@@ -41,26 +42,26 @@ export class DataServiceTester {
     const passed = Object.values(this.testResults).filter(Boolean).length;
     const failed = Object.values(this.testResults).filter((r) => !r).length;
 
-    console.log('\n📊 Test Results Summary:');
-    console.log(`✅ Passed: ${passed}`);
-    console.log(`❌ Failed: ${failed}`);
-    console.log(`📈 Success Rate: ${((passed / (passed + failed)) * 100).toFixed(1)}%\n`);
+    logger.info('\n📊 Test Results Summary:');
+    logger.info(`✅ Passed: ${passed}`);
+    logger.info(`❌ Failed: ${failed}`);
+    logger.info(`📈 Success Rate: ${((passed / (passed + failed)) * 100).toFixed(1)}%\n`);
 
     // Print detailed results
     Object.entries(this.testResults).forEach(([test, passed]) => {
-      console.log(`${passed ? '✅' : '❌'} ${test}`);
+      logger.info(`${passed ? '✅' : '❌'} ${test}`);
     });
 
     return { passed, failed, results: this.testResults };
   }
 
   private async testFeatureFlags(): Promise<void> {
-    console.log('1️⃣ Testing Feature Flags...');
+    logger.info('1️⃣ Testing Feature Flags...');
 
     try {
       // Test getting default flags
       const initialFlags = this.dataService.getFeatureFlags();
-      console.log('   📄 Initial flags:', initialFlags);
+      logger.info('   📄 Initial flags:', initialFlags);
 
       // Test updating a flag
       await this.dataService.updateFeatureFlag('USE_REAL_API', true);
@@ -68,18 +69,18 @@ export class DataServiceTester {
 
       const success = updatedFlags.USE_REAL_API === true;
       this.testResults['Feature Flags Update'] = success;
-      console.log(`   ${success ? '✅' : '❌'} Flag update: ${success}`);
+      logger.info(`   ${success ? '✅' : '❌'} Flag update: ${success}`);
 
       // Reset for other tests
       await this.dataService.resetToMockData();
     } catch (error) {
-      console.log('   ❌ Feature flags test failed:', error);
+      logger.info('   ❌ Feature flags test failed:', error);
       this.testResults['Feature Flags Update'] = false;
     }
   }
 
   private async testMockDataSystem(): Promise<void> {
-    console.log('\n2️⃣ Testing Mock Data System...');
+    logger.info('\n2️⃣ Testing Mock Data System...');
 
     try {
       // Ensure we're in mock mode
@@ -89,24 +90,24 @@ export class DataServiceTester {
       const products = await this.dataService.getProducts();
       const productsValid = Array.isArray(products) && products.length > 0;
       this.testResults['Mock Products'] = productsValid;
-      console.log(`   ${productsValid ? '✅' : '❌'} Products: ${products.length} items`);
+      logger.info(`   ${productsValid ? '✅' : '❌'} Products: ${products.length} items`);
 
       // Test categories
       const categories = await this.dataService.getCategories();
       const categoriesValid = Array.isArray(categories) && categories.length > 0;
       this.testResults['Mock Categories'] = categoriesValid;
-      console.log(`   ${categoriesValid ? '✅' : '❌'} Categories: ${categories.length} items`);
+      logger.info(`   ${categoriesValid ? '✅' : '❌'} Categories: ${categories.length} items`);
 
       // Test authentication
       const authResult = await this.dataService.login('demo', 'demo');
       this.testResults['Mock Authentication'] = authResult;
-      console.log(`   ${authResult ? '✅' : '❌'} Authentication: ${authResult}`);
+      logger.info(`   ${authResult ? '✅' : '❌'} Authentication: ${authResult}`);
 
       // Test floor plan
       const floorPlan = await this.dataService.getRestaurantFloorPlan();
       const floorPlanValid = floorPlan && floorPlan.tables && floorPlan.sections;
       this.testResults['Mock Floor Plan'] = floorPlanValid;
-      console.log(
+      logger.info(
         `   ${floorPlanValid ? '✅' : '❌'} Floor Plan: ${floorPlan?.tables?.length || 0} tables`
       );
 
@@ -114,15 +115,15 @@ export class DataServiceTester {
       const report = await this.dataService.getDailySalesReport();
       const reportValid = report && report.summary;
       this.testResults['Mock Reports'] = reportValid;
-      console.log(`   ${reportValid ? '✅' : '❌'} Reports: £${report?.summary?.total_sales || 0}`);
+      logger.info(`   ${reportValid ? '✅' : '❌'} Reports: £${report?.summary?.total_sales || 0}`);
     } catch (error) {
-      console.log('   ❌ Mock data test failed:', error);
+      logger.info('   ❌ Mock data test failed:', error);
       this.testResults['Mock Data System'] = false;
     }
   }
 
   private async testAPISwitching(): Promise<void> {
-    console.log('\n3️⃣ Testing API Switching...');
+    logger.info('\n3️⃣ Testing API Switching...');
 
     try {
       // Test switching to real API mode
@@ -131,7 +132,7 @@ export class DataServiceTester {
       const apiEnabled = flags.USE_REAL_API === true;
 
       this.testResults['API Mode Switch'] = apiEnabled;
-      console.log(`   ${apiEnabled ? '✅' : '❌'} Switch to real API: ${apiEnabled}`);
+      logger.info(`   ${apiEnabled ? '✅' : '❌'} Switch to real API: ${apiEnabled}`);
 
       // Test connection status
       const status = this.dataService.getConnectionStatus();
@@ -139,7 +140,7 @@ export class DataServiceTester {
         status && typeof status.mode === 'string' && typeof status.backend === 'boolean';
 
       this.testResults['Connection Status'] = statusValid;
-      console.log(
+      logger.info(
         `   ${statusValid ? '✅' : '❌'} Status check: Mode=${status.mode}, Backend=${
           status.backend
         }`
@@ -148,13 +149,13 @@ export class DataServiceTester {
       // Reset to mock for other tests
       await this.dataService.resetToMockData();
     } catch (error) {
-      console.log('   ❌ API switching test failed:', error);
+      logger.info('   ❌ API switching test failed:', error);
       this.testResults['API Mode Switch'] = false;
     }
   }
 
   private async testFallbackBehavior(): Promise<void> {
-    console.log('\n4️⃣ Testing Fallback Behavior...');
+    logger.info('\n4️⃣ Testing Fallback Behavior...');
 
     try {
       // Enable real API but expect fallback to mock (since backend likely not running)
@@ -165,7 +166,7 @@ export class DataServiceTester {
       const fallbackWorking = Array.isArray(products) && products.length > 0;
 
       this.testResults['Fallback to Mock'] = fallbackWorking;
-      console.log(
+      logger.info(
         `   ${fallbackWorking ? '✅' : '❌'} Fallback working: Got ${products.length} products`
       );
 
@@ -174,19 +175,19 @@ export class DataServiceTester {
       const reportFallback = report && report.summary && report.summary.total_sales > 0;
 
       this.testResults['Report Fallback'] = reportFallback;
-      console.log(
+      logger.info(
         `   ${reportFallback ? '✅' : '❌'} Report fallback: £${report?.summary?.total_sales || 0}`
       );
 
       await this.dataService.resetToMockData();
     } catch (error) {
-      console.log('   ❌ Fallback test failed:', error);
+      logger.info('   ❌ Fallback test failed:', error);
       this.testResults['Fallback to Mock'] = false;
     }
   }
 
   private async testAuthenticationModes(): Promise<void> {
-    console.log('\n5️⃣ Testing Authentication Modes...');
+    logger.info('\n5️⃣ Testing Authentication Modes...');
 
     try {
       // Test mock authentication
@@ -194,22 +195,22 @@ export class DataServiceTester {
       const mockAuth = await this.dataService.login('demo', 'demo');
 
       this.testResults['Mock Auth Mode'] = mockAuth;
-      console.log(`   ${mockAuth ? '✅' : '❌'} Mock auth: ${mockAuth}`);
+      logger.info(`   ${mockAuth ? '✅' : '❌'} Mock auth: ${mockAuth}`);
 
       // Test invalid mock credentials
       const invalidMockAuth = await this.dataService.login('invalid', 'wrong');
       const mockValidation = !invalidMockAuth; // Should be false
 
       this.testResults['Mock Auth Validation'] = mockValidation;
-      console.log(`   ${mockValidation ? '✅' : '❌'} Mock validation: ${mockValidation}`);
+      logger.info(`   ${mockValidation ? '✅' : '❌'} Mock validation: ${mockValidation}`);
     } catch (error) {
-      console.log('   ❌ Authentication test failed:', error);
+      logger.info('   ❌ Authentication test failed:', error);
       this.testResults['Mock Auth Mode'] = false;
     }
   }
 
   private async testPaymentModes(): Promise<void> {
-    console.log('\n6️⃣ Testing Payment Modes...');
+    logger.info('\n6️⃣ Testing Payment Modes...');
 
     try {
       // Test mock payment mode (should always succeed)
@@ -217,7 +218,7 @@ export class DataServiceTester {
       const mockPayment = await this.dataService.processPayment(123, 'card', 25.99);
 
       this.testResults['Mock Payment'] = mockPayment;
-      console.log(`   ${mockPayment ? '✅' : '❌'} Mock payment: ${mockPayment}`);
+      logger.info(`   ${mockPayment ? '✅' : '❌'} Mock payment: ${mockPayment}`);
 
       // Test different payment methods
       const paymentMethods = ['card', 'cash', 'apple_pay'];
@@ -229,17 +230,17 @@ export class DataServiceTester {
       }
 
       this.testResults['Payment Methods'] = allPaymentsSucceed;
-      console.log(
+      logger.info(
         `   ${allPaymentsSucceed ? '✅' : '❌'} All payment methods: ${allPaymentsSucceed}`
       );
     } catch (error) {
-      console.log('   ❌ Payment test failed:', error);
+      logger.info('   ❌ Payment test failed:', error);
       this.testResults['Mock Payment'] = false;
     }
   }
 
   private async testBackendDetection(): Promise<void> {
-    console.log('\n7️⃣ Testing Backend Detection...');
+    logger.info('\n7️⃣ Testing Backend Detection...');
 
     try {
       // Test connection status reporting
@@ -247,7 +248,7 @@ export class DataServiceTester {
       const hasRequiredFields = status.mode && typeof status.backend === 'boolean' && status.flags;
 
       this.testResults['Status Reporting'] = hasRequiredFields;
-      console.log(`   ${hasRequiredFields ? '✅' : '❌'} Status structure: ${hasRequiredFields}`);
+      logger.info(`   ${hasRequiredFields ? '✅' : '❌'} Status structure: ${hasRequiredFields}`);
 
       // Test that backend detection doesn't crash
       await this.dataService.enableRealAPI();
@@ -259,18 +260,18 @@ export class DataServiceTester {
       const detectionWorking = newStatus.mode === 'REAL';
 
       this.testResults['Backend Detection'] = detectionWorking;
-      console.log(`   ${detectionWorking ? '✅' : '❌'} Detection working: ${detectionWorking}`);
+      logger.info(`   ${detectionWorking ? '✅' : '❌'} Detection working: ${detectionWorking}`);
 
       await this.dataService.resetToMockData();
     } catch (error) {
-      console.log('   ❌ Backend detection test failed:', error);
+      logger.info('   ❌ Backend detection test failed:', error);
       this.testResults['Backend Detection'] = false;
     }
   }
 
   // Quick test method for development
   async quickTest(): Promise<boolean> {
-    console.log('⚡ Running quick DataService test...');
+    logger.info('⚡ Running quick DataService test...');
 
     try {
       // Test basic functionality
@@ -281,14 +282,14 @@ export class DataServiceTester {
 
       const success = products.length > 0 && categories.length > 0 && auth;
 
-      console.log(`${success ? '✅' : '❌'} Quick test: ${success ? 'PASSED' : 'FAILED'}`);
-      console.log(
+      logger.info(`${success ? '✅' : '❌'} Quick test: ${success ? 'PASSED' : 'FAILED'}`);
+      logger.info(
         `   Products: ${products.length}, Categories: ${categories.length}, Auth: ${auth}`
       );
 
       return success;
     } catch (error) {
-      console.log('❌ Quick test failed:', error);
+      logger.info('❌ Quick test failed:', error);
       return false;
     }
   }

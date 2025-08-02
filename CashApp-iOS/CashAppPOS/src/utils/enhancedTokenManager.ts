@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AUTH_CONFIG } from '../config/auth.config';
 import { supabase } from '../lib/supabase';
+import { logger } from '../utils/logger';
 
 interface TokenCache {
   token: string | null;
@@ -92,7 +93,7 @@ class EnhancedTokenManager {
     // Check minimum refresh interval
     const now = Date.now();
     if (now - this.tokenCache.lastRefresh < this.minRefreshInterval) {
-      console.log('⏳ Token refresh too recent, using cached token');
+      logger.info('⏳ Token refresh too recent, using cached token');
       return this.tokenCache.token;
     }
 
@@ -150,7 +151,7 @@ class EnhancedTokenManager {
 
   private async doRefresh(): Promise<string | null> {
     try {
-      console.log('🔄 Refreshing authentication token...');
+      logger.info('🔄 Refreshing authentication token...');
 
       const { data, error } = await supabase.auth.refreshSession();
 
@@ -179,7 +180,7 @@ class EnhancedTokenManager {
         AsyncStorage.setItem('supabase_session', JSON.stringify(data.session)),
       ]);
 
-      console.log('✅ Token refreshed successfully');
+      logger.info('✅ Token refreshed successfully');
       this.emit('token:refreshed', data.session.access_token);
 
       // Reset refresh timer
@@ -228,7 +229,7 @@ class EnhancedTokenManager {
     const delaySeconds = Math.max(refreshAt - now, 0);
 
     if (delaySeconds > 0) {
-      console.log(`⏰ Scheduling token refresh in ${delaySeconds}s`);
+      logger.info(`⏰ Scheduling token refresh in ${delaySeconds}s`);
 
       this.refreshTimer = setTimeout(() => {
         this.getTokenWithRefresh().catch((error) => {
@@ -239,7 +240,7 @@ class EnhancedTokenManager {
   }
 
   async forceRefresh(): Promise<string | null> {
-    console.log('🔄 Forcing token refresh...');
+    logger.info('🔄 Forcing token refresh...');
 
     // Clear cache to force refresh
     this.tokenCache.expiresAt = 0;

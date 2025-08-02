@@ -18,7 +18,6 @@
 - **Playwright/Puppeteer** (`mcp__playwright__`, `mcp__puppeteer__`) - Browser automation
 - **SemGrep** (`mcp__semgrep__`) - Security scanning, code analysis
 - **Ref** (`mcp__Ref__`) - Search documentation, GitHub, private resources
-- **DigitalOcean** (`mcp__digitalocean-mcp-local__`) - Infrastructure management
 - **SQLite** (`mcp__sqlite__`) - Test local databases, query Supabase data locally
 - **Terminal** (`mcp__terminal__`) - Run Xcode builds, iOS simulator commands, shell operations
 - **Homebrew** (`mcp__homebrew__`) - Manage iOS dev tools (CocoaPods, fastlane, etc.)

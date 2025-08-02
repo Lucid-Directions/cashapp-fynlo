@@ -20,6 +20,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import useAppStore from '../../store/useAppStore';
+import { logger } from '../../utils/logger';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
@@ -181,7 +182,7 @@ const HomeHubScreen: React.FC = () => {
 
   const handleIconPress = (icon: HubIcon) => {
     // Analytics tracking for icon tap
-    console.log('📊 Analytics: HomeHubIconTapped', {
+    logger.info('📊 Analytics: HomeHubIconTapped', {
       iconId: icon.id,
       iconTitle: icon.title,
       iconCategory: icon.category,
@@ -206,7 +207,7 @@ const HomeHubScreen: React.FC = () => {
   // Track analytics for hub view
   useEffect(() => {
     // Analytics tracking for HomeHubViewed event
-    console.log('📊 Analytics: HomeHubViewed', {
+    logger.info('📊 Analytics: HomeHubViewed', {
       userId: user?.id,
       userEmail: user?.email,
       userRole: user?.role,

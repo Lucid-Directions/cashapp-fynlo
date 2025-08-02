@@ -274,7 +274,7 @@ class MonitoringService {
       const variation = -5 + Math.random() * 10; // -5% to +5%
 
       if (metric.name.includes('Response Time') || metric.name.includes('Latency')) {
-        const currentValue = parseInt(metric.value);
+        const currentValue = parseInt(metric.value, 10);
         const newValue = Math.max(10, currentValue + Math.round((currentValue * variation) / 100));
         metric.value = `${newValue}ms`;
         metric.status = newValue > 200 ? 'error' : newValue > 100 ? 'warning' : 'good';

@@ -1,5 +1,6 @@
 // Using simple error tracking for immediate deployment
 import SimpleErrorTrackingService from './SimpleErrorTrackingService';
+import { logger } from '../utils/logger';
 
 export interface ErrorContext {
   userId?: string;
@@ -56,14 +57,14 @@ class ErrorTrackingService {
   }
 
   startTransaction(context: PerformanceContext): any {
-    console.log('📊 Transaction started:', context.operation);
+    logger.info('📊 Transaction started:', context.operation);
     return { operation: context.operation, startTime: Date.now() };
   }
 
   finishTransaction(transaction: any, success: boolean = true): void {
     if (transaction) {
       const duration = Date.now() - transaction.startTime;
-      console.log(
+      logger.info(
         `📊 Transaction finished: ${transaction.operation} (${duration}ms) - ${
           success ? 'success' : 'failed'
         }`

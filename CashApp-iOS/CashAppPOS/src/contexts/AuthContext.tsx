@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import useAppStore from '../store/useAppStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { logger } from '../utils/logger';
 
 export interface User {
   id: string;
@@ -268,13 +269,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const resetPassword = async (email: string): Promise<boolean> => {
     // Placeholder for password reset
-    console.log('Password reset requested for:', email);
+    logger.info('Password reset requested for:', email);
     return true;
   };
 
   const loadPlatformData = async (): Promise<void> => {
     // This will be implemented when platform features are needed
-    console.log('Loading platform data...');
+    logger.info('Loading platform data...');
   };
 
   const switchRestaurant = async (restaurantId: string): Promise<void> => {

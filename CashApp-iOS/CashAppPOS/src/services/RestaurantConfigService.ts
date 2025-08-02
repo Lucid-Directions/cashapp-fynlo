@@ -4,6 +4,7 @@ import API_CONFIG from '../config/api';
 import tokenManager from '../utils/tokenManager';
 
 import RestaurantDataService from './RestaurantDataService';
+import { logger } from '../utils/logger';
 
 export interface RestaurantConfig {
   // Restaurant Identity
@@ -206,7 +207,7 @@ class RestaurantConfigService {
         });
 
         if (response.ok) {
-          console.log('✅ Restaurant config saved to API');
+          logger.info('✅ Restaurant config saved to API');
         } else {
           const errorData = await response.json();
           console.error('❌ API save failed:', errorData);
@@ -274,7 +275,7 @@ class RestaurantConfigService {
         });
       }
 
-      console.log('✅ Restaurant config synced to platform');
+      logger.info('✅ Restaurant config synced to platform');
     } catch (error) {
       console.error('❌ Failed to sync restaurant to platform:', error);
       // Don't fail the update if sync fails

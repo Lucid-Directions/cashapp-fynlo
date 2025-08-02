@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { API_CONFIG } from '../config/api';
 import tokenManager from '../utils/tokenManager';
+import { logger } from '../utils/logger';
 
 export interface SumUpConfig {
   appId: string;
@@ -45,7 +46,7 @@ class SumUpConfigService {
       // Check cache first
       const cached = await this.getCachedConfig();
       if (cached) {
-        console.log('📦 Using cached SumUp configuration');
+        logger.info('📦 Using cached SumUp configuration');
         return cached;
       }
 
@@ -56,7 +57,7 @@ class SumUpConfigService {
       }
 
       // Fetch from backend
-      console.log('🔄 Fetching SumUp configuration from backend...');
+      logger.info('🔄 Fetching SumUp configuration from backend...');
       const response = await fetch(`${API_CONFIG.FULL_API_URL}/sumup/initialize`, {
         method: 'POST',
         headers: {
@@ -80,7 +81,7 @@ class SumUpConfigService {
         // Cache the configuration
         await this.cacheConfig(config);
 
-        console.log('✅ SumUp configuration fetched successfully');
+        logger.info('✅ SumUp configuration fetched successfully');
         return config;
       } else {
         throw new Error(result.message || 'Invalid response from server');
@@ -159,7 +160,7 @@ class SumUpConfigService {
     try {
       await AsyncStorage.removeItem(this.configCacheKey);
       this.cachedConfig = null;
-      console.log('🧹 SumUp configuration cache cleared');
+      logger.info('🧹 SumUp configuration cache cleared');
     } catch (error) {
       console.error('Failed to clear cache:', error);
     }

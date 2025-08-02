@@ -6,6 +6,7 @@
  */
 
 import type { SettingsStackParamList } from '../navigation/SettingsNavigator';
+import { logger } from '../utils/logger';
 
 // Define the expected navigation structure
 export const expectedSettingsRoutes = {
@@ -75,7 +76,7 @@ export const validateNavigationStructure = () => {
 
   routeNames.forEach((route) => {
     // This would be a runtime check in a test environment
-    console.log(`✓ Route '${route}' is defined: ${expectedSettingsRoutes[route]}`);
+    logger.info(`✓ Route '${route}' is defined: ${expectedSettingsRoutes[route]}`);
   });
 
   // Check category screens
@@ -83,7 +84,7 @@ export const validateNavigationStructure = () => {
     if (!routeNames.includes(category as keyof SettingsStackParamList)) {
       issues.push(`Category screen '${category}' is missing from navigation`);
     } else {
-      console.log(`✓ Category screen '${category}' is properly defined`);
+      logger.info(`✓ Category screen '${category}' is properly defined`);
     }
   });
 

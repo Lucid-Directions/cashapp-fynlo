@@ -9,6 +9,7 @@ import API_CONFIG from '../config/api';
 import tokenManager from '../utils/tokenManager';
 
 import SharedDataStore from './SharedDataStore';
+import { logger } from '../utils/logger';
 
 // Base API URL - FIXED: Uses LAN IP for device testing
 
@@ -88,7 +89,7 @@ class PlatformService {
     try {
       this.authToken = await tokenManager.getTokenWithRefresh();
     } catch (error) {
-      console.log('No auth token found');
+      logger.info('No auth token found');
     }
   }
 
@@ -120,9 +121,9 @@ class PlatformService {
         config.body = JSON.stringify(data);
       }
 
-      console.log(`🌐 Making ${method} request to: ${url}`);
+      logger.info(`🌐 Making ${method} request to: ${url}`);
       if (data) {
-        console.log('📦 Request data:', JSON.stringify(data, null, 2));
+        logger.info('📦 Request data:', JSON.stringify(data, null, 2));
       }
 
       const response = await fetch(url, config);
@@ -135,7 +136,7 @@ class PlatformService {
       }
 
       const result = await response.json();
-      console.log('✅ API Response:', result);
+      logger.info('✅ API Response:', result);
       return result.data || result;
     } catch (error) {
       console.error(`❌ API request failed for ${endpoint}:`, error);
@@ -238,7 +239,7 @@ class PlatformService {
       console.error('❌ Failed to bulk update settings:', error);
 
       // If the bulk endpoint fails, try individual updates as fallback
-      console.log('🔄 Attempting individual updates as fallback...');
+      logger.info('🔄 Attempting individual updates as fallback...');
       let successful = 0;
       let failed = 0;
       const errors: Record<string, string> = {};
@@ -544,7 +545,7 @@ class PlatformService {
     description: string;
   }> {
     try {
-      console.log('📊 Getting service charge config from real data store...');
+      logger.info('📊 Getting service charge config from real data store...');
       return await this.dataStore.getServiceChargeConfig();
     } catch (error) {
       console.error('❌ Failed to get service charge config:', error);
@@ -558,7 +559,7 @@ class PlatformService {
     description?: string
   ): Promise<boolean> {
     try {
-      console.log('💾 Updating service charge config in real data store...', {
+      logger.info('💾 Updating service charge config in real data store...', {
         enabled,
         rate,
         description,
@@ -572,7 +573,7 @@ class PlatformService {
       };
 
       await this.dataStore.setServiceChargeConfig(config);
-      console.log('✅ Service charge config updated successfully');
+      logger.info('✅ Service charge config updated successfully');
       return true;
     } catch (error) {
       console.error('❌ Failed to update service charge config:', error);

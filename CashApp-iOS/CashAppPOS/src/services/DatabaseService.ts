@@ -8,6 +8,7 @@ import errorLogger from '../utils/ErrorLogger';
 import tokenManager from '../utils/tokenManager';
 
 import BackendCompatibilityService from './BackendCompatibilityService';
+import { logger } from '../utils/logger';
 
 // Database configuration - FIXED: Uses LAN IP for device testing
 
@@ -109,7 +110,7 @@ class DatabaseService {
       this.authToken = token;
       // CRITICAL: Must persist token for tokenManager to access it
       await AsyncStorage.setItem('auth_token', token);
-      console.log('✅ Auth token saved to storage');
+      logger.info('✅ Auth token saved to storage');
     } catch (error) {
       console.error('Error saving auth token:', error);
     }
@@ -180,7 +181,7 @@ class DatabaseService {
 
       // Handle 401 Unauthorized - token might be expired
       if (response.status === 401) {
-        console.log('Token expired, attempting to refresh...');
+        logger.info('Token expired, attempting to refresh...');
 
         // Try to refresh the token using token manager
         const newToken = await tokenManager.refreshAuthToken();
@@ -260,7 +261,7 @@ class DatabaseService {
         if (retryCount < retryAttempts - 1) {
           const retryDelay = API_CONFIG.RETRY_DELAY || 1000;
           const delay = retryDelay * Math.pow(2, retryCount);
-          console.log(`🔄 Retrying after ${delay}ms...`);
+          logger.info(`🔄 Retrying after ${delay}ms...`);
           await new Promise((resolve) => setTimeout(resolve, delay));
           return this.apiRequest(endpoint, options, retryCount + 1, startTime);
         }
@@ -324,11 +325,11 @@ class DatabaseService {
         })
       );
 
-      console.log('✅ Test user authenticated:', user.name, `(${user.role})`);
+      logger.info('✅ Test user authenticated:', user.name, `(${user.role})`);
       return true;
     }
 
-    console.log('❌ Invalid test user credentials');
+    logger.info('❌ Invalid test user credentials');
     return false;
   }
 
@@ -414,12 +415,12 @@ class DatabaseService {
     try {
       await this.apiRequest('/api/v1/auth/logout', { method: 'POST' });
     } catch (error) {
-      console.log('API logout failed (expected for test users):', error);
+      logger.info('API logout failed (expected for test users):', error);
     } finally {
       // Always clear local session data
       this.authToken = null;
       await AsyncStorage.multiRemove(['auth_token', 'user_data']);
-      console.log('✅ User session cleared');
+      logger.info('✅ User session cleared');
     }
   }
 
@@ -470,12 +471,12 @@ class DatabaseService {
     // Check cache first
     const now = Date.now();
     if (this.menuCache.items && now - this.menuCache.itemsTimestamp < this.CACHE_DURATION) {
-      console.log('✅ Returning cached menu items');
+      logger.info('✅ Returning cached menu items');
       return this.menuCache.items;
     }
 
     try {
-      console.log('🔄 Fetching menu items from API...');
+      logger.info('🔄 Fetching menu items from API...');
       // Use public endpoint that doesn't require authentication
       const response = await this.apiRequest('/api/v1/public/menu/items', {
         method: 'GET',
@@ -484,7 +485,7 @@ class DatabaseService {
       if (response.data) {
         // Apply compatibility transformation if needed
         if (BackendCompatibilityService.needsMenuTransformation(response.data)) {
-          console.log('🔄 Applying menu compatibility transformation in DatabaseService');
+          logger.info('🔄 Applying menu compatibility transformation in DatabaseService');
           const transformedData = BackendCompatibilityService.transformMenuItems(response.data);
           // Cache the transformed data with current timestamp
           this.menuCache.items = transformedData;
@@ -494,7 +495,7 @@ class DatabaseService {
         // Cache the data with current timestamp
         this.menuCache.items = response.data;
         this.menuCache.itemsTimestamp = Date.now();
-        console.log(`✅ Menu items loaded and cached (${response.data.length} items)`);
+        logger.info(`✅ Menu items loaded and cached (${response.data.length} items)`);
         return response.data;
       }
 
@@ -526,12 +527,12 @@ class DatabaseService {
       this.menuCache.categories &&
       now - this.menuCache.categoriesTimestamp < this.CACHE_DURATION
     ) {
-      console.log('✅ Returning cached menu categories');
+      logger.info('✅ Returning cached menu categories');
       return this.menuCache.categories;
     }
 
     try {
-      console.log('🔄 Fetching menu categories from API...');
+      logger.info('🔄 Fetching menu categories from API...');
       // Use public endpoint that doesn't require authentication
       const response = await this.apiRequest('/api/v1/public/menu/categories', {
         method: 'GET',
@@ -541,7 +542,7 @@ class DatabaseService {
         // Cache the categories with current timestamp
         this.menuCache.categories = response.data;
         this.menuCache.categoriesTimestamp = Date.now();
-        console.log(`✅ Menu categories loaded and cached (${response.data.length} categories)`);
+        logger.info(`✅ Menu categories loaded and cached (${response.data.length} categories)`);
         return response.data;
       }
 
@@ -620,7 +621,7 @@ class DatabaseService {
       }
 
       const result = await response.json();
-      console.log('✅ Category updated successfully:', result);
+      logger.info('✅ Category updated successfully:', result);
       return result.data || result;
     } catch (error) {
       console.error('❌ Error updating category:', error);
@@ -645,7 +646,7 @@ class DatabaseService {
         throw new Error(`Failed to delete category: ${error}`);
       }
 
-      console.log('✅ Category deleted successfully');
+      logger.info('✅ Category deleted successfully');
     } catch (error) {
       console.error('❌ Error deleting category:', error);
       throw error;
@@ -738,7 +739,7 @@ class DatabaseService {
       itemsTimestamp: 0,
       categoriesTimestamp: 0,
     };
-    console.log('🧹 Menu cache cleared');
+    logger.info('🧹 Menu cache cleared');
   }
 
   // Import Chucho menu data
@@ -852,7 +853,7 @@ class DatabaseService {
   // Payment processing - PHASE 3: Updated to match backend multi-provider endpoint
   async processPayment(orderId: number, paymentMethod: string, amount: number): Promise<boolean> {
     try {
-      console.log(`🔄 Processing ${paymentMethod} payment for £${amount} (Order: ${orderId})`);
+      logger.info(`🔄 Processing ${paymentMethod} payment for £${amount} (Order: ${orderId})`);
 
       const response = await this.apiRequest('/api/v1/payments/process', {
         method: 'POST',
@@ -868,13 +869,13 @@ class DatabaseService {
       });
 
       if (response.success && response.data) {
-        console.log(`✅ Payment processed successfully via ${response.data.provider}`);
-        console.log(
+        logger.info(`✅ Payment processed successfully via ${response.data.provider}`);
+        logger.info(
           `💰 Amount: £${response.data.amount}, Fee: £${response.data.fee}, Net: £${response.data.net_amount}`
         );
         return true;
       } else {
-        console.log(`❌ Payment failed:`, response.message || 'Unknown error');
+        logger.info(`❌ Payment failed:`, response.message || 'Unknown error');
         return false;
       }
     } catch (error) {
@@ -1075,7 +1076,7 @@ class DatabaseService {
         method: 'GET',
       });
 
-      console.log('✅ Schedule API response received:', response);
+      logger.info('✅ Schedule API response received:', response);
       return response.data || null;
     } catch (error) {
       console.error('Failed to fetch week schedule:', error);

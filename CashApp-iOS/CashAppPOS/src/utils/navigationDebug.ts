@@ -4,6 +4,7 @@
  */
 
 import type { NavigationState } from '@react-navigation/native';
+import { logger } from '../utils/logger';
 
 // All valid routes in the app
 export const VALID_ROUTES = {
@@ -124,11 +125,11 @@ export function logNavigationState(state: NavigationState | undefined, depth = 0
   if (!state) return;
 
   const indent = '  '.repeat(depth);
-  console.log(`${indent}Navigator: ${state.type || 'Stack'}`);
+  logger.info(`${indent}Navigator: ${state.type || 'Stack'}`);
 
   state.routes.forEach((route, index) => {
     const active = index === state.index ? '(ACTIVE)' : '';
-    console.log(`${indent}  - ${route.name} ${active}`);
+    logger.info(`${indent}  - ${route.name} ${active}`);
 
     if (route.state) {
       logNavigationState(route.state as NavigationState, depth + 2);

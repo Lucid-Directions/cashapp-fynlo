@@ -1,6 +1,7 @@
 import { Alert, Platform } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { logger } from '../utils/logger';
 
 export interface ErrorInfo {
   id: string;
@@ -261,7 +262,7 @@ class ErrorHandler {
         console.warn(logMessage, errorInfo);
         break;
       default:
-        console.log(logMessage, errorInfo);
+        logger.info(logMessage, errorInfo);
     }
   }
 
@@ -404,7 +405,7 @@ class ErrorHandler {
 
   private async retryRequest(requestConfig: any, errorInfo: ErrorInfo): Promise<void> {
     // This would integrate with your API layer to retry requests
-    console.log('Retrying request:', requestConfig);
+    logger.info('Retrying request:', requestConfig);
   }
 
   private attemptRecovery(errorInfo: ErrorInfo): void {
@@ -415,17 +416,17 @@ class ErrorHandler {
         break;
       case ErrorType.AUTHENTICATION:
         // Redirect to login
-        console.log('Redirecting to authentication...');
+        logger.info('Redirecting to authentication...');
         break;
       default:
-        console.log('No automatic recovery available for this error type');
+        logger.info('No automatic recovery available for this error type');
     }
   }
 
   private sendToCrashReporting(errorInfo: ErrorInfo): void {
     // This would integrate with crash reporting services like Crashlytics
     if (__DEV__) {
-      console.log('Would send to crash reporting:', errorInfo);
+      logger.info('Would send to crash reporting:', errorInfo);
     }
   }
 

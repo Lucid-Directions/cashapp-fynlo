@@ -21,6 +21,7 @@ import { useAuthStore } from './src/store/useAuthStore';
 import { clearAuthStorage } from './src/utils/clearAuthStorage';
 import { ensureComponentsLoaded } from './src/utils/componentRegistry';
 import tokenManager from './src/utils/tokenManager';
+import { logger } from './src/utils/logger';
 
 // Suppress specific warnings for development
 LogBox.ignoreLogs([
@@ -39,15 +40,15 @@ const App: React.FC = () => {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        console.log('🚀 Fynlo POS App Starting...');
-        console.log('📱 BUNDLE VERSION: 2025-01-08-v10 - FIXED TextInput');
+        logger.info('🚀 Fynlo POS App Starting...');
+        logger.info('📱 BUNDLE VERSION: 2025-01-08-v10 - FIXED TextInput');
 
         // Ensure critical React Native components are not tree-shaken
         // This prevents ReferenceError in production iOS builds
         ensureComponentsLoaded();
 
         // Clear any stored authentication on app startup
-        console.log('🧹 Clearing stored authentication...');
+        logger.info('🧹 Clearing stored authentication...');
         await AsyncStorage.multiRemove([
           'auth-storage',
           'auth_token',

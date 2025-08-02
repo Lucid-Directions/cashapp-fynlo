@@ -45,6 +45,7 @@ import useSettingsStore from '../../store/useSettingsStore';
 import useUIStore from '../../store/useUIStore';
 
 import type { MenuItem, OrderItem } from '../../types';
+import { logger } from '../../utils/logger';
 
 // Get screen dimensions
 const { width: screenWidth } = Dimensions.get('window');
@@ -146,7 +147,7 @@ const POSScreen: React.FC = () => {
 
   // Debug showSumUpPayment state changes
   useEffect(() => {
-    console.log('🔄 showSumUpPayment state changed to:', showSumUpPayment);
+    logger.info('🔄 showSumUpPayment state changed to:', showSumUpPayment);
   }, [showSumUpPayment]);
 
   // Create themed styles
@@ -168,7 +169,7 @@ const POSScreen: React.FC = () => {
       try {
         const config = await dataStore.getServiceChargeConfig();
         setServiceChargeConfig(config);
-        console.log('✅ Service charge config loaded from real data store:', config);
+        logger.info('✅ Service charge config loaded from real data store:', config);
       } catch (error) {
         console.error('❌ Failed to load service charge config:', error);
       }
@@ -179,11 +180,11 @@ const POSScreen: React.FC = () => {
 
     // Subscribe to real-time updates
     const unsubscribe = dataStore.subscribe('serviceCharge', (updatedConfig) => {
-      console.log('🔄 Service charge config updated in real-time:', updatedConfig);
+      logger.info('🔄 Service charge config updated in real-time:', updatedConfig);
       const debugInfo = `SYNC: ${
         updatedConfig.enabled ? updatedConfig.rate + '%' : 'OFF'
       } @ ${new Date().toLocaleTimeString()}`;
-      console.log('📊 Service charge debug:', debugInfo);
+      logger.info('📊 Service charge debug:', debugInfo);
       setServiceChargeConfig(updatedConfig);
       setServiceChargeDebugInfo(debugInfo);
     });
@@ -220,7 +221,7 @@ const POSScreen: React.FC = () => {
         ];
         setDynamicCategories(categoryNames);
 
-        console.log('✅ Dynamic menu loaded:', {
+        logger.info('✅ Dynamic menu loaded:', {
           itemCount: menuItems.length,
           categories: categoryNames,
         });
@@ -228,7 +229,7 @@ const POSScreen: React.FC = () => {
         console.error('❌ Failed to load dynamic menu:', error);
 
         // Log detailed error information
-        console.log(`
+        logger.info(`
 📱 ======== MENU LOADING ERROR ========
 🕐 Time: ${new Date().toISOString()}
 📍 Component: POSScreen
@@ -263,7 +264,7 @@ const POSScreen: React.FC = () => {
           // Import the local menu data directly to avoid API calls
           const { CHUCHO_MENU_ITEMS, CHUCHO_CATEGORIES } = await import('../../data/chuchoMenu');
 
-          console.log('🍮 Using local Chucho menu data as fallback');
+          logger.info('🍮 Using local Chucho menu data as fallback');
 
           // Transform menu items to match expected format
           const fallbackItems = CHUCHO_MENU_ITEMS.map((item) => ({
@@ -280,7 +281,7 @@ const POSScreen: React.FC = () => {
           ];
           setDynamicCategories(categoryNames);
 
-          console.log('✅ Loaded fallback menu:', {
+          logger.info('✅ Loaded fallback menu:', {
             itemCount: fallbackItems.length,
             categories: categoryNames,
           });
@@ -448,13 +449,13 @@ const POSScreen: React.FC = () => {
     switch (selectedPaymentMethod) {
       case 'sumup':
         // Check SumUp compatibility before attempting payment
-        console.log('🏦 Starting SumUp payment for amount:', totalAmount);
+        logger.info('🏦 Starting SumUp payment for amount:', totalAmount);
         const checkSumUpCompatibility = async () => {
           const compatibilityService = SumUpCompatibilityService.getInstance();
           const shouldAttempt = await compatibilityService.shouldAttemptSumUp();
 
           if (shouldAttempt) {
-            console.log('🏦 SumUp compatible, showing payment modal');
+            logger.info('🏦 SumUp compatible, showing payment modal');
             setShowSumUpPayment(true);
           } else {
             console.warn('⚠️ SumUp not compatible, showing alternatives');
@@ -608,7 +609,7 @@ const POSScreen: React.FC = () => {
     setShowSumUpPayment(false);
 
     if (success && transactionCode) {
-      console.log('🎉 SumUp payment completed successfully!', transactionCode);
+      logger.info('🎉 SumUp payment completed successfully!', transactionCode);
       Alert.alert(
         'Payment Successful!',
         `Your payment has been processed successfully.\n\nTransaction Code: ${transactionCode}\nAmount: ${formatPrice(
@@ -647,7 +648,7 @@ const POSScreen: React.FC = () => {
 
   const handleSumUpPaymentCancel = () => {
     setShowSumUpPayment(false);
-    console.log('❌ SumUp payment cancelled by user');
+    logger.info('❌ SumUp payment cancelled by user');
     // Show the payment modal again for user to try again
     setShowPaymentModal(true);
   };
@@ -796,7 +797,7 @@ const POSScreen: React.FC = () => {
                 style={[styles.devButton, { marginRight: 8 }]}
                 onPress={() => {
                   setShowSumUpTest(!showSumUpTest);
-                  console.log('🧪 SumUp Test toggled:', !showSumUpTest);
+                  logger.info('🧪 SumUp Test toggled:', !showSumUpTest);
                 }}
               >
                 <Icon name="bug-report" size={20} color={theme.colors.white} />
@@ -1281,7 +1282,7 @@ const POSScreen: React.FC = () => {
       {/* SumUp Payment Component */}
       {showSumUpPayment && (
         <>
-          {console.log(
+          {logger.info(
             '🔄 Rendering SumUpPaymentComponent with showSumUpPayment:',
             showSumUpPayment
           )}

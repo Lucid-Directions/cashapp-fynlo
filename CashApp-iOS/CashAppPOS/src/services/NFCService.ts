@@ -4,6 +4,7 @@
  */
 
 import { Platform } from 'react-native';
+import { logger } from '../utils/logger';
 
 export interface NFCCapabilities {
   isSupported: boolean;
@@ -109,7 +110,7 @@ class NFCServiceClass {
 
     // This would typically start native NFC proximity monitoring
     // For now, we'll simulate proximity detection for demo purposes
-    console.log('Started NFC proximity detection');
+    logger.info('Started NFC proximity detection');
   }
 
   /**
@@ -117,7 +118,7 @@ class NFCServiceClass {
    */
   stopProximityDetection(): void {
     this.proximityCallback = null;
-    console.log('Stopped NFC proximity detection');
+    logger.info('Stopped NFC proximity detection');
   }
 
   /**

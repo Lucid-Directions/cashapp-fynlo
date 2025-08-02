@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../config/api';
 import NetworkUtils from '../utils/NetworkUtils';
 import tokenManager from '../utils/tokenManager';
+import { logger } from '../utils/logger';
 const API_BASE_URL = API_CONFIG.FULL_API_URL;
 
 interface ServiceChargeConfig {
@@ -49,13 +50,13 @@ class SharedDataStore {
   // Service Charge Management
   async getServiceChargeConfig(): Promise<ServiceChargeConfig> {
     try {
-      console.log('💰 SharedDataStore - Loading service charge config...');
+      logger.info('💰 SharedDataStore - Loading service charge config...');
 
       // Try to get from real backend API first using robust networking
       const networkResult = await NetworkUtils.getServiceChargeConfig();
 
       if (networkResult.success && networkResult.data) {
-        console.log('✅ Service charge config received from API:', networkResult.data);
+        logger.info('✅ Service charge config received from API:', networkResult.data);
 
         // Handle different API response formats
         let config: ServiceChargeConfig;
@@ -91,7 +92,7 @@ class SharedDataStore {
         // Cache the result and save to AsyncStorage for offline use
         this.cache.set('serviceCharge', config);
         await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(config));
-        console.log('✅ Service charge config cached locally:', config);
+        logger.info('✅ Service charge config cached locally:', config);
         return config;
       } else {
         console.warn('⚠️ API request failed:', networkResult.error);
@@ -102,7 +103,7 @@ class SharedDataStore {
       if (stored) {
         const config = JSON.parse(stored);
         this.cache.set('serviceCharge', config);
-        console.log('✅ Service charge config from local storage (API fallback):', config);
+        logger.info('✅ Service charge config from local storage (API fallback):', config);
         return config;
       }
 
@@ -164,7 +165,7 @@ class SharedDataStore {
 
         if (response.ok) {
           const result = await response.json();
-          console.log('✅ Service charge saved to API:', result);
+          logger.info('✅ Service charge saved to API:', result);
 
           // Update cache with confirmed data
           this.cache.set('serviceCharge', configWithTimestamp);
@@ -187,7 +188,7 @@ class SharedDataStore {
       await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(configWithTimestamp));
       this.cache.set('serviceCharge', configWithTimestamp);
 
-      console.log('✅ Service charge config saved locally (API fallback):', configWithTimestamp);
+      logger.info('✅ Service charge config saved locally (API fallback):', configWithTimestamp);
 
       // Trigger sync event for real-time updates
       this.notifySubscribers('serviceCharge', configWithTimestamp);
@@ -240,7 +241,7 @@ class SharedDataStore {
       await AsyncStorage.setItem('platform.payments', JSON.stringify(configWithTimestamp));
       this.cache.set('payments', configWithTimestamp);
 
-      console.log('✅ Payment config saved:', configWithTimestamp);
+      logger.info('✅ Payment config saved:', configWithTimestamp);
       this.notifySubscribers('payments', configWithTimestamp);
     } catch (error) {
       console.error('❌ Failed to save payment config:', error);
@@ -280,7 +281,7 @@ class SharedDataStore {
       await AsyncStorage.setItem(`platform.${key}`, JSON.stringify(valueWithTimestamp));
       this.cache.set(key, valueWithTimestamp);
 
-      console.log(`✅ Platform setting ${key} saved:`, valueWithTimestamp);
+      logger.info(`✅ Platform setting ${key} saved:`, valueWithTimestamp);
       this.notifySubscribers(key, valueWithTimestamp);
     } catch (error) {
       console.error(`❌ Failed to save platform setting ${key}:`, error);
@@ -329,7 +330,7 @@ class SharedDataStore {
       await AsyncStorage.multiRemove(platformKeys);
       this.cache.clear();
 
-      console.log('✅ All platform data cleared');
+      logger.info('✅ All platform data cleared');
     } catch (error) {
       console.error('❌ Failed to clear platform data:', error);
       throw error;

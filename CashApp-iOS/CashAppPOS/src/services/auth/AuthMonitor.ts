@@ -8,6 +8,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import tokenManager from '../../utils/tokenManager';
+import { logger } from '../../utils/logger';
 
 interface AuthEvent {
   timestamp: string;
@@ -82,7 +83,7 @@ class AuthMonitor {
     // Log to console in development
     if (__DEV__) {
       const emoji = this.getEmojiForType(type);
-      console.log(`${emoji} Auth Event: ${message}`, details || '');
+      logger.info(`${emoji} Auth Event: ${message}`, details || '');
     }
 
     // Persist events for debugging
@@ -192,5 +193,5 @@ export { AuthMonitor };
 
 // Log that monitoring is active
 if (__DEV__) {
-  console.log('🔍 Auth monitoring active');
+  logger.info('🔍 Auth monitoring active');
 }

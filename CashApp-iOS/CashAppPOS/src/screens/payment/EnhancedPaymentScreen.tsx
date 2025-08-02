@@ -24,6 +24,7 @@ import OrderService from '../../services/OrderService';
 import SharedDataStore from '../../services/SharedDataStore';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
+import { logger } from '../../utils/logger';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -117,7 +118,7 @@ const EnhancedPaymentScreen: React.FC = () => {
   useEffect(() => {
     const loadPlatformServiceCharge = async () => {
       try {
-        console.log('💰 EnhancedPaymentScreen - Loading platform service charge...');
+        logger.info('💰 EnhancedPaymentScreen - Loading platform service charge...');
         const dataStore = SharedDataStore.getInstance();
         const config = await dataStore.getServiceChargeConfig();
 
@@ -127,9 +128,9 @@ const EnhancedPaymentScreen: React.FC = () => {
             rate: config.rate,
             description: config.description || 'Platform service charge',
           });
-          console.log('✅ Platform service charge loaded:', config);
+          logger.info('✅ Platform service charge loaded:', config);
         } else {
-          console.log('⚠️ No platform service charge config found');
+          logger.info('⚠️ No platform service charge config found');
         }
       } catch (error) {
         console.error('❌ Failed to load platform service charge:', error);
@@ -141,7 +142,7 @@ const EnhancedPaymentScreen: React.FC = () => {
     // Subscribe to real-time updates
     const dataStore = SharedDataStore.getInstance();
     const unsubscribe = dataStore.subscribe('serviceCharge', (updatedConfig) => {
-      console.log('🔄 Platform service charge updated in real-time:', updatedConfig);
+      logger.info('🔄 Platform service charge updated in real-time:', updatedConfig);
       setPlatformServiceCharge({
         enabled: updatedConfig.enabled,
         rate: updatedConfig.rate,
@@ -190,12 +191,12 @@ const EnhancedPaymentScreen: React.FC = () => {
       // Simulate QR code expiration after 5 minutes with safer state checking
       setTimeout(() => {
         setQRPaymentStatus((current) => {
-          console.log('⏰ QR Code expiration check - current status:', current);
+          logger.info('⏰ QR Code expiration check - current status:', current);
           return current === 'waiting' ? 'expired' : current;
         });
       }, 300000); // 5 minutes
 
-      console.log('✅ QR Code generated successfully:', qrString.substring(0, 50) + '...');
+      logger.info('✅ QR Code generated successfully:', qrString.substring(0, 50) + '...');
     } catch (error) {
       console.error('❌ Failed to generate QR code:', error);
       setQRPaymentStatus('expired');
@@ -388,7 +389,7 @@ const EnhancedPaymentScreen: React.FC = () => {
         notes: undefined,
       };
 
-      console.log('💳 Processing payment and saving order...', {
+      logger.info('💳 Processing payment and saving order...', {
         total,
         customer: customerEmail,
         method: selectedPaymentMethod,

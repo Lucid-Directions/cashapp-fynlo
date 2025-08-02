@@ -19,6 +19,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SimpleTextInput } from '../../../components/inputs'; // Assuming SimpleDecimalInput not needed for now
 import Colors from '../../../constants/Colors';
 import { useAuth } from '../../../contexts/AuthContext';
+import { logger } from '../../../utils/logger';
 
 interface BankDetails {
   accountHolderName: string;
@@ -139,7 +140,7 @@ const BankDetailsScreen: React.FC = () => {
     // Simulate API call
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log('Bank details saved:', details);
+        logger.info('Bank details saved:', details);
         resolve();
       }, 1500);
     });

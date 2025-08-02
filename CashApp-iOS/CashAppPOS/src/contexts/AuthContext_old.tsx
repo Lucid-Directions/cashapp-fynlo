@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import RestaurantDataService from '../services/RestaurantDataService';
 import API_CONFIG from '../config/api';
 import { useAuthStore } from '../store/useAuthStore';
+import { logger } from '../utils/logger';
 
 export interface User {
   id: string;
@@ -156,7 +157,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(true);
       
       // Check auth state from Supabase
-      console.log('🔐 Checking Supabase authentication state...');
+      logger.info('🔐 Checking Supabase authentication state...');
       await checkAuthStore();
       
     } catch (error) {
@@ -181,7 +182,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return false;
     }
   };
-        console.log('🌐 API URL:', `${API_CONFIG.FULL_API_URL}/auth/login`);
+        logger.info('🌐 API URL:', `${API_CONFIG.FULL_API_URL}/auth/login`);
         
         const authToken = await AsyncStorage.getItem('auth_token');
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/auth/login`, {
@@ -195,9 +196,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }),
         });
 
-        console.log('📡 Response status:', response.status);
+        logger.info('📡 Response status:', response.status);
         const responseText = await response.text();
-        console.log('📄 Response:', responseText.substring(0, 200));
+        logger.info('📄 Response:', responseText.substring(0, 200));
 
         if (response.ok) {
           const data = JSON.parse(responseText);
@@ -264,7 +265,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(businessData));
               }
             } catch (restaurantError) {
-              console.log('Failed to load restaurant data, using defaults');
+              logger.info('Failed to load restaurant data, using defaults');
             }
           }
 
@@ -276,13 +277,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           // Parse error response
           try {
             const errorData = JSON.parse(responseText);
-            console.log('❌ API error:', errorData.error?.message || errorData.message || 'Unknown error');
+            logger.info('❌ API error:', errorData.error?.message || errorData.message || 'Unknown error');
           } catch {
-            console.log('❌ API error: Could not parse response');
+            logger.info('❌ API error: Could not parse response');
           }
         }
       } catch (apiError) {
-        console.log('API authentication failed, falling back to mock for demo accounts:', apiError);
+        logger.info('API authentication failed, falling back to mock for demo accounts:', apiError);
       }
 
       // Fallback to mock authentication for demo accounts only
@@ -318,7 +319,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
           // INITIALIZE: If no restaurants exist, populate with mock data for the Mexican restaurant
           if (!Array.isArray(realRestaurants) || realRestaurants.length === 0) {
-            console.log('🏗️ Initializing platform restaurants - no restaurants found, adding mock data');
+            logger.info('🏗️ Initializing platform restaurants - no restaurants found, adding mock data');
             
             // Convert MOCK_RESTAURANTS to RestaurantData format for RestaurantDataService
             const restaurantDataList = MOCK_RESTAURANTS.map(business => ({
@@ -353,7 +354,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             
             // Save to RestaurantDataService
             await restaurantDataService.savePlatformRestaurants('platform_owner_1', restaurantDataList);
-            console.log(`✅ Initialized ${restaurantDataList.length} restaurants for platform owner`);
+            logger.info(`✅ Initialized ${restaurantDataList.length} restaurants for platform owner`);
             
             // Reload the restaurants after initialization
             realRestaurants = await restaurantDataService.getPlatformRestaurants('platform_owner_1');
@@ -380,7 +381,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
         
         setPlatform(realPlatformData);
-        console.log(`✅ Platform data loaded with REAL data: ${Array.isArray(realRestaurants) ? realRestaurants.length : 0} restaurants, £${totalRevenue} total revenue`);
+        logger.info(`✅ Platform data loaded with REAL data: ${Array.isArray(realRestaurants) ? realRestaurants.length : 0} restaurants, £${totalRevenue} total revenue`);
         
         // Set first restaurant as default if exists
         if (businesses.length > 0) {
@@ -578,7 +579,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const loadPlatformData = async (): Promise<void> => {
     try {
       if (user?.role === 'platform_owner') {
-        console.log('🏢 Loading REAL platform data for platform owner');
+        logger.info('🏢 Loading REAL platform data for platform owner');
         
         // Load REAL restaurant data first
         const restaurantDataService = RestaurantDataService.getInstance();
@@ -599,7 +600,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
         
         setPlatform(realPlatformData);
-        console.log(`✅ Platform data loaded: ${realRestaurants.length} restaurants, £${totalRevenue} total revenue`);
+        logger.info(`✅ Platform data loaded: ${realRestaurants.length} restaurants, £${totalRevenue} total revenue`);
       }
     } catch (error) {
       console.error('Error loading platform data:', error);
@@ -609,14 +610,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const switchRestaurant = async (restaurantId: string): Promise<void> => {
     try {
       if (user?.role === 'platform_owner') {
-        console.log(`🔄 Switching to restaurant: ${restaurantId}`);
+        logger.info(`🔄 Switching to restaurant: ${restaurantId}`);
         
         // Find restaurant in the REAL managed restaurants data
         const restaurant = managedRestaurants.find(r => r.id === restaurantId);
         if (restaurant) {
           setBusiness(restaurant);
           await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(restaurant));
-          console.log(`✅ Switched to restaurant: ${restaurant.name}`);
+          logger.info(`✅ Switched to restaurant: ${restaurant.name}`);
         } else {
           console.error(`❌ Restaurant ${restaurantId} not found in managed restaurants`);
         }
@@ -635,7 +636,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const unsubscribe = restaurantDataService.subscribeToPlatformRestaurants(
         'platform_owner_1',
         (updatedRestaurants) => {
-          console.log('🔄 Platform restaurants updated in real-time:', updatedRestaurants.length);
+          logger.info('🔄 Platform restaurants updated in real-time:', updatedRestaurants.length);
           const businesses = updatedRestaurants.map(r => restaurantDataService.toBusinessType(r));
           setManagedRestaurants(businesses);
         }

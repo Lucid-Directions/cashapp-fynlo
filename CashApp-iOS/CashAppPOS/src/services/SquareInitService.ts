@@ -6,6 +6,7 @@
 import { getSquareConfig, getSquareLocationId } from '../config/square';
 
 import SquareService from './SquareService';
+import { logger } from '../utils/logger';
 
 class SquareInitService {
   private static instance: SquareInitService;
@@ -47,7 +48,7 @@ class SquareInitService {
       });
 
       this.initialized = true;
-      console.log('Square SDK initialized successfully');
+      logger.info('Square SDK initialized successfully');
       return true;
     } catch (error) {
       console.error('Failed to initialize Square SDK:', error);

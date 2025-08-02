@@ -1,3 +1,5 @@
+import { logger } from '../../utils/logger';
+
 // Note: This is a placeholder implementation since react-native-square-in-app-payments
 // is not available. In a real implementation, you would use the Square SDK.
 
@@ -25,7 +27,7 @@ class SquarePaymentProviderClass {
       // await SQIPCore.setSquareApplicationId(config.applicationId);
 
       this.initialized = true;
-      console.log('Square payment provider initialized (placeholder)');
+      logger.info('Square payment provider initialized (placeholder)');
     } catch (error) {
       console.error('Failed to initialize Square:', error);
       throw error;

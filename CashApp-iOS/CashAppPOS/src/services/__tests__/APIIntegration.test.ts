@@ -1,5 +1,6 @@
 // APIIntegration.test.ts - Integration tests for real API connections
 import DatabaseService from '../DatabaseService';
+import { logger } from '../../utils/logger';
 
 // These tests require the backend server to be running
 // Run with: npm test -- --testNamePattern="API Integration"
@@ -13,7 +14,7 @@ describe('API Integration Tests', () => {
 
   beforeAll(() => {
     if (SKIP_API_TESTS) {
-      console.log('Skipping API integration tests (SKIP_API_TESTS=true)');
+      logger.info('Skipping API integration tests (SKIP_API_TESTS=true)');
       return;
     }
     databaseService = DatabaseService.getInstance();
@@ -32,7 +33,7 @@ describe('API Integration Tests', () => {
         expect(data.status).toBe('healthy');
       } catch (error) {
         console.error('Backend health check failed:', error);
-        console.log('Make sure the backend server is running at http://localhost:8000');
+        logger.info('Make sure the backend server is running at http://localhost:8000');
         throw new Error('Backend server is not available for testing');
       }
     });
@@ -82,7 +83,7 @@ describe('API Integration Tests', () => {
           expect(product).toHaveProperty('price');
         }
       } catch (error) {
-        console.log(
+        logger.info(
           'Products API test failed - this is expected if backend is not fully implemented'
         );
         // Don't fail the test if endpoint doesn't exist yet
@@ -104,7 +105,7 @@ describe('API Integration Tests', () => {
           expect(category).toHaveProperty('name');
         }
       } catch (error) {
-        console.log(
+        logger.info(
           'Categories API test failed - this is expected if backend is not fully implemented'
         );
         expect(error).toBeDefined();
@@ -137,7 +138,7 @@ describe('API Integration Tests', () => {
           expect(order).toHaveProperty('state');
         }
       } catch (error) {
-        console.log(
+        logger.info(
           'Order creation API test failed - this is expected if backend is not fully implemented'
         );
         expect(error).toBeDefined();
@@ -158,7 +159,7 @@ describe('API Integration Tests', () => {
           expect(order).toHaveProperty('date_order');
         }
       } catch (error) {
-        console.log(
+        logger.info(
           'Recent orders API test failed - this is expected if backend is not fully implemented'
         );
         expect(error).toBeDefined();
@@ -178,7 +179,7 @@ describe('API Integration Tests', () => {
         expect(Array.isArray(floorPlan.tables)).toBe(true);
         expect(Array.isArray(floorPlan.sections)).toBe(true);
       } catch (error) {
-        console.log(
+        logger.info(
           'Floor plan API test failed - this is expected if backend is not fully implemented'
         );
         expect(error).toBeDefined();
@@ -198,7 +199,7 @@ describe('API Integration Tests', () => {
           expect(report.summary).toHaveProperty('total_sales');
         }
       } catch (error) {
-        console.log(
+        logger.info(
           'Daily report API test failed - this is expected if backend is not fully implemented'
         );
         expect(error).toBeDefined();
@@ -216,7 +217,7 @@ describe('API Integration Tests', () => {
           expect(summary).toHaveProperty('period');
         }
       } catch (error) {
-        console.log(
+        logger.info(
           'Sales summary API test failed - this is expected if backend is not fully implemented'
         );
         expect(error).toBeDefined();
@@ -233,7 +234,7 @@ describe('API Integration Tests', () => {
 
         expect(typeof result).toBe('boolean');
       } catch (error) {
-        console.log(
+        logger.info(
           'Payment API test failed - this is expected if backend is not fully implemented'
         );
         expect(error).toBeDefined();

@@ -1,15 +1,16 @@
 // utils/dataPrefetcher.ts (new)
 // import { queryClient } from '../services/QueryClient'; // Assuming QueryClient is set up
 import DataService from '../services/DataService';
+import { logger } from '../utils/logger';
 
 // Placeholder for queryClient if not fully set up yet.
 // In a real scenario, this would be imported from a React Query setup.
 const queryClient = {
   prefetchQuery: async (queryKey: any, queryFn: any) => {
-    console.log(`[dataPrefetcher] Attempting to prefetch ${queryKey.join('/')}`);
+    logger.info(`[dataPrefetcher] Attempting to prefetch ${queryKey.join('/')}`);
     try {
       await queryFn();
-      console.log(`[dataPrefetcher] Successfully prefetched ${queryKey.join('/')}`);
+      logger.info(`[dataPrefetcher] Successfully prefetched ${queryKey.join('/')}`);
     } catch (error) {
       console.error(`[dataPrefetcher] Error prefetching ${queryKey.join('/')}:`, error);
     }
@@ -35,7 +36,7 @@ export async function prefetchUserData() {
   const dataService = DataService.getInstance();
   // Example:
   // await queryClient.prefetchQuery(['userOrders'], () => dataService.getRecentOrders(5));
-  console.log(
+  logger.info(
     '[dataPrefetcher] prefetchUserData called (currently no specific user data to prefetch here).'
   );
 }

@@ -4,6 +4,7 @@
  */
 
 import API_CONFIG from '../config/api';
+import { logger } from '../utils/logger';
 
 export interface RealUser {
   id: string;
@@ -126,7 +127,7 @@ class RealUserManagementService {
   // API methods
   async getAllUsers(): Promise<UserDisplayData[]> {
     try {
-      console.log('🔍 Fetching users from real backend...');
+      logger.info('🔍 Fetching users from real backend...');
       const response = await fetch(`${this.baseUrl}/users`);
 
       if (!response.ok) {
@@ -134,7 +135,7 @@ class RealUserManagementService {
       }
 
       const realUsers: RealUser[] = await response.json();
-      console.log('✅ Found real users:', realUsers.length);
+      logger.info('✅ Found real users:', realUsers.length);
 
       // Convert to display format
       const displayUsers = realUsers.map((user) => this.convertToDisplayFormat(user));
@@ -232,7 +233,7 @@ class RealUserManagementService {
 
   // Mock access logs since backend doesn't have this yet
   async getAccessLogs(limit?: number): Promise<AccessLog[]> {
-    console.log('📝 Access logs not implemented in backend yet, returning empty array');
+    logger.info('📝 Access logs not implemented in backend yet, returning empty array');
     return [];
   }
 
@@ -249,7 +250,7 @@ class RealUserManagementService {
     details?: string
   ): Promise<void> {
     // Will implement when backend supports it
-    console.log(`📝 Would log: ${userEmail} - ${action} - ${status}`);
+    logger.info(`📝 Would log: ${userEmail} - ${action} - ${status}`);
   }
 
   // Search functionality

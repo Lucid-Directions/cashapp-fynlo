@@ -1,0 +1,154 @@
+name: Python Syntax Check
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**/*.py'
+      - '.github/workflows/python-syntax-check.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**/*.py'
+      - '.github/workflows/python-syntax-check.yml'
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+    name: Python Syntax Validation
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for better analysis
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ruff black mypy pylint flake8 bandit
+        # Install project dependencies for import checking
+        if [ -f backend/requirements.txt ]; then
+          pip install -r backend/requirements.txt
+        fi
+    
+    - name: Check Python syntax with compile
+      run: |
+        echo "🔍 Checking Python syntax with compile..."
+        python -m compileall backend -q
+        if [ $? -eq 0 ]; then
+          echo "✅ Python syntax check passed!"
+        else
+          echo "❌ Python syntax errors found!"
+          exit 1
+        fi
+    
+    - name: Run Ruff linter
+      run: |
+        echo "🔍 Running Ruff linter..."
+        cd backend
+        ruff check . --format github
+        if [ $? -ne 0 ]; then
+          echo "❌ Ruff found issues!"
+          exit 1
+        fi
+    
+    - name: Check imports with Ruff
+      run: |
+        echo "🔍 Checking for unused imports..."
+        cd backend
+        ruff check . --select F401,F821 --format github
+        if [ $? -ne 0 ]; then
+          echo "❌ Import issues found!"
+          exit 1
+        fi
+    
+    - name: Run Black formatter check
+      run: |
+        echo "🔍 Checking code formatting with Black..."
+        cd backend
+        black . --check --diff
+        if [ $? -ne 0 ]; then
+          echo "⚠️ Code formatting issues found. Run 'black .' to fix."
+        fi
+    
+    - name: Run MyPy type checking
+      run: |
+        echo "🔍 Running MyPy type checker..."
+        cd backend
+        mypy . --ignore-missing-imports --no-strict-optional || true
+        # MyPy is informational only for now
+    
+    - name: Run Flake8 style checker
+      run: |
+        echo "🔍 Running Flake8..."
+        cd backend
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        if [ $? -ne 0 ]; then
+          echo "❌ Critical Flake8 errors found!"
+          exit 1
+        fi
+    
+    - name: Security check with Bandit
+      run: |
+        echo "🔐 Running Bandit security check..."
+        cd backend
+        bandit -r . -f json -o bandit-report.json || true
+        # Parse and display critical issues
+        python -c "
+import json
+with open('bandit-report.json', 'r') as f:
+    data = json.load(f)
+    high_issues = [r for r in data['results'] if r['issue_severity'] == 'HIGH']
+    if high_issues:
+        print('⚠️ High severity security issues found:')
+        for issue in high_issues:
+            print(f'  - {issue[\"filename\"]}:{issue[\"line_number\"]} - {issue[\"issue_text\"]}')
+    else:
+        print('✅ No high severity security issues found.')
+        "
+    
+    - name: Check for debugging code
+      run: |
+        echo "🔍 Checking for debugging code..."
+        cd backend
+        # Check for print statements (should use logging)
+        if grep -r "print(" . --include="*.py" | grep -v "# noqa" | grep -v "__pycache__"; then
+          echo "⚠️ Found print statements. Consider using logging instead."
+        fi
+        # Check for breakpoints
+        if grep -r "breakpoint()\|import pdb\|pdb.set_trace()" . --include="*.py"; then
+          echo "❌ Found debugging breakpoints!"
+          exit 1
+        fi
+    
+    - name: Validate Alembic migrations
+      run: |
+        echo "🔍 Checking Alembic migration files..."
+        cd backend
+        for file in alembic/versions/*.py; do
+          if [ -f "$file" ]; then
+            python -m py_compile "$file"
+            if [ $? -ne 0 ]; then
+              echo "❌ Syntax error in migration: $file"
+              exit 1
+            fi
+          fi
+        done
+        echo "✅ All migration files are syntactically valid."
+    
+    - name: Summary
+      if: always()
+      run: |
+        echo "📊 Python Code Quality Summary:"
+        echo "================================"
+        cd backend
+        echo "Total Python files: $(find . -name '*.py' -not -path './__pycache__/*' | wc -l)"
+        echo "Total lines of code: $(find . -name '*.py' -not -path './__pycache__/*' -exec cat {} \; | wc -l)"
+        echo ""
+        echo "✅ Syntax validation complete!"

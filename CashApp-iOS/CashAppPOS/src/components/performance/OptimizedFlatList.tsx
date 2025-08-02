@@ -4,6 +4,7 @@ import type { FlatListProps, ViewToken } from 'react-native';
 import { FlatList } from 'react-native';
 
 import { performanceUtils } from '../../hooks/usePerformanceMonitor';
+import { logger } from '../../utils/logger';
 
 interface OptimizedFlatListProps<T> extends Omit<FlatListProps<T>, 'renderItem' | 'keyExtractor'> {
   data: T[];
@@ -66,7 +67,7 @@ function OptimizedFlatList<T>({
   const handleViewableItemsChanged = useCallback(
     ({ viewableItems, changed }: { viewableItems: ViewToken[]; changed: ViewToken[] }) => {
       if (enableViewabilityTracking && __DEV__) {
-        console.log(
+        logger.info(
           `[OptimizedFlatList] Viewable items: ${viewableItems.length}, Changed: ${changed.length}`
         );
       }

@@ -21,6 +21,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../../constants/Colors';
 
 import type { RouteProp } from '@react-navigation/native';
+import { logger } from '../../utils/logger';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -134,7 +135,7 @@ const QRScannerScreen: React.FC = () => {
     setIsScanning(false);
 
     // Provide haptic feedback simulation
-    console.log('QR Code scanned:', randomCode);
+    logger.info('QR Code scanned:', randomCode);
 
     // Auto-confirm after 2 seconds or let user manually confirm
     scanTimeoutRef.current = setTimeout(() => {
