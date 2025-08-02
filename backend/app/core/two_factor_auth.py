@@ -18,7 +18,8 @@ from app.core.exceptions import ValidationException, AuthenticationException, Fy
 
 # 2FA Configuration
 TOTP_ISSUER = "Fynlo POS"
-TOTP_WINDOW = 1  # Allow 1 time window before/after for clock skewBACKUP_CODES_COUNT = 10
+TOTP_WINDOW = 1  # Allow 1 time window before/after for clock skew
+BACKUP_CODES_COUNT = 10
 RECOVERY_CODE_LENGTH = 8
 
 
@@ -85,7 +86,8 @@ class TwoFactorAuth:
                 error_code="ACCESS_DENIED"
             )
         
-        # Generate secret and backup codes        secret = self.generate_secret()
+        # Generate secret and backup codes
+        secret = self.generate_secret()
         backup_codes = self.generate_backup_codes()
         qr_code = self.generate_qr_code(user, secret)
         
@@ -247,7 +249,8 @@ class TwoFactorAuth:
                 status_code=503
             )
         
-        # Generate new codes        new_codes = self.generate_backup_codes()
+        # Generate new codes
+        new_codes = self.generate_backup_codes()
         
         # Update stored data
         user_2fa_key = f"2fa:user:{user.id}"
