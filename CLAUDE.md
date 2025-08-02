@@ -26,6 +26,7 @@
 - **GitHub**: `gh` - Repository & PR management
 - **DigitalOcean**: `doctl` - Infrastructure control
 - **Vercel**: `vercel` - Deployment (requires VERCEL_TOKEN env var)
+- **Trivy**: `trivy` - Vulnerability scanner for dependencies and Docker images
 
 ### Specialized Sub-Agents (via Task tool)
 - **fynlo-test-runner** - Run tests, fix failures, improve coverage
@@ -293,4 +294,149 @@ vercel list
 vercel rollback
 ```
 
-**Remember**: Always commit before switching branches. Keep changes simple. Check logs for common issues.
+## 🔧 Python Quality Tools & Scripts
+
+### Installed Python Quality Tools
+When working on backend Python code, these tools are available:
+- **Ruff**: Fast Python linter (`ruff check app/`)
+- **Black**: Code formatter (`black app/`)
+- **MyPy**: Type checker (`mypy app/`)
+- **Flake8**: Style guide enforcement (`flake8 app/`)
+- **Bandit**: Security linter (`bandit -r app/`)
+- **Pylint**: Advanced linting (`pylint app/`)
+
+### Custom Scripts for PR Resolution
+
+#### 1. **Python Quality Checker** (`scripts/python-quality-check.py`)
+Runs all 5 Python quality tools and generates comprehensive report:
+```bash
+python3 scripts/python-quality-check.py --backend-path backend
+```
+Use when: You need to verify Python code quality before committing
+
+#### 2. **PR #459 Fixer** (`scripts/pr459_fixer.py`)
+Specialized tool for fixing common Python issues:
+```bash
+# Validate only (no fixes)
+python3 scripts/pr459_fixer.py --validate-only
+
+# Fix common issues
+python3 scripts/pr459_fixer.py
+```
+Use when: Fixing import issues, HTTPException migrations, or docstring problems
+
+#### 3. **Batch Conflict Resolver** (`scripts/batch-resolve-conflicts.py`)
+Automatically resolves simple merge conflicts:
+```bash
+python3 scripts/batch-resolve-conflicts.py
+```
+Use when: Dealing with many merge conflicts, especially import conflicts
+
+#### 4. **Syntax Error Fixer** (`scripts/fix-syntax-errors.py`)
+Fixes common Python syntax errors:
+```bash
+python3 scripts/fix-syntax-errors.py
+```
+Use when: Multiple syntax errors after merge conflicts
+
+### Security Scanning
+
+#### Trivy Usage
+```bash
+# Scan for vulnerabilities in dependencies
+trivy fs --scanners vuln backend/
+
+# Generate detailed JSON report
+trivy fs --format json --output trivy-report.json backend/
+
+# Scan Docker images
+trivy image fynlo-backend:latest
+```
+Use when: Before any production deployment or after updating dependencies
+
+### Common Patterns to Fix
+
+#### 1. Validator Syntax Errors
+```python
+# WRONG
+@validator('field')
+    return value
+
+# CORRECT
+@validator('field')
+def validate_field(cls, v):
+    return v
+```
+
+#### 2. HTTPException to FynloException
+```python
+# WRONG
+raise HTTPException(status_code=400, detail="Error")
+
+# CORRECT
+raise FynloException(message="Error", status_code=400)
+```
+
+#### 3. Print to Logger
+```python
+# WRONG
+print("Debug info")
+
+# CORRECT
+logger.info("Debug info")
+```
+
+## 📋 PR Conflict Resolution Workflow
+
+When dealing with large PRs with many conflicts (like PR #459):
+
+1. **Analyze Conflicts**:
+   ```bash
+   git diff --name-only --diff-filter=U | wc -l  # Count conflicts
+   python3 scripts/batch-resolve-conflicts.py    # Auto-resolve simple ones
+   ```
+
+2. **Fix Syntax Errors**:
+   ```bash
+   python3 scripts/pr459_fixer.py --validate-only  # Check errors
+   python3 scripts/fix-syntax-errors.py           # Fix common issues
+   ```
+
+3. **Run Quality Checks**:
+   ```bash
+   python3 scripts/python-quality-check.py --backend-path backend
+   ```
+
+4. **Security Scan**:
+   ```bash
+   trivy fs --scanners vuln backend/
+   ```
+
+5. **Update Dependencies** (if vulnerabilities found):
+   ```bash
+   pip install --upgrade package-name>=safe-version
+   ```
+
+## 🚨 When to Use Which Tool
+
+### Use MCP Tools When:
+- **File System**: Reading/writing multiple files, searching patterns
+- **Sequential Thinking**: Breaking down complex problems
+- **SemGrep**: Deep security analysis beyond Bandit
+
+### Use Python Quality Tools When:
+- **Before commits**: Run at least Ruff and Black
+- **Before PRs**: Run full python-quality-check.py
+- **After merge conflicts**: Run pr459_fixer.py
+
+### Use Security Tools When:
+- **Before deployments**: Always run Trivy
+- **After dependency updates**: Check for new vulnerabilities
+- **In PRs**: Run Bandit for Python-specific security issues
+
+### Use Custom Scripts When:
+- **Many conflicts**: batch-resolve-conflicts.py
+- **Syntax errors**: fix-syntax-errors.py
+- **Import cleanup**: pr459_fixer.py
+
+**Remember**: Always commit before switching branches. Keep changes simple. Check logs for common issues. Run quality checks before pushing.
