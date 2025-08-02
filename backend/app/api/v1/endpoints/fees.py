@@ -97,7 +97,6 @@ async def calculate_fees_for_order(
         restaurant_id=request.restaurant_id
     )
 
-"""
     if not payment_method_setting:
         # This should ideally not happen if defaults are seeded for all PaymentMethodEnums
         raise ResourceNotFoundException(

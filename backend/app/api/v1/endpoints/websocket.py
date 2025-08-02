@@ -3,8 +3,6 @@ WebSocket API endpoints for Fynlo POS
 Real-time communication endpoints
 """
 
-
-"""
 import asyncio
 import json
 import logging

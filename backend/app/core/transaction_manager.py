@@ -3,8 +3,6 @@ Database Transaction Management for Fynlo POS
 Provides decorators and utilities for atomic operations and rollback handling.
 """
 
-
-"""
 import functools
 import logging
 from contextlib import asynccontextmanager
@@ -34,9 +32,6 @@ class TransactionManager:
     Manages database transactions with retry logic, rollback handling,
     and atomic operation support.
     """
-    
-    
-"""
     def __init__(self, max_retries: int = 3, retry_delay: float = 0.1):
         self.max_retries = max_retries
         self.retry_delay = retry_delay
@@ -47,7 +42,6 @@ class TransactionManager:
         Context manager for atomic database transactions with automatic rollback.
         
         Usage:
-"""
             async with transaction_manager.atomic_transaction(db) as tx:
                 # Perform database operations
                 db.add(object1)
@@ -56,8 +50,6 @@ class TransactionManager:
                 # Automatically rolled back on exception
         """
         transaction_started = datetime.utcnow()
-        
-"""
         try:
             # Begin transaction if not already in one
             if db.in_transaction():
@@ -166,7 +158,6 @@ def transactional(max_retries: int = 3, retry_delay: float = 0.1):
         retry_delay: Base delay between retries (with exponential backoff)
     
     Usage:
-"""
         @transactional(max_retries=5, retry_delay=0.2)
         async def create_order_atomically(db: Session, order_data: dict):
             # All database operations in this function will be atomic
@@ -176,7 +167,6 @@ def transactional(max_retries: int = 3, retry_delay: float = 0.1):
             # Send notifications
             # etc.
     """
-"""
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
@@ -210,7 +200,6 @@ def optimistic_lock_retry(version_field: str = 'version', max_retries: int = 5):
         max_retries: Maximum number of retry attempts for version conflicts
     
     Usage:
-"""
         @optimistic_lock_retry(version_field='version', max_retries=10)
         async def update_product_stock(db: Session, product_id: str, quantity_change: int):
             product = db.query(Product).filter(Product.id == product_id).first()
@@ -219,7 +208,6 @@ def optimistic_lock_retry(version_field: str = 'version', max_retries: int = 5):
             product.version += 1
             # If another process updated the product, this will fail and retry
     """
-"""
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
@@ -243,9 +231,6 @@ class BatchTransactionManager:
     """
     Manages batch operations with transaction boundaries and partial failure handling.
     """
-    
-    
-"""
     def __init__(self, batch_size: int = 100, rollback_on_partial_failure: bool = True):
         self.batch_size = batch_size
         self.rollback_on_partial_failure = rollback_on_partial_failure

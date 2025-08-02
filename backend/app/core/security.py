@@ -3,8 +3,6 @@ Comprehensive security module for Fynlo POS backend.
 Handles environment filtering, input validation, password hashing, and security utilities.
 """
 
-
-"""
 import os
 import re
 import hmac
@@ -81,8 +79,6 @@ class SafeEnvironmentFilter:
         re.compile(r".*(API|AUTH|PRIVATE|CERT|WEBHOOK).*", re.IGNORECASE),
         re.compile(r"^(DATABASE_URL|REDIS_URL|AMQP_URL)$", re.IGNORECASE),
     ]
-    
-"""
     @classmethod
     def get_safe_environment(
         cls, 
@@ -171,8 +167,6 @@ class InputValidator:
     UUID_PATTERN = re.compile(r"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
     SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
     INSTANCE_ID_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$")
-    
-"""
     @classmethod
     def sanitize_string(
         cls, 
@@ -262,7 +256,6 @@ class TokenEncryption:
     """
     
     
-"""
     def __init__(self, master_key: Optional[str] = None):
         """
         Initialize token encryption with master key.
@@ -325,7 +318,6 @@ class WebhookSecurity:
     """
     
     
-"""
     @staticmethod
     def verify_signature(
         payload: bytes,

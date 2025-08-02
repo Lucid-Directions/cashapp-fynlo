@@ -3,8 +3,6 @@ WebSocket Manager for Fynlo POS
 Real-time communication for orders, payments, kitchen updates, and notifications
 """
 
-
-"""
 from typing import Dict, List, Optional, Any
 from fastapi import WebSocket, WebSocketDisconnect
 import json

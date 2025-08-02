@@ -2,8 +2,6 @@
 Stripe Payment Provider Implementation
 """
 
-
-"""
 import stripe
 from decimal import Decimal
 from typing import Dict, Any, Optional

@@ -5,8 +5,6 @@ This module contains Pydantic models for validating subscription-related
 API requests and responses.
 """
 
-
-"""
 from pydantic import BaseModel, validator
 from typing import Optional, Dict, Any
 from datetime import datetime

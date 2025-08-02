@@ -2,8 +2,6 @@
 Platform financial reporting endpoints.
 """
 
-
-"""
 from datetime import datetime, timedelta, date
 from typing import Optional
 from fastapi import APIRouter, Depends, Query

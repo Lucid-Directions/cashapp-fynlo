@@ -3,8 +3,6 @@ Platform administration endpoints for secure management
 Only accessible by existing platform owners with proper authentication
 """
 
-
-"""
 from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
 from typing import Optional

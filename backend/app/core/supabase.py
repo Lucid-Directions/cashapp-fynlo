@@ -2,8 +2,6 @@
 Supabase client configuration for authentication
 """
 
-
-"""
 import os
 import logging
 from typing import Optional

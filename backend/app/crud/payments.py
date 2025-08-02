@@ -2,8 +2,6 @@
 CRUD operations for payments and provider analytics
 """
 
-
-"""
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
 from datetime import datetime, timedelta

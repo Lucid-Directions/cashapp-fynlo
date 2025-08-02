@@ -3,8 +3,6 @@ WebSocket Event Integration for Fynlo POS
 Connects backend services with WebSocket notifications
 """
 
-
-"""
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 import asyncio

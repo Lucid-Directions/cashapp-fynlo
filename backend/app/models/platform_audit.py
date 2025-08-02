@@ -3,8 +3,6 @@ Platform audit logging model and functions.
 Tracks all platform admin actions for compliance and security.
 """
 
-
-"""
 from datetime import datetime
 from typing import Optional, Dict, Any
 from sqlalchemy import Column, String, TIMESTAMP, JSONB, Integer, ForeignKey, Text

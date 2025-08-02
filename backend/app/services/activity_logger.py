@@ -2,8 +2,6 @@
 Activity logging service for Fynlo Portal - Audit trail for portal actions
 """
 
-
-"""
 from typing import Optional, Dict, Any
 from datetime import datetime
 import json

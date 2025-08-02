@@ -3,8 +3,6 @@ Health monitoring endpoints for tracking instance status and system health.
 Enhanced with security best practices and proper authentication.
 """
 
-
-"""
 from fastapi import APIRouter, Request, Depends, Query
 from datetime import datetime, timezone
 import os

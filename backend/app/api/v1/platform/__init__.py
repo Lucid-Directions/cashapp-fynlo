@@ -12,8 +12,6 @@ Note: These endpoints are NOT used by the mobile app.
 Mobile apps use the standard v1 API endpoints.
 """
 
-
-"""
 from fastapi import APIRouter
 
 # Create platform router

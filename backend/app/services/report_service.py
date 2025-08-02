@@ -3,8 +3,6 @@ Report Aggregation Service
 Generates and populates DailyReport and HourlyMetric models from actual order data
 """
 
-
-"""
 from datetime import datetime, date, timedelta
 from decimal import Decimal
 from typing import Dict, List, Optional

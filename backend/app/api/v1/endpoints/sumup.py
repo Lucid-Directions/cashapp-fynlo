@@ -5,8 +5,6 @@ Provides secure configuration for mobile app without exposing API keys
 Last updated: 2025-07-29 - Force rebuild after rate limiter fix
 """
 
-
-"""
 from fastapi import APIRouter, Depends, status, Request
 from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session

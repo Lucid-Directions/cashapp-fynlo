@@ -3,8 +3,6 @@ Offline Sync Manager for Fynlo POS
 Handles batch upload, conflict resolution, and offline synchronization
 """
 
-
-"""
 from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session

@@ -3,8 +3,6 @@ Configuration Management API Endpoints
 Provides endpoints for managing payment system configuration
 """
 
-
-"""
 from typing import Dict, Any, Optional, List
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session

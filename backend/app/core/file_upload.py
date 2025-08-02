@@ -3,8 +3,6 @@ File Upload System for Fynlo POS
 Handles base64 image uploads from iOS with validation and processing
 """
 
-
-"""
 import base64
 import os
 import uuid
