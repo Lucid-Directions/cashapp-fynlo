@@ -54,7 +54,7 @@ jobs:
     
     - name: Install dependencies
       working-directory: CashApp-iOS/CashAppPOS
-      run: npm ci
+      run: npm ci --legacy-peer-deps
     
     - name: TypeScript type check
       working-directory: CashApp-iOS/CashAppPOS
