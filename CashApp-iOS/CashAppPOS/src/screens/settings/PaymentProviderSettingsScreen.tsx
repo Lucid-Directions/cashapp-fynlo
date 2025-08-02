@@ -73,7 +73,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
         setConfig(savedConfig);
       }
     } catch (error) {
-      logger.error('Failed to load payment configuration:', error);
+      console.error('Failed to load payment configuration:', error);
     } finally {
       setLoading(false);
     }
@@ -85,7 +85,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
       Alert.alert('Success', 'Payment provider configuration saved successfully');
     } catch (error) {
       Alert.alert('Error', 'Failed to save configuration');
-      logger.error('Failed to save payment configuration:', error);
+      console.error('Failed to save payment configuration:', error);
     }
   };
 
@@ -124,7 +124,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
       }
     } catch (error) {
       Alert.alert('Error', `Failed to test ${provider} connection`);
-      logger.error(`${provider} connection test failed:`, error);
+      console.error(`${provider} connection test failed:`, error);
     }
   };
 

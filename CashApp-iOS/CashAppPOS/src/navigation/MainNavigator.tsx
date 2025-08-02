@@ -46,7 +46,7 @@ const MainTabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ _focused, color, size }) => {
+        tabBarIcon: ({ focused, color, size }) => {
           let iconName: string;
 
           switch (route.name) {
