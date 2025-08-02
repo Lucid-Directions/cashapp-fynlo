@@ -3,8 +3,6 @@ Enhanced Exception Handling for Fynlo POS
 iOS-friendly error management with detailed error information
 """
 
-
-"""
 from typing import Any, Dict, Optional, List
 from fastapi import Request
 from fastapi.exceptions import RequestValidationError
@@ -449,3 +447,4 @@ class iOSErrorHelper:
                 "suggestion": "Please select an alternative item"
             }
         )
+
