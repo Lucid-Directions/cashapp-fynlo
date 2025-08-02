@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "tree-sitter": {
+      "command": "python",
+      "args": ["-m", "mcp_server_tree_sitter.server"],
+      "description": "AST-level Python parsing to catch syntax errors early"
+    },
+    "code-checker": {
+      "command": "python",
+      "args": ["-m", "src.main", "--project-dir", "/Users/arnauddecube/Documents/Fynlo/cashapp-fynlo/backend"],
+      "description": "Pylint + pytest integration for comprehensive code quality"
+    }
+  }
+}
