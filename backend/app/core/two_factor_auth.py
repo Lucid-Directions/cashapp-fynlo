@@ -82,7 +82,7 @@ class TwoFactorAuth:
         # Only platform owners require 2FA
         if not TenantSecurity.is_platform_owner(user):
             raise AuthenticationException(
-                message="2FA is only required for platform owners",
+                detail="2FA is only required for platform owners",
                 error_code="ACCESS_DENIED"
             )
         
@@ -119,7 +119,7 @@ class TwoFactorAuth:
         """
         if not self.redis:
             raise FynloException(
-                "2FA service unavailable", 
+                detail="2FA service unavailable", 
                 status_code=503
             )
         
@@ -245,7 +245,7 @@ class TwoFactorAuth:
         
         if not self.redis:
             raise FynloException(
-                "2FA service unavailable", 
+                detail="2FA service unavailable", 
                 status_code=503
             )
         

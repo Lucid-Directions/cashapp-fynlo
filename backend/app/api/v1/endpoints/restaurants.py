@@ -1197,89 +1197,94 @@ async def update_table_server(
     )
 
 # Layout Management Endpoints
-class FloorPlanLayoutUpdate(BaseModel):
-    layout: dict
+# COMMENTED OUT: Floor plan layout endpoints temporarily disabled 
+# The floor_plan_layout column was removed from the database
+# These endpoints need to be updated to use a different storage mechanism
+# before they can be re-enabled
 
-@router.get("/floor-plan/layout")
-async def get_floor_plan_layout(
-    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Get restaurant floor plan layout"""
-    
-    # Validate restaurant access
-    await TenantSecurity.validate_restaurant_access(
-        current_user, 
-        current_restaurant_id or current_user.restaurant_id, 
-        db=db
-    )
-    # Use the provided restaurant_id or fall back to user's default
-    restaurant_id = current_restaurant_id or current_user.restaurant_id
-    
-    restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
-    
-    if not restaurant:
-        raise FynloException(
-            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
-            detail="Restaurant not found"
-        )
-    
-    return APIResponseHelper.success(
-        data={
-            "layout": restaurant.floor_plan_layout or {},
-            "restaurant_id": str(restaurant.id)
-        },
-        message="Floor plan layout retrieved successfully"
-    )
+# class FloorPlanLayoutUpdate(BaseModel):
+#     layout: dict
 
-@router.put("/floor-plan/layout")
-async def update_floor_plan_layout(
-    layout_data: FloorPlanLayoutUpdate,
-    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Update restaurant floor plan layout"""
-    
-    # Validate restaurant access
-    await TenantSecurity.validate_restaurant_access(
-        current_user, 
-        current_restaurant_id or current_user.restaurant_id, 
-        db=db
-    )
-    # Use the provided restaurant_id or fall back to user's default
-    restaurant_id = current_restaurant_id or current_user.restaurant_id
-    
-    restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
-    
-    if not restaurant:
-        raise FynloException(
-            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
-            detail="Restaurant not found"
-        )
-    
-    # Validate layout JSON
-    try:
-        validated_layout = validate_model_jsonb_fields('restaurant', 'floor_plan_layout', layout_data.layout)
-    except ValidationErr as e:
-        raise FynloException(
-            error_code=ErrorCodes.VALIDATION_ERROR,
-            detail=f"Layout validation failed: {str(e)}"
-        )
-    
-    restaurant.floor_plan_layout = validated_layout
-    restaurant.updated_at = datetime.utcnow()
-    db.commit()
-    db.refresh(restaurant)
-    
-    return APIResponseHelper.success(
-        data={
-            "layout": restaurant.floor_plan_layout,
-            "restaurant_id": str(restaurant.id)
-        },
-        message="Floor plan layout updated successfully"
-    )
+# @router.get("/floor-plan/layout")
+# async def get_floor_plan_layout(
+#     current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
+#     current_user: User = Depends(get_current_user),
+#     db: Session = Depends(get_db)
+# ):
+#     """Get restaurant floor plan layout"""
+#     
+#     # Validate restaurant access
+#     await TenantSecurity.validate_restaurant_access(
+#         current_user, 
+#         current_restaurant_id or current_user.restaurant_id, 
+#         db=db
+#     )
+#     # Use the provided restaurant_id or fall back to user's default
+#     restaurant_id = current_restaurant_id or current_user.restaurant_id
+#     
+#     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+#     
+#     if not restaurant:
+#         raise FynloException(
+#             error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+#             detail="Restaurant not found"
+#         )
+#     
+#     return APIResponseHelper.success(
+#         data={
+#             "layout": restaurant.floor_plan_layout or {},
+#             "restaurant_id": str(restaurant.id)
+#         },
+#         message="Floor plan layout retrieved successfully"
+#     )
+
+# @router.put("/floor-plan/layout")
+# async def update_floor_plan_layout(
+#     layout_data: FloorPlanLayoutUpdate,
+#     current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
+#     current_user: User = Depends(get_current_user),
+#     db: Session = Depends(get_db)
+# ):
+#     """Update restaurant floor plan layout"""
+#     
+#     # Validate restaurant access
+#     await TenantSecurity.validate_restaurant_access(
+#         current_user, 
+#         current_restaurant_id or current_user.restaurant_id, 
+#         db=db
+#     )
+#     # Use the provided restaurant_id or fall back to user's default
+#     restaurant_id = current_restaurant_id or current_user.restaurant_id
+#     
+#     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+#     
+#     if not restaurant:
+#         raise FynloException(
+#             error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+#             detail="Restaurant not found"
+#         )
+#     
+#     # Validate layout JSON
+#     try:
+#         validated_layout = validate_model_jsonb_fields('restaurant', 'floor_plan_layout', layout_data.layout)
+#     except ValidationErr as e:
+#         raise FynloException(
+#             error_code=ErrorCodes.VALIDATION_ERROR,
+#             detail=f"Layout validation failed: {str(e)}"
+#         )
+#     
+#     restaurant.floor_plan_layout = validated_layout
+#     restaurant.updated_at = datetime.utcnow()
+#     db.commit()
+#     db.refresh(restaurant)
+#     
+#     return APIResponseHelper.success(
+#         data={
+#             "layout": restaurant.floor_plan_layout,
+#             "restaurant_id": str(restaurant.id)
+#         },
+#         message="Floor plan layout updated successfully"
+#     )
 
 # Table Position Updates
 class TablePositionUpdate(BaseModel):
