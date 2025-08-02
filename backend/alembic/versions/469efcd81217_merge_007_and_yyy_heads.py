@@ -5,8 +5,6 @@ Revises: 007, YYY_create_financial_records_tables
 Create Date: 2025-07-01 15:03:41.278609
 
 """
-from alembic import op
-import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.

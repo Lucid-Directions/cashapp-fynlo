@@ -3,18 +3,16 @@ Customer Management API endpoints for Fynlo POS
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc, func
 from pydantic import BaseModel, EmailStr
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from app.core.database import get_db, Customer, Order, User
 from app.core.auth import get_current_user
 from app.core.redis_client import get_redis, RedisClient
-from app.core.responses import APIResponseHelper
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
-from app.core.security_utils import sanitize_sql_like_pattern, sanitize_search_term
+from app.core.exceptions import ValidationException, ResourceNotFoundException
 from app.schemas.search_schemas import CustomerSearchRequest
 
 router = APIRouter()

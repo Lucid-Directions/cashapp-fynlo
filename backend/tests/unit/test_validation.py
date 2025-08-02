@@ -1,7 +1,6 @@
 """
 Unit tests for input validation
 """
-import pytest
 from app.core.validation import (
     sanitize_input,
     validate_email,
@@ -10,7 +9,6 @@ from app.core.validation import (
     validate_table_number,
     validate_order_status,
     sanitize_sql_input,
-    validate_restaurant_id,
     validate_uuid
 )
 

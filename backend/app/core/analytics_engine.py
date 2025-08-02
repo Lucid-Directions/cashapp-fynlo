@@ -3,16 +3,14 @@ Advanced Analytics Engine for Fynlo POS
 Real-time dashboard metrics optimized for mobile consumption
 """
 
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta, date
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, or_, desc, asc, text
+from sqlalchemy import and_, desc
 from enum import Enum
-import json
 from dataclasses import dataclass
-from decimal import Decimal
 
-from app.core.database import get_db, Order, Product, Customer, Payment, User, Restaurant
+from app.core.database import Order, Product, Customer, Payment, User
 from app.core.exceptions import FynloException, ErrorCodes
 
 class AnalyticsTimeframe(str, Enum):

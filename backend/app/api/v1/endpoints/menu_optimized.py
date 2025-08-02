@@ -4,11 +4,9 @@ Optimized Menu API endpoints with caching and performance improvements
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, Session
-from sqlalchemy import select, func, and_
+from sqlalchemy import func, and_
 import json
-import asyncio
 from datetime import datetime
 import logging
 
@@ -16,7 +14,7 @@ from app.core.database import get_db, Product, Category, User
 from app.core.redis_client import get_redis, RedisClient
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
+from app.core.exceptions import FynloException
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

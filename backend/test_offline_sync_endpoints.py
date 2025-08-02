@@ -4,10 +4,12 @@ Test script for Offline Sync Endpoints Implementation
 Tests batch upload, conflict resolution, and offline synchronization
 """
 
-import requests
-import json
 from datetime import datetime, timedelta
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Test configuration
 BASE_URL = "http://localhost:8000"
@@ -26,29 +28,29 @@ SYNC_ENDPOINTS = {
 
 def test_offline_sync_core_features():
     """Test core offline synchronization functionality"""
-    print("📱 Testing Offline Sync Core Features...")
+    logger.info("📱 Testing Offline Sync Core Features...")
     
-    print("✅ Sync Manager Features:")
-    print("   - Batch upload processing with conflict detection")
-    print("   - Incremental change download with timestamp filtering")
-    print("   - Conflict resolution with multiple strategies")
-    print("   - Entity-specific synchronization (orders, products, customers, payments)")
-    print("   - Version-based optimistic locking")
-    print("   - Device-specific sync tracking")
+    logger.info("✅ Sync Manager Features:")
+    logger.info("   - Batch upload processing with conflict detection")
+    logger.info("   - Incremental change download with timestamp filtering")
+    logger.info("   - Conflict resolution with multiple strategies")
+    logger.info("   - Entity-specific synchronization (orders, products, customers, payments)")
+    logger.info("   - Version-based optimistic locking")
+    logger.info("   - Device-specific sync tracking")
     
-    print("✅ Sync Actions Supported:")
+    logger.info("✅ Sync Actions Supported:")
     sync_actions = ["create", "update", "delete"]
     for action in sync_actions:
-        print(f"   - {action}: Entity lifecycle management")
+        logger.info(f"   - {action}: Entity lifecycle management")
     
-    print("✅ Entity Types:")
+    logger.info("✅ Entity Types:")
     entity_types = ["orders", "products", "customers", "payments"]
     for entity in entity_types:
-        print(f"   - {entity}: Full CRUD synchronization support")
+        logger.info(f"   - {entity}: Full CRUD synchronization support")
 
 def test_batch_upload_functionality():
     """Test batch upload capabilities"""
-    print("\n📤 Testing Batch Upload Functionality...")
+    logger.info("\n📤 Testing Batch Upload Functionality...")
     
     # Example batch upload request
     batch_request = {
@@ -86,14 +88,14 @@ def test_batch_upload_functionality():
         ]
     }
     
-    print("✅ Batch Upload Features:")
-    print("   - Multiple entity types in single request")
-    print("   - Conflict detection and reporting")
-    print("   - Atomic transaction processing")
-    print("   - Device-specific tracking")
-    print("   - Version-based optimistic locking")
+    logger.info("✅ Batch Upload Features:")
+    logger.info("   - Multiple entity types in single request")
+    logger.info("   - Conflict detection and reporting")
+    logger.info("   - Atomic transaction processing")
+    logger.info("   - Device-specific tracking")
+    logger.info("   - Version-based optimistic locking")
     
-    print("✅ Response Handling:")
+    logger.info("✅ Response Handling:")
     expected_response = {
         "success": True,
         "data": {
@@ -119,18 +121,18 @@ def test_batch_upload_functionality():
         }
     }
     
-    print(f"   Example request structure ready")
-    print(f"   Comprehensive conflict detection implemented")
+    logger.info(f"   Example request structure ready")
+    logger.info(f"   Comprehensive conflict detection implemented")
 
 def test_download_changes_functionality():
     """Test incremental change download"""
-    print("\n📥 Testing Download Changes Functionality...")
+    logger.info("\n📥 Testing Download Changes Functionality...")
     
-    print("✅ Download Features:")
-    print("   - Incremental sync with timestamp filtering")
-    print("   - Entity-specific change filtering")
-    print("   - Pagination with configurable limits")
-    print("   - Change type identification (create, update, delete)")
+    logger.info("✅ Download Features:")
+    logger.info("   - Incremental sync with timestamp filtering")
+    logger.info("   - Entity-specific change filtering")
+    logger.info("   - Pagination with configurable limits")
+    logger.info("   - Change type identification (create, update, delete)")
     
     # Example download request parameters
     download_params = {
@@ -168,23 +170,23 @@ def test_download_changes_functionality():
         }
     }
     
-    print("✅ Change Detection:")
-    print("   - Timestamp-based change identification")
-    print("   - Entity modification tracking")
-    print("   - Incremental data transfer optimization")
-    print("   - Mobile bandwidth optimization")
+    logger.info("✅ Change Detection:")
+    logger.info("   - Timestamp-based change identification")
+    logger.info("   - Entity modification tracking")
+    logger.info("   - Incremental data transfer optimization")
+    logger.info("   - Mobile bandwidth optimization")
 
 def test_conflict_resolution():
     """Test conflict resolution mechanisms"""
-    print("\n⚔️ Testing Conflict Resolution...")
+    logger.info("\n⚔️ Testing Conflict Resolution...")
     
-    print("✅ Conflict Detection:")
-    print("   - Timestamp-based conflict identification")
-    print("   - Field-level conflict analysis")
-    print("   - Entity existence conflicts")
-    print("   - Version mismatch detection")
+    logger.info("✅ Conflict Detection:")
+    logger.info("   - Timestamp-based conflict identification")
+    logger.info("   - Field-level conflict analysis")
+    logger.info("   - Entity existence conflicts")
+    logger.info("   - Version mismatch detection")
     
-    print("✅ Resolution Strategies:")
+    logger.info("✅ Resolution Strategies:")
     resolution_strategies = {
         "server_wins": "Keep server data, discard client changes",
         "client_wins": "Apply client data, overwrite server",
@@ -193,9 +195,9 @@ def test_conflict_resolution():
     }
     
     for strategy, description in resolution_strategies.items():
-        print(f"   - {strategy}: {description}")
+        logger.info(f"   - {strategy}: {description}")
     
-    print("✅ Conflict Types:")
+    logger.info("✅ Conflict Types:")
     conflict_types = [
         "timestamp_conflict: Server has newer data",
         "already_exists: Entity creation conflict",
@@ -204,7 +206,7 @@ def test_conflict_resolution():
     ]
     
     for conflict_type in conflict_types:
-        print(f"   - {conflict_type}")
+        logger.info(f"   - {conflict_type}")
     
     # Example conflict resolution request
     resolution_request = {
@@ -218,19 +220,19 @@ def test_conflict_resolution():
         }
     }
     
-    print("✅ Merge Resolution Example:")
-    print(f"   Merged data combines client and server changes intelligently")
+    logger.info("✅ Merge Resolution Example:")
+    logger.info(f"   Merged data combines client and server changes intelligently")
 
 def test_sync_status_monitoring():
     """Test synchronization status monitoring"""
-    print("\n📊 Testing Sync Status Monitoring...")
+    logger.info("\n📊 Testing Sync Status Monitoring...")
     
-    print("✅ Status Tracking:")
-    print("   - Restaurant-wide sync status")
-    print("   - Device-specific sync tracking")
-    print("   - Pending upload count")
-    print("   - Active conflict count")
-    print("   - Sync health indicators")
+    logger.info("✅ Status Tracking:")
+    logger.info("   - Restaurant-wide sync status")
+    logger.info("   - Device-specific sync tracking")
+    logger.info("   - Pending upload count")
+    logger.info("   - Active conflict count")
+    logger.info("   - Sync health indicators")
     
     example_status = {
         "restaurant_id": "restaurant_123",
@@ -241,7 +243,7 @@ def test_sync_status_monitoring():
         "sync_health": "conflicts_detected"
     }
     
-    print("✅ Health Indicators:")
+    logger.info("✅ Health Indicators:")
     health_states = [
         "healthy: All synced, no conflicts",
         "pending: Uploads waiting to process",
@@ -250,23 +252,23 @@ def test_sync_status_monitoring():
     ]
     
     for state in health_states:
-        print(f"   - {state}")
+        logger.info(f"   - {state}")
 
 def test_conflict_management():
     """Test conflict management endpoints"""
-    print("\n🛠️ Testing Conflict Management...")
+    logger.info("\n🛠️ Testing Conflict Management...")
     
-    print("✅ Conflict Listing:")
-    print("   - Paginated conflict retrieval")
-    print("   - Restaurant-filtered conflicts")
-    print("   - Conflict details with field-level info")
-    print("   - Conflict age and priority")
+    logger.info("✅ Conflict Listing:")
+    logger.info("   - Paginated conflict retrieval")
+    logger.info("   - Restaurant-filtered conflicts")
+    logger.info("   - Conflict details with field-level info")
+    logger.info("   - Conflict age and priority")
     
-    print("✅ Conflict Operations:")
-    print("   - Resolve with strategy selection")
-    print("   - Dismiss conflicts (manual resolution)")
-    print("   - Bulk conflict operations")
-    print("   - Conflict history tracking")
+    logger.info("✅ Conflict Operations:")
+    logger.info("   - Resolve with strategy selection")
+    logger.info("   - Dismiss conflicts (manual resolution)")
+    logger.info("   - Bulk conflict operations")
+    logger.info("   - Conflict history tracking")
     
     example_conflict = {
         "sync_record_id": "record_789",
@@ -285,20 +287,20 @@ def test_conflict_management():
         "detected_at": datetime.now().isoformat()
     }
     
-    print("✅ Conflict Detail Structure:")
-    print(f"   Comprehensive conflict information for informed resolution")
+    logger.info("✅ Conflict Detail Structure:")
+    logger.info(f"   Comprehensive conflict information for informed resolution")
 
 def test_force_sync_functionality():
     """Test force synchronization capabilities"""
-    print("\n🔄 Testing Force Sync Functionality...")
+    logger.info("\n🔄 Testing Force Sync Functionality...")
     
-    print("✅ Force Sync Features:")
-    print("   - Full restaurant synchronization")
-    print("   - Entity-specific force sync")
-    print("   - Management-only operation")
-    print("   - Complete data refresh")
+    logger.info("✅ Force Sync Features:")
+    logger.info("   - Full restaurant synchronization")
+    logger.info("   - Entity-specific force sync")
+    logger.info("   - Management-only operation")
+    logger.info("   - Complete data refresh")
     
-    print("✅ Use Cases:")
+    logger.info("✅ Use Cases:")
     force_sync_scenarios = [
         "Data corruption recovery",
         "Major system updates",
@@ -308,57 +310,57 @@ def test_force_sync_functionality():
     ]
     
     for scenario in force_sync_scenarios:
-        print(f"   - {scenario}")
+        logger.info(f"   - {scenario}")
 
 def test_mobile_optimization():
     """Test mobile-specific optimizations"""
-    print("\n📱 Testing Mobile Optimization...")
+    logger.info("\n📱 Testing Mobile Optimization...")
     
-    print("✅ iOS Integration Features:")
-    print("   - Batch processing for efficiency")
-    print("   - Incremental sync to minimize data usage")
-    print("   - Offline queue management")
-    print("   - Background sync capabilities")
+    logger.info("✅ iOS Integration Features:")
+    logger.info("   - Batch processing for efficiency")
+    logger.info("   - Incremental sync to minimize data usage")
+    logger.info("   - Offline queue management")
+    logger.info("   - Background sync capabilities")
     
-    print("✅ Performance Optimizations:")
-    print("   - Compressed data transfer")
-    print("   - Minimal payload structures")
-    print("   - Efficient conflict detection")
-    print("   - Smart retry mechanisms")
+    logger.info("✅ Performance Optimizations:")
+    logger.info("   - Compressed data transfer")
+    logger.info("   - Minimal payload structures")
+    logger.info("   - Efficient conflict detection")
+    logger.info("   - Smart retry mechanisms")
     
-    print("✅ Offline-First Support:")
-    print("   - Local action queuing")
-    print("   - Conflict-free operation when possible")
-    print("   - Graceful degradation")
-    print("   - Automatic synchronization on reconnect")
+    logger.info("✅ Offline-First Support:")
+    logger.info("   - Local action queuing")
+    logger.info("   - Conflict-free operation when possible")
+    logger.info("   - Graceful degradation")
+    logger.info("   - Automatic synchronization on reconnect")
 
 def test_data_integrity():
     """Test data integrity and consistency"""
-    print("\n🔒 Testing Data Integrity...")
+    logger.info("\n🔒 Testing Data Integrity...")
     
-    print("✅ Consistency Guarantees:")
-    print("   - Atomic batch processing")
-    print("   - Transaction rollback on failures")
-    print("   - Version-based optimistic locking")
-    print("   - Conflict prevention mechanisms")
+    logger.info("✅ Consistency Guarantees:")
+    logger.info("   - Atomic batch processing")
+    logger.error("   - Transaction rollback on failures")
+    logger.info("   - Version-based optimistic locking")
+    logger.info("   - Conflict prevention mechanisms")
     
-    print("✅ Data Validation:")
-    print("   - Schema validation for sync actions")
-    print("   - Business rule enforcement")
-    print("   - Referential integrity checks")
-    print("   - Timestamp validation")
+    logger.info("✅ Data Validation:")
+    logger.info("   - Schema validation for sync actions")
+    logger.info("   - Business rule enforcement")
+    logger.info("   - Referential integrity checks")
+    logger.info("   - Timestamp validation")
     
-    print("✅ Security Features:")
-    print("   - User authentication for all operations")
-    print("   - Restaurant-based data isolation")
-    print("   - Role-based access control")
-    print("   - Audit trail for sync operations")
+    logger.info("✅ Security Features:")
+    logger.info("   - User authentication for all operations")
+    logger.info("   - Restaurant-based data isolation")
+    logger.info("   - Role-based access control")
+    logger.info("   - Audit trail for sync operations")
 
 def test_error_handling():
     """Test comprehensive error handling"""
-    print("\n❌ Testing Error Handling...")
+    logger.error("\n❌ Testing Error Handling...")
     
-    print("✅ Error Categories:")
+    logger.error("✅ Error Categories:")
     error_types = [
         "Network connectivity issues",
         "Data validation failures",
@@ -368,18 +370,18 @@ def test_error_handling():
     ]
     
     for error_type in error_types:
-        print(f"   - {error_type}")
+        logger.error(f"   - {error_type}")
     
-    print("✅ Recovery Mechanisms:")
-    print("   - Automatic retry with exponential backoff")
-    print("   - Partial success handling")
-    print("   - Error reporting and logging")
-    print("   - Graceful degradation")
+    logger.info("✅ Recovery Mechanisms:")
+    logger.info("   - Automatic retry with exponential backoff")
+    logger.info("   - Partial success handling")
+    logger.error("   - Error reporting and logging")
+    logger.info("   - Graceful degradation")
 
 def main():
     """Run all offline sync implementation tests"""
-    print("🚀 Fynlo POS Offline Sync Endpoints Implementation Tests")
-    print("=" * 70)
+    logger.info("🚀 Fynlo POS Offline Sync Endpoints Implementation Tests")
+    logger.info("=" * 70)
     
     test_offline_sync_core_features()
     test_batch_upload_functionality()
@@ -392,44 +394,44 @@ def main():
     test_data_integrity()
     test_error_handling()
     
-    print("\n" + "=" * 70)
-    print("✅ Offline Sync Endpoints Implementation Complete")
+    logger.info("\n" + "=" * 70)
+    logger.info("✅ Offline Sync Endpoints Implementation Complete")
     
-    print("\n📱 Offline Sync Benefits:")
-    print("📤 Efficient batch upload for offline actions")
-    print("📥 Incremental change download with minimal data transfer")
-    print("⚔️ Intelligent conflict detection and resolution")
-    print("🔄 Robust synchronization for unreliable connections")
-    print("📊 Comprehensive sync status monitoring")
-    print("🛠️ Management tools for conflict resolution")
-    print("🔒 Data integrity and consistency guarantees")
-    print("📱 Mobile-optimized for iOS React Native app")
+    logger.info("\n📱 Offline Sync Benefits:")
+    logger.info("📤 Efficient batch upload for offline actions")
+    logger.info("📥 Incremental change download with minimal data transfer")
+    logger.info("⚔️ Intelligent conflict detection and resolution")
+    logger.info("🔄 Robust synchronization for unreliable connections")
+    logger.info("📊 Comprehensive sync status monitoring")
+    logger.info("🛠️ Management tools for conflict resolution")
+    logger.info("🔒 Data integrity and consistency guarantees")
+    logger.info("📱 Mobile-optimized for iOS React Native app")
     
-    print("\n🚀 Key Features Implemented:")
-    print("1. Batch Upload API - Process multiple offline actions atomically")
-    print("2. Incremental Download - Efficient change synchronization")
-    print("3. Conflict Resolution - Multiple strategies with merge capabilities")
-    print("4. Sync Status Monitoring - Real-time sync health tracking")
-    print("5. Conflict Management - Tools for resolving sync conflicts")
-    print("6. Force Synchronization - Complete data refresh capabilities")
-    print("7. Mobile Optimization - iOS-specific performance features")
-    print("8. Data Integrity - Atomic operations and validation")
-    print("9. Error Handling - Comprehensive error recovery")
-    print("10. Security - Authentication and data isolation")
+    logger.info("\n🚀 Key Features Implemented:")
+    logger.info("1. Batch Upload API - Process multiple offline actions atomically")
+    logger.info("2. Incremental Download - Efficient change synchronization")
+    logger.info("3. Conflict Resolution - Multiple strategies with merge capabilities")
+    logger.info("4. Sync Status Monitoring - Real-time sync health tracking")
+    logger.info("5. Conflict Management - Tools for resolving sync conflicts")
+    logger.info("6. Force Synchronization - Complete data refresh capabilities")
+    logger.info("7. Mobile Optimization - iOS-specific performance features")
+    logger.info("8. Data Integrity - Atomic operations and validation")
+    logger.error("9. Error Handling - Comprehensive error recovery")
+    logger.info("10. Security - Authentication and data isolation")
     
-    print("\n📡 Sync API Endpoints:")
+    logger.info("\n📡 Sync API Endpoints:")
     for name, endpoint in SYNC_ENDPOINTS.items():
         endpoint_display = endpoint.replace("{conflict_id}", ":conflict_id")
-        print(f"- {name.replace('_', ' ').title()}: {endpoint_display}")
+        logger.info(f"- {name.replace('_', ' ').title()}: {endpoint_display}")
     
-    print("\n🔄 Sync Flow Overview:")
-    print("1. Mobile app queues actions while offline")
-    print("2. Batch upload when connection restored")
-    print("3. Server processes and detects conflicts")
-    print("4. Conflicts resolved with selected strategies")
-    print("5. Download incremental server changes")
-    print("6. Mobile app updates local data")
-    print("7. Continuous sync monitoring and health checks")
+    logger.info("\n🔄 Sync Flow Overview:")
+    logger.info("1. Mobile app queues actions while offline")
+    logger.info("2. Batch upload when connection restored")
+    logger.info("3. Server processes and detects conflicts")
+    logger.info("4. Conflicts resolved with selected strategies")
+    logger.info("5. Download incremental server changes")
+    logger.info("6. Mobile app updates local data")
+    logger.info("7. Continuous sync monitoring and health checks")
 
 if __name__ == "__main__":
     main()

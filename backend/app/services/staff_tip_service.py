@@ -206,14 +206,14 @@ class StaffTipService:
 #             assigned_staff=staff_list
 #         )
 #
-#         print(f"Tip distributions for order {order_ref}:")
+#         logger.info(f"Tip distributions for order {order_ref}:")
 #         for dist in distributions:
-#             print(f"  Staff: {dist['staff_member']['name']}, Tip: {dist['tip_amount_allocated']}, Notes: {dist['notes']}")
+#             logger.info(f"  Staff: {dist['staff_member']['name']}, Tip: {dist['tip_amount_allocated']}, Notes: {dist['notes']}")
 #
 #         retrieved_dists = staff_tip_service.get_tip_distributions_for_order(order_ref)
-#         print(f"\nRetrieved records from DB for order {order_ref}:")
+#         logger.info(f"\nRetrieved records from DB for order {order_ref}:")
 #         for r_dist in retrieved_dists:
-#             print(f"  Staff ID: {r_dist.staff_id}, Net Tip: {r_dist.tip_amount_net}, Gross Tip: {r_dist.tip_amount_gross}, Fee Impact: {r_dist.transaction_fee_impact_on_tip}")
+#             logger.info(f"  Staff ID: {r_dist.staff_id}, Net Tip: {r_dist.tip_amount_net}, Gross Tip: {r_dist.tip_amount_gross}, Fee Impact: {r_dist.transaction_fee_impact_on_tip}")
 #
 #     finally:
 #         db_session.close()
@@ -250,13 +250,13 @@ class StaffTipService:
 #                 processor_fee_covered_by_service_charge=1.50,
 #                 assigned_staff=staff_list
 #             )
-#             print(f"Tip distributions for order {order_ref}:")
+#             logger.info(f"Tip distributions for order {order_ref}:")
 #             for dist in distributions:
-#                 print(f"  Staff: {dist['staff_member']['name']}, Tip: {dist['tip_amount_allocated']}, Notes: {dist['notes']}")
+#                 logger.info(f"  Staff: {dist['staff_member']['name']}, Tip: {dist['tip_amount_allocated']}, Notes: {dist['notes']}")
 #
 #             retrieved_dists = staff_tip_service.get_tip_distributions_for_order(order_ref)
-#             print(f"\nRetrieved records from DB for order {order_ref}: {len(retrieved_dists)} records")
+#             logger.info(f"\nRetrieved records from DB for order {order_ref}: {len(retrieved_dists)} records")
 #             for r_dist in retrieved_dists:
-#                 print(f"  DB Record ID: {r_dist.id}, Staff ID: {r_dist.staff_id}, Net Tip: {r_dist.tip_amount_net}, Gross Tip: {r_dist.tip_amount_gross}, Fee Impact: {r_dist.transaction_fee_impact_on_tip}")
+#                 logger.info(f"  DB Record ID: {r_dist.id}, Staff ID: {r_dist.staff_id}, Net Tip: {r_dist.tip_amount_net}, Gross Tip: {r_dist.tip_amount_gross}, Fee Impact: {r_dist.transaction_fee_impact_on_tip}")
 #         finally:
 #             db_session.close()

@@ -4,11 +4,11 @@ Test script for WebSocket Real-time Events Implementation
 Tests WebSocket connections, message broadcasting, and event handling
 """
 
-import asyncio
-import websockets
 import json
-from datetime import datetime
-import uuid
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Test configuration
 WEBSOCKET_BASE_URL = "ws://localhost:8000/api/v1/websocket"
@@ -29,35 +29,35 @@ REST_ENDPOINTS = {
 
 def test_websocket_core_features():
     """Test core WebSocket functionality"""
-    print("🔌 Testing WebSocket Core Features...")
+    logger.info("🔌 Testing WebSocket Core Features...")
     
-    print("✅ WebSocket Manager Features:")
-    print("   - Connection management with unique IDs")
-    print("   - Restaurant-based connection grouping")
-    print("   - User-based connection tracking")
-    print("   - Connection type categorization (POS, Kitchen, Management, Customer)")
-    print("   - Message queuing for offline users")
-    print("   - Connection health monitoring with ping/pong")
-    print("   - Automatic connection cleanup on disconnect")
-    print("   - Statistics tracking for monitoring")
+    logger.info("✅ WebSocket Manager Features:")
+    logger.info("   - Connection management with unique IDs")
+    logger.info("   - Restaurant-based connection grouping")
+    logger.info("   - User-based connection tracking")
+    logger.info("   - Connection type categorization (POS, Kitchen, Management, Customer)")
+    logger.info("   - Message queuing for offline users")
+    logger.info("   - Connection health monitoring with ping/pong")
+    logger.info("   - Automatic connection cleanup on disconnect")
+    logger.info("   - Statistics tracking for monitoring")
     
-    print("✅ Event Types Supported:")
+    logger.info("✅ Event Types Supported:")
     event_types = [
         "order_created", "order_status_changed", "payment_completed", "payment_failed",
         "inventory_low", "inventory_out", "user_login", "user_logout", 
         "kitchen_update", "table_status_changed", "restaurant_status", "system_notification"
     ]
     for event in event_types:
-        print(f"   - {event}")
+        logger.info(f"   - {event}")
     
-    print("✅ Connection Types:")
+    logger.info("✅ Connection Types:")
     connection_types = ["pos", "kitchen", "management", "customer", "platform"]
     for conn_type in connection_types:
-        print(f"   - {conn_type}: Specialized endpoints and message filtering")
+        logger.info(f"   - {conn_type}: Specialized endpoints and message filtering")
 
 def test_websocket_endpoints():
     """Test WebSocket endpoint structure"""
-    print("\n📡 Testing WebSocket Endpoints...")
+    logger.info("\n📡 Testing WebSocket Endpoints...")
     
     endpoints = {
         "General Restaurant Updates": "/ws/{restaurant_id}?user_id={user_id}&connection_type=pos",
@@ -66,60 +66,60 @@ def test_websocket_endpoints():
         "Management Dashboard": "/ws/management/{restaurant_id}?user_id={user_id}"
     }
     
-    print("✅ Available WebSocket Endpoints:")
+    logger.info("✅ Available WebSocket Endpoints:")
     for name, endpoint in endpoints.items():
-        print(f"   - {name}: {endpoint}")
+        logger.info(f"   - {name}: {endpoint}")
     
-    print("✅ Authentication & Authorization:")
-    print("   - User ID parameter for authenticated connections")
-    print("   - Restaurant access validation")
-    print("   - Role-based message filtering")
-    print("   - Platform owner multi-restaurant access")
-    print("   - Connection type-specific permissions")
+    logger.info("✅ Authentication & Authorization:")
+    logger.info("   - User ID parameter for authenticated connections")
+    logger.info("   - Restaurant access validation")
+    logger.info("   - Role-based message filtering")
+    logger.info("   - Platform owner multi-restaurant access")
+    logger.info("   - Connection type-specific permissions")
 
 def test_real_time_events():
     """Test real-time event broadcasting"""
-    print("\n⚡ Testing Real-time Event Broadcasting...")
+    logger.info("\n⚡ Testing Real-time Event Broadcasting...")
     
-    print("✅ Order Lifecycle Events:")
-    print("   - order_created: New order notifications to kitchen and management")
-    print("   - order_status_changed: Status updates to POS and kitchen")
-    print("   - payment_completed: Payment confirmations to POS and management")
-    print("   - kitchen_update: Preparation status updates")
+    logger.info("✅ Order Lifecycle Events:")
+    logger.info("   - order_created: New order notifications to kitchen and management")
+    logger.info("   - order_status_changed: Status updates to POS and kitchen")
+    logger.info("   - payment_completed: Payment confirmations to POS and management")
+    logger.info("   - kitchen_update: Preparation status updates")
     
-    print("✅ Inventory Management Events:")
-    print("   - inventory_low: Low stock alerts to POS and management")
-    print("   - inventory_out: Out of stock notifications")
-    print("   - product_updates: Menu changes and availability")
+    logger.info("✅ Inventory Management Events:")
+    logger.info("   - inventory_low: Low stock alerts to POS and management")
+    logger.info("   - inventory_out: Out of stock notifications")
+    logger.info("   - product_updates: Menu changes and availability")
     
-    print("✅ User Activity Events:")
-    print("   - user_login: Staff login notifications to management")
-    print("   - user_logout: Staff logout tracking")
-    print("   - role_changes: Permission updates")
+    logger.info("✅ User Activity Events:")
+    logger.info("   - user_login: Staff login notifications to management")
+    logger.info("   - user_logout: Staff logout tracking")
+    logger.info("   - role_changes: Permission updates")
     
-    print("✅ System Events:")
-    print("   - restaurant_status: Operating hours, closure notifications")
-    print("   - system_notification: Admin broadcasts and alerts")
-    print("   - table_status_changed: Table availability updates")
+    logger.info("✅ System Events:")
+    logger.info("   - restaurant_status: Operating hours, closure notifications")
+    logger.info("   - system_notification: Admin broadcasts and alerts")
+    logger.info("   - table_status_changed: Table availability updates")
 
 def test_message_broadcasting():
     """Test message broadcasting capabilities"""
-    print("\n📢 Testing Message Broadcasting...")
+    logger.info("\n📢 Testing Message Broadcasting...")
     
-    print("✅ Broadcasting Methods:")
-    print("   - send_to_connection: Direct message to specific connection")
-    print("   - send_to_restaurant: Broadcast to all restaurant connections")
-    print("   - send_to_user: Message to all user connections")
-    print("   - send_to_connection_type: Type-specific broadcasting")
-    print("   - broadcast_to_restaurant: Filtered broadcasting with exclusions")
+    logger.info("✅ Broadcasting Methods:")
+    logger.info("   - send_to_connection: Direct message to specific connection")
+    logger.info("   - send_to_restaurant: Broadcast to all restaurant connections")
+    logger.info("   - send_to_user: Message to all user connections")
+    logger.info("   - send_to_connection_type: Type-specific broadcasting")
+    logger.info("   - broadcast_to_restaurant: Filtered broadcasting with exclusions")
     
-    print("✅ Message Filtering:")
-    print("   - Connection type filtering (POS, kitchen, management)")
-    print("   - User role-based message filtering")
-    print("   - Restaurant isolation (messages only to relevant restaurant)")
-    print("   - Exclude sender from broadcasts")
+    logger.info("✅ Message Filtering:")
+    logger.info("   - Connection type filtering (POS, kitchen, management)")
+    logger.info("   - User role-based message filtering")
+    logger.info("   - Restaurant isolation (messages only to relevant restaurant)")
+    logger.info("   - Exclude sender from broadcasts")
     
-    print("✅ Message Structure:")
+    logger.info("✅ Message Structure:")
     message_structure = {
         "id": "unique_message_id",
         "event_type": "order_created",
@@ -133,27 +133,27 @@ def test_message_broadcasting():
         "user_id": "user_789",
         "timestamp": "2025-06-18T12:00:00Z"
     }
-    print(f"   Example: {json.dumps(message_structure, indent=2)}")
+    logger.info(f"   Example: {json.dumps(message_structure, indent=2)}")
 
 def test_connection_management():
     """Test connection management features"""
-    print("\n🔗 Testing Connection Management...")
+    logger.info("\n🔗 Testing Connection Management...")
     
-    print("✅ Connection Lifecycle:")
-    print("   - WebSocket handshake and authentication")
-    print("   - Connection registration with metadata")
-    print("   - Connection indexing by restaurant, user, and type")
-    print("   - Welcome messages with connection confirmation")
-    print("   - Graceful disconnection handling")
-    print("   - Automatic cleanup of stale connections")
+    logger.info("✅ Connection Lifecycle:")
+    logger.info("   - WebSocket handshake and authentication")
+    logger.info("   - Connection registration with metadata")
+    logger.info("   - Connection indexing by restaurant, user, and type")
+    logger.info("   - Welcome messages with connection confirmation")
+    logger.info("   - Graceful disconnection handling")
+    logger.info("   - Automatic cleanup of stale connections")
     
-    print("✅ Connection Health Monitoring:")
-    print("   - Periodic ping/pong health checks")
-    print("   - Automatic disconnection detection")
-    print("   - Connection timeout handling")
-    print("   - Reconnection support")
+    logger.info("✅ Connection Health Monitoring:")
+    logger.info("   - Periodic ping/pong health checks")
+    logger.info("   - Automatic disconnection detection")
+    logger.info("   - Connection timeout handling")
+    logger.info("   - Reconnection support")
     
-    print("✅ Connection Statistics:")
+    logger.info("✅ Connection Statistics:")
     stats_example = {
         "total_connections": 45,
         "active_connections": 42,
@@ -170,37 +170,37 @@ def test_connection_management():
         },
         "queued_messages": 5
     }
-    print(f"   Example stats: {json.dumps(stats_example, indent=2)}")
+    logger.info(f"   Example stats: {json.dumps(stats_example, indent=2)}")
 
 def test_offline_message_queuing():
     """Test offline message queuing system"""
-    print("\n📥 Testing Offline Message Queuing...")
+    logger.info("\n📥 Testing Offline Message Queuing...")
     
-    print("✅ Message Queue Features:")
-    print("   - Automatic message queuing for offline users")
-    print("   - Message delivery upon reconnection")
-    print("   - Queue size limits to prevent memory issues")
-    print("   - Restaurant-specific message filtering")
-    print("   - Message expiration and cleanup")
+    logger.info("✅ Message Queue Features:")
+    logger.info("   - Automatic message queuing for offline users")
+    logger.info("   - Message delivery upon reconnection")
+    logger.info("   - Queue size limits to prevent memory issues")
+    logger.info("   - Restaurant-specific message filtering")
+    logger.info("   - Message expiration and cleanup")
     
-    print("✅ Queue Management:")
-    print("   - FIFO message delivery order")
-    print("   - Maximum 100 queued messages per user")
-    print("   - Automatic queue cleanup on delivery")
-    print("   - Memory optimization for large queues")
+    logger.info("✅ Queue Management:")
+    logger.info("   - FIFO message delivery order")
+    logger.info("   - Maximum 100 queued messages per user")
+    logger.info("   - Automatic queue cleanup on delivery")
+    logger.info("   - Memory optimization for large queues")
 
 def test_kitchen_integration():
     """Test kitchen-specific WebSocket features"""
-    print("\n🍳 Testing Kitchen Integration...")
+    logger.info("\n🍳 Testing Kitchen Integration...")
     
-    print("✅ Kitchen Display Features:")
-    print("   - Real-time order notifications")
-    print("   - Order status updates (preparing, ready, served)")
-    print("   - Preparation time estimates")
-    print("   - Special cooking instructions")
-    print("   - Item-level preparation tracking")
+    logger.info("✅ Kitchen Display Features:")
+    logger.info("   - Real-time order notifications")
+    logger.info("   - Order status updates (preparing, ready, served)")
+    logger.info("   - Preparation time estimates")
+    logger.info("   - Special cooking instructions")
+    logger.info("   - Item-level preparation tracking")
     
-    print("✅ Kitchen Message Types:")
+    logger.info("✅ Kitchen Message Types:")
     kitchen_messages = [
         "New order received with cooking instructions",
         "Order status update (item ready, order ready)",
@@ -209,20 +209,20 @@ def test_kitchen_integration():
         "Kitchen equipment status alerts"
     ]
     for msg in kitchen_messages:
-        print(f"   - {msg}")
+        logger.info(f"   - {msg}")
 
 def test_pos_integration():
     """Test POS-specific WebSocket features"""
-    print("\n💳 Testing POS Integration...")
+    logger.info("\n💳 Testing POS Integration...")
     
-    print("✅ POS Terminal Features:")
-    print("   - Order creation notifications")
-    print("   - Payment completion confirmations")
-    print("   - Inventory level alerts")
-    print("   - Menu item availability updates")
-    print("   - Table status synchronization")
+    logger.info("✅ POS Terminal Features:")
+    logger.info("   - Order creation notifications")
+    logger.info("   - Payment completion confirmations")
+    logger.info("   - Inventory level alerts")
+    logger.info("   - Menu item availability updates")
+    logger.info("   - Table status synchronization")
     
-    print("✅ POS Event Handling:")
+    logger.info("✅ POS Event Handling:")
     pos_events = [
         "Order placed and sent to kitchen",
         "Payment processed successfully",
@@ -231,20 +231,20 @@ def test_pos_integration():
         "Table reservation updates"
     ]
     for event in pos_events:
-        print(f"   - {event}")
+        logger.info(f"   - {event}")
 
 def test_management_dashboard():
     """Test management dashboard WebSocket features"""
-    print("\n📊 Testing Management Dashboard Integration...")
+    logger.info("\n📊 Testing Management Dashboard Integration...")
     
-    print("✅ Management Dashboard Features:")
-    print("   - Real-time order and revenue tracking")
-    print("   - Staff activity monitoring")
-    print("   - System health and performance metrics")
-    print("   - Customer flow and table management")
-    print("   - Inventory and supply alerts")
+    logger.info("✅ Management Dashboard Features:")
+    logger.info("   - Real-time order and revenue tracking")
+    logger.info("   - Staff activity monitoring")
+    logger.info("   - System health and performance metrics")
+    logger.info("   - Customer flow and table management")
+    logger.info("   - Inventory and supply alerts")
     
-    print("✅ Analytics Events:")
+    logger.info("✅ Analytics Events:")
     analytics_events = [
         "Real-time sales and revenue updates",
         "Order completion rate monitoring",
@@ -253,88 +253,88 @@ def test_management_dashboard():
         "Inventory turnover analysis"
     ]
     for event in analytics_events:
-        print(f"   - {event}")
+        logger.info(f"   - {event}")
 
 def test_security_features():
     """Test WebSocket security implementation"""
-    print("\n🔐 Testing Security Features...")
+    logger.info("\n🔐 Testing Security Features...")
     
-    print("✅ Authentication & Authorization:")
-    print("   - User ID verification for connections")
-    print("   - Restaurant access validation")
-    print("   - Role-based message filtering")
-    print("   - Platform owner multi-tenant access")
+    logger.info("✅ Authentication & Authorization:")
+    logger.info("   - User ID verification for connections")
+    logger.info("   - Restaurant access validation")
+    logger.info("   - Role-based message filtering")
+    logger.info("   - Platform owner multi-tenant access")
     
-    print("✅ Data Security:")
-    print("   - Restaurant data isolation")
-    print("   - User permission validation")
-    print("   - Message content filtering by role")
-    print("   - Secure connection termination")
+    logger.info("✅ Data Security:")
+    logger.info("   - Restaurant data isolation")
+    logger.info("   - User permission validation")
+    logger.info("   - Message content filtering by role")
+    logger.info("   - Secure connection termination")
     
-    print("✅ Error Handling:")
-    print("   - Invalid JSON message handling")
-    print("   - Connection timeout management")
-    print("   - Graceful error recovery")
-    print("   - Comprehensive error logging")
+    logger.error("✅ Error Handling:")
+    logger.info("   - Invalid JSON message handling")
+    logger.info("   - Connection timeout management")
+    logger.error("   - Graceful error recovery")
+    logger.error("   - Comprehensive error logging")
 
 def test_performance_features():
     """Test WebSocket performance optimizations"""
-    print("\n⚡ Testing Performance Features...")
+    logger.info("\n⚡ Testing Performance Features...")
     
-    print("✅ Performance Optimizations:")
-    print("   - Efficient connection indexing")
-    print("   - Minimal message serialization overhead")
-    print("   - Batch message processing capabilities")
-    print("   - Memory-efficient queue management")
+    logger.info("✅ Performance Optimizations:")
+    logger.info("   - Efficient connection indexing")
+    logger.info("   - Minimal message serialization overhead")
+    logger.info("   - Batch message processing capabilities")
+    logger.info("   - Memory-efficient queue management")
     
-    print("✅ Scalability Features:")
-    print("   - Multi-restaurant connection support")
-    print("   - Concurrent connection handling")
-    print("   - Load balancing compatibility")
-    print("   - Horizontal scaling readiness")
+    logger.info("✅ Scalability Features:")
+    logger.info("   - Multi-restaurant connection support")
+    logger.info("   - Concurrent connection handling")
+    logger.info("   - Load balancing compatibility")
+    logger.info("   - Horizontal scaling readiness")
 
 def test_integration_with_backend():
     """Test WebSocket integration with backend services"""
-    print("\n🔗 Testing Backend Integration...")
+    logger.info("\n🔗 Testing Backend Integration...")
     
-    print("✅ Database Integration:")
-    print("   - Order status updates trigger WebSocket events")
-    print("   - Payment completion notifications")
-    print("   - Inventory level monitoring")
-    print("   - User activity tracking")
+    logger.info("✅ Database Integration:")
+    logger.info("   - Order status updates trigger WebSocket events")
+    logger.info("   - Payment completion notifications")
+    logger.info("   - Inventory level monitoring")
+    logger.info("   - User activity tracking")
     
-    print("✅ Service Integration:")
-    print("   - Order service notifications")
-    print("   - Payment service events")
-    print("   - Inventory service alerts")
-    print("   - User management events")
+    logger.info("✅ Service Integration:")
+    logger.info("   - Order service notifications")
+    logger.info("   - Payment service events")
+    logger.info("   - Inventory service alerts")
+    logger.info("   - User management events")
     
-    print("✅ API Integration:")
-    print("   - REST API endpoints for WebSocket management")
-    print("   - Statistics and monitoring endpoints")
-    print("   - Administrative broadcast capabilities")
-    print("   - Connection health monitoring")
+    logger.info("✅ API Integration:")
+    logger.info("   - REST API endpoints for WebSocket management")
+    logger.info("   - Statistics and monitoring endpoints")
+    logger.info("   - Administrative broadcast capabilities")
+    logger.info("   - Connection health monitoring")
 
 def test_mobile_optimization():
     """Test mobile-specific WebSocket optimizations"""
-    print("\n📱 Testing Mobile Optimization...")
+    logger.info("\n📱 Testing Mobile Optimization...")
     
-    print("✅ Mobile-Specific Features:")
-    print("   - Connection persistence across app state changes")
-    print("   - Battery-efficient message handling")
-    print("   - Bandwidth-optimized message format")
-    print("   - Offline queue synchronization")
+    logger.info("✅ Mobile-Specific Features:")
+    logger.info("   - Connection persistence across app state changes")
+    logger.info("   - Battery-efficient message handling")
+    logger.info("   - Bandwidth-optimized message format")
+    logger.info("   - Offline queue synchronization")
     
-    print("✅ iOS Integration:")
-    print("   - Compatible with React Native WebSocket client")
-    print("   - Background app state handling")
-    print("   - Push notification integration readiness")
-    print("   - App lifecycle event handling")
+    logger.info("✅ iOS Integration:")
+    logger.info("   - Compatible with React Native WebSocket client")
+    logger.info("   - Background app state handling")
+    logger.info("   - Push notification integration readiness")
+    logger.info("   - App lifecycle event handling")
 
 def main():
     """Run all WebSocket implementation tests"""
-    print("🚀 Fynlo POS WebSocket Real-time Events Implementation Tests")
-    print("=" * 70)
+    logger.info("🚀 Fynlo POS WebSocket Real-time Events Implementation Tests")
+    logger.info("=" * 70)
     
     test_websocket_core_features()
     test_websocket_endpoints()
@@ -350,38 +350,38 @@ def main():
     test_integration_with_backend()
     test_mobile_optimization()
     
-    print("\n" + "=" * 70)
-    print("✅ WebSocket Real-time Events Implementation Complete")
+    logger.info("\n" + "=" * 70)
+    logger.info("✅ WebSocket Real-time Events Implementation Complete")
     
-    print("\n🔌 WebSocket Implementation Benefits:")
-    print("📊 Real-time order and payment updates across all devices")
-    print("🍳 Instant kitchen notifications for order management")
-    print("💳 Live POS synchronization with inventory alerts")
-    print("📈 Real-time analytics and management dashboard updates")
-    print("🔔 Instant notifications for staff and management")
-    print("📱 Mobile-optimized real-time communication")
-    print("🔐 Secure multi-tenant message isolation")
-    print("⚡ High-performance concurrent connection handling")
+    logger.info("\n🔌 WebSocket Implementation Benefits:")
+    logger.info("📊 Real-time order and payment updates across all devices")
+    logger.info("🍳 Instant kitchen notifications for order management")
+    logger.info("💳 Live POS synchronization with inventory alerts")
+    logger.info("📈 Real-time analytics and management dashboard updates")
+    logger.info("🔔 Instant notifications for staff and management")
+    logger.info("📱 Mobile-optimized real-time communication")
+    logger.info("🔐 Secure multi-tenant message isolation")
+    logger.info("⚡ High-performance concurrent connection handling")
     
-    print("\n🚀 Key Features Implemented:")
-    print("1. Multi-endpoint WebSocket architecture (General, Kitchen, POS, Management)")
-    print("2. Real-time event broadcasting with message filtering")
-    print("3. Connection management with health monitoring")
-    print("4. Offline message queuing and synchronization")
-    print("5. Role-based access control and message filtering")
-    print("6. Restaurant and user-specific connection grouping")
-    print("7. Comprehensive event types for all business operations")
-    print("8. Mobile-optimized message format and handling")
-    print("9. Integration with backend services and APIs")
-    print("10. Performance monitoring and statistics tracking")
+    logger.info("\n🚀 Key Features Implemented:")
+    logger.info("1. Multi-endpoint WebSocket architecture (General, Kitchen, POS, Management)")
+    logger.info("2. Real-time event broadcasting with message filtering")
+    logger.info("3. Connection management with health monitoring")
+    logger.info("4. Offline message queuing and synchronization")
+    logger.info("5. Role-based access control and message filtering")
+    logger.info("6. Restaurant and user-specific connection grouping")
+    logger.info("7. Comprehensive event types for all business operations")
+    logger.info("8. Mobile-optimized message format and handling")
+    logger.info("9. Integration with backend services and APIs")
+    logger.info("10. Performance monitoring and statistics tracking")
     
-    print("\n📡 WebSocket Endpoints Available:")
+    logger.info("\n📡 WebSocket Endpoints Available:")
     for name, endpoint in WEBSOCKET_ENDPOINTS.items():
-        print(f"- {name.title()}: {endpoint}")
+        logger.info(f"- {name.title()}: {endpoint}")
     
-    print("\n🛠️ REST API Integration:")
+    logger.info("\n🛠️ REST API Integration:")
     for name, endpoint in REST_ENDPOINTS.items():
-        print(f"- {name.replace('_', ' ').title()}: {endpoint}")
+        logger.info(f"- {name.replace('_', ' ').title()}: {endpoint}")
 
 if __name__ == "__main__":
     main()

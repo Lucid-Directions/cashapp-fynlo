@@ -1,5 +1,5 @@
 """Enhanced search and filter schemas with security validation."""
-from typing import Optional, List, Dict, Any, ClassVar
+from typing import Optional, List, ClassVar
 from pydantic import BaseModel, Field, validator
 from datetime import datetime
 
@@ -7,7 +7,6 @@ from app.core.validators import (
     validate_search_input,
     validate_sort_field,
     validate_uuid_format,
-    validate_alphanumeric,
     validate_no_sql_injection
 )
 

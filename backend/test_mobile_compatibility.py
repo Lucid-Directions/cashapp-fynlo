@@ -4,10 +4,11 @@ Test script for Mobile API Compatibility
 Tests Odoo-style endpoints and mobile optimization features
 """
 
-import requests
-import json
-import base64
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Test configuration
 BASE_URL = "http://localhost:8000"
@@ -15,7 +16,7 @@ MOBILE_USER_AGENT = "FynloPOS/1.0 (iOS 15.0; iPhone 12; React Native)"
 
 def test_odoo_authentication():
     """Test Odoo-style authentication endpoint"""
-    print("🔐 Testing Odoo-Style Authentication...")
+    logger.info("🔐 Testing Odoo-Style Authentication...")
     
     auth_url = f"{BASE_URL}/web/session/authenticate"
     
@@ -32,26 +33,26 @@ def test_odoo_authentication():
         "User-Agent": MOBILE_USER_AGENT
     }
     
-    print(f"📱 POST {auth_url}")
-    print(f"   Headers: {headers}")
-    print(f"   Data: {auth_data}")
+    logger.info(f"📱 POST {auth_url}")
+    logger.info(f"   Headers: {headers}")
+    logger.info(f"   Data: {auth_data}")
     
     # Note: This would require actual server running and valid credentials
-    print("✅ Endpoint structure ready for Odoo compatibility")
-    print("   Expected response format:")
-    print("   {")
-    print("     'success': true,")
-    print("     'data': {")
-    print("       'session_id': 'jwt_token',")
-    print("       'uid': 'user_id',")
-    print("       'user_context': {...},")
-    print("       'company_id': 'restaurant_id'")
-    print("     }")
-    print("   }")
+    logger.info("✅ Endpoint structure ready for Odoo compatibility")
+    logger.info("   Expected response format:")
+    logger.info("   {")
+    logger.info("     'success': true,")
+    logger.info("     'data': {")
+    logger.info("       'session_id': 'jwt_token',")
+    logger.info("       'uid': 'user_id',")
+    logger.info("       'user_context': {...},")
+    logger.info("       'company_id': 'restaurant_id'")
+    logger.info("     }")
+    logger.info("   }")
 
 def test_mobile_menu_endpoint():
     """Test mobile-optimized menu endpoint"""
-    print("\n🍽️ Testing Mobile Menu Endpoint...")
+    logger.info("\n🍽️ Testing Mobile Menu Endpoint...")
     
     menu_url = f"{BASE_URL}/api/v1/products/mobile"
     
@@ -64,21 +65,21 @@ def test_mobile_menu_endpoint():
         "include_unavailable": False
     }
     
-    print(f"📱 GET {menu_url}")
-    print(f"   Headers: {headers}")
-    print(f"   Params: {params}")
+    logger.info(f"📱 GET {menu_url}")
+    logger.info(f"   Headers: {headers}")
+    logger.info(f"   Params: {params}")
     
-    print("✅ Mobile-optimized menu endpoint ready")
-    print("   Features:")
-    print("   - Reduced payload size (lightweight models)")
-    print("   - Category product counts")
-    print("   - Mobile-optimized image URLs")
-    print("   - Restaurant branding info")
-    print("   - Last updated timestamps")
+    logger.info("✅ Mobile-optimized menu endpoint ready")
+    logger.info("   Features:")
+    logger.info("   - Reduced payload size (lightweight models)")
+    logger.info("   - Category product counts")
+    logger.info("   - Mobile-optimized image URLs")
+    logger.info("   - Restaurant branding info")
+    logger.info("   - Last updated timestamps")
 
 def test_daily_sales_report():
     """Test Odoo-style daily sales report"""
-    print("\n📊 Testing Daily Sales Report (Odoo-style)...")
+    logger.info("\n📊 Testing Daily Sales Report (Odoo-style)...")
     
     report_url = f"{BASE_URL}/pos/reports/daily_sales"
     
@@ -91,21 +92,21 @@ def test_daily_sales_report():
         "date": datetime.now().strftime("%Y-%m-%d")
     }
     
-    print(f"📱 GET {report_url}")
-    print(f"   Headers: {headers}")
-    print(f"   Params: {params}")
+    logger.info(f"📱 GET {report_url}")
+    logger.info(f"   Headers: {headers}")
+    logger.info(f"   Params: {params}")
     
-    print("✅ Daily sales report endpoint ready")
-    print("   Features:")
-    print("   - Odoo-compatible URL structure")
-    print("   - Sales summary with metrics")
-    print("   - Payment method breakdown")
-    print("   - Top selling items")
-    print("   - Mobile-optimized response")
+    logger.info("✅ Daily sales report endpoint ready")
+    logger.info("   Features:")
+    logger.info("   - Odoo-compatible URL structure")
+    logger.info("   - Sales summary with metrics")
+    logger.info("   - Payment method breakdown")
+    logger.info("   - Top selling items")
+    logger.info("   - Mobile-optimized response")
 
 def test_mobile_orders():
     """Test mobile-optimized orders endpoint"""
-    print("\n📋 Testing Mobile Orders Endpoint...")
+    logger.info("\n📋 Testing Mobile Orders Endpoint...")
     
     orders_url = f"{BASE_URL}/api/v1/orders/mobile"
     
@@ -119,66 +120,66 @@ def test_mobile_orders():
         "limit": 20
     }
     
-    print(f"📱 GET {orders_url}")
-    print(f"   Headers: {headers}")
-    print(f"   Params: {params}")
+    logger.info(f"📱 GET {orders_url}")
+    logger.info(f"   Headers: {headers}")
+    logger.info(f"   Params: {params}")
     
-    print("✅ Mobile orders endpoint ready")
-    print("   Features:")
-    print("   - Lightweight order summaries")
-    print("   - Status filtering")
-    print("   - Limited fields for bandwidth optimization")
-    print("   - ISO timestamp formatting")
+    logger.info("✅ Mobile orders endpoint ready")
+    logger.info("   Features:")
+    logger.info("   - Lightweight order summaries")
+    logger.info("   - Status filtering")
+    logger.info("   - Limited fields for bandwidth optimization")
+    logger.info("   - ISO timestamp formatting")
 
 def test_configuration_endpoints():
     """Test mobile configuration endpoints"""
-    print("\n⚙️ Testing Configuration Endpoints...")
+    logger.info("\n⚙️ Testing Configuration Endpoints...")
     
     # Base URL configuration
     config_url = f"{BASE_URL}/api/config/base_url"
-    print(f"📱 GET {config_url}")
-    print("✅ Base URL configuration endpoint ready")
-    print("   - Supports both port 8000 and 8069")
-    print("   - WebSocket URL configuration")
-    print("   - Feature capabilities")
+    logger.info(f"📱 GET {config_url}")
+    logger.info("✅ Base URL configuration endpoint ready")
+    logger.info("   - Supports both port 8000 and 8069")
+    logger.info("   - WebSocket URL configuration")
+    logger.info("   - Feature capabilities")
     
     # Feature flags
     features_url = f"{BASE_URL}/api/features"
-    print(f"📱 GET {features_url}")
-    print("✅ Feature flags endpoint ready")
-    print("   - Role-based feature access")
-    print("   - Mobile-specific features")
-    print("   - Dynamic feature toggles")
+    logger.info(f"📱 GET {features_url}")
+    logger.info("✅ Feature flags endpoint ready")
+    logger.info("   - Role-based feature access")
+    logger.info("   - Mobile-specific features")
+    logger.info("   - Dynamic feature toggles")
     
     # Session info (Odoo-style)
     session_url = f"{BASE_URL}/web/session/get_session_info"
-    print(f"📱 POST {session_url}")
-    print("✅ Session info endpoint ready (Odoo-compatible)")
+    logger.info(f"📱 POST {session_url}")
+    logger.info("✅ Session info endpoint ready (Odoo-compatible)")
 
 def test_mobile_middleware():
     """Test mobile middleware functionality"""
-    print("\n🔧 Testing Mobile Middleware...")
+    logger.info("\n🔧 Testing Mobile Middleware...")
     
-    print("✅ Mobile Compatibility Middleware:")
-    print("   - Detects mobile User-Agent headers")
-    print("   - Adds CORS headers for mobile apps")
-    print("   - Adds mobile-specific response headers")
-    print("   - Logs mobile requests for monitoring")
+    logger.info("✅ Mobile Compatibility Middleware:")
+    logger.info("   - Detects mobile User-Agent headers")
+    logger.info("   - Adds CORS headers for mobile apps")
+    logger.info("   - Adds mobile-specific response headers")
+    logger.info("   - Logs mobile requests for monitoring")
     
-    print("✅ Data Optimization Middleware:")
-    print("   - Removes null values from responses")
-    print("   - Compacts JSON formatting")
-    print("   - Optimizes payload size for mobile bandwidth")
-    print("   - Maintains data integrity")
+    logger.info("✅ Data Optimization Middleware:")
+    logger.info("   - Removes null values from responses")
+    logger.info("   - Compacts JSON formatting")
+    logger.info("   - Optimizes payload size for mobile bandwidth")
+    logger.info("   - Maintains data integrity")
     
-    print("✅ JSONRPC Compatibility:")
-    print("   - Handles Odoo-style JSONRPC requests")
-    print("   - Transforms between REST and JSONRPC formats")
-    print("   - Maintains backward compatibility")
+    logger.info("✅ JSONRPC Compatibility:")
+    logger.info("   - Handles Odoo-style JSONRPC requests")
+    logger.info("   - Transforms between REST and JSONRPC formats")
+    logger.info("   - Maintains backward compatibility")
 
 def test_mobile_user_agent_detection():
     """Test mobile user agent detection"""
-    print("\n📱 Testing Mobile User Agent Detection...")
+    logger.info("\n📱 Testing Mobile User Agent Detection...")
     
     mobile_agents = [
         "FynloPOS/1.0 (iOS 15.0; iPhone 12; React Native)",
@@ -188,53 +189,53 @@ def test_mobile_user_agent_detection():
     ]
     
     for agent in mobile_agents:
-        print(f"✅ Detects mobile: {agent[:50]}...")
+        logger.info(f"✅ Detects mobile: {agent[:50]}...")
     
-    print("\nMobile-specific optimizations applied:")
-    print("   - X-Mobile-Optimized header")
-    print("   - Reduced response payloads")
-    print("   - Optimized caching headers")
-    print("   - CORS headers for React Native")
+    logger.info("\nMobile-specific optimizations applied:")
+    logger.info("   - X-Mobile-Optimized header")
+    logger.info("   - Reduced response payloads")
+    logger.info("   - Optimized caching headers")
+    logger.info("   - CORS headers for React Native")
 
 def test_port_compatibility():
     """Test dual port support"""
-    print("\n🚪 Testing Port Compatibility...")
+    logger.info("\n🚪 Testing Port Compatibility...")
     
-    print("✅ Port 8000 (Primary API):")
-    print("   - Full FastAPI endpoints")
-    print("   - Modern REST API structure")
-    print("   - WebSocket support")
-    print("   - File upload endpoints")
+    logger.info("✅ Port 8000 (Primary API):")
+    logger.info("   - Full FastAPI endpoints")
+    logger.info("   - Modern REST API structure")
+    logger.info("   - WebSocket support")
+    logger.info("   - File upload endpoints")
     
-    print("✅ Port 8069 Compatibility (Odoo-style):")
-    print("   - /web/session/authenticate")
-    print("   - /pos/reports/daily_sales")
-    print("   - /web/session/get_session_info")
-    print("   - JSONRPC format support")
+    logger.info("✅ Port 8069 Compatibility (Odoo-style):")
+    logger.info("   - /web/session/authenticate")
+    logger.info("   - /pos/reports/daily_sales")
+    logger.info("   - /web/session/get_session_info")
+    logger.info("   - JSONRPC format support")
     
-    print("Note: Both ports serve the same backend with different URL patterns")
+    logger.info("Note: Both ports serve the same backend with different URL patterns")
 
 def test_response_optimization():
     """Test mobile response optimization"""
-    print("\n⚡ Testing Response Optimization...")
+    logger.info("\n⚡ Testing Response Optimization...")
     
-    print("✅ Mobile Response Features:")
-    print("   - Lightweight data models")
-    print("   - Reduced field count")
-    print("   - Optimized image URLs")
-    print("   - Compressed JSON (no pretty printing)")
-    print("   - Null value removal")
-    print("   - Timestamp standardization (ISO format)")
+    logger.info("✅ Mobile Response Features:")
+    logger.info("   - Lightweight data models")
+    logger.info("   - Reduced field count")
+    logger.info("   - Optimized image URLs")
+    logger.info("   - Compressed JSON (no pretty printing)")
+    logger.info("   - Null value removal")
+    logger.info("   - Timestamp standardization (ISO format)")
     
-    print("✅ Bandwidth Optimizations:")
-    print("   - Product responses: ~60% size reduction")
-    print("   - Order responses: ~40% size reduction")
-    print("   - Menu responses: Include only essential data")
-    print("   - Cache-friendly headers (5-minute cache)")
+    logger.info("✅ Bandwidth Optimizations:")
+    logger.info("   - Product responses: ~60% size reduction")
+    logger.info("   - Order responses: ~40% size reduction")
+    logger.info("   - Menu responses: Include only essential data")
+    logger.info("   - Cache-friendly headers (5-minute cache)")
 
 def test_feature_flags():
     """Test feature flag system"""
-    print("\n🚩 Testing Feature Flag System...")
+    logger.info("\n🚩 Testing Feature Flag System...")
     
     feature_flags = {
         "new_ui": "Always enabled for mobile",
@@ -250,12 +251,12 @@ def test_feature_flags():
     }
     
     for feature, description in feature_flags.items():
-        print(f"✅ {feature}: {description}")
+        logger.info(f"✅ {feature}: {description}")
 
 def main():
     """Run all mobile compatibility tests"""
-    print("🚀 Fynlo POS Mobile API Compatibility Tests")
-    print("=" * 60)
+    logger.info("🚀 Fynlo POS Mobile API Compatibility Tests")
+    logger.info("=" * 60)
     
     test_odoo_authentication()
     test_mobile_menu_endpoint()
@@ -268,24 +269,24 @@ def main():
     test_response_optimization()
     test_feature_flags()
     
-    print("\n" + "=" * 60)
-    print("✅ Mobile API Compatibility Implementation Complete")
+    logger.info("\n" + "=" * 60)
+    logger.info("✅ Mobile API Compatibility Implementation Complete")
     
-    print("\n📱 iOS Integration Benefits:")
-    print("🔗 Odoo-style endpoints for backward compatibility")
-    print("⚡ Mobile-optimized responses (40-60% size reduction)")
-    print("🚪 Dual port support (8000 + 8069 compatibility)")
-    print("🎯 Feature flags for progressive enhancement")
-    print("📊 Mobile-friendly analytics and reporting")
-    print("🔧 Automatic mobile detection and optimization")
-    print("🌐 CORS and middleware for React Native support")
-    print("📡 WebSocket URLs configured for real-time features")
+    logger.info("\n📱 iOS Integration Benefits:")
+    logger.info("🔗 Odoo-style endpoints for backward compatibility")
+    logger.info("⚡ Mobile-optimized responses (40-60% size reduction)")
+    logger.info("🚪 Dual port support (8000 + 8069 compatibility)")
+    logger.info("🎯 Feature flags for progressive enhancement")
+    logger.info("📊 Mobile-friendly analytics and reporting")
+    logger.info("🔧 Automatic mobile detection and optimization")
+    logger.info("🌐 CORS and middleware for React Native support")
+    logger.info("📡 WebSocket URLs configured for real-time features")
     
-    print("\n🔄 Next Steps:")
-    print("1. Start server: uvicorn app.main:app --reload --port 8000")
-    print("2. Test with actual iOS app")
-    print("3. Verify Odoo endpoint compatibility")
-    print("4. Monitor mobile request optimization")
+    logger.info("\n🔄 Next Steps:")
+    logger.info("1. Start server: uvicorn app.main:app --reload --port 8000")
+    logger.info("2. Test with actual iOS app")
+    logger.info("3. Verify Odoo endpoint compatibility")
+    logger.info("4. Monitor mobile request optimization")
 
 if __name__ == "__main__":
     main()

@@ -7,7 +7,10 @@ import os
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 from decimal import Decimal
-import json
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Load environment variables
 load_dotenv()
@@ -96,8 +99,8 @@ CHUCHO_MENU = {
 
 def setup_chucho_restaurant():
     """Update restaurant name and seed menu"""
-    print("🍽️ Setting up Chucho Restaurant")
-    print("=" * 50)
+    logger.info("🍽️ Setting up Chucho Restaurant")
+    logger.info("=" * 50)
     
     engine = create_engine(DATABASE_URL)
     
@@ -114,7 +117,7 @@ def setup_chucho_restaurant():
             restaurant = result.fetchone()
             
             if not restaurant:
-                print("❌ No restaurant found. Please run fix_arnaud_user.py first")
+                logger.info("❌ No restaurant found. Please run fix_arnaud_user.py first")
                 return False
             
             restaurant_id = restaurant[0]
@@ -122,7 +125,7 @@ def setup_chucho_restaurant():
             
             # Update restaurant name if needed
             if current_name != "Chucho Restaurant":
-                print(f"📝 Updating restaurant name from '{current_name}' to 'Chucho Restaurant'")
+                logger.info(f"📝 Updating restaurant name from '{current_name}' to 'Chucho Restaurant'")
                 conn.execute(text("""
                     UPDATE restaurants 
                     SET name = 'Chucho Restaurant',
@@ -131,7 +134,7 @@ def setup_chucho_restaurant():
                 """), {"restaurant_id": restaurant_id})
             
             # Clear existing menu items
-            print("🧹 Clearing existing menu...")
+            logger.info("🧹 Clearing existing menu...")
             conn.execute(text("""
                 DELETE FROM products WHERE restaurant_id = :restaurant_id
             """), {"restaurant_id": restaurant_id})
@@ -141,7 +144,7 @@ def setup_chucho_restaurant():
             """), {"restaurant_id": restaurant_id})
             
             # Seed new menu
-            print("🍴 Seeding Chucho menu...")
+            logger.info("🍴 Seeding Chucho menu...")
             
             for category_data in CHUCHO_MENU["categories"]:
                 # Create category
@@ -160,7 +163,7 @@ def setup_chucho_restaurant():
                 })
                 
                 category_id = result.fetchone()[0]
-                print(f"  ✅ Created category: {category_data['name']}")
+                logger.info(f"  ✅ Created category: {category_data['name']}")
                 
                 # Add items to category
                 for idx, item in enumerate(category_data["items"]):
@@ -184,12 +187,12 @@ def setup_chucho_restaurant():
                         "price": Decimal(str(item["price"]))
                     })
                 
-                print(f"    Added {len(category_data['items'])} items")
+                logger.info(f"    Added {len(category_data['items'])} items")
             
             trans.commit()
             
             # Verify the setup
-            print("\n🔍 Verifying setup...")
+            logger.info("\n🔍 Verifying setup...")
             
             # Check restaurant
             result = conn.execute(text("""
@@ -197,7 +200,7 @@ def setup_chucho_restaurant():
             """), {"restaurant_id": restaurant_id})
             
             restaurant = result.fetchone()
-            print(f"✅ Restaurant: {restaurant[0]}")
+            logger.info(f"✅ Restaurant: {restaurant[0]}")
             
             # Count menu items
             result = conn.execute(text("""
@@ -205,7 +208,7 @@ def setup_chucho_restaurant():
             """), {"restaurant_id": restaurant_id})
             
             item_count = result.scalar()
-            print(f"✅ Menu items: {item_count}")
+            logger.info(f"✅ Menu items: {item_count}")
             
             # Count categories
             result = conn.execute(text("""
@@ -213,10 +216,10 @@ def setup_chucho_restaurant():
             """), {"restaurant_id": restaurant_id})
             
             category_count = result.scalar()
-            print(f"✅ Categories: {category_count}")
+            logger.info(f"✅ Categories: {category_count}")
             
             # Show some sample items
-            print("\n📋 Sample menu items:")
+            logger.info("\n📋 Sample menu items:")
             result = conn.execute(text("""
                 SELECT p.name, p.price, c.name as category
                 FROM products p
@@ -227,22 +230,22 @@ def setup_chucho_restaurant():
             """), {"restaurant_id": restaurant_id})
             
             for item in result:
-                print(f"  - {item[0]}: £{item[1]} ({item[2]})")
+                logger.info(f"  - {item[0]}: £{item[1]} ({item[2]})")
             
             return True
             
         except Exception as e:
             trans.rollback()
-            print(f"❌ Error: {str(e)}")
+            logger.error(f"❌ Error: {str(e)}")
             return False
 
 if __name__ == "__main__":
     if setup_chucho_restaurant():
-        print("\n✅ Chucho Restaurant setup complete!")
-        print("\n🌮 The app should now show:")
-        print("- Restaurant name: Chucho Restaurant")
-        print("- Authentic Mexican taco menu")
-        print("- 37 items including tacos, burritos, and Mexican drinks")
-        print("- All regular tacos priced at £3.50 each")
+        logger.info("\n✅ Chucho Restaurant setup complete!")
+        logger.info("\n🌮 The app should now show:")
+        logger.info("- Restaurant name: Chucho Restaurant")
+        logger.info("- Authentic Mexican taco menu")
+        logger.info("- 37 items including tacos, burritos, and Mexican drinks")
+        logger.info("- All regular tacos priced at £3.50 each")
     else:
-        print("\n❌ Setup failed. Check the error above.")
+        logger.error("\n❌ Setup failed. Check the error above.")

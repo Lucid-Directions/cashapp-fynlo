@@ -6,7 +6,6 @@ Create Date: 2025-06-21 10:00:00.000000
 
 """
 from alembic import op
-import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '006_add_foreign_key_constraints'

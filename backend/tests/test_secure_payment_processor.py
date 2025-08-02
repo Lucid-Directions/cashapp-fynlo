@@ -6,13 +6,10 @@ Tests payment processing, fallback logic, and audit trails
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
 from decimal import Decimal
-from datetime import datetime
-import uuid
 
 from app.services.secure_payment_processor import (
     SecurePaymentProcessor,
     PaymentProcessingError,
-    Payment,
     PaymentAuditLog
 )
 from app.services.payment_providers import PaymentStatus, PaymentMethod
@@ -317,11 +314,9 @@ class TestPaymentProcessorIntegration:
     async def test_end_to_end_payment_flow(self, test_db_session):
         """Test complete payment flow with real database"""
         # This would test the full flow with actual database
-        pass
     
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_concurrent_payments(self, test_db_session):
         """Test handling of concurrent payment requests"""
         # This would test race conditions and locking
-        pass

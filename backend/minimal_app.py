@@ -5,8 +5,7 @@ This bypasses complex payment provider imports and focuses on core data endpoint
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Dict, Any
-import json
+from typing import Dict, Any
 from datetime import datetime
 
 app = FastAPI(

@@ -4,7 +4,7 @@ iOS-optimized base64 image upload endpoints
 """
 
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Path, Query
+from fastapi import APIRouter, Depends, Path, Query
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -12,7 +12,7 @@ import os
 
 from app.core.database import get_db, Product, Restaurant, User
 from app.core.auth import get_current_user
-from app.core.file_upload import file_upload_service, ImageUploadRequest, ImageUploadResponse
+from app.core.file_upload import file_upload_service, ImageUploadRequest
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
 

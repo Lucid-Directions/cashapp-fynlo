@@ -5,12 +5,11 @@ No mocks - uses actual payment services in test mode
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from decimal import Decimal
 import uuid
 import os
 from datetime import datetime
 
-from app.models import Order, Payment
+from app.models import Payment
 
 
 @pytest.mark.asyncio
@@ -294,7 +293,6 @@ class TestPaymentProcessing:
         db_session: AsyncSession
     ):
         """Test real Stripe webhook validation"""
-        import stripe
         import time
         
         # Create real Stripe webhook event

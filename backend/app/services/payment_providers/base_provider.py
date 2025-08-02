@@ -42,7 +42,6 @@ class IGatewayRefund(ABC):
             including at least 'success' (bool), 'refund_id' (str, gateway's refund ID),
             'status' (str, e.g., 'succeeded', 'pending', 'failed'), and optionally 'error' (str).
         """
-        pass
 
 class BasePaymentProvider(IGatewayRefund, ABC): # Make it inherit IGatewayRefund
     def __init__(self, api_key: str, api_secret: Optional[str] = None, config: Optional[Dict[str, Any]] = None):

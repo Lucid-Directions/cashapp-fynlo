@@ -4,7 +4,7 @@ Handles configuration and testing of payment providers
 """
 
 from fastapi import APIRouter, Depends, status, Query
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 from decimal import Decimal
 from sqlalchemy.orm import Session
 

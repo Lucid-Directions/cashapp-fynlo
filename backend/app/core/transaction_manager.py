@@ -6,7 +6,7 @@ Provides decorators and utilities for atomic operations and rollback handling.
 import functools
 import logging
 from contextlib import asynccontextmanager
-from typing import Any, Callable, Optional, Type, Union
+from typing import Any, Callable
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DisconnectionError
 import asyncio
@@ -16,15 +16,12 @@ logger = logging.getLogger(__name__)
 
 class TransactionError(Exception):
     """Custom exception for transaction failures"""
-    pass
 
 class RetryableTransactionError(TransactionError):
     """Exception for transactions that can be retried"""
-    pass
 
 class NonRetryableTransactionError(TransactionError):
     """Exception for transactions that should not be retried"""
-    pass
 
 
 class TransactionManager:

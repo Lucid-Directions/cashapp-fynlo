@@ -1,5 +1,8 @@
-import base64
 from typing import List, Dict, Any
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Placeholder for ScannedItemResponse if not centrally defined
 # from app.api.v1.endpoints.inventory import ScannedItemResponse
@@ -26,7 +29,7 @@ class OCRService:
         #     pass # self.client = vision.ImageAnnotatorClient()
         # else:
         #     self.client = None # Mock client or raise error
-        print("OCRService initialized (mock).")
+        logger.info("OCRService initialized (mock).")
 
     async def parse_receipt_image(self, image_bytes: bytes) -> List[Dict[str, Any]]:
         """
@@ -40,7 +43,7 @@ class OCRService:
             A list of dictionaries, where each dictionary represents a parsed line item.
             Example: [{"raw_text": "Milk 1L", "quantity": 1, "price": 2.50}, ...]
         """
-        print(f"OCRService: Received image_bytes of length {len(image_bytes)}")
+        logger.info(f"OCRService: Received image_bytes of length {len(image_bytes)}")
 
         # Simulate OCR processing delay
         # import asyncio
@@ -94,7 +97,7 @@ class OCRService:
 # ocr_service_instance = OCRService(ocr_provider_config={"provider": "mock"})
 # image_content = b"some image data"
 # parsed_data = await ocr_service_instance.parse_receipt_image(image_content)
-# print(parsed_data)
+# logger.info(parsed_data)
 
 # Fuzzy matching service would be separate, e.g., in product_service.py or a new fuzzy_matching_service.py
 # It would take the parsed item names and try to match them against existing product names/SKUs in the database.

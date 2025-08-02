@@ -4,7 +4,7 @@ Provides real-time visibility into replica counts and system health.
 Enhanced with strict input validation and security measures.
 """
 
-from fastapi import APIRouter, Depends, BackgroundTasks, Query, Body, Request
+from fastapi import APIRouter, Depends, BackgroundTasks, Body, Request
 from datetime import datetime, timezone
 from typing import Dict, Any, List
 import logging

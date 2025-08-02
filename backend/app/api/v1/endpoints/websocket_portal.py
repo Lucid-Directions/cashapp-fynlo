@@ -10,6 +10,10 @@ from datetime import datetime
 
 from app.core.database import get_db, User, Restaurant
 from app.core.websocket import (
+import logging
+
+logger = logging.getLogger(__name__)
+
     websocket_manager, 
     ConnectionType, 
     EventType,
@@ -273,7 +277,7 @@ async def handle_portal_update_request(
             }))
             
     except Exception as e:
-        print(f"Portal update request error: {str(e)}")
+        logger.error(f"Portal update request error: {str(e)}")
 
 async def handle_platform_stats_request(websocket: WebSocket, db: Session):
     """Handle platform statistics request"""
@@ -297,4 +301,4 @@ async def handle_platform_stats_request(websocket: WebSocket, db: Session):
         await websocket.send_text(json.dumps(stats))
         
     except Exception as e:
-        print(f"Platform stats request error: {str(e)}")
+        logger.error(f"Platform stats request error: {str(e)}")

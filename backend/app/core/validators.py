@@ -1,7 +1,7 @@
 """Enhanced input validators for security."""
 import re
 from typing import Any, Optional
-from pydantic import validator, ValidationError
+from pydantic import validator
 from app.core.security_utils import sanitize_search_term, is_valid_uuid
 
 

@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import List, Dict, Any, Optional
-from ..core.database import Payment, QRPayment, Restaurant, Order
+from typing import List, Dict, Any
+from ..core.database import Payment, Order
 
 async def get_restaurant_monthly_volume(
     restaurant_id: str,

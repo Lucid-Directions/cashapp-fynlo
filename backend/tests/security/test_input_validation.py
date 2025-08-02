@@ -4,8 +4,6 @@ Input Validation Security Tests
 import pytest
 from httpx import AsyncClient
 from app.main import app
-from tests.fixtures.database import test_db, test_restaurant
-from tests.fixtures.auth import auth_headers
 
 
 @pytest.mark.asyncio

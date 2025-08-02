@@ -3,10 +3,9 @@ Public Menu API endpoints for Fynlo POS
 These endpoints don't require authentication to allow menu loading before login
 """
 
-from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from typing import Optional
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
 import time
 import logging
 

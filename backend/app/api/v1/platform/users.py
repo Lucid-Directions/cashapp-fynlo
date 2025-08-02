@@ -3,10 +3,10 @@ Platform user management endpoints.
 """
 
 from datetime import datetime, timedelta
-from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from typing import Optional
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_, func
+from sqlalchemy import or_, func
 
 from app.core.database import get_db, User, Restaurant
 from app.core.auth import get_current_platform_owner

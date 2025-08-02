@@ -6,7 +6,7 @@ FynloException instead of HTTPException.
 """
 
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch
 from fastapi import Request
 from sqlalchemy.orm import Session
 
@@ -14,9 +14,9 @@ from app.core.exceptions import FynloException, AuthenticationException, Authori
 from app.core.auth import get_current_user, get_current_active_user, get_platform_owner, get_restaurant_user
 from app.core.tenant_security import TenantSecurity
 from app.core.two_factor_auth import TwoFactorAuth
-from app.core.dependencies import get_db, platform_owner_required
+from app.core.dependencies import platform_owner_required
 from app.core.production_guard import production_guard
-from app.models import User, Restaurant
+from app.models import User
 
 
 class TestFynloExceptionMigration:

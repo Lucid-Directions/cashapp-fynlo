@@ -2,8 +2,7 @@
 API Router for Fynlo POS Backend
 """
 
-from fastapi import APIRouter, Depends
-from app.middleware.rate_limit_middleware import limiter, DEFAULT_RATE
+from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     auth, restaurants, products, orders, payments, customers,

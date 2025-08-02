@@ -9,19 +9,19 @@ import sys
 # Force production environment
 os.environ["APP_ENV"] = "production"
 
-print("=== Direct CORS Parsing Test ===")
-print(f"APP_ENV: {os.getenv('APP_ENV')}")
+logger.info("=== Direct CORS Parsing Test ===")
+logger.info(f"APP_ENV: {os.getenv('APP_ENV')}")
 
 # Test loading .env.production
 from dotenv import load_dotenv
 env_file = f".env.{os.getenv('APP_ENV', 'development')}"
-print(f"Loading env file: {env_file}")
+logger.info(f"Loading env file: {env_file}")
 load_dotenv(dotenv_path=env_file, override=True)
 
 # Check what CORS_ORIGINS is set to
 cors_value = os.getenv('CORS_ORIGINS')
-print(f"CORS_ORIGINS from env: {repr(cors_value)}")
-print(f"Type: {type(cors_value)}")
+logger.info(f"CORS_ORIGINS from env: {repr(cors_value)}")
+logger.info(f"Type: {type(cors_value)}")
 
 # Try the parsing function directly
 try:
@@ -41,11 +41,15 @@ try:
     for val in test_values:
         try:
             result = Settings.parse_cors_origins(val)
-            print(f"✅ parse_cors_origins({repr(val)}) = {result}")
+            logger.info(f"✅ parse_cors_origins({repr(val)}) = {result}")
         except Exception as e:
-            print(f"❌ parse_cors_origins({repr(val)}) failed: {e}")
+            logger.error(f"❌ parse_cors_origins({repr(val)}) failed: {e}")
             
 except Exception as e:
-    print(f"❌ Failed to import Settings: {e}")
+    logger.error(f"❌ Failed to import Settings: {e}")
     import traceback
+import logging
+
+logger = logging.getLogger(__name__)
+
     traceback.print_exc()

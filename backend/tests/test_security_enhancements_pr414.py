@@ -4,7 +4,7 @@ Tests the actual implementation of security features added to the Fynlo backend.
 """
 
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import patch
 import os
 from datetime import datetime, timezone
 
@@ -21,8 +21,6 @@ from app.core.security import (
 )
 from app.services.digitalocean_monitor import (
     DigitalOceanMonitor,
-    DigitalOceanAPIError,
-    DigitalOceanConfigError,
     do_circuit_breaker
 )
 from app.middleware.rate_limit_middleware import (

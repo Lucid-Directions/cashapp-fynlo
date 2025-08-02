@@ -6,14 +6,13 @@ Creates comprehensive production-like data for testing and development
 
 import asyncio
 import sys
-import os
 from pathlib import Path
 
 # Add parent directory to path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from seed_production_data import ProductionSeeder
-from app.core.database import engine, SessionLocal, Base
+from app.core.database import SessionLocal
 from app.models import Restaurant, User, Product, Order, Customer
 from sqlalchemy import select, text
 import logging

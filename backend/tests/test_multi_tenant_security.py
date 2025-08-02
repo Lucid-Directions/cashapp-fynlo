@@ -10,9 +10,9 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
-from app.core.database import User, Restaurant, UserRestaurant, Product, Customer, Order, InventoryItem
+from app.core.database import User, Restaurant, UserRestaurant, Product, Customer
 from app.core.auth import create_access_token
-from app.core.security import get_password_hash, verify_password
+from app.core.security import get_password_hash
 
 
 class TestMultiTenantSecurity:

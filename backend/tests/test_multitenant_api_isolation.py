@@ -4,14 +4,12 @@ Tests actual API endpoints for cross-tenant access vulnerabilities
 """
 
 import pytest
-import json
-from datetime import datetime
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.main import app
-from app.models import User, Restaurant, Order, Product, Employee
+from app.models import User, Restaurant
 
 
 class TestAPIMultiTenantIsolation:

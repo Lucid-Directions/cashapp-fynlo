@@ -4,12 +4,10 @@ Manages centralized platform configurations and restaurant overrides
 """
 
 import logging
-import json
 from datetime import datetime
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, List
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
-import jsonschema
+from sqlalchemy import and_
 from jsonschema import validate, ValidationError
 
 from app.models.platform_config import (

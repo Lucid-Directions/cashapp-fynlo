@@ -5,7 +5,6 @@ Authentication middleware for Supabase integration
 from fastapi import Depends, Header, Request
 from sqlalchemy.orm import Session
 from typing import Optional
-import uuid
 import logging
 from datetime import datetime, timedelta
 from jose import jwt
@@ -136,7 +135,7 @@ async def get_current_user(
             details={"error": str(e), "reason": "Unexpected error during authentication"},
             commit=True
         )
-        print(f"Auth error: {str(e)}")
+        logger.error(f"Auth error: {str(e)}")
         raise AuthenticationException(
             message="Authentication failed",
             details={"error_code": "AUTHENTICATION_FAILED"}

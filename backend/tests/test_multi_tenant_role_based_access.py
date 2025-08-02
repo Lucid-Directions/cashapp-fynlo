@@ -7,9 +7,8 @@ import uuid
 from datetime import datetime, timedelta
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text
 
-from app.core.database import User, Restaurant, UserRestaurant, Product, Customer, Order
+from app.core.database import User, Restaurant, UserRestaurant, Product, Customer
 from app.core.auth import create_access_token
 
 
