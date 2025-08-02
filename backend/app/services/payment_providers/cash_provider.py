@@ -126,7 +126,4 @@ class CashProvider(BasePaymentProvider):
             "status": "void_not_applicable_or_manual", # Or PaymentStatus.CANCELLED if that's how it's handled
             "message": "Cash transaction voiding is a manual process or handled as cancellation/refund."
         }
-
-    def calculate_fee(self, amount: Decimal) -> Decimal:
-        """Execute calculate_fee operation."""
         return Decimal(0) # No processing fees for cash

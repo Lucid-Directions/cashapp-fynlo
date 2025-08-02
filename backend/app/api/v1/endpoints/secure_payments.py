@@ -37,16 +37,12 @@ class PaymentRequest(BaseModel):
     metadata: Optional[Dict[str, Any]] = Field(None, description="Optional metadata")
     
     @validator('amount')
-    def validate_amount(cls, v):
-        """Execute validate_amount operation."""
         # Ensure proper decimal places
         if v.as_tuple().exponent < -2:
             raise ValueError("Amount cannot have more than 2 decimal places")
         return v
     
     @validator('payment_method')
-    def validate_payment_method(cls, v):
-        """Execute validate_payment_method operation."""
         valid_methods = ['card', 'cash', 'qr_code', 'apple_pay', 'google_pay']
         if v not in valid_methods:
             raise ValueError(f"Invalid payment method. Must be one of: {', '.join(valid_methods)}")
@@ -60,8 +56,6 @@ class RefundRequest(BaseModel):
     reason: Optional[str] = Field(None, max_length=500, description="Refund reason")
     
     @validator('amount')
-    def validate_amount(cls, v):
-        """Execute validate_amount operation."""
         if v is not None and v.as_tuple().exponent < -2:
             raise ValueError("Amount cannot have more than 2 decimal places")
         return v

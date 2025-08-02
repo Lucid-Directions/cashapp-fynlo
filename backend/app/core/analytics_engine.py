@@ -68,15 +68,6 @@ class AnalyticsEngine:
     
     def __init__(self, db: Session):
         self.db = db
-        
-    def get_dashboard_overview(
-        self,
-        restaurant_id: str,
-        timeframe: AnalyticsTimeframe = AnalyticsTimeframe.DAY,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None
-    ) -> Dict[str, Any]:
-        """Execute get_dashboard_overview operation."""
         """
         Get comprehensive dashboard overview with key metrics
         """
@@ -136,15 +127,6 @@ class AnalyticsEngine:
                 error_code=ErrorCodes.INTERNAL_ERROR,
                 status_code=500
             )
-    
-    def get_sales_analytics(
-        self,
-        restaurant_id: str,
-        timeframe: AnalyticsTimeframe = AnalyticsTimeframe.DAY,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None
-    ) -> Dict[str, Any]:
-        """Execute get_sales_analytics operation."""
         """
         Get detailed sales analytics and reporting
         """
@@ -194,15 +176,6 @@ class AnalyticsEngine:
                 error_code=ErrorCodes.INTERNAL_ERROR,
                 status_code=500
             )
-    
-    def get_employee_performance(
-        self,
-        restaurant_id: str,
-        timeframe: AnalyticsTimeframe = AnalyticsTimeframe.DAY,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None
-    ) -> Dict[str, Any]:
-        """Execute get_employee_performance operation."""
         """
         Get employee performance analytics
         """
@@ -276,15 +249,6 @@ class AnalyticsEngine:
                 error_code=ErrorCodes.INTERNAL_ERROR,
                 status_code=500
             )
-    
-    def get_customer_analytics(
-        self,
-        restaurant_id: str,
-        timeframe: AnalyticsTimeframe = AnalyticsTimeframe.DAY,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None
-    ) -> Dict[str, Any]:
-        """Execute get_customer_analytics operation."""
         """
         Get customer behavior and analytics
         """
@@ -381,15 +345,6 @@ class AnalyticsEngine:
                 error_code=ErrorCodes.INTERNAL_ERROR,
                 status_code=500
             )
-    
-    def get_inventory_analytics(
-        self,
-        restaurant_id: str,
-        timeframe: AnalyticsTimeframe = AnalyticsTimeframe.DAY,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None
-    ) -> Dict[str, Any]:
-        """Execute get_inventory_analytics operation."""
         """
         Get inventory and product analytics
         """

@@ -135,14 +135,7 @@ class TenantSecurity:
             
     
     @staticmethod
-    def apply_tenant_filter(
-        query: Query,
-        user: User,
-        model_class: type,
-        restaurant_field: str = "restaurant_id",
-        db: Optional[Session] = None
-    ) -> Query:
-        """
+    def apply_tenant_filter(query, user, model_class, restaurant_field: str = "restaurant_id", db = None):
         Apply tenant filtering to a SQLAlchemy query
         
         Args:
@@ -210,12 +203,7 @@ class TenantSecurity:
         return list(accessible_restaurants)
     
     @staticmethod
-    def validate_cross_restaurant_operation(
-        user: User,
-        source_restaurant_id: str,
-        target_restaurant_id: str,
-        operation: str = "transfer"
-    ) -> None:
+    def validate_cross_restaurant_operation(user: User, source_restaurant_id: str, target_restaurant_id: str, operation: str):
         """
         Validate operations that involve multiple restaurants
         
@@ -236,7 +224,7 @@ class TenantSecurity:
     @staticmethod
     def sanitize_response_data(data: dict, user: User) -> dict:
         """
-        Remove sensitive data based on user's access level
+        Remove sensitive data based on user access level
         
         Args:
             data: Response data

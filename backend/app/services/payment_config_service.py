@@ -16,13 +16,6 @@ class PaymentConfigService:
 
     def __init__(self, db: Session):
         self.db = db
-
-    def get_payment_method_setting(
-        self,
-        payment_method: PaymentMethodEnum,
-        restaurant_id: Optional[str] = None
-    ) -> Optional[PaymentMethodSetting]:
-        """Execute get_payment_method_setting operation."""
         """
         Retrieves the effective payment method setting.
         It first looks for a restaurant-specific override, then falls back to the platform default.

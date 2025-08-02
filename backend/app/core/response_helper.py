@@ -12,14 +12,7 @@ from fastapi.responses import JSONResponse
 class APIResponseHelper:
     """Helper class for creating standardized API responses"""
 
-    @staticmethod
-    def success(
-        data: Optional[Union[Dict[str, Any], List[Any]]] = None,
-        message: str = "Success",
-        status_code: int = status.HTTP_200_OK,
-        meta: Optional[Dict[str, Any]] = None
-    ) -> JSONResponse:
-        """Execute success operation."""
+    def success(data: Any = None, message: str = "Success", status_code: int = 200) -> JSONResponse:    @staticmethod
         """
         Create a successful API response
         
@@ -50,13 +43,6 @@ class APIResponseHelper:
         )
 
     @staticmethod
-    def error(
-        message: str = "An error occurred",
-        status_code: int = status.HTTP_400_BAD_REQUEST,
-        error_code: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None
-    ) -> JSONResponse:
-        """Execute error operation."""
         """
         Create an error API response
         
@@ -87,14 +73,6 @@ class APIResponseHelper:
         )
 
     @staticmethod
-    def paginated(
-        data: List[Any],
-        page: int,
-        page_size: int,
-        total: int,
-        message: str = "Success"
-    ) -> JSONResponse:
-        """Execute paginated operation."""
         """
         Create a paginated API response
         
@@ -126,11 +104,6 @@ class APIResponseHelper:
         )
 
     @staticmethod
-    def onboarding_required(
-        user_data: Dict[str, Any],
-        message: str = "Restaurant setup required"
-    ) -> JSONResponse:
-        """Execute onboarding_required operation."""
         """
         Create response for users who need to complete onboarding
         

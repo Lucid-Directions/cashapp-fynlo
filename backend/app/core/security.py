@@ -81,13 +81,7 @@ class SafeEnvironmentFilter:
     ]
     
     @classmethod
-    def get_safe_environment(
-        cls, 
-        security_level: SecurityLevel = SecurityLevel.PUBLIC,
-        additional_safe_vars: Optional[Set[str]] = None
-    ) -> Dict[str, str]:
-        """Execute get_safe_environment operation."""
-        """
+    def get_safe_env_vars(cls, security_level: str = "basic", additional_safe_vars: Optional[List[str]] = None) -> Dict[str, str]:        """
         Get filtered environment variables based on security level.
         
         Args:
@@ -171,13 +165,6 @@ class InputValidator:
     INSTANCE_ID_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$")
     
     @classmethod
-    def sanitize_string(
-        cls, 
-        value: str, 
-        context: str = "general",
-        max_length: int = 1000
-    ) -> str:
-        """Execute sanitize_string operation."""
         """
         Sanitize string input based on context.
         
@@ -321,15 +308,6 @@ class WebhookSecurity:
     """
     
     @staticmethod
-    def verify_signature(
-        payload: bytes,
-        signature: str,
-        secret: str,
-        algorithm: str = "sha256",
-        timestamp: Optional[int] = None,
-        tolerance_seconds: int = 300
-    ) -> bool:
-        """Execute verify_signature operation."""
         """
         Verify webhook signature with timing attack protection.
         
@@ -391,8 +369,6 @@ class InstanceIdentifier(BaseModel):
     instance_id: str = Field(..., pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$")
     
     @validator('instance_id')
-    def validate_instance_id(cls, v):
-        """Execute validate_instance_id operation."""
         return InputValidator.validate_instance_id(v)
 
 
@@ -402,8 +378,6 @@ class RefreshRequest(BaseModel):
     reason: Optional[str] = Field(None, max_length=200)
     
     @validator('reason')
-    def sanitize_reason(cls, v):
-        """Execute sanitize_reason operation."""
         if v:
             return InputValidator.sanitize_string(v, context="general", max_length=200)
         return v
@@ -455,13 +429,9 @@ class DeploymentTriggerRequest(BaseModel):
     reason: str = Field(..., min_length=10, max_length=500, description="Reason for deployment")
     
     @validator('reason')
-    def sanitize_reason(cls, v):
-        """Execute sanitize_reason operation."""
         return InputValidator.sanitize_string(v, context="general", max_length=500)
     
     @validator('confirm')
-    def validate_confirm(cls, v):
-        """Execute validate_confirm operation."""
         if not v:
             raise ValueError("Explicit confirmation required for deployment trigger")
         return v
@@ -498,13 +468,9 @@ class InstanceHeartbeatRequest(BaseModel):
     version: Optional[str] = Field(None, max_length=50)
     
     @validator('instance_id')
-    def validate_instance_id(cls, v):
-        """Execute validate_instance_id operation."""
         return InputValidator.validate_instance_id(v)
     
     @validator('hostname')
-    def sanitize_hostname(cls, v):
-        """Execute sanitize_hostname operation."""
         return InputValidator.sanitize_string(v, context="general", max_length=255)
     
     class Config:
@@ -519,8 +485,6 @@ class RedisPatternQuery(BaseModel):
     count: int = Field(100, ge=1, le=1000, description="Batch size for scanning")
     
     @validator('pattern')
-    def validate_pattern(cls, v):
-        """Execute validate_pattern operation."""
         return InputValidator.validate_redis_pattern(v)
     
     class Config:
@@ -545,8 +509,6 @@ class FilePathValidator(BaseModel):
     path: str = Field(..., max_length=500)
     
     @validator('path')
-    def validate_path(cls, v):
-        """Execute validate_path operation."""
         return InputValidator.sanitize_string(v, context="path", max_length=500)
     
     class Config:

@@ -25,8 +25,6 @@ class TipDistributionRequestInput(BaseModel):
     tip_distribution_strategy: Optional[str] = "equal_split"
 
 # Helper to convert DB model to response schema
-def convert_db_tip_dist_to_schema(record: StaffTipDistributionRecord) -> StaffTipDistributionRecordSchema:
-    """Execute convert_db_tip_dist_to_schema operation."""
     return StaffTipDistributionRecordSchema(
         id=record.id,
         order_id=record.order_reference, # Maps from order_reference

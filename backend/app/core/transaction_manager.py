@@ -169,8 +169,6 @@ def transactional(max_retries: int = 3, retry_delay: float = 0.1):
             # Send notifications
             # etc.
     """
-    def decorator(func: Callable) -> Callable:
-        """Execute decorator operation."""
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             # Extract db session from arguments
@@ -211,8 +209,6 @@ def optimistic_lock_retry(version_field: str = 'version', max_retries: int = 5):
             product.version += 1
             # If another process updated the product, this will fail and retry
     """
-    def decorator(func: Callable) -> Callable:
-        """Execute decorator operation."""
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             for attempt in range(max_retries + 1):
@@ -272,9 +268,6 @@ class BatchTransactionManager:
         logger.info(f"✅ Batch execution completed: {results['successful']}/{results['total']} successful")
         
         return results
-    
-    async def _execute_batch_chunk(self, db: Session, batch: list, operation_handler: Callable) -> dict:
-        """Execute a single batch chunk"""
         chunk_results = {
             'successful': 0,
             'failed': 0,

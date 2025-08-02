@@ -113,15 +113,6 @@ class EmailService:
         except Exception as e:
             logger.exception(f"Error sending receipt email for order #{getattr(order, 'order_number', 'N/A')}: {e}")
             return False
-    
-    def send_custom_email(
-        self, 
-        to_email: str, 
-        subject: str, 
-        html_content: str,
-        tags: Optional[Dict[str, str]] = None
-    ) -> bool:
-        """Execute send_custom_email operation."""
         """
         Send custom email with HTML content
         

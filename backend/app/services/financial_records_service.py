@@ -71,14 +71,6 @@ class FinancialRecordsService:
         return self.db.query(StaffTipDistributionRecord).filter(
             StaffTipDistributionRecord.order_reference == order_reference
         ).all()
-
-    def get_staff_tip_distributions_for_staff_member(
-        self,
-        staff_id: str,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None
-    ) -> List[StaffTipDistributionRecord]:
-        """Execute get_staff_tip_distributions_for_staff_member operation."""
         """
         Retrieves staff tip distribution records for a specific staff member.
         (This functionality might also live in StaffTipService)

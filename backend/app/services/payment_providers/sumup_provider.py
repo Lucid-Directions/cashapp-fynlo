@@ -5,7 +5,6 @@ SumUp Payment Provider Implementation
 from decimal import Decimal
 from typing import Dict, Any, Optional
 import logging
-from  import 
 import httpx
 
 from .base import PaymentProvider, PaymentStatus

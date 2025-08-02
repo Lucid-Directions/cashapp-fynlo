@@ -53,9 +53,6 @@ class WebSocketMessage:
         self.user_id = user_id
         self.connection_types = connection_types or [ConnectionType.POS]
         self.timestamp = datetime.now().isoformat()
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Execute to_dict operation."""
         return {
             "id": self.id,
             "event_type": self.event_type.value,

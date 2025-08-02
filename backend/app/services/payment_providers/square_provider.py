@@ -5,7 +5,6 @@ Square Payment Provider Implementation
 from decimal import Decimal
 from typing import Dict, Any, Optional
 import logging
-from  import 
 import uuid
 try:
     from square import client as Client

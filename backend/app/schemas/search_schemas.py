@@ -21,15 +21,11 @@ class BaseSearchRequest(BaseModel):
     sort_order: Optional[str] = Field("asc", pattern="^(asc|desc)$")
     
     @validator('search', pre=True)
-    def validate_search(cls, v):
-        """Execute validate_search operation."""
         if v:
             return validate_search_input(v)
         return v
     
     @validator('sort_by')
-    def validate_sort_by_base(cls, v):
-        """Execute validate_sort_by_base operation."""
         # This will be overridden in subclasses with specific allowed fields
         if v:
             validate_no_sql_injection(v, "Sort field")
@@ -48,22 +44,16 @@ class CustomerSearchRequest(BaseSearchRequest):
         'first_name', 'last_name', 'email']
     
     @validator('email', 'phone', 'name', pre=True)
-    def validate_search_fields(cls, v):
-        """Execute validate_search_fields operation."""
         if v:
             return validate_search_input(v)
         return v
     
     @validator('restaurant_id')
-    def validate_restaurant_id(cls, v):
-        """Execute validate_restaurant_id operation."""
         if v:
             return validate_uuid_format(v)
         return v
     
     @validator('sort_by')
-    def validate_sort_field_customer(cls, v):
-        """Execute validate_sort_field_customer operation."""
         if v:
             return validate_sort_field(v, cls.ALLOWED_SORT_FIELDS)
         return v
@@ -79,22 +69,16 @@ class UserSearchRequest(BaseSearchRequest):
     ALLOWED_SORT_FIELDS: ClassVar[List[str]] = ['created_at', 'updated_at', 'email', 'first_name', 'last_name']
     
     @validator('email', pre=True)
-    def validate_email_search(cls, v):
-        """Execute validate_email_search operation."""
         if v:
             return validate_search_input(v)
         return v
     
     @validator('restaurant_id')
-    def validate_restaurant_id(cls, v):
-        """Execute validate_restaurant_id operation."""
         if v:
             return validate_uuid_format(v)
         return v
     
     @validator('sort_by')
-    def validate_sort_field_user(cls, v):
-        """Execute validate_sort_field_user operation."""
         if v:
             return validate_sort_field(v, cls.ALLOWED_SORT_FIELDS)
         return v
@@ -111,15 +95,11 @@ class RestaurantSearchRequest(BaseSearchRequest):
     ALLOWED_SORT_FIELDS: ClassVar[List[str]] = ['created_at', 'updated_at', 'name', 'subscription_plan']
     
     @validator('name', 'email', 'phone', pre=True)
-    def validate_search_fields(cls, v):
-        """Execute validate_search_fields operation."""
         if v:
             return validate_search_input(v)
         return v
     
     @validator('sort_by')
-    def validate_sort_field_restaurant(cls, v):
-        """Execute validate_sort_field_restaurant operation."""
         if v:
             return validate_sort_field(v, cls.ALLOWED_SORT_FIELDS)
         return v
@@ -139,22 +119,16 @@ class OrderSearchRequest(BaseSearchRequest):
     ALLOWED_SORT_FIELDS: ClassVar[List[str]] = ['created_at', 'updated_at', 'total_amount', 'status', 'payment_method']
     
     @validator('customer_id', 'restaurant_id')
-    def validate_uuid_fields(cls, v):
-        """Execute validate_uuid_fields operation."""
         if v:
             return validate_uuid_format(v)
         return v
     
     @validator('sort_by')
-    def validate_sort_field_order(cls, v):
-        """Execute validate_sort_field_order operation."""
         if v:
             return validate_sort_field(v, cls.ALLOWED_SORT_FIELDS)
         return v
     
     @validator('max_amount')
-    def validate_amount_range(cls, v, values):
-        """Execute validate_amount_range operation."""
         if v and 'min_amount' in values and values['min_amount']:
             if v < values['min_amount']:
                 raise ValueError("max_amount must be greater than min_amount")
@@ -173,29 +147,21 @@ class ProductSearchRequest(BaseSearchRequest):
     ALLOWED_SORT_FIELDS: ClassVar[List[str]] = ['name', 'price', 'created_at', 'updated_at', 'category_name']
     
     @validator('name', pre=True)
-    def validate_name_search(cls, v):
-        """Execute validate_name_search operation."""
         if v:
             return validate_search_input(v)
         return v
     
     @validator('category_id', 'restaurant_id')
-    def validate_uuid_fields(cls, v):
-        """Execute validate_uuid_fields operation."""
         if v:
             return validate_uuid_format(v)
         return v
     
     @validator('sort_by')
-    def validate_sort_field_product(cls, v):
-        """Execute validate_sort_field_product operation."""
         if v:
             return validate_sort_field(v, cls.ALLOWED_SORT_FIELDS)
         return v
     
     @validator('max_price')
-    def validate_price_range(cls, v, values):
-        """Execute validate_price_range operation."""
         if v and 'min_price' in values and values['min_price']:
             if v < values['min_price']:
                 raise ValueError("max_price must be greater than min_price")
@@ -207,8 +173,6 @@ class BulkOperationRequest(BaseModel):
     ids: List[str] = Field(..., min_items=1, max_items=100)
     
     @validator('ids')
-    def validate_all_uuids(cls, v):
-        """Execute validate_all_uuids operation."""
         for id_val in v:
             validate_uuid_format(id_val)
         return v

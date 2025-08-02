@@ -77,15 +77,6 @@ class PaymentProvider(ABC):
     def calculate_fee(self, amount: Decimal) -> Decimal:
         """Calculate the provider fee for a given amount"""
         pass
-    
-    def standardize_response(
-        self,
-        provider_response: Dict[str, Any],
-        status: PaymentStatus,
-        amount: Decimal,
-        transaction_id: str
-    ) -> Dict[str, Any]:
-        """Execute standardize_response operation."""
         """Convert provider-specific response to standard format"""
         fee = self.calculate_fee(amount)
         return {

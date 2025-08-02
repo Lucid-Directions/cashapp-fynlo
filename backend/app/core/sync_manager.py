@@ -65,9 +65,6 @@ class SyncRecord:
         self.server_timestamp = datetime.now()
         self.conflict_details = None
         self.error_message = None
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Execute to_dict operation."""
         return {
             "id": self.id,
             "entity_type": self.entity_type,
@@ -99,9 +96,6 @@ class SyncConflict:
         self.conflict_fields = conflict_fields
         self.conflict_type = conflict_type
         self.detected_at = datetime.now()
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Execute to_dict operation."""
         return {
             "sync_record_id": self.sync_record.id,
             "conflict_type": self.conflict_type,
@@ -119,15 +113,6 @@ class OfflineSyncManager:
         self.db = db
         self.sync_queue: List[SyncRecord] = []
         self.conflicts: List[SyncConflict] = []
-        
-    def batch_upload(
-        self,
-        sync_actions: List[Dict[str, Any]],
-        restaurant_id: str,
-        user_id: str,
-        device_id: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """Execute batch_upload operation."""
         """
         Process batch upload of offline actions
         """
@@ -191,14 +176,6 @@ class OfflineSyncManager:
                 error_code=ErrorCodes.INTERNAL_ERROR,
                 status_code=500
             )
-    
-    def download_changes(
-        self,
-        restaurant_id: str,
-        last_sync_timestamp: Optional[datetime] = None,
-        entity_types: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
-        """Execute download_changes operation."""
         """
         Download server changes since last sync
         """
@@ -240,14 +217,6 @@ class OfflineSyncManager:
                 error_code=ErrorCodes.INTERNAL_ERROR,
                 status_code=500
             )
-    
-    def resolve_conflict(
-        self,
-        conflict_id: str,
-        resolution_strategy: ConflictResolution,
-        merged_data: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """Execute resolve_conflict operation."""
         """
         Resolve sync conflict with specified strategy
         """
@@ -308,13 +277,6 @@ class OfflineSyncManager:
                 error_code=ErrorCodes.INTERNAL_ERROR,
                 status_code=500
             )
-    
-    def get_sync_status(
-        self,
-        restaurant_id: str,
-        device_id: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """Execute get_sync_status operation."""
         """
         Get synchronization status for restaurant/device
         """

@@ -22,19 +22,6 @@ class StaffTipService:
         """Rounds a Decimal amount to 2 decimal places for currency representation."""
         quantizer = Decimal("0.01")
         return float(amount.quantize(quantizer, rounding=ROUND_HALF_UP))
-
-    def distribute_order_tips(
-        self,
-        order_reference: str,
-        total_tips_collected: float,
-        # Total service charge applied to the order. This might have absorbed some processor fees.
-        service_charge_amount_on_order: float,
-        # The portion of the service_charge_amount_on_order that was specifically to cover a processor fee.
-        processor_fee_covered_by_service_charge: float,
-        assigned_staff: List[StaffMember],
-        tip_distribution_strategy: str = "equal_split" # e.g., "equal_split", "points_based"
-    ) -> List[StaffTipDistribution]:
-        """Execute distribute_order_tips operation."""
         """
         Distributes tips collected from an order to the assigned staff members.
 

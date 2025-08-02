@@ -42,22 +42,6 @@ class PlatformAuditLog(Base):
     
     # Relationships
     user = relationship("User", backref="platform_audit_logs")
-
-
-def create_audit_log(
-    db: Session,
-    user_id: str,
-    action: str,
-    resource_type: str,
-    resource_id: Optional[str] = None,
-    details: Optional[Dict[str, Any]] = None,
-    ip_address: Optional[str] = None,
-    user_agent: Optional[str] = None,
-    request_id: Optional[str] = None,
-    http_method: Optional[str] = None,
-    endpoint: Optional[str] = None
-) -> PlatformAuditLog:
-    """Execute create_audit_log operation."""
     """
     Create an audit log entry.
     
@@ -187,13 +171,6 @@ async def get_audit_logs(
         query = query.filter(PlatformAuditLog.created_at <= end_date)
     
     return query.order_by(PlatformAuditLog.created_at.desc()).limit(limit).offset(offset).all()
-
-
-def get_audit_summary(
-    db: Session,
-    days: int = 30
-) -> Dict[str, Any]:
-    """Execute get_audit_summary operation."""
     """
     Get summary of audit logs for dashboard.
     

@@ -448,13 +448,6 @@ class PushNotificationService:
                 error_code=ErrorCodes.INTERNAL_ERROR,
                 status_code=500
             )
-    
-    def update_user_preferences(
-        self,
-        user_id: str,
-        preferences: NotificationPreferences
-    ) -> bool:
-        """Execute update_user_preferences operation."""
         """Update user notification preferences"""
         try:
             preferences.user_id = user_id
@@ -471,13 +464,6 @@ class PushNotificationService:
     def get_user_preferences(self, user_id: str) -> Optional[NotificationPreferences]:
         """Get user notification preferences"""
         return self.user_preferences.get(user_id)
-    
-    def get_notification_history(
-        self,
-        user_id: Optional[str] = None,
-        limit: int = 100
-    ) -> List[NotificationResult]:
-        """Execute get_notification_history operation."""
         """Get notification history"""
         history = self.notification_history
         

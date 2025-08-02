@@ -48,9 +48,6 @@ class MenuItemResponse:
         self.preparation_time = product.prep_time if hasattr(product, 'prep_time') else 0
         self.created_at = product.created_at.isoformat()
         self.updated_at = product.updated_at.isoformat()
-    
-    def dict(self):
-        """Execute dict operation."""
         return {
             "id": self.id,
             "name": self.name,
@@ -82,9 +79,6 @@ class CategoryResponse:
         self.product_count = product_count
         self.created_at = category.created_at.isoformat() if hasattr(category, 'created_at') else datetime.now().isoformat()
         self.updated_at = category.updated_at.isoformat() if hasattr(category, 'updated_at') else datetime.now().isoformat()
-    
-    def dict(self):
-        """Execute dict operation."""
         return {
             "id": self.id,
             "name": self.name,

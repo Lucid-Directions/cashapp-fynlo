@@ -188,7 +188,7 @@ class PaymentProviderFactory:
         """Get restaurant's average monthly transaction volume"""
         # This would query the database for the restaurant's monthly volume
         # For now, return a default value
-                from ..crud.payments import get_restaurant_monthly_volume
+        from ..crud.payments import get_restaurant_monthly_volume
         try:
             return await get_restaurant_monthly_volume(restaurant_id)
         except Exception as e:
@@ -245,7 +245,6 @@ class PaymentProviderFactory:
             return {"error": "Analytics service not available"}
     
     def calculate_savings(
-        """Execute calculate_savings operation."""
         self,
         amount: Decimal,
         monthly_volume: Decimal,

@@ -133,14 +133,6 @@ class ConnectionLimiter:
         
         # user_id -> set of connection_ids
         self.user_connections: Dict[str, set] = {}
-        
-    def check_connection_allowed(
-        self, 
-        ip_address: str, 
-        user_id: str,
-        connection_id: str
-    ) -> Tuple[bool, str]:
-        """Execute check_connection_allowed operation."""
         """
         Check if new connection is allowed
         

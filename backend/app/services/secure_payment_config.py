@@ -55,7 +55,7 @@ class SecurePaymentConfigService:
             if os.environ.get('ENVIRONMENT', 'development') == 'development':
                 # Fixed development key - prevents losing encrypted data on restart
                 encryption_key = "8J5AOuMMykQkzj6EU5Z8QgPYLE1Aye4OuIjUER2b8w0="
-                            else:
+            else:
                 raise ValueError("PAYMENT_CONFIG_ENCRYPTION_KEY environment variable not set")
         
         # Handle both string and bytes format
@@ -79,7 +79,6 @@ class SecurePaymentConfigService:
         self.cipher = Fernet(encryption_key)
     
     def store_provider_config(
-        """Execute store_provider_config operation."""
         self,
         provider: str,
         restaurant_id: str,
