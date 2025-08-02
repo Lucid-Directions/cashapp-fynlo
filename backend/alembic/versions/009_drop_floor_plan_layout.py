@@ -18,7 +18,13 @@ depends_on = None
 
 def upgrade():
     # Drop the floor_plan_layout column from restaurants table if it exists
-    op.drop_column('restaurants', 'floor_plan_layout')
+    # First check if the column exists to avoid errors
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    columns = [col['name'] for col in inspector.get_columns('restaurants')]
+    
+    if 'floor_plan_layout' in columns:
+        op.drop_column('restaurants', 'floor_plan_layout')
 
 
 def downgrade():
