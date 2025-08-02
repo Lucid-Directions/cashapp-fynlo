@@ -69,6 +69,9 @@ class PlatformSettingsMigration:
             logger.info("DRY RUN - No changes committed to database")
         
         self.db.close()
+        
+    def run_migration(self) -> bool:
+        """Execute the complete migration process"""
         logger.info(f"Starting platform settings migration (DRY RUN: {self.dry_run})")
         
         try:

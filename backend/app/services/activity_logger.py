@@ -33,6 +33,14 @@ class ActivityLogger:
     API_CALL = "api_call"
     
     @staticmethod
+    def log_activity(
+        db: Session,
+        user_id: str,
+        action: str,
+        target_type: str,
+        target_id: Optional[str] = None,
+        details: Optional[dict] = None
+    ):
         """
         Log a portal activity
         
@@ -72,6 +80,7 @@ class ActivityLogger:
             return None
     
     @staticmethod
+    def log_export(db: Session, user_id: str, restaurant_id: str, export_type: str, details: dict = None):
         """Log export activity"""
         ActivityLogger.log_activity(
             db=db,

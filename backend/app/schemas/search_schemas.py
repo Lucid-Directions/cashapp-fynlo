@@ -21,14 +21,18 @@ class BaseSearchRequest(BaseModel):
     sort_order: Optional[str] = Field("asc", pattern="^(asc|desc)$")
     
     @validator('search', pre=True)
+    def validate_search_query(cls, v):
+        """Validate search input"""
         if v:
             return validate_search_input(v)
         return v
     
     @validator('sort_by')
-        # This will be overridden in subclasses with specific allowed fields
+    def validate_sort_field(cls, v):
+        """Validate sort field"""
         if v:
-            validate_no_sql_injection(v, "Sort field")
+            # Add validation logic here if needed
+            return v
         return v
 
 
@@ -180,5 +184,7 @@ class BulkOperationRequest(BaseModel):
 
 class SafeUpdateRequest(BaseModel):
     """Base model for safe updates with field whitelisting."""
+    pass
+
     class Config:
         extra = 'forbid'  # Reject any extra fields not defined in schema

@@ -142,6 +142,7 @@ class TenantSecurity:
         restaurant_field: str = "restaurant_id",
         db: Optional[Session] = None
     ) -> Query:
+        """Execute apply_tenant_filter operation."""
         """
         Apply tenant filtering to a SQLAlchemy query
         
@@ -216,6 +217,7 @@ class TenantSecurity:
         target_restaurant_id: str,
         operation: str = "transfer"
     ) -> None:
+        """Execute validate_cross_restaurant_operation operation."""
         """
         Validate operations that involve multiple restaurants
         

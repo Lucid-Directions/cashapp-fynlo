@@ -39,17 +39,20 @@ class SubscriptionPlanResponse(SubscriptionPlanBase):
         from_attributes = True
     
     @validator('yearly_savings', pre=False, always=True)
+    def calculate_yearly_savings(cls, v, values):
+        """Calculate yearly savings based on monthly vs yearly pricing"""
         if 'price_monthly' in values and 'price_yearly' in values:
             monthly_yearly_cost = values['price_monthly'] * 12
             return monthly_yearly_cost - values['price_yearly']
         return v
     
     @validator('yearly_discount_percentage', pre=False, always=True)
-        if 'price_monthly' in values and 'price_yearly' in values:
-            monthly_yearly_cost = float(values['price_monthly']) * 12
-            if monthly_yearly_cost > 0:
-                savings = monthly_yearly_cost - float(values['price_yearly'])
-                return (savings / monthly_yearly_cost) * 100
+    def calculate_yearly_discount_percentage(cls, v, values):
+        """Calculate discount percentage for yearly plans"""
+        if 'price_monthly' in values and 'price_yearly' in values and values['price_monthly'] > 0:
+            monthly_yearly_cost = values['price_monthly'] * 12
+            discount = (monthly_yearly_cost - values['price_yearly']) / monthly_yearly_cost * 100
+            return round(discount, 1)
         return v
 
 

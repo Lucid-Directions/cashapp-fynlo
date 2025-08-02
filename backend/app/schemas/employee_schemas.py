@@ -56,6 +56,8 @@ class EmployeeCreateRequest(EmployeeBase):
 
     @field_validator('hire_date')
     @classmethod
+    def validate_hire_date(cls, v):
+        """Validate hire date"""
         if v is None:
             return date.today()
         if v > date.today():
@@ -167,12 +169,16 @@ class ShiftResponse(BaseModel):
 
     @property
     def scheduled_hours(self) -> float:
+    """TODO: Implement function."""
+    pass
         """Calculate scheduled hours for the shift"""
         delta = self.scheduled_end - self.scheduled_start
         return round(delta.total_seconds() / 3600, 2)
 
     @property
     def actual_hours(self) -> Optional[float]:
+    """TODO: Implement function."""
+    pass
         """Calculate actual hours worked"""
         if not self.actual_start or not self.actual_end:
             return None

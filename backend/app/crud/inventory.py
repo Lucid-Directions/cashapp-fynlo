@@ -12,13 +12,24 @@ from app.models import InventoryItem, Recipe, InventoryLedgerEntry, Product
 from app.schemas import inventory_schemas as schemas
 
 # --- InventoryItem CRUD ---
+
+def get_inventory_item_by_sku(db: Session, sku: str, restaurant_id: int) -> Optional[InventoryItem]:
+    """Get inventory item by SKU and restaurant ID."""
     return db.query(InventoryItem).filter(
         InventoryItem.sku == sku,
         InventoryItem.restaurant_id == restaurant_id
     ).first()
+
+
+def get_inventory_items(db: Session, restaurant_id: int, skip: int = 0, limit: int = 100) -> List[InventoryItem]:
+    """Get inventory items for a restaurant."""
     return db.query(InventoryItem).filter(
         InventoryItem.restaurant_id == restaurant_id
     ).offset(skip).limit(limit).all()
+
+
+def create_inventory_item(db: Session, item: schemas.InventoryItemCreate, restaurant_id: int) -> InventoryItem:
+    """Create a new inventory item."""
     db_item = InventoryItem(**item.dict(exclude={'restaurant_id'}), restaurant_id=restaurant_id)
     db.add(db_item)
     db.commit()

@@ -33,6 +33,8 @@ class TransactionManager:
     and atomic operation support.
     """
     
+    pass
+
     def __init__(self, max_retries: int = 3, retry_delay: float = 0.1):
         self.max_retries = max_retries
         self.retry_delay = retry_delay
@@ -169,24 +171,24 @@ def transactional(max_retries: int = 3, retry_delay: float = 0.1):
             # Send notifications
             # etc.
     """
-        @functools.wraps(func)
-        async def wrapper(*args, **kwargs):
-            # Extract db session from arguments
-            db = None
-            if args and hasattr(args[0], 'query'):  # First arg is Session
-                db = args[0]
-            elif 'db' in kwargs:
-                db = kwargs['db']
-            else:
-                raise ValueError("No database session found in function arguments")
-            
-            transaction_manager = TransactionManager(max_retries=max_retries, retry_delay=retry_delay)
-            
-            async def operation():
-                async with transaction_manager.atomic_transaction(db):
-                    return await func(*args, **kwargs)
-            
-            return await transaction_manager.execute_with_retry(operation)
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+        # Extract db session from arguments
+        db = None
+        if args and hasattr(args[0], 'query'):  # First arg is Session
+            db = args[0]
+        elif 'db' in kwargs:
+            db = kwargs['db']
+        else:
+            raise ValueError("No database session found in function arguments")
+        
+        transaction_manager = TransactionManager(max_retries=max_retries, retry_delay=retry_delay)
+        
+        async def operation():
+            async with transaction_manager.atomic_transaction(db):
+                return await func(*args, **kwargs)
+        
+        return await transaction_manager.execute_with_retry(operation)
         
         return wrapper
     return decorator
@@ -209,6 +211,7 @@ def optimistic_lock_retry(version_field: str = 'version', max_retries: int = 5):
             product.version += 1
             # If another process updated the product, this will fail and retry
     """
+    def decorator(func):
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             for attempt in range(max_retries + 1):
@@ -232,6 +235,8 @@ class BatchTransactionManager:
     Manages batch operations with transaction boundaries and partial failure handling.
     """
     
+    pass
+
     def __init__(self, batch_size: int = 100, rollback_on_partial_failure: bool = True):
         self.batch_size = batch_size
         self.rollback_on_partial_failure = rollback_on_partial_failure

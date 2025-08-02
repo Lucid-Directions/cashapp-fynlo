@@ -1,0 +1,19 @@
+{
+  "files_processed": 0,
+  "fixes_applied": 0,
+  "initial_errors": 10,
+  "remaining_errors": 10,
+  "remaining_files": [
+    "backend/fix_docstrings_properly.py",
+    "backend/app/core/security.py",
+    "backend/app/core/response_helper.py",
+    "backend/app/core/tenant_security_current.py",
+    "backend/app/core/transaction_manager.py",
+    "backend/app/schemas/subscription.py",
+    "backend/app/schemas/search_schemas.py",
+    "backend/app/schemas/employee_schemas.py",
+    "backend/app/services/activity_logger.py",
+    "backend/app/api/v1/endpoints/secure_payments.py"
+  ],
+  "process_errors": []
+}

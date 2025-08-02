@@ -253,13 +253,13 @@ class TestOrderManagementFullCoverage:
         assert self.redis.lpush.call_count == 5
         
         # Process queue with batch size
-        await self.redis.lrange.return_value = [str(i) for i in order_ids[:3]]
+        self.redis.lrange.return_value = [str(i) for i in order_ids[:3]]
         
         processed = await order_service.process_order_queue(batch_size=3)
         assert len(processed) == 3
         
         # Test empty queue
-        await self.redis.lrange.return_value = []
+        self.redis.lrange.return_value = []
         processed = await order_service.process_order_queue()
         assert len(processed) == 0
     

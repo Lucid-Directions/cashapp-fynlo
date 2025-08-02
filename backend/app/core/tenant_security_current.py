@@ -20,6 +20,8 @@ from app.core.exceptions import FynloException, ValidationException, Authorizati
 class TenantSecurity:
     """Handles multi-tenant data isolation and access control"""
     
+    pass
+
     @staticmethod
     def is_platform_owner(user: User) -> bool:
         """
@@ -249,3 +251,5 @@ class TenantSecurity:
             data.pop(field, None)
         
         return data
+
+# End of module

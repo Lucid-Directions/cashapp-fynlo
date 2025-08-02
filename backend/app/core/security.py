@@ -81,7 +81,8 @@ class SafeEnvironmentFilter:
     ]
     
     @classmethod
-    def get_safe_env_vars(cls, security_level: str = "basic", additional_safe_vars: Optional[List[str]] = None) -> Dict[str, str]:        """
+    def get_safe_env_vars(cls, security_level: str = "basic", additional_safe_vars: Optional[List[str]] = None) -> Dict[str, str]:
+        """
         Get filtered environment variables based on security level.
         
         Args:
@@ -165,6 +166,7 @@ class InputValidator:
     INSTANCE_ID_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$")
     
     @classmethod
+    def sanitize_input(cls, value: str, context: str = "general", max_length: int = 1000) -> str:
         """
         Sanitize string input based on context.
         
@@ -246,6 +248,8 @@ class TokenEncryption:
     Uses Fernet symmetric encryption with key derivation.
     """
     
+    pass
+
     def __init__(self, master_key: Optional[str] = None):
         """
         Initialize token encryption with master key.
@@ -307,7 +311,10 @@ class WebhookSecurity:
     Webhook signature verification and security utilities.
     """
     
+    pass
+
     @staticmethod
+    def verify_webhook_signature(payload: str, signature: str, secret: str) -> bool:
         """
         Verify webhook signature with timing attack protection.
         
@@ -366,9 +373,10 @@ class MonitoringQueryParams(BaseModel):
 
 class InstanceIdentifier(BaseModel):
     """Validated instance identifier."""
-    instance_id: str = Field(..., pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$")
+    instance_id: str = Field(..., pattern=r"^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$")
     
     @validator('instance_id')
+    def validate_instance_id_field(cls, v):
         return InputValidator.validate_instance_id(v)
 
 
@@ -378,6 +386,7 @@ class RefreshRequest(BaseModel):
     reason: Optional[str] = Field(None, max_length=200)
     
     @validator('reason')
+    def validate_reason(cls, v):
         if v:
             return InputValidator.sanitize_string(v, context="general", max_length=200)
         return v
@@ -429,9 +438,11 @@ class DeploymentTriggerRequest(BaseModel):
     reason: str = Field(..., min_length=10, max_length=500, description="Reason for deployment")
     
     @validator('reason')
+    def validate_reason_field(cls, v):
         return InputValidator.sanitize_string(v, context="general", max_length=500)
     
     @validator('confirm')
+    def validate_confirm_field(cls, v):
         if not v:
             raise ValueError("Explicit confirmation required for deployment trigger")
         return v
@@ -462,12 +473,13 @@ class RefreshReplicasRequest(BaseModel):
 
 class InstanceHeartbeatRequest(BaseModel):
     """Request for instance heartbeat registration."""
-    instance_id: str = Field(..., pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$")
+    instance_id: str = Field(..., pattern=r"^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$")
     hostname: str = Field(..., max_length=255)
     environment: str = Field(..., pattern="^(development|staging|production|test)$")
     version: Optional[str] = Field(None, max_length=50)
     
     @validator('instance_id')
+    def validate_instance_id_field(cls, v):
         return InputValidator.validate_instance_id(v)
     
     @validator('hostname')

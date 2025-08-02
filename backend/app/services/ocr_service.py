@@ -107,6 +107,9 @@ class OCRService:
 #         matched_product = next((p for p in product_list if p["name"] == match[0]), None)
 #         return matched_product["sku"] if matched_product else None
 #     return None
+
+def get_ocr_service():
+    """Execute get_ocr_service operation."""
     # This function can be used for dependency injection in FastAPI
     # It can load configuration for the OCR provider from environment variables or a config file
     # For now, returns a mock instance

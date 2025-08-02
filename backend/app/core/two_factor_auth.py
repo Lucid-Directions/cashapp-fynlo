@@ -7,13 +7,13 @@ import pyotp
 import qrcode
 import io
 import base64
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, Tuple
-from fastapi import HTTPException
 
 from app.core.redis_client import RedisClient
 from app.models import User
 from app.core.tenant_security import TenantSecurity
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
 
 # 2FA Configuration
 TOTP_ISSUER = "Fynlo POS"
@@ -80,7 +80,10 @@ class TwoFactorAuth:
         """
         # Only platform owners require 2FA
         if not TenantSecurity.is_platform_owner(user):
-            raise FynloException(message="2FA is only required for platform owners")
+            raise AuthenticationException(
+                message="2FA is only required for platform owners",
+                error_code="ACCESS_DENIED"
+            )
         
         # Generate secret and backup codes
         secret = self.generate_secret()
@@ -114,12 +117,17 @@ class TwoFactorAuth:
         Confirm 2FA setup with a valid token
         """
         if not self.redis:
-            raise ServiceUnavailableError(message="2FA service unavailable")
+            raise FynloException(
+                message="2FA service unavailable", 
+                status_code=503
+            )
         
         # Get setup data
         setup_data = await self.redis.get(setup_key)
         if not setup_data:
-            raise ValidationException(message="2FA setup expired or invalid")
+            raise ValidationException(
+                message="2FA setup expired or invalid"
+            )
         
         # Verify token
         secret = setup_data.get("secret")
@@ -177,7 +185,6 @@ class TwoFactorAuth:
             
             # Try backup codes
             backup_codes = user_2fa_data.get("backup_codes", "").split(",")
-            # Format 2FA code for display (not a secret token)
             formatted_token = token if "-" in token else f"{token[:4]}-{token[4:]}"
             
             if formatted_token in backup_codes:
@@ -210,7 +217,9 @@ class TwoFactorAuth:
         # Verify current token first
         valid, _ = await self.verify_2fa(user, current_token)
         if not valid:
-            raise FynloException(message="Invalid 2FA token")
+            raise AuthenticationException(
+                message="Invalid 2FA token"
+            )
         
         if self.redis:
             user_2fa_key = f"2fa:user:{user.id}"
@@ -229,10 +238,15 @@ class TwoFactorAuth:
         # Verify current token
         valid, _ = await self.verify_2fa(user, current_token)
         if not valid:
-            raise FynloException(message="Invalid 2FA token")
+            raise AuthenticationException(
+                message="Invalid 2FA token"
+            )
         
         if not self.redis:
-            raise ServiceUnavailableError(message="2FA service unavailable")
+            raise FynloException(
+                message="2FA service unavailable", 
+                status_code=503
+            )
         
         # Generate new codes
         new_codes = self.generate_backup_codes()

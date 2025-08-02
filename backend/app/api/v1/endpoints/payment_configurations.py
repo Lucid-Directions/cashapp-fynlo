@@ -40,6 +40,8 @@ class PaymentMethodSettingUpdateInput(BaseModel):
     include_processor_fee_in_service_charge: Optional[bool] = None
 
 # Helper to convert SQLAlchemy model to Pydantic schema for response
+def convert_db_model_to_schema(db_setting: PaymentMethodSetting) -> PaymentMethodFeeSettingSchema:
+    """Execute convert_db_model_to_schema operation."""
     return PaymentMethodFeeSettingSchema(
         id=db_setting.id,
         restaurant_id=db_setting.restaurant_id,

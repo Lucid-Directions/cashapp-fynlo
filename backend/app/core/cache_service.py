@@ -229,10 +229,14 @@ class CacheMetrics:
 
 # Global cache service instance
 cache_service = CacheService()
+
+
+def cached(
     ttl: int = 3600,
     prefix: Optional[str] = None,
     key_params: Optional[List[str]] = None,
     invalidate_on: Optional[List[str]] = None
+):
     """
     Decorator for caching function results.
     
@@ -247,6 +251,7 @@ cache_service = CacheService()
         async def get_menu(restaurant_id: str, db: Session):
             return db.query(MenuItem).filter(...).all()
     """
+    def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get function signature to map args to parameter names

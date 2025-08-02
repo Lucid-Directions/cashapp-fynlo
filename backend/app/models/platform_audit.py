@@ -42,6 +42,21 @@ class PlatformAuditLog(Base):
     
     # Relationships
     user = relationship("User", backref="platform_audit_logs")
+
+
+def create_audit_log(
+    db: Session,
+    user_id: str,
+    action: str,
+    resource_type: str,
+    resource_id: Optional[str] = None,
+    details: Optional[dict] = None,
+    ip_address: Optional[str] = None,
+    user_agent: Optional[str] = None,
+    request_id: Optional[str] = None,
+    http_method: Optional[str] = None,
+    endpoint: Optional[str] = None
+) -> PlatformAuditLog:
     """
     Create an audit log entry.
     

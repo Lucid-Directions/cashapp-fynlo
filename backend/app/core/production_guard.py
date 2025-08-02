@@ -25,7 +25,8 @@ def production_guard(func):
     else:
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
-                        if settings.ENVIRONMENT == "production":
+            """Execute sync_wrapper operation."""
+            if settings.ENVIRONMENT == "production":
                 raise FynloException(message="This endpoint is not available in production environment")
             return func(*args, **kwargs)
         return sync_wrapper

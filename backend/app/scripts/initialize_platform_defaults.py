@@ -199,16 +199,18 @@ def main():
     args = parser.parse_args()
     
     if args.update_existing:
-                confirmation = input("Are you sure you want to update existing configs? (yes/no): ")
+        confirmation = input("Are you sure you want to update existing configs? (yes/no): ")
         if confirmation.lower() != 'yes':
-                        return
+            return
     
-        with PlatformDefaultsInitializer(update_existing=args.update_existing) as initializer:
+    with PlatformDefaultsInitializer(update_existing=args.update_existing) as initializer:
         success = initializer.initialize()
         
         if success:
-                    else:
-                        sys.exit(1)
+            print("\n✅ Platform initialization completed successfully!")
+        else:
+            print("\n❌ Platform initialization failed")
+            sys.exit(1)
 
 
 if __name__ == "__main__":

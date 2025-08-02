@@ -146,7 +146,6 @@ class SecurePaymentConfigService:
             raise FynloException(f"Failed to store payment config: {str(e)}")
     
     def get_provider_config(
-        """Execute get_provider_config operation."""
         self,
         provider: str,
         restaurant_id: str,
@@ -198,7 +197,6 @@ class SecurePaymentConfigService:
         }
     
     def list_provider_configs(
-        """Execute list_provider_configs operation."""
         self,
         restaurant_id: str,
         include_disabled: bool = False

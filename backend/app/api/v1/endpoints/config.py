@@ -3,16 +3,16 @@ Configuration Management API Endpoints
 Provides endpoints for managing payment system configuration
 """
 
-from typing import Dict, Any, Optional
-from fastapi import APIRouter, Depends
+from typing import Dict, Any, Optional, List
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.core.database import get_db, User
-from app.core.exceptions import FynloException, ResourceNotFoundException, ValidationException
+from app.core.exceptions import FynloException, ResourceNotFoundException, ValidationException, AuthenticationException, ConflictException
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
-from app.services.config_manager import config_manager
+from app.services.config_manager import config_manager, ProviderConfig, RoutingConfig, FeatureFlags
 from app.services.payment_factory import payment_factory
 from app.services.smart_routing import RoutingStrategy
 from app.services.monitoring import get_monitoring_service
@@ -63,7 +63,7 @@ async def get_configuration_summary(
         )
         
     except Exception as e:
-        raise FynloException(message="Failed to retrieve restaurant configuration", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.get("/providers")
 async def get_provider_configurations(
@@ -92,7 +92,7 @@ async def get_provider_configurations(
         )
         
     except Exception as e:
-        raise FynloException(message="Error loading restaurant settings", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.get("/providers/{provider_name}")
 async def get_provider_configuration(
@@ -104,7 +104,7 @@ async def get_provider_configuration(
         config = config_manager.get_provider_config(provider_name)
         
         if not config:
-            raise ResourceNotFoundException(resource="Resource", message=f"Provider {provider_name} not found")
+            raise ResourceNotFoundException(resource="Provider", resource_id=provider_name)
         
         # Don't expose sensitive information
         provider_config = {
@@ -127,7 +127,7 @@ async def get_provider_configuration(
     except FynloException:
         raise
     except Exception as e:
-        raise FynloException(message="Configuration retrieval failed", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.put("/providers/{provider_name}")
 async def update_provider_configuration(
@@ -174,7 +174,7 @@ async def update_provider_configuration(
     except FynloException:
         raise
     except Exception as e:
-        raise FynloException(message="Error updating restaurant configuration", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.get("/routing")
 async def get_routing_configuration(
@@ -199,7 +199,7 @@ async def get_routing_configuration(
         )
         
     except Exception as e:
-        raise FynloException(message="Failed to save configuration changes", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.put("/routing")
 async def update_routing_configuration(
@@ -225,7 +225,9 @@ async def update_routing_configuration(
         if config_update.fallback_provider is not None:
             # Validate provider exists
             if config_update.fallback_provider not in config_manager.providers:
-                raise ValidationException(message=f"Fallback provider ")
+                raise ValidationException(
+                    message=f"Fallback provider '{config_update.fallback_provider}' not configured"
+                )
             routing_config.fallback_provider = config_update.fallback_provider
         
         # Save configuration
@@ -243,7 +245,7 @@ async def update_routing_configuration(
     except FynloException:
         raise
     except Exception as e:
-        raise FynloException(message="Error processing configuration update", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.get("/features")
 async def get_feature_flags(
@@ -270,7 +272,7 @@ async def get_feature_flags(
         )
         
     except Exception as e:
-        raise FynloException(message="Failed to update specific configuration item", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.put("/features")
 async def update_feature_flag(
@@ -293,7 +295,7 @@ async def update_feature_flag(
         )
         
     except Exception as e:
-        raise FynloException(message="Configuration item update failed", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.get("/security")
 async def get_security_configuration(
@@ -318,7 +320,7 @@ async def get_security_configuration(
         )
         
     except Exception as e:
-        raise FynloException(message="Error updating configuration field", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.post("/validate")
 async def validate_configuration(
@@ -363,7 +365,7 @@ async def validate_configuration(
         )
         
     except Exception as e:
-        raise FynloException(message="Failed to process bulk configuration update", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.get("/monitoring/health")
 async def get_system_health(
@@ -381,7 +383,7 @@ async def get_system_health(
         )
         
     except Exception as e:
-        raise FynloException(message="Bulk configuration update error", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.get("/monitoring/metrics")
 async def get_system_metrics(
@@ -392,7 +394,7 @@ async def get_system_metrics(
     """Get system metrics for specified time period"""
     try:
         if hours < 1 or hours > 168:  # Max 1 week
-            raise ValidationException(message="Hours must be between 1 and 168", field="hours")
+            raise ValidationException(message="Hours must be between 1 and 168")
         
         monitoring_service = get_monitoring_service(db)
         metrics = await monitoring_service.get_system_metrics(hours)
@@ -405,7 +407,7 @@ async def get_system_metrics(
     except FynloException:
         raise
     except Exception as e:
-        raise FynloException(message="Error applying configuration changes", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.put("/monitoring/thresholds")
 async def update_monitoring_thresholds(
@@ -424,7 +426,7 @@ async def update_monitoring_thresholds(
         )
         
     except Exception as e:
-        raise FynloException(message="Failed to validate configuration", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.post("/test/routing")
 async def test_routing_simulation(
@@ -456,7 +458,7 @@ async def test_routing_simulation(
     except FynloException:
         raise
     except Exception as e:
-        raise FynloException(message="Configuration validation error", status_code=500)
+        raise FynloException(message=str(e))
 
 @router.post("/backup")
 async def backup_configuration(
@@ -479,4 +481,4 @@ async def backup_configuration(
         )
         
     except Exception as e:
-        raise FynloException(message="Error processing configuration request", status_code=500)
+        raise FynloException(message=str(e))
