@@ -1,11 +1,12 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-var-requires */
 
 /**
  * Manual test script for menu loading
  * Run this to test the menu loading with the production API
  */
 
-import fetch from 'node-fetch';
+const fetch = require('node-fetch');
 
 const API_BASE_URL = 'https://fynlopos-9eg2c.ondigitalocean.app';
 const TIMEOUT = 10000; // 10 seconds
