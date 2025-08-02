@@ -34,6 +34,39 @@ repos:
         pass_filenames: true
         description: Parse Python AST to detect unterminated strings
 
+  # TypeScript and ESLint checks for React Native
+  - repo: local
+    hooks:
+      - id: eslint-strict
+        name: ESLint with strict rules
+        entry: bash -c 'cd CashApp-iOS/CashAppPOS && npm run lint -- --max-warnings=0'
+        language: system
+        files: ^CashApp-iOS/CashAppPOS/.*\.(ts|tsx|js|jsx)$
+        pass_filenames: false
+        description: Run ESLint with zero tolerance for warnings
+        
+      - id: typescript-strict
+        name: TypeScript type checking
+        entry: bash -c 'cd CashApp-iOS/CashAppPOS && npx tsc --noEmit'
+        language: system
+        files: ^CashApp-iOS/CashAppPOS/.*\.(ts|tsx)$
+        pass_filenames: false
+        description: Ensure TypeScript compiles without errors
+
+      - id: no-console-check
+        name: Check for console statements
+        entry: bash -c 'grep -r "console\." --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" CashApp-iOS/CashAppPOS/src && echo "❌ Console statements found!" && exit 1 || exit 0'
+        language: system
+        pass_filenames: false
+        description: Prevent console statements in production code
+
+      - id: no-any-check
+        name: Check for TypeScript any
+        entry: bash -c 'grep -r ": any" --include="*.ts" --include="*.tsx" CashApp-iOS/CashAppPOS/src && echo "❌ TypeScript any types found!" && exit 1 || exit 0'
+        language: system
+        pass_filenames: false
+        description: Prevent use of any type in TypeScript
+
 # Configuration
 fail_fast: true  # Stop on first error
 default_stages: [pre-commit]

@@ -1,0 +1,98 @@
+name: Code Quality Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  python-checks:
+    runs-on: ubuntu-latest
+    name: Python Syntax & Quality
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Check Python syntax
+      run: |
+        echo "🔍 Checking Python syntax..."
+        cd backend
+        python -m compileall -q app || (echo "❌ Syntax errors found!" && exit 1)
+        echo "✅ Python syntax valid!"
+    
+    - name: Install Ruff
+      run: pip install ruff
+    
+    - name: Run Ruff linter
+      run: |
+        cd backend
+        ruff check app --select E999,F,E,W --fix --exit-non-zero-on-fix
+        echo "✅ Ruff checks passed!"
+
+  typescript-checks:
+    runs-on: ubuntu-latest
+    name: TypeScript & React Native Quality
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: CashApp-iOS/CashAppPOS/package-lock.json
+    
+    - name: Install dependencies
+      working-directory: CashApp-iOS/CashAppPOS
+      run: npm ci
+    
+    - name: TypeScript type check
+      working-directory: CashApp-iOS/CashAppPOS
+      run: |
+        echo "🔍 Running TypeScript compiler..."
+        npx tsc --noEmit || (echo "❌ TypeScript errors found!" && exit 1)
+        echo "✅ TypeScript compilation passed!"
+    
+    - name: ESLint strict mode
+      working-directory: CashApp-iOS/CashAppPOS
+      run: |
+        echo "🔍 Running ESLint in strict mode..."
+        npm run lint -- --max-warnings=0 || (echo "❌ ESLint warnings/errors found!" && exit 1)
+        echo "✅ ESLint checks passed!"
+    
+    - name: Check for console statements
+      working-directory: CashApp-iOS/CashAppPOS
+      run: |
+        echo "🔍 Checking for console statements..."
+        if grep -r "console\." --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" src; then
+          echo "❌ Console statements found in production code!"
+          exit 1
+        fi
+        echo "✅ No console statements found!"
+    
+    - name: Check for TypeScript any
+      working-directory: CashApp-iOS/CashAppPOS
+      run: |
+        echo "🔍 Checking for TypeScript 'any' usage..."
+        if grep -r ": any" --include="*.ts" --include="*.tsx" src; then
+          echo "⚠️ Warning: TypeScript 'any' types found (will be enforced in future)"
+          # Don't fail for now, just warn
+        else
+          echo "✅ No 'any' types found!"
+        fi
+    
+    - name: Generate quality report
+      if: always()
+      working-directory: CashApp-iOS/CashAppPOS
+      run: |
+        echo "📊 Code Quality Summary:"
+        echo "- TypeScript files: $(find src -name "*.ts" -o -name "*.tsx" | wc -l)"
+        echo "- React components: $(find src -name "*.tsx" | wc -l)"
+        echo "- Test files: $(find src -name "*.test.*" -o -name "*.spec.*" | wc -l)"
