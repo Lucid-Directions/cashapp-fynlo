@@ -3,10 +3,13 @@ Configuration settings for Fynlo POS Backend
 """
 
 import os
+import logging
 from pydantic_settings import BaseSettings
 from pydantic import field_validator
 from typing import Optional, List, Any
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 # Determine the environment and load the appropriate .env file
 APP_ENV = os.getenv("APP_ENV", "development")

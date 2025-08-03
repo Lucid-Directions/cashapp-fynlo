@@ -4,12 +4,15 @@ Handles encryption/decryption of payment provider credentials
 """
 import os
 import json
+import logging
 from typing import Dict, Any, Optional
 from datetime import datetime
 from cryptography.fernet import Fernet
 from sqlalchemy.orm import Session
 from sqlalchemy import Column, String, Boolean, DateTime, Text
 import uuid
+
+logger = logging.getLogger(__name__)
 
 from app.core.database import Base
 from app.core.exceptions import FynloException

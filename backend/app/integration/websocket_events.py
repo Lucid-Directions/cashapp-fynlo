@@ -6,6 +6,9 @@ Connects backend services with WebSocket notifications
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 import asyncio
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.core.websocket import (
     websocket_manager,

@@ -6,6 +6,9 @@ Connects backend services with push notification sending
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 import asyncio
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.core.push_notifications import (
     get_push_service,
