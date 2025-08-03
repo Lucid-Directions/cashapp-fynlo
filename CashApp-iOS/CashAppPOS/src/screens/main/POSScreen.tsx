@@ -23,6 +23,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import CartIcon from '../../components/cart/CartIcon';
+import ItemModificationModal from '../../components/cart/ItemModificationModal';
 import { QuantityPill } from '../../components/inputs';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
@@ -144,6 +145,8 @@ const POSScreen: React.FC = () => {
   const [showSumUpTest, setShowSumUpTest] = useState(false);
   const [serviceChargeDebugInfo, setServiceChargeDebugInfo] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
+  const [showModificationModal, setShowModificationModal] = useState(false);
+  const [selectedItemForModification, setSelectedItemForModification] = useState<OrderItem | null>(null);
 
   // Dynamic styles that depend on state
   const dynamicStyles = createDynamicStyles(theme, serviceChargeConfig);
@@ -663,6 +666,9 @@ const POSScreen: React.FC = () => {
 
   const MenuItemCard = ({ item }: { item: MenuItem }) => {
     const existingItem = cart.find((cartItem) => cartItem.id === item.id);
+    // Check if item category supports modifications
+    const supportsModifications = ['coffee', 'tea', 'hot drinks', 'beverages']
+      .includes(item.category?.toLowerCase() || '');
 
     return (
       <View style={[styles.menuCard, !item.available && styles.menuCardDisabled]}>
@@ -690,6 +696,13 @@ const POSScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
 
+        {/* Modifications Available Badge */}
+        {supportsModifications && (
+          <View style={styles.modificationBadge}>
+            <Icon name="tune" size={14} color={theme.colors.primary} />
+          </View>
+        )}
+
         {/* Quick Quantity Controls */}
         {existingItem && (
           <View style={styles.menuItemQuantityControls}>
@@ -715,6 +728,57 @@ const POSScreen: React.FC = () => {
   const CartItem = ({ item }: { item: OrderItem }) => {
     const menuItem = dynamicMenuItems.find((mi) => mi.id === item.id);
 
+    // Check for modifications or modifiers
+    const hasModifications = (item.modifiers && item.modifiers.length > 0) || 
+                            (item.modifications && item.modifications.some(mod => mod.selected));
+    
+    const renderModificationSummary = () => {
+      if (!hasModifications) return null;
+      
+      // Handle both old modifiers and new modifications format
+      let modificationText = '';
+      
+      if (item.modifiers && item.modifiers.length > 0) {
+        // Old format with modifiers array
+        modificationText = item.modifiers
+          .map(mod => {
+            if (mod.quantity && mod.quantity > 1) {
+              return `${mod.quantity}x ${mod.name}`;
+            }
+            return mod.name;
+          })
+          .join(', ');
+      } else if (item.modifications) {
+        // New format with modifications
+        const selected = item.modifications.filter(mod => mod.selected);
+        if (selected.length > 0) {
+          modificationText = selected
+            .map(mod => {
+              if (mod.quantity && mod.quantity > 1) {
+                return `${mod.quantity}x ${mod.name}`;
+              }
+              return mod.name;
+            })
+            .join(', ');
+        }
+      }
+      
+      if (!modificationText && item.specialInstructions) {
+        modificationText = 'Special instructions';
+      }
+      
+      if (!modificationText) return null;
+      
+      return (
+        <View style={styles.cartItemModifications}>
+          <Icon name="tune" size={12} color={theme.colors.textSecondary} />
+          <Text style={styles.cartItemModificationText} numberOfLines={1}>
+            {modificationText}
+          </Text>
+        </View>
+      );
+    };
+
     const renderRightActions = (
       progress: Animated.AnimatedInterpolation<number>,
       dragX: Animated.AnimatedValue
@@ -737,7 +801,14 @@ const POSScreen: React.FC = () => {
 
     return (
       <Swipeable renderRightActions={renderRightActions} overshootRight={false} friction={2}>
-        <View style={styles.cartItem}>
+        <TouchableOpacity 
+          style={styles.cartItem} 
+          onPress={() => {
+            setSelectedItemForModification(item);
+            setShowModificationModal(true);
+          }}
+          activeOpacity={0.7}
+        >
           <View style={styles.cartItemInfo}>
             <View style={styles.cartItemHeader}>
               <Text style={styles.cartItemEmoji}>{item.emoji}</Text>
@@ -753,6 +824,7 @@ const POSScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
+            {renderModificationSummary()}
             {menuItem?.description && (
               <Text style={styles.cartItemDescription} numberOfLines={2}>
                 {menuItem.description}
@@ -783,7 +855,7 @@ const POSScreen: React.FC = () => {
               })}
             </Text>
           </View>
-        </View>
+        </TouchableOpacity>
       </Swipeable>
     );
   };
@@ -1284,6 +1356,22 @@ const POSScreen: React.FC = () => {
           />
         </>
       )}
+
+      {/* Item Modification Modal */}
+      <ItemModificationModal
+        visible={showModificationModal}
+        item={selectedItemForModification}
+        onClose={() => {
+          setShowModificationModal(false);
+          setSelectedItemForModification(null);
+        }}
+        onSave={() => {
+          setShowModificationModal(false);
+          setSelectedItemForModification(null);
+          // The cart will be automatically updated by the modal
+        }}
+        useEnhancedCart={false} // Using regular cart for now
+      />
     </SafeAreaView>
   );
 };
@@ -1462,6 +1550,17 @@ const createStyles = (theme: unknown) =>
       borderRadius: 8,
       overflow: 'hidden',
     },
+    modificationBadge: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      backgroundColor: theme.colors.primaryLight || 'rgba(0, 166, 81, 0.1)',
+      borderRadius: 12,
+      width: 24,
+      height: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     quantityPillContainer: {
       alignItems: 'center',
       justifyContent: 'center',
@@ -1568,6 +1667,20 @@ const createStyles = (theme: unknown) =>
       color: theme.colors.lightText,
       lineHeight: 16,
       marginLeft: 36,
+    },
+    cartItemModifications: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginLeft: 36,
+      marginTop: 4,
+      marginBottom: 4,
+    },
+    cartItemModificationText: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+      fontStyle: 'italic',
+      marginLeft: 4,
+      flex: 1,
     },
     cartItemActions: {
       flexDirection: 'row',
