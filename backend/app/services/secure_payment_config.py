@@ -64,10 +64,6 @@ class SecurePaymentConfigService:
             try:
                 # Try to decode as base64 first (Fernet key format)
                 import base64
-import logging
-
-logger = logging.getLogger(__name__)
-
                 base64.b64decode(encryption_key)
                 encryption_key = encryption_key.encode()
             except Exception:

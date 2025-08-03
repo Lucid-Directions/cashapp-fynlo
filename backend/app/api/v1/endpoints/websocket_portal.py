@@ -10,10 +10,6 @@ from datetime import datetime
 
 from app.core.database import get_db, User, Restaurant
 from app.core.websocket import (
-import logging
-
-logger = logging.getLogger(__name__)
-
     websocket_manager, 
     ConnectionType, 
     EventType,

@@ -158,10 +158,6 @@ class Settings(BaseSettings):
         # Try to parse as JSON first
         try:
             import json
-import logging
-
-logger = logging.getLogger(__name__)
-
             parsed = json.loads(v)
             if isinstance(parsed, list):
                 return [str(item) for item in parsed if item]
