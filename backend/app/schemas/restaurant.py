@@ -9,6 +9,7 @@ from pydantic import BaseModel, EmailStr
 
 class RestaurantBase(BaseModel):
     """Base restaurant schema"""
+
     name: str
     address: dict
     phone: Optional[str] = None
@@ -24,6 +25,7 @@ class RestaurantCreate(RestaurantBase):
 
 class RestaurantOnboardingCreate(BaseModel):
     """Extended schema for restaurant onboarding with additional fields"""
+
     name: str
     display_name: str
     business_type: str
@@ -40,6 +42,7 @@ class RestaurantOnboardingCreate(BaseModel):
 
 class RestaurantUpdate(BaseModel):
     """Schema for updating a restaurant"""
+
     name: Optional[str] = None
     address: Optional[dict] = None
     phone: Optional[str] = None
@@ -54,6 +57,7 @@ class RestaurantUpdate(BaseModel):
 
 class RestaurantResponse(RestaurantBase):
     """Schema for restaurant responses"""
+
     id: str
     platform_id: Optional[str]
     tax_configuration: dict
@@ -68,6 +72,7 @@ class RestaurantResponse(RestaurantBase):
 
 class RestaurantStats(BaseModel):
     """Restaurant statistics schema"""
+
     restaurant_id: str
     name: str
     daily_revenue: float
@@ -80,6 +85,7 @@ class RestaurantStats(BaseModel):
 
 class PlatformStats(BaseModel):
     """Platform statistics schema"""
+
     total_restaurants: int
     active_restaurants: int
     total_revenue: float

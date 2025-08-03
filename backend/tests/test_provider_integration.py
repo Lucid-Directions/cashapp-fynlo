@@ -26,6 +26,7 @@ class BaseProviderIntegrationTest:
     
     def requires_credentials(self, provider_name: str):
         """Decorator to skip tests if credentials are not available"""
+    pass  # TODO: Implement
         def decorator(func):
             return pytest.mark.skipif(
                 not self._has_test_credentials(provider_name),

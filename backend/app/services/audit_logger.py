@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.models.audit_log import AuditLog, AuditEventType, AuditEventStatus
-from app.core.database import get_db  # To be used as a dependency if service is injected
 
 # Standard logger for issues within the audit logger itself
 logger = logging.getLogger(__name__)
+
 
 class AuditLoggerService:
     def __init__(self, db: Session):
@@ -28,7 +28,7 @@ class AuditLoggerService:
         resource_id: Optional[str] = None,
         details: Optional[Dict[str, Any]] = None,
         risk_score: Optional[int] = None,
-        commit: bool = True  # Option to control commit, useful if called within a larger transaction
+        commit: bool = True,  # Option to control commit, useful if called within a larger transaction
     ) -> Optional[AuditLog]:
         """
         Creates and saves an audit log entry.
@@ -58,12 +58,12 @@ class AuditLoggerService:
                 action_performed=action_performed,
                 user_id=user_id,
                 username_or_email=username_or_email,
-                ip_address=ip_address, # SQLAlchemy handles INET conversion
+                ip_address=ip_address,  # SQLAlchemy handles INET conversion
                 user_agent=user_agent,
                 resource_type=resource_type,
                 resource_id=resource_id,
                 details=details,
-                risk_score=risk_score
+                risk_score=risk_score,
             )
             self.db.add(audit_log_entry)
 
@@ -78,20 +78,27 @@ class AuditLoggerService:
                 # but for defaults like UUID and server_default timestamp, flush is often enough.
                 # If refresh is critical, the caller must handle it post-commit.
 
-            logger.debug(f"Audit log created: {event_type.value} for user {user_id or username_or_email}")
+            logger.debug(
+                f"Audit log created: {event_type.value} for user {user_id or username_or_email}"
+            )
             return audit_log_entry
         except SQLAlchemyError as e:
             logger.error(f"Failed to save audit log: {e}", exc_info=True)
             try:
-                self.db.rollback() # Rollback on error if we were supposed to commit
+                self.db.rollback()  # Rollback on error if we were supposed to commit
             except Exception as rb_exc:
-                logger.error(f"Failed to rollback audit log session: {rb_exc}", exc_info=True)
+                logger.error(
+                    f"Failed to rollback audit log session: {rb_exc}", exc_info=True
+                )
             return None
         except Exception as e:
             # Catch any other unexpected errors
-            logger.error(f"Unexpected error during audit log creation: {e}", exc_info=True)
+            logger.error(
+                f"Unexpected error during audit log creation: {e}", exc_info=True
+            )
             # We don't rollback here as the state of db session is unknown for non-SQLAlchemy errors
             return None
+
 
 # --- Helper function to get the service with a DB session ---
 # This is a common pattern in FastAPI for dependency injection.

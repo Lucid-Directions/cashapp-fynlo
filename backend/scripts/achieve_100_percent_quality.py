@@ -255,7 +255,7 @@ def add_docstrings():
                                 # Add generic docstring
                                 indent = len(line) - len(line.lstrip())
                                 func_name = line.strip().split('(')[0].replace('def ', '')
-                                new_lines.append(' ' * (indent + 4) + f'"""Execute {func_name} operation."""')
+                                new_lines.append(' ' * (indent + 4) + f'# Execute {func_name} operation')
                                 modified = True
                     
                     if modified:

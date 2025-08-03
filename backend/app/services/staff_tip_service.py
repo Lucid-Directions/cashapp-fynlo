@@ -3,11 +3,14 @@ from typing import List, Optional
 from decimal import Decimal, ROUND_HALF_UP
 from sqlalchemy.orm import Session
 
-from app.schemas.fee_schemas import StaffMember, StaffTipDistribution # Input/Output schema
-from app.models.financial_records import StaffTipDistributionRecord # DB model
-from app.core.database import SessionLocal # For example usage, service should get session via DI
+from app.schemas.fee_schemas import (
+    StaffMember,
+    StaffTipDistribution,
+)  # Input/Output schema
+from app.models.financial_records import StaffTipDistributionRecord  # DB model
 
 logger = logging.getLogger(__name__)
+
 
 class StaffTipService:
     """
@@ -41,16 +44,22 @@ class StaffTipService:
             A list of StaffTipDistribution dictionaries detailing each staff member's allocated tip.
         """
         dec_total_tips_collected = Decimal(str(total_tips_collected))
-        dec_service_charge_amount_on_order = Decimal(str(service_charge_amount_on_order))
-        dec_processor_fee_covered_by_service_charge = Decimal(str(processor_fee_covered_by_service_charge))
+        Decimal(str(service_charge_amount_on_order))
+        dec_processor_fee_covered_by_service_charge = Decimal(
+            str(processor_fee_covered_by_service_charge)
+        )
 
         if not assigned_staff:
-            logger.warning(f"No staff assigned for order {order_reference}. Tips collected: {total_tips_collected} will not be distributed by this call.")
+            logger.warning(
+                f"No staff assigned for order {order_reference}. Tips collected: {total_tips_collected} will not be distributed by this call."
+            )
             # Depending on policy, these undistributed tips might go to a general pool or be handled differently.
             return []
 
         if dec_total_tips_collected <= Decimal("0"):
-            logger.info(f"No tips collected for order {order_reference}. Nothing to distribute.")
+            logger.info(
+                f"No tips collected for order {order_reference}. Nothing to distribute."
+            )
             return []
 
         # Business Logic: How does Service Charge affect tips?
@@ -100,11 +109,16 @@ class StaffTipService:
                 # This impact is on the service charge portion that would have gone to staff.
                 # If we assume `processor_fee_covered_by_service_charge` is the total impact,
                 # then per staff it's:
-                impact_per_staff = dec_processor_fee_covered_by_service_charge / Decimal(num_staff) if num_staff > 0 else Decimal("0.00")
-
+                impact_per_staff = (
+                    dec_processor_fee_covered_by_service_charge / Decimal(num_staff)
+                    if num_staff > 0
+                    else Decimal("0.00")
+                )
 
                 for staff_member_data in assigned_staff:
-                    staff_member = StaffMember(id=staff_member_data['id'], name=staff_member_data['name'])
+                    staff_member = StaffMember(
+                        id=staff_member_data["id"], name=staff_member_data["name"]
+                    )
 
                     # This is the distribution of the explicit "tips"
                     allocated_tip = tip_per_staff
@@ -113,7 +127,7 @@ class StaffTipService:
                         staff_member=staff_member,
                         tip_amount_allocated=self._round_currency(allocated_tip),
                         # `notes` could indicate the transaction_fee_impact if SC was also part of their income
-                        notes=f"Service charge related processor fee impact per staff: {self._round_currency(impact_per_staff)}"
+                        notes=f"Service charge related processor fee impact per staff: {self._round_currency(impact_per_staff)}",
                     )
                     staff_tip_distributions.append(distribution_entry)
 
@@ -121,56 +135,95 @@ class StaffTipService:
                     record = StaffTipDistributionRecord(
                         order_reference=order_reference,
                         staff_id=staff_member.id,
-                        tip_amount_gross=self._round_currency(allocated_tip), # Gross tip share
-                        service_charge_deduction=0.0, # Assuming SC doesn't directly reduce this tip amount here
-                            # This field might be used if SC is pooled with tips then distributed
-                        transaction_fee_impact_on_tip=self._round_currency(impact_per_staff), # Share of SC's fee burden
-                        tip_amount_net=self._round_currency(allocated_tip), # Net from tips. If SC also for staff, their total income is this + SC_share
+                        tip_amount_gross=self._round_currency(
+                            allocated_tip
+                        ),  # Gross tip share
+                        service_charge_deduction=0.0,  # Assuming SC doesn't directly reduce this tip amount here
+                        # This field might be used if SC is pooled with tips then distributed
+                        transaction_fee_impact_on_tip=self._round_currency(
+                            impact_per_staff
+                        ),  # Share of SC's fee burden
+                        tip_amount_net=self._round_currency(
+                            allocated_tip
+                        ),  # Net from tips. If SC also for staff, their total income is this + SC_share
                         # distribution_timestamp is server_default
                     )
                     self.db.add(record)
             else:
-                logger.warning(f"Tip distribution strategy is '{tip_distribution_strategy}' but no staff found for order {order_reference}.")
+                logger.warning(
+                    f"Tip distribution strategy is '{tip_distribution_strategy}' but no staff found for order {order_reference}."
+                )
 
         # elif tip_distribution_strategy == "points_based":
-            # Placeholder for future strategy:
-            # total_points = sum(staff.get('points', 1) for staff in assigned_staff)
-            # for staff in assigned_staff:
-            #     points = staff.get('points', 1)
-            #     share = (Decimal(points) / Decimal(total_points)) * distributable_tip_pool
-            #     ... create StaffTipDistribution ...
-            # pass
+        # Placeholder for future strategy:
+        # total_points = sum(staff.get('points', 1) for staff in assigned_staff)
+        # for staff in assigned_staff:
+        #     points = staff.get('points', 1)
+        #     share = (Decimal(points) / Decimal(total_points)) * distributable_tip_pool
+        #     ... create StaffTipDistribution ...
+        # pass
         else:
-            logger.error(f"Unsupported tip distribution strategy: {tip_distribution_strategy}")
-            raise ValueError(f"Unsupported tip distribution strategy: {tip_distribution_strategy}")
+            logger.error(
+                f"Unsupported tip distribution strategy: {tip_distribution_strategy}"
+            )
+            raise ValueError(
+                f"Unsupported tip distribution strategy: {tip_distribution_strategy}"
+            )
 
         try:
             self.db.commit()
-            for dist_entry_schema, db_record in zip(staff_tip_distributions, self.db.query(StaffTipDistributionRecord).filter(StaffTipDistributionRecord.order_reference == order_reference).all()): # Re-fetch to get IDs if needed, or use refreshed objects
-                 # If you need the DB record ID in the returned schema, you'd map it here.
-                 # For now, the schema doesn't include the DB record ID.
-                 pass
+            for dist_entry_schema, db_record in zip(
+                staff_tip_distributions,
+                self.db.query(StaffTipDistributionRecord)
+                .filter(StaffTipDistributionRecord.order_reference == order_reference)
+                .all(),
+            ):  # Re-fetch to get IDs if needed, or use refreshed objects
+                # If you need the DB record ID in the returned schema, you'd map it here.
+                # For now, the schema doesn't include the DB record ID.
+                pass
         except Exception as e:
             self.db.rollback()
-            logger.error(f"Error saving staff tip distributions for order {order_reference}: {e}", exc_info=True)
+            logger.error(
+                f"Error saving staff tip distributions for order {order_reference}: {e}",
+                exc_info=True,
+            )
             raise
 
         return staff_tip_distributions
 
-    def get_tip_distributions_for_order(self, order_reference: str) -> List[StaffTipDistributionRecord]:
+    def get_tip_distributions_for_order(
+        # Execute get_tip_distributions_for_order operation
+        self, order_reference: str
+    ) -> List[StaffTipDistributionRecord]:
         """Retrieves all tip distribution records for a given order."""
-        return self.db.query(StaffTipDistributionRecord).filter(
-            StaffTipDistributionRecord.order_reference == order_reference
-        ).all()
+        return (
+            self.db.query(StaffTipDistributionRecord)
+            .filter(StaffTipDistributionRecord.order_reference == order_reference)
+            .all()
+        )
 
-    def get_tip_distributions_for_staff(self, staff_id: str, start_date: Optional[str] = None, end_date: Optional[str] = None) -> List[StaffTipDistributionRecord]:
+    def get_tip_distributions_for_staff(
+        # Execute get_tip_distributions_for_staff operation
+        self,
+        staff_id: str,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+    ) -> List[StaffTipDistributionRecord]:
         """Retrieves all tip distribution records for a given staff member, optionally within a date range."""
-        query = self.db.query(StaffTipDistributionRecord).filter(StaffTipDistributionRecord.staff_id == staff_id)
+        query = self.db.query(StaffTipDistributionRecord).filter(
+            StaffTipDistributionRecord.staff_id == staff_id
+        )
         if start_date:
-            query = query.filter(StaffTipDistributionRecord.distribution_timestamp >= start_date)
+            query = query.filter(
+                StaffTipDistributionRecord.distribution_timestamp >= start_date
+            )
         if end_date:
-            query = query.filter(StaffTipDistributionRecord.distribution_timestamp <= end_date)
-        return query.order_by(StaffTipDistributionRecord.distribution_timestamp.desc()).all()
+            query = query.filter(
+                StaffTipDistributionRecord.distribution_timestamp <= end_date
+            )
+        return query.order_by(
+            StaffTipDistributionRecord.distribution_timestamp.desc()
+        ).all()
 
 
 # Example Usage (conceptual)

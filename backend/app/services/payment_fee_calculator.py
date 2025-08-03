@@ -7,6 +7,7 @@ from app.schemas.fee_schemas import PaymentMethodEnum
 
 logger = logging.getLogger(__name__)
 
+
 class PaymentFeeCalculator:
     """
     Calculates the actual payment processor fees.
@@ -22,7 +23,7 @@ class PaymentFeeCalculator:
         payment_method: PaymentMethodEnum,
         restaurant_id: Optional[str] = None,
         # monthly_volume could be passed if available and relevant for specific providers like SumUp
-        monthly_volume_for_restaurant: Optional[float] = None
+        monthly_volume_for_restaurant: Optional[float] = None,
     ) -> float:
         """
         Calculates the actual fee charged by the payment processor to the platform.
@@ -52,12 +53,12 @@ class PaymentFeeCalculator:
                 payment_method=payment_method_str,
                 amount=transaction_amount,
                 restaurant_id=restaurant_id,
-                monthly_volume=monthly_volume_for_restaurant
+                monthly_volume=monthly_volume_for_restaurant,
             )
 
             # 'platform_fee' in fee_details dict is the actual processor fee before restaurant markup.
             # This was a bit confusingly named in the original PlatformSettingsService.
-            processor_fee_value = fee_details.get('platform_fee', 0.0)
+            processor_fee_value = fee_details.get("platform_fee", 0.0)
 
             # Ensure the fee is positive
             if processor_fee_value < 0:
@@ -70,30 +71,34 @@ class PaymentFeeCalculator:
             # Assuming GBP or USD-like currency, typically 2 decimal places.
             # Using Decimal for precision in financial calculations.
             quantizer = Decimal("0.01")
-            rounded_fee = Decimal(str(processor_fee_value)).quantize(quantizer, rounding=ROUND_HALF_UP)
+            rounded_fee = Decimal(str(processor_fee_value)).quantize(
+                quantizer, rounding=ROUND_HALF_UP
+            )
 
             return float(rounded_fee)
 
         except ValueError as ve:
             # This can happen if PlatformSettingsService raises ValueError (e.g., no fee config for payment method)
-            logger.error(f"ValueError in PaymentFeeCalculator for {payment_method.value}: {ve}")
+            logger.error(
+                f"ValueError in PaymentFeeCalculator for {payment_method.value}: {ve}"
+            )
             # Depending on policy, could re-raise, or return a default/error indicator.
             # For now, let's assume if a fee cannot be calculated, it's 0, but this might need adjustment.
             # Or, more safely, raise an exception to signal a configuration problem.
-            raise ve # Re-raise to make it explicit that fee calculation failed
+            raise ve  # Re-raise to make it explicit that fee calculation failed
         except Exception as e:
             logger.error(
                 f"Error calculating processor fee for {payment_method.value} on amount {transaction_amount}: {e}",
-                exc_info=True
+                exc_info=True,
             )
             # Fallback or re-raise, based on business requirements for error handling.
             # Raising an exception is often safer for financial calculations to prevent silent errors.
-            raise Exception(f"Failed to calculate processor fee for {payment_method.value}: {e}")
+            raise Exception(
+                f"Failed to calculate processor fee for {payment_method.value}: {e}"
+            )
 
     async def get_payment_method_fee_config(
-        self,
-        payment_method: PaymentMethodEnum,
-        restaurant_id: Optional[str] = None
+        self, payment_method: PaymentMethodEnum, restaurant_id: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
         """
         Retrieves the fee configuration details for a specific payment method.
@@ -103,23 +108,33 @@ class PaymentFeeCalculator:
         try:
             payment_method_str = payment_method.value
             # The fee config is stored under keys like 'payment.fees.stripe'
-            fee_config_key = f'payment.fees.{payment_method_str}'
+            fee_config_key = f"payment.fees.{payment_method_str}"
 
             # Use PlatformSettingsService to get the setting
             # If restaurant_id is provided, it might fetch an override, but raw fee configs are usually platform-level.
             # For now, let's assume direct fetch of platform setting for the fee structure.
             # If restaurant-specific fee structures (not just markups) exist, this needs more complex logic.
 
-            raw_config = await self.platform_settings_service.get_platform_setting(config_key=fee_config_key)
+            raw_config = await self.platform_settings_service.get_platform_setting(
+                config_key=fee_config_key
+            )
 
-            if raw_config and 'value' in raw_config:
-                return raw_config['value'] # This should be the dict like {'percentage': 1.4, 'fixed_fee': 0.20, 'currency': 'GBP'}
+            if raw_config and "value" in raw_config:
+                return raw_config[
+                    "value"
+                ]  # This should be the dict like {'percentage': 1.4, 'fixed_fee': 0.20, 'currency': 'GBP'}
             else:
-                logger.warning(f"No fee configuration found for payment method '{payment_method_str}' using key '{fee_config_key}'.")
+                logger.warning(
+                    f"No fee configuration found for payment method '{payment_method_str}' using key '{fee_config_key}'."
+                )
                 return None
         except Exception as e:
-            logger.error(f"Error retrieving fee configuration for {payment_method.value}: {e}", exc_info=True)
+            logger.error(
+                f"Error retrieving fee configuration for {payment_method.value}: {e}",
+                exc_info=True,
+            )
             return None
+
 
 # Example Usage (conceptual, would be part of another service or API endpoint)
 # async def main():

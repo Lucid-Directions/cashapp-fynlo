@@ -36,6 +36,7 @@ class ActivityLogger:
     
     @staticmethod
     def log_activity(
+        # Execute log_activity operation
         db: Session,
         user_id: str,
         action: str,

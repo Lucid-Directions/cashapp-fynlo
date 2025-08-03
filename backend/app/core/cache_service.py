@@ -6,7 +6,7 @@ Implements decorator pattern for easy endpoint caching and cache invalidation.
 import hashlib
 import logging
 from functools import wraps
-from typing import Any, Callable, Optional, Dict, List
+from typing import Any, Optional, Dict, List
 import inspect
 
 from app.core.redis_client import redis_client
@@ -16,40 +16,42 @@ logger = logging.getLogger(__name__)
 
 class CacheService:
     """Enhanced cache service with advanced features"""
-    
+
     def __init__(self):
         self.redis = redis_client
         self.metrics = CacheMetrics()
-        
+
     def cache_key(self, prefix: str, **kwargs) -> str:
         """
         Generate a cache key from prefix and parameters.
         Ensures consistent key generation for cache hits.
-        
+
         Args:
             prefix: Cache key prefix
             **kwargs: Key-value pairs to include in the key
-            
+
         Returns:
             str: Generated cache key
         """
         # Sort kwargs to ensure consistent key generation
-        key_data = f"{prefix}:" + ":".join(f"{k}={v}" for k, v in sorted(kwargs.items()))
+        key_data = f"{prefix}:" + ":".join(
+            f"{k}={v}" for k, v in sorted(kwargs.items())
+        )
         # Use MD5 hash for long keys to avoid Redis key length limits
         if len(key_data) > 200:
             # Include restaurant_id in the hash key to maintain tenant isolation
-            restaurant_id = kwargs.get('restaurant_id', 'global')
+            restaurant_id = kwargs.get("restaurant_id", "global")
             key_hash = hashlib.md5(key_data.encode()).hexdigest()
             return f"{prefix}:restaurant_id={restaurant_id}:hash:{key_hash}"
         return key_data
-    
+
     async def get(self, key: str) -> Optional[Any]:
         """
         Get value from cache.
-        
+
         Args:
             key: Cache key
-            
+
         Returns:
             Cached value or None if not found/expired
         """
@@ -66,16 +68,16 @@ class CacheService:
             self.metrics.record_error()
             logger.error(f"Cache get error for key {key}: {e}")
             return None
-    
+
     async def set(self, key: str, value: Any, ttl: int = 3600) -> bool:
         """
         Set value in cache with TTL.
-        
+
         Args:
             key: Cache key
             value: Value to cache
             ttl: Time-to-live in seconds (default: 1 hour)
-            
+
         Returns:
             bool: True if successful, False otherwise
         """
@@ -88,14 +90,14 @@ class CacheService:
             self.metrics.record_error()
             logger.error(f"Cache set error for key {key}: {e}")
             return False
-    
+
     async def delete(self, key: str) -> bool:
         """
         Delete a specific cache key.
-        
+
         Args:
             key: Cache key to delete
-            
+
         Returns:
             bool: True if successful, False otherwise
         """
@@ -108,14 +110,14 @@ class CacheService:
             self.metrics.record_error()
             logger.error(f"Cache delete error for key {key}: {e}")
             return False
-    
+
     async def delete_pattern(self, pattern: str) -> int:
         """
         Delete all keys matching a pattern.
-        
+
         Args:
             pattern: Pattern to match (e.g., "menu:restaurant_id=*")
-            
+
         Returns:
             int: Number of keys deleted
         """
@@ -127,14 +129,14 @@ class CacheService:
             self.metrics.record_error()
             logger.error(f"Cache delete pattern error for {pattern}: {e}")
             return 0
-    
+
     async def invalidate_restaurant_cache(self, restaurant_id: str) -> int:
         """
         Invalidate all cache entries for a restaurant.
-        
+
         Args:
             restaurant_id: Restaurant ID
-            
+
         Returns:
             int: Number of keys deleted
         """
@@ -150,22 +152,24 @@ class CacheService:
             # Hash-based keys with restaurant_id preserved
             f"*:restaurant_id={restaurant_id}:hash:*",
         ]
-        
+
         total_deleted = 0
         for pattern in patterns:
             deleted = await self.delete_pattern(pattern)
             total_deleted += deleted
-        
-        logger.info(f"Invalidated {total_deleted} cache entries for restaurant {restaurant_id}")
+
+        logger.info(
+            f"Invalidated {total_deleted} cache entries for restaurant {restaurant_id}"
+        )
         return total_deleted
-    
+
     async def invalidate_user_cache(self, user_id: str) -> int:
         """
         Invalidate all cache entries for a user.
-        
+
         Args:
             user_id: User ID
-            
+
         Returns:
             int: Number of keys deleted
         """
@@ -174,15 +178,15 @@ class CacheService:
             f"session:*{user_id}*",
             f"permissions:user_id={user_id}*",
         ]
-        
+
         total_deleted = 0
         for pattern in patterns:
             deleted = await self.delete_pattern(pattern)
             total_deleted += deleted
-        
+
         logger.info(f"Invalidated {total_deleted} cache entries for user {user_id}")
         return total_deleted
-    
+
     def get_metrics(self) -> Dict[str, Any]:
         """Get cache performance metrics"""
         return self.metrics.get_metrics()
@@ -190,30 +194,30 @@ class CacheService:
 
 class CacheMetrics:
     """Track cache performance metrics"""
-    
+
     def __init__(self):
         self.hits = 0
         self.misses = 0
         self.errors = 0
-    
+
     @property
     def hit_rate(self) -> float:
         """Calculate cache hit rate percentage"""
         total = self.hits + self.misses
         return (self.hits / total * 100) if total > 0 else 0.0
-    
+
     def record_hit(self):
         """Record a cache hit"""
         self.hits += 1
-    
+
     def record_miss(self):
         """Record a cache miss"""
         self.misses += 1
-    
+
     def record_error(self):
         """Record a cache error"""
         self.errors += 1
-    
+
     def get_metrics(self) -> Dict[str, Any]:
         """Get all metrics"""
         return {
@@ -221,7 +225,7 @@ class CacheMetrics:
             "misses": self.misses,
             "errors": self.errors,
             "hit_rate": f"{self.hit_rate:.2f}%",
-            "total_requests": self.hits + self.misses
+            "total_requests": self.hits + self.misses,
         }
 
 
@@ -230,36 +234,39 @@ cache_service = CacheService()
 
 
 def cached(
+    # Execute cached operation
     ttl: int = 3600,
     prefix: Optional[str] = None,
     key_params: Optional[List[str]] = None,
-    invalidate_on: Optional[List[str]] = None
+    invalidate_on: Optional[List[str]] = None,
 ):
     """
     Decorator for caching function results.
-    
+
     Args:
         ttl: Time-to-live in seconds (default: 1 hour)
         prefix: Cache key prefix (default: function name)
         key_params: List of parameter names to include in cache key
         invalidate_on: List of parameter names that trigger cache invalidation
-    
+
     Example:
         @cached(ttl=3600, prefix="menu", key_params=["restaurant_id"])
         async def get_menu(restaurant_id: str, db: Session):
             return db.query(MenuItem).filter(...).all()
     """
+
     def decorator(func):
+        # Execute decorator operation
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Get function signature to map args to parameter names
             sig = inspect.signature(func)
             bound_args = sig.bind(*args, **kwargs)
             bound_args.apply_defaults()
-            
+
             # Generate cache key prefix
             cache_prefix = prefix or f"{func.__module__}.{func.__name__}"
-            
+
             # Build cache key parameters
             cache_params = {}
             if key_params:
@@ -267,21 +274,27 @@ def cached(
                     if param in bound_args.arguments:
                         value = bound_args.arguments[param]
                         # Convert complex objects to string representation
-                        if hasattr(value, '__dict__'):
+                        if hasattr(value, "__dict__"):
                             value = str(value)
                         cache_params[param] = value
             else:
                 # Use all non-database parameters by default
                 for param, value in bound_args.arguments.items():
                     # Skip common non-cacheable parameters
-                    if param not in ['db', 'session', 'request', 'response', 'background_tasks']:
-                        if hasattr(value, '__dict__'):
+                    if param not in [
+                        "db",
+                        "session",
+                        "request",
+                        "response",
+                        "background_tasks",
+                    ]:
+                        if hasattr(value, "__dict__"):
                             value = str(value)
                         cache_params[param] = value
-            
+
             # Generate cache key
             cache_key = cache_service.cache_key(cache_prefix, **cache_params)
-            
+
             # Check if we need to invalidate cache
             if invalidate_on:
                 for param in invalidate_on:
@@ -289,26 +302,27 @@ def cached(
                         await cache_service.delete_pattern(f"{cache_prefix}*")
                         logger.debug(f"Cache invalidated for prefix: {cache_prefix}")
                         break
-            
+
             # Try to get from cache
             cached_value = await cache_service.get(cache_key)
             if cached_value is not None:
                 return cached_value
-            
+
             # Execute function and cache result
             result = await func(*args, **kwargs)
-            
+
             # Cache the result
             await cache_service.set(cache_key, result, ttl)
-            
+
             return result
-        
+
         # Add cache management methods to the wrapper
         wrapper.invalidate_cache = lambda **params: cache_service.delete_pattern(
             f"{prefix or f'{func.__module__}.{func.__name__}'}*"
         )
-        
+
         return wrapper
+
     return decorator
 
 
@@ -319,28 +333,27 @@ async def warm_menu_cache(db):
     Should be called on startup and periodically.
     """
     from app.models import Restaurant, Product
-    
+
     try:
         # Get all active restaurants
-        restaurants = db.query(Restaurant).filter(
-            Restaurant.is_active == True
-        ).all()
-        
+        restaurants = db.query(Restaurant).filter(Restaurant.is_active).all()
+
         warmed_count = 0
         for restaurant in restaurants:
             # Generate cache key - using menu_items prefix to match endpoints
             cache_key = cache_service.cache_key(
                 "menu_items",
                 restaurant_id=str(restaurant.id),
-                category=None  # Match the key params used by the endpoint
+                category=None,  # Match the key params used by the endpoint
             )
-            
+
             # Get menu data
-            menu_items = db.query(Product).filter(
-                Product.restaurant_id == restaurant.id,
-                Product.is_active == True
-            ).all()
-            
+            menu_items = (
+                db.query(Product)
+                .filter(Product.restaurant_id == restaurant.id, Product.is_active)
+                .all()
+            )
+
             # Convert to dict for caching
             menu_data = [
                 {
@@ -354,11 +367,11 @@ async def warm_menu_cache(db):
                 }
                 for item in menu_items
             ]
-            
+
             # Cache it
             if await cache_service.set(cache_key, menu_data, ttl=3600):
                 warmed_count += 1
-        
+
         logger.info(f"Warmed cache for {warmed_count}/{len(restaurants)} restaurants")
         return warmed_count
     except Exception as e:

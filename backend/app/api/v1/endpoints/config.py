@@ -9,16 +9,20 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.core.database import get_db, User
-from app.core.exceptions import FynloException, ResourceNotFoundException, ValidationException, AuthenticationException, ConflictException
+from app.core.exceptions import (
+    FynloException,
+    ResourceNotFoundException,
+    ValidationException,
+)
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.services.config_manager import config_manager
 from app.services.payment_factory import payment_factory
 from app.services.smart_routing import RoutingStrategy
 from app.services.monitoring import get_monitoring_service
-from app.core.exceptions import ValidationException, FynloException, ResourceNotFoundException
 
 router = APIRouter()
+
 
 # Pydantic models for requests/responses
 class ProviderConfigRequest(BaseModel):
@@ -29,263 +33,271 @@ class ProviderConfigRequest(BaseModel):
     retry_attempts: Optional[int] = None
     custom_settings: Optional[Dict[str, Any]] = None
 
+
 class RoutingConfigRequest(BaseModel):
     enabled: Optional[bool] = None
     default_strategy: Optional[str] = None
     fallback_provider: Optional[str] = None
 
+
 class FeatureFlagRequest(BaseModel):
     feature_name: str
     enabled: bool
 
+
 class ThresholdUpdateRequest(BaseModel):
     thresholds: Dict[str, float]
 
+
 @router.get("/summary")
-async def get_configuration_summary(
-    current_user: User = Depends(get_current_user)
-):
+async def get_configuration_summary(current_user: User = Depends(get_current_user)):
     """Get comprehensive configuration summary"""
-    try:
         summary = config_manager.get_configuration_summary()
-        
+
         # Add runtime information
         available_providers = payment_factory.get_available_providers()
-        
-        summary['runtime'] = {
-            'available_providers': available_providers,
-            'total_providers_configured': len(config_manager.providers),
-            'enabled_providers': len(config_manager.get_enabled_providers())
+
+        summary["runtime"] = {
+            "available_providers": available_providers,
+            "total_providers_configured": len(config_manager.providers),
+            "enabled_providers": len(config_manager.get_enabled_providers()),
         }
-        
+
         return APIResponseHelper.success(
-            data=summary,
-            message="Configuration summary retrieved successfully"
+            data=summary, message="Configuration summary retrieved successfully"
         )
     except Exception as e:
         raise FynloException(message=str(e))
 
+
 @router.get("/providers/{provider_name}")
 async def get_provider_configuration(
-    provider_name: str,
-    current_user: User = Depends(get_current_user)
+    provider_name: str, current_user: User = Depends(get_current_user)
 ):
     """Get configuration for a specific provider"""
-    try:
         config = config_manager.get_provider_config(provider_name)
-        
+
         if not config:
-            raise ResourceNotFoundException(resource="Provider", resource_id=provider_name)
-        
+            raise ResourceNotFoundException(
+                resource="Provider", resource_id=provider_name
+            )
+
         # Don't expose sensitive information
         provider_config = {
-            'name': config.name,
-            'enabled': config.enabled,
-            'environment': config.environment,
-            'webhook_url': config.webhook_url,
-            'timeout_seconds': config.timeout_seconds,
-            'retry_attempts': config.retry_attempts,
-            'custom_settings': config.custom_settings,
-            'has_api_key': bool(config.api_key),
-            'has_secret_key': bool(config.secret_key)
+            "name": config.name,
+            "enabled": config.enabled,
+            "environment": config.environment,
+            "webhook_url": config.webhook_url,
+            "timeout_seconds": config.timeout_seconds,
+            "retry_attempts": config.retry_attempts,
+            "custom_settings": config.custom_settings,
+            "has_api_key": bool(config.api_key),
+            "has_secret_key": bool(config.secret_key),
         }
-        
+
         return APIResponseHelper.success(
             data=provider_config,
-            message=f"Configuration for {provider_name} retrieved successfully"
+            message=f"Configuration for {provider_name} retrieved successfully",
         )
-        
+
     except FynloException:
         raise
     except Exception as e:
         raise FynloException(message=str(e))
+
 
 @router.put("/providers/{provider_name}")
 async def update_provider_configuration(
     provider_name: str,
     config_update: ProviderConfigRequest,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """Update configuration for a specific provider"""
-    try:
         # Get current configuration
-        current_config = config_manager.get_provider_config(provider_name)
-        
+        config_manager.get_provider_config(provider_name)
+
         # Prepare update data (exclude None values)
-        update_data = {
-            k: v for k, v in config_update.dict().items() 
-            if v is not None
-        }
-        
+        update_data = {k: v for k, v in config_update.dict().items() if v is not None}
+
         if not update_data:
-            raise ValidationException(message="No configuration changes provided")        
+            raise ValidationException(message="No configuration changes provided")
         # Update configuration
         config_manager.update_provider_config(provider_name, **update_data)
-        
+
         # Save to file
         config_manager.save_configuration("providers")
-        
+
         # Get updated configuration
         updated_config = config_manager.get_provider_config(provider_name)
-        
+
         return APIResponseHelper.success(
             data={
-                'name': updated_config.name,
-                'enabled': updated_config.enabled,
-                'environment': updated_config.environment,
-                'webhook_url': updated_config.webhook_url,
-                'timeout_seconds': updated_config.timeout_seconds,
-                'retry_attempts': updated_config.retry_attempts,
-                'custom_settings': updated_config.custom_settings
+                "name": updated_config.name,
+                "enabled": updated_config.enabled,
+                "environment": updated_config.environment,
+                "webhook_url": updated_config.webhook_url,
+                "timeout_seconds": updated_config.timeout_seconds,
+                "retry_attempts": updated_config.retry_attempts,
+                "custom_settings": updated_config.custom_settings,
             },
-            message=f"Configuration for {provider_name} updated successfully"
+            message=f"Configuration for {provider_name} updated successfully",
         )
-        
+
     except FynloException:
         raise
     except Exception as e:
         raise FynloException(message=str(e))
 
+
 @router.get("/routing")
-async def get_routing_configuration(
-    current_user: User = Depends(get_current_user)
-):
+async def get_routing_configuration(current_user: User = Depends(get_current_user)):
     """Get smart routing configuration"""
-    try:
         routing_config = config_manager.get_routing_config()
-        
+
         config_data = {
-            'enabled': routing_config.enabled,
-            'default_strategy': routing_config.default_strategy,
-            'volume_thresholds': {k: float(v) for k, v in routing_config.volume_thresholds.items()},
-            'provider_weights': routing_config.provider_weights,
-            'fallback_provider': routing_config.fallback_provider,
-            'available_strategies': [strategy.value for strategy in RoutingStrategy]
+            "enabled": routing_config.enabled,
+            "default_strategy": routing_config.default_strategy,
+            "volume_thresholds": {
+                k: float(v) for k, v in routing_config.volume_thresholds.items()
+            },
+            "provider_weights": routing_config.provider_weights,
+            "fallback_provider": routing_config.fallback_provider,
+            "available_strategies": [strategy.value for strategy in RoutingStrategy],
         }
-        
+
         return APIResponseHelper.success(
-            data=config_data,
-            message="Routing configuration retrieved successfully"
+            data=config_data, message="Routing configuration retrieved successfully"
         )
     except Exception as e:
         raise FynloException(message=str(e))
+
 
 @router.get("/features")
-async def get_feature_flags(
-    current_user: User = Depends(get_current_user)
-):
+async def get_feature_flags(current_user: User = Depends(get_current_user)):
     """Get all feature flags"""
-    try:
         features = config_manager.features
-        
+
         feature_flags = {
-            'smart_routing_enabled': features.smart_routing_enabled,
-            'analytics_enabled': features.analytics_enabled,
-            'volume_tracking_enabled': features.volume_tracking_enabled,
-            'qr_payments_enabled': features.qr_payments_enabled,
-            'cash_payments_enabled': features.cash_payments_enabled,
-            'auto_refunds_enabled': features.auto_refunds_enabled,
-            'webhook_retries_enabled': features.webhook_retries_enabled,
-            'cost_optimization_alerts': features.cost_optimization_alerts
+            "smart_routing_enabled": features.smart_routing_enabled,
+            "analytics_enabled": features.analytics_enabled,
+            "volume_tracking_enabled": features.volume_tracking_enabled,
+            "qr_payments_enabled": features.qr_payments_enabled,
+            "cash_payments_enabled": features.cash_payments_enabled,
+            "auto_refunds_enabled": features.auto_refunds_enabled,
+            "webhook_retries_enabled": features.webhook_retries_enabled,
+            "cost_optimization_alerts": features.cost_optimization_alerts,
         }
-        
+
         return APIResponseHelper.success(
-            data=feature_flags,
-            message="Feature flags retrieved successfully"
+            data=feature_flags, message="Feature flags retrieved successfully"
         )
     except Exception as e:
         raise FynloException(message=str(e))
 
+
 @router.get("/security")
-async def get_security_configuration(
-    current_user: User = Depends(get_current_user)
-):
+async def get_security_configuration(current_user: User = Depends(get_current_user)):
     """Get security configuration"""
-    try:
         security_config = config_manager.get_security_config()
-        
+
         config_data = {
-            'encrypt_api_keys': security_config.encrypt_api_keys,
-            'webhook_signature_validation': security_config.webhook_signature_validation,
-            'rate_limiting_enabled': security_config.rate_limiting_enabled,
-            'max_requests_per_minute': security_config.max_requests_per_minute,
-            'allowed_origins': security_config.allowed_origins,
-            'ssl_required': security_config.ssl_required
+            "encrypt_api_keys": security_config.encrypt_api_keys,
+            "webhook_signature_validation": security_config.webhook_signature_validation,
+            "rate_limiting_enabled": security_config.rate_limiting_enabled,
+            "max_requests_per_minute": security_config.max_requests_per_minute,
+            "allowed_origins": security_config.allowed_origins,
+            "ssl_required": security_config.ssl_required,
         }
-        
+
         return APIResponseHelper.success(
-            data=config_data,
-            message="Security configuration retrieved successfully"
+            data=config_data, message="Security configuration retrieved successfully"
         )
     except Exception as e:
         raise FynloException(message=str(e))
+
 
 @router.get("/monitoring/health")
 async def get_system_health(
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+):
+    """Get system health status"""
+@router.get("/monitoring/metrics")
+async def get_system_metrics(
+    hours: int = Query(24, description="Number of hours to look back"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get system health status"""
-    try:
+    """Get system metrics for the specified time period"""
         monitoring_service = get_monitoring_service(db)
         health_status = await monitoring_service.check_system_health()
-        
+
         return APIResponseHelper.success(
-            data=health_status,
-            message="System health status retrieved successfully"
+            data=health_status, message="System health status retrieved successfully"
         )
     except Exception as e:
         raise FynloException(message=str(e))
 
+@router.get("/monitoring/metrics")
+async def get_system_metrics(
+    hours: int = Query(24, description="Number of hours to look back"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get system metrics for the specified time period"""
         monitoring_service = get_monitoring_service(db)
         metrics = await monitoring_service.get_system_metrics(hours)
-        
+
         return APIResponseHelper.success(
             data=metrics,
-            message=f"System metrics for last {hours} hours retrieved successfully"
+            message=f"System metrics for last {hours} hours retrieved successfully",
         )
-        
+
     except FynloException:
         raise
     except Exception as e:
         raise FynloException(message=str(e))
+
 
 @router.put("/monitoring/thresholds")
 async def update_monitoring_thresholds(
     threshold_update: ThresholdUpdateRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """Update monitoring alert thresholds"""
-    try:
+@router.get("/monitoring/metrics")
+async def get_system_metrics(
+    hours: int = Query(24, description="Number of hours to look back"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get system metrics for the specified time period"""
         monitoring_service = get_monitoring_service(db)
         await monitoring_service.update_thresholds(threshold_update.thresholds)
-        
+
         return APIResponseHelper.success(
             data=threshold_update.thresholds,
-            message="Monitoring thresholds updated successfully"
+            message="Monitoring thresholds updated successfully",
         )
     except Exception as e:
         raise FynloException(message=str(e))
 
+
 @router.post("/backup")
-async def backup_configuration(
-    current_user: User = Depends(get_current_user)
-):
+async def backup_configuration(current_user: User = Depends(get_current_user)):
     """Create a backup of current configuration"""
-    try:
         # Save all configurations
         config_manager.save_configuration("all")
-        
+
         # Get configuration summary for backup verification
         summary = config_manager.get_configuration_summary()
-        
+
         return APIResponseHelper.success(
             data={
-                'backup_timestamp': summary,
-                'backup_location': f"config/payment_config_{config_manager.environment.value}.json"
+                "backup_timestamp": summary,
+                "backup_location": f"config/payment_config_{config_manager.environment.value}.json",
             },
-            message="Configuration backup created successfully"
+            message="Configuration backup created successfully",
         )
     except Exception as e:
         raise FynloException(message=str(e))

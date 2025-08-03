@@ -137,6 +137,7 @@ def manager_token(db_session: Session):
 
 def test_refund_sends_email(client: TestClient, db_session: Session, seeded_order: Order, manager_token: str):
     """Test that processing a refund triggers an email send operation."""
+    pass  # TODO: Implement
 
     # Ensure SENDGRID_API_KEY is set for the test environment (can be a dummy value)
     # The EmailService init checks for this.

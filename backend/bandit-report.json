@@ -1,83 +1,7 @@
 {
   "errors": [
     {
-      "filename": "app/api/v1/api.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/api/v1/endpoints/config.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/api/v1/endpoints/inventory.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/api/v1/endpoints/monitoring.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/api/v1/endpoints/platform.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/api/v1/endpoints/platform_settings.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/api/v1/endpoints/restaurant_deletion.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/api/v1/endpoints/rls_example.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/api/v1/endpoints/secure_payments.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/api/v1/endpoints/websocket_portal.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/api/v1/endpoints/websocket_secure.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/api/v1/platform/analytics.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/api/v1/platform/restaurants.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/core/cache.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/core/cache_warmer.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
       "filename": "app/core/config.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/core/file_upload.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/core/mobile_id_mapping.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/core/platform_service.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/core/production_guard.py",
       "reason": "syntax error while parsing AST from file"
     },
     {
@@ -85,15 +9,7 @@
       "reason": "syntax error while parsing AST from file"
     },
     {
-      "filename": "app/core/tenant_security.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
       "filename": "app/core/tenant_security_current.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/core/two_factor_auth.py",
       "reason": "syntax error while parsing AST from file"
     },
     {
@@ -109,26 +25,6 @@
       "reason": "syntax error while parsing AST from file"
     },
     {
-      "filename": "app/middleware/feature_gate.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/middleware/rate_limit_middleware.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/middleware/version_middleware.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/models/financial_records.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/models/payment_config.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
       "filename": "app/schemas/employee_schemas.py",
       "reason": "syntax error while parsing AST from file"
     },
@@ -137,50 +33,22 @@
       "reason": "syntax error while parsing AST from file"
     },
     {
-      "filename": "app/scripts/initialize_platform_defaults.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/scripts/migrate_to_platform_settings.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/scripts/validate_migration.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
       "filename": "app/services/activity_logger.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/services/cache_service.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/services/digitalocean_monitor.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/services/payment_analytics.py",
-      "reason": "syntax error while parsing AST from file"
-    },
-    {
-      "filename": "app/services/secure_payment_config.py",
       "reason": "syntax error while parsing AST from file"
     }
   ],
-  "generated_at": "2025-08-02T22:55:55Z",
+  "generated_at": "2025-08-02T23:37:02Z",
   "metrics": {
     "_totals": {
-      "CONFIDENCE.HIGH": 36,
+      "CONFIDENCE.HIGH": 41,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 10,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 3,
-      "SEVERITY.LOW": 40,
+      "SEVERITY.LOW": 45,
       "SEVERITY.MEDIUM": 3,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 43346,
+      "loc": 42864,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -250,7 +118,15 @@
       "skipped_tests": 0
     },
     "app/api/v1/api.py": {
-      "loc": 56,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 53,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -320,7 +196,15 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/config.py": {
-      "loc": 461,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 239,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -416,6 +300,14 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/inventory.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
       "loc": 294,
       "nosec": 0,
       "skipped_tests": 0
@@ -447,7 +339,15 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/monitoring.py": {
-      "loc": 279,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 276,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -504,7 +404,15 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/platform.py": {
-      "loc": 515,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 512,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -522,7 +430,15 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/platform_settings.py": {
-      "loc": 517,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 449,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -618,7 +534,15 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/restaurant_deletion.py": {
-      "loc": 270,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 267,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -649,7 +573,15 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/rls_example.py": {
-      "loc": 123,
+      "CONFIDENCE.HIGH": 3,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 3,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 120,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -667,7 +599,15 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/secure_payments.py": {
-      "loc": 331,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 330,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -750,7 +690,15 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/websocket_portal.py": {
-      "loc": 249,
+      "CONFIDENCE.HIGH": 2,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 2,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 246,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -768,7 +716,15 @@
       "skipped_tests": 0
     },
     "app/api/v1/endpoints/websocket_secure.py": {
-      "loc": 137,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 134,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -786,7 +742,15 @@
       "skipped_tests": 0
     },
     "app/api/v1/platform/analytics.py": {
-      "loc": 190,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 187,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -804,7 +768,15 @@
       "skipped_tests": 0
     },
     "app/api/v1/platform/restaurants.py": {
-      "loc": 220,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 217,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -887,7 +859,15 @@
       "skipped_tests": 0
     },
     "app/core/cache.py": {
-      "loc": 266,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 263,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -905,12 +885,20 @@
       "skipped_tests": 0
     },
     "app/core/cache_warmer.py": {
-      "loc": 204,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 201,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/core/config.py": {
-      "loc": 182,
+      "loc": 180,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -980,7 +968,15 @@
       "skipped_tests": 0
     },
     "app/core/file_upload.py": {
-      "loc": 361,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 359,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -998,7 +994,15 @@
       "skipped_tests": 0
     },
     "app/core/mobile_id_mapping.py": {
-      "loc": 234,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 231,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1029,12 +1033,28 @@
       "skipped_tests": 0
     },
     "app/core/platform_service.py": {
-      "loc": 299,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 296,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/core/production_guard.py": {
-      "loc": 31,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 26,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1213,7 +1233,15 @@
       "skipped_tests": 0
     },
     "app/core/tenant_security.py": {
-      "loc": 227,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 194,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1231,12 +1259,20 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 227,
+      "loc": 228,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/core/two_factor_auth.py": {
-      "loc": 220,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 193,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1368,7 +1404,7 @@
       "skipped_tests": 0
     },
     "app/main_minimal.py": {
-      "loc": 116,
+      "loc": 113,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1399,12 +1435,28 @@
       "skipped_tests": 0
     },
     "app/middleware/feature_gate.py": {
-      "loc": 217,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 210,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/middleware/rate_limit_middleware.py": {
-      "loc": 88,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 85,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1461,7 +1513,15 @@
       "skipped_tests": 0
     },
     "app/middleware/version_middleware.py": {
-      "loc": 138,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 135,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1544,12 +1604,28 @@
       "skipped_tests": 0
     },
     "app/models/financial_records.py": {
-      "loc": 39,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 36,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/models/payment_config.py": {
-      "loc": 27,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 24,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1733,17 +1809,41 @@
       "skipped_tests": 0
     },
     "app/scripts/initialize_platform_defaults.py": {
-      "loc": 180,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 162,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/scripts/migrate_to_platform_settings.py": {
-      "loc": 373,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 354,
       "nosec": 0,
       "skipped_tests": 0
     },
     "app/scripts/validate_migration.py": {
-      "loc": 436,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 423,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1766,7 +1866,15 @@
       "skipped_tests": 0
     },
     "app/services/cache_service.py": {
-      "loc": 66,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 63,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1784,7 +1892,15 @@
       "skipped_tests": 0
     },
     "app/services/digitalocean_monitor.py": {
-      "loc": 387,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 384,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1880,7 +1996,15 @@
       "skipped_tests": 0
     },
     "app/services/payment_analytics.py": {
-      "loc": 438,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 435,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2080,7 +2204,15 @@
       "skipped_tests": 0
     },
     "app/services/secure_payment_config.py": {
-      "loc": 274,
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 271,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2337,6 +2469,108 @@
       "line_range": [
         1476,
         1477
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
+      "test_id": "B110",
+      "test_name": "try_except_pass"
+    },
+    {
+      "code": "102         # Verify they match the current user\n103         assert session_info.user_id == str(current_user.id), \"User ID mismatch\"\n104         assert session_info.restaurant_id == str(current_user.restaurant_id), \"Restaurant ID mismatch\"\n",
+      "col_offset": 8,
+      "end_col_offset": 79,
+      "filename": "app/api/v1/endpoints/rls_example.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "line_number": 103,
+      "line_range": [
+        103
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b101_assert_used.html",
+      "test_id": "B101",
+      "test_name": "assert_used"
+    },
+    {
+      "code": "103         assert session_info.user_id == str(current_user.id), \"User ID mismatch\"\n104         assert session_info.restaurant_id == str(current_user.restaurant_id), \"Restaurant ID mismatch\"\n105         assert session_info.user_role == current_user.role, \"Role mismatch\"\n",
+      "col_offset": 8,
+      "end_col_offset": 102,
+      "filename": "app/api/v1/endpoints/rls_example.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "line_number": 104,
+      "line_range": [
+        104
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b101_assert_used.html",
+      "test_id": "B101",
+      "test_name": "assert_used"
+    },
+    {
+      "code": "104         assert session_info.restaurant_id == str(current_user.restaurant_id), \"Restaurant ID mismatch\"\n105         assert session_info.user_role == current_user.role, \"Role mismatch\"\n106         \n",
+      "col_offset": 8,
+      "end_col_offset": 75,
+      "filename": "app/api/v1/endpoints/rls_example.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "line_number": 105,
+      "line_range": [
+        105
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b101_assert_used.html",
+      "test_id": "B101",
+      "test_name": "assert_used"
+    },
+    {
+      "code": "125             await websocket.close(code=4000, reason=f\"Connection error: {str(e)}\")\n126         except Exception as e:\n127             pass\n128     finally:\n",
+      "col_offset": 8,
+      "end_col_offset": 16,
+      "filename": "app/api/v1/endpoints/websocket_portal.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Try, Except, Pass detected.",
+      "line_number": 126,
+      "line_range": [
+        126,
+        127
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
+      "test_id": "B110",
+      "test_name": "try_except_pass"
+    },
+    {
+      "code": "238             await websocket.close(code=4000, reason=f\"Platform connection error: {str(e)}\")\n239         except Exception as e:\n240             pass\n241     finally:\n",
+      "col_offset": 8,
+      "end_col_offset": 16,
+      "filename": "app/api/v1/endpoints/websocket_portal.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Try, Except, Pass detected.",
+      "line_number": 239,
+      "line_range": [
+        239,
+        240
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",

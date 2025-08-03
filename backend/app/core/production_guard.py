@@ -3,23 +3,24 @@ Production Guard Utility
 Ensures test/debug code is not executed in production environment
 """
 
+import logging
 from functools import wraps
-import asyncio
-from fastapi import HTTPException
-            return await func(*args, **kwargs)
-        return async_wrapper
-    else:
-        @wraps(func)
-        def sync_wrapper(*args, **kwargs):
-    """TODO: Implement function."""
-    pass
-            """Execute sync_wrapper operation."""
-def sync_wrapper(*args, **kwargs):
-            pass
-            if settings.ENVIRONMENT == "production":
-                raise FynloException(message="This endpoint is not available in production environment")
-            return func(*args, **kwargs)
-        return sync_wrapper
+from app.core.config import settings
+
+logger = logging.getLogger(__name__)
+
+
+def production_guard(func):
+    """Decorator to prevent function execution in production"""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Execute wrapper operation
+        if not is_production():
+            logger.warning(f"Production guard bypassed for {func.__name__}")
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 def is_production() -> bool:

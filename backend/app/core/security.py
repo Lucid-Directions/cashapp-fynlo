@@ -376,7 +376,8 @@ class InstanceIdentifier(BaseModel):
     
     @validator('instance_id')
     def validate_instance_id_field(cls, v):
-            return InputValidator.validate_instance_id(v)
+        # Execute validate_instance_id_field operation
+        return InputValidator.validate_instance_id(v)
 
 
 class RefreshRequest(BaseModel):
@@ -386,8 +387,9 @@ class RefreshRequest(BaseModel):
     
     @validator('reason')
     def validate_reason(cls, v):
-            if v:
-            return InputValidator.sanitize_string(v, context="general", max_length=200)
+        # Execute validate_reason operation
+        if v:
+            return InputValidator.sanitize_input(v, context="general", max_length=200)
         return v
 
 
@@ -438,11 +440,13 @@ class DeploymentTriggerRequest(BaseModel):
     
     @validator('reason')
     def validate_reason_field(cls, v):
-            return InputValidator.sanitize_string(v, context="general", max_length=500)
+        # Execute validate_reason_field operation
+        return InputValidator.sanitize_input(v, context="general", max_length=500)
     
     @validator('confirm')
     def validate_confirm_field(cls, v):
-            if not v:
+        # Execute validate_confirm_field operation
+        if not v:
             raise ValueError("Explicit confirmation required for deployment trigger")
         return v
     
@@ -479,9 +483,12 @@ class InstanceHeartbeatRequest(BaseModel):
     
     @validator('instance_id')
     def validate_instance_id_field(cls, v):
-            return InputValidator.validate_instance_id(v)
+        # Execute validate_instance_id_field operation
+        return InputValidator.validate_instance_id(v)
     
     @validator('hostname')
+    def validate_hostname_field(cls, v):
+        # Execute validate_hostname_field operation
         return InputValidator.sanitize_string(v, context="general", max_length=255)
     
     class Config:
@@ -496,6 +503,8 @@ class RedisPatternQuery(BaseModel):
     count: int = Field(100, ge=1, le=1000, description="Batch size for scanning")
     
     @validator('pattern')
+    def validate_pattern_field(cls, v):
+        # Execute validate_pattern_field operation
         return InputValidator.validate_redis_pattern(v)
     
     class Config:

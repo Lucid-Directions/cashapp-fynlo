@@ -8,7 +8,9 @@ from decimal import Decimal
 from .payment_providers.stripe_provider import StripeProvider
 from .payment_providers.square_provider import SquareProvider
 from .payment_providers.sumup_provider import SumUpProvider
+
 # Note: PaymentProviderFactory should be imported directly from payment_factory to avoid circular imports
+
 
 class PaymentStatus(Enum):
     SUCCESS = "success"
@@ -17,13 +19,14 @@ class PaymentStatus(Enum):
     CANCELLED = "cancelled"
     REFUNDED = "refunded"
 
+
 class PaymentProvider(ABC):
     """Abstract base class for all payment providers"""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        self.provider_name = self.__class__.__name__.replace('Provider', '')
-    
+        self.provider_name = self.__class__.__name__.replace("Provider", "")
+
     @abstractmethod
     async def process_payment(
         self,
@@ -31,11 +34,11 @@ class PaymentProvider(ABC):
         currency: str = "GBP",
         customer_id: Optional[str] = None,
         payment_method_id: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Process a payment through the provider
-        
+
         Returns standardized response:
         {
             "provider": "Stripe",
@@ -49,16 +52,16 @@ class PaymentProvider(ABC):
             "metadata": {...}
         }
         """
-    
+
     @abstractmethod
     async def refund_payment(
         self,
         transaction_id: str,
         amount: Optional[Decimal] = None,
-        reason: Optional[str] = None
+        reason: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Process a refund for a previous payment"""
-    
+
     @abstractmethod
     async def create_checkout(
         self,
@@ -66,10 +69,10 @@ class PaymentProvider(ABC):
         currency: str = "GBP",
         return_url: str = None,
         cancel_url: str = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Create a checkout session for web/mobile payments"""
-    
+
     @abstractmethod
     def calculate_fee(self, amount: Decimal) -> Decimal:
         """Calculate the provider fee for a given amount"""
@@ -86,14 +89,15 @@ class PaymentProvider(ABC):
             "net_amount": int((amount - fee) * 100),
             "created_at": datetime.utcnow().isoformat() + "Z",
             "raw_response": provider_response,
-            "metadata": provider_response.get("metadata", {})
+            "metadata": provider_response.get("metadata", {}),
         }
+
 
 # Export all classes for backwards compatibility
 __all__ = [
-    'PaymentStatus',
-    'PaymentProvider',
-    'StripeProvider',
-    'SquareProvider',
-    'SumUpProvider'
+    "PaymentStatus",
+    "PaymentProvider",
+    "StripeProvider",
+    "SquareProvider",
+    "SumUpProvider",
 ]

@@ -18,7 +18,7 @@ app = FastAPI(
     title="Fynlo POS Backend",
     description="Hardware-Free Restaurant Management Platform",
     version="1.0.0",
-    debug=False
+    debug=False,
 )
 
 # CORS middleware for React Native frontend
@@ -30,6 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 async def root():
     """Root endpoint"""
@@ -37,8 +38,9 @@ async def root():
         "service": "Fynlo POS Backend API",
         "version": "1.0.0",
         "status": "healthy",
-        "message": "Fynlo POS API is running"
+        "message": "Fynlo POS API is running",
     }
+
 
 @app.get("/health")
 async def health_check():
@@ -47,26 +49,22 @@ async def health_check():
         "status": "healthy",
         "service": "fynlo-pos-backend",
         "version": "1.0.0",
-        "timestamp": "2025-01-08"
+        "timestamp": "2025-01-08",
     }
+
 
 @app.get("/api/v1/health")
 async def api_health():
     """API health check"""
-    return {
-        "api_version": "v1",
-        "status": "operational",
-        "endpoints": "available"
-    }
+    return {"api_version": "v1", "status": "operational", "endpoints": "available"}
+
 
 # Basic auth endpoint for testing
 @app.post("/api/v1/auth/login")
 async def login():
     """Basic login endpoint"""
-    return {
-        "message": "Authentication endpoint available",
-        "status": "ready"
-    }
+    return {"message": "Authentication endpoint available", "status": "ready"}
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))

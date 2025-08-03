@@ -2,6 +2,7 @@
 Secure Payment API Endpoints
 Handles payment processing with comprehensive security measures
 """
+
 import uuid
 from typing import Dict, Any, Optional, List
 from decimal import Decimal
@@ -15,7 +16,10 @@ from app.core.database import get_db, User
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import PaymentException
-from app.services.secure_payment_processor import SecurePaymentProcessor, PaymentProcessingError
+from app.services.secure_payment_processor import (
+    SecurePaymentProcessor,
+    PaymentProcessingError,
+)
 from app.services.secure_payment_config import SecurePaymentConfigService
 from app.middleware.rate_limit_middleware import limiter
 from app.core.tenant_security import TenantSecurity
@@ -29,38 +33,46 @@ logger = logging.getLogger(__name__)
 # Pydantic models for request/response validation
 class PaymentRequest(BaseModel):
     """Payment processing request"""
+
     order_id: str = Field(..., description="Order ID")
     amount: Decimal = Field(..., gt=0, le=10000, description="Payment amount")
-    payment_method: str = Field(..., description="Payment method: card, cash, qr_code, apple_pay, google_pay")
-    payment_details: Dict[str, Any] = Field(..., description="Method-specific payment details")
+    payment_method: str = Field(
+        ..., description="Payment method: card, cash, qr_code, apple_pay, google_pay"
+    )
+    payment_details: Dict[str, Any] = Field(
+        ..., description="Method-specific payment details"
+    )
     metadata: Optional[Dict[str, Any]] = Field(None, description="Optional metadata")
-    
-    @validator('amount')
+
+    @validator("amount")
     def validate_amount(cls, v):
-    """TODO: Implement function."""
-    pass
+        """Validate payment amount"""
         # Ensure proper decimal places
         if v.as_tuple().exponent < -2:
             raise ValueError("Amount cannot have more than 2 decimal places")
         return v
-    
-    @validator('payment_method')
+
+    @validator("payment_method")
     def validate_payment_method(cls, v):
-    """TODO: Implement function."""
-    pass
-        valid_methods = ['card', 'cash', 'qr_code', 'apple_pay', 'google_pay']
-        if v not in valid_methods:
-            raise ValueError(f"Invalid payment method. Must be one of: {', '.join(valid_methods)}")
+        """Validate payment method"""
+        allowed_methods = {"card", "cash", "qr_code", "apple_pay", "google_pay"}
+        if v not in allowed_methods:
+            raise ValueError(f"Payment method must be one of: {allowed_methods}")
         return v
 
 
 class RefundRequest(BaseModel):
     """Refund processing request"""
+
     transaction_id: str = Field(..., description="Original transaction ID")
-    amount: Optional[Decimal] = Field(None, gt=0, description="Refund amount (None for full refund)")
+    amount: Optional[Decimal] = Field(
+        None, gt=0, description="Refund amount (None for full refund)"
+    )
     reason: Optional[str] = Field(None, max_length=500, description="Refund reason")
-    
-    @validator('amount')
+
+    @validator("amount")
+    def validate_amount(cls, v):
+        # Execute validate_amount operation
         if v is not None and v.as_tuple().exponent < -2:
             raise ValueError("Amount cannot have more than 2 decimal places")
         return v
@@ -68,12 +80,14 @@ class RefundRequest(BaseModel):
 
 class PaymentMethodsResponse(BaseModel):
     """Available payment methods response"""
+
     methods: List[Dict[str, Any]]
     fees: Dict[str, Dict[str, float]]
 
 
 class PaymentStatusResponse(BaseModel):
     """Payment status response"""
+
     payment_id: str
     status: str
     provider: Optional[str]
@@ -88,8 +102,8 @@ class PaymentStatusResponse(BaseModel):
 def get_request_context(request: Request) -> Dict[str, Any]:
     """Extract request context for audit logging"""
     return {
-        'ip_address': request.client.host if request.client else None,
-        'user_agent': request.headers.get('user-agent', 'Unknown')
+        "ip_address": request.client.host if request.client else None,
+        "user_agent": request.headers.get("user-agent", "Unknown"),
     }
 
 
@@ -98,13 +112,15 @@ def get_request_context(request: Request) -> Dict[str, Any]:
 async def process_payment(
     payment_request: PaymentRequest,
     request: Request,
-    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
+    current_restaurant_id: Optional[str] = Query(
+        None, description="Restaurant ID for multi-location owners"
+    ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """
     Process a payment with automatic provider fallback
-    
+
     Security features:
     - Authentication required
     - Rate limiting (10 requests per minute)
@@ -118,15 +134,15 @@ async def process_payment(
             current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
         restaurant_id = current_restaurant_id or current_user.restaurant_id
-        
+
         # Add user context to request
         request_context = get_request_context(request)
-        request_context['user_id'] = str(current_user.id)
-        request_context['restaurant_id'] = str(restaurant_id)
-        
+        request_context["user_id"] = str(current_user.id)
+        request_context["restaurant_id"] = str(restaurant_id)
+
         # Initialize payment processor
         processor = SecurePaymentProcessor(db, request_context)
-        
+
         # Process payment
         result = await processor.process_payment(
             order_id=payment_request.order_id,
@@ -135,57 +151,56 @@ async def process_payment(
             payment_details=payment_request.payment_details,
             user_id=str(current_user.id),
             restaurant_id=str(restaurant_id),
-            metadata=payment_request.metadata
+            metadata=payment_request.metadata,
         )
-        
+
         # Log successful payment
         logger.info(
-            f"Payment processed successfully",
+            "Payment processed successfully",
             extra={
-                'payment_id': result['payment_id'],
-                'amount': result['amount'],
-                'provider': result['provider'],
-                'user_id': str(current_user.id)
-            }
+                "payment_id": result["payment_id"],
+                "amount": result["amount"],
+                "provider": result["provider"],
+                "user_id": str(current_user.id),
+            },
         )
-        
+
         return APIResponseHelper.success(
-            data=result,
-            message="Payment processed successfully"
+            data=result, message="Payment processed successfully"
         )
-        
+
     except PaymentProcessingError as e:
         logger.error(f"Payment processing failed: {str(e)}")
         return APIResponseHelper.error(
             message=str(e),
             status_code=400,
             error_code="PAYMENT_FAILED",
-            details={'payment_id': e.payment_id} if hasattr(e, 'payment_id') else None
+            details={"payment_id": e.payment_id} if hasattr(e, "payment_id") else None,
         )
     except ValueError as e:
         return APIResponseHelper.error(
-            message=str(e),
-            status_code=400,
-            error_code="VALIDATION_ERROR"
+            message=str(e), status_code=400, error_code="VALIDATION_ERROR"
         )
     except Exception as e:
         logger.error(f"Unexpected error in payment processing: {str(e)}")
         return APIResponseHelper.error(
             message="Payment processing failed",
             status_code=500,
-            error_code="INTERNAL_ERROR"
+            error_code="INTERNAL_ERROR",
         )
 
 
 @router.get("/methods", response_model=PaymentMethodsResponse)
 async def get_payment_methods(
-    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
+    current_restaurant_id: Optional[str] = Query(
+        None, description="Restaurant ID for multi-location owners"
+    ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """
     Get available payment methods for the current restaurant
-    
+
     Returns:
     - Available payment methods
     - Fee structure for transparency
@@ -196,75 +211,73 @@ async def get_payment_methods(
             current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
         restaurant_id = current_restaurant_id or current_user.restaurant_id
-        
+
         # Get configured payment providers
         config_service = SecurePaymentConfigService(db)
-        configs = config_service.list_provider_configs(
-            restaurant_id=str(restaurant_id)
-        )
-        
+        configs = config_service.list_provider_configs(restaurant_id=str(restaurant_id))
+
         # Build available methods
         methods = []
         fees = {}
-        
+
         # Always have cash available
-        methods.append({
-            'id': 'cash',
-            'name': 'Cash',
-            'icon': 'cash',
-            'enabled': True,
-            'min_amount': 0.01,
-            'max_amount': 10000.00
-        })
-        fees['cash'] = {
-            'percentage': 0,
-            'fixed': 0,
-            'description': 'No fees'
-        }
-        
+        methods.append(
+            {
+                "id": "cash",
+                "name": "Cash",
+                "icon": "cash",
+                "enabled": True,
+                "min_amount": 0.01,
+                "max_amount": 10000.00,
+            }
+        )
+        fees["cash"] = {"percentage": 0, "fixed": 0, "description": "No fees"}
+
         # Add configured providers
         provider_mapping = {
-            'stripe': {
-                'methods': ['card', 'apple_pay', 'google_pay'],
-                'fees': {'percentage': 1.4, 'fixed': 0.20, 'description': '1.4% + 20p'}
+            "stripe": {
+                "methods": ["card", "apple_pay", "google_pay"],
+                "fees": {"percentage": 1.4, "fixed": 0.20, "description": "1.4% + 20p"},
             },
-            'square': {
-                'methods': ['card', 'apple_pay'],
-                'fees': {'percentage': 1.75, 'fixed': 0, 'description': '1.75%'}
+            "square": {
+                "methods": ["card", "apple_pay"],
+                "fees": {"percentage": 1.75, "fixed": 0, "description": "1.75%"},
             },
-            'sumup': {
-                'methods': ['card', 'apple_pay'],
-                'fees': {'percentage': 0.69, 'fixed': 0, 'description': '0.69%'}
+            "sumup": {
+                "methods": ["card", "apple_pay"],
+                "fees": {"percentage": 0.69, "fixed": 0, "description": "0.69%"},
             },
-            'qr_provider': {
-                'methods': ['qr_code'],
-                'fees': {'percentage': 1.2, 'fixed': 0, 'description': '1.2%'}
-            }
+            "qr_provider": {
+                "methods": ["qr_code"],
+                "fees": {"percentage": 1.2, "fixed": 0, "description": "1.2%"},
+            },
         }
-        
+
         for config in configs:
-            provider = config['provider']
+            provider = config["provider"]
             if provider in provider_mapping:
                 mapping = provider_mapping[provider]
-                for method in mapping['methods']:
-                    if not any(m['id'] == method for m in methods):
-                        methods.append({
-                            'id': method,
-                            'name': method.replace('_', ' ').title(),
-                            'icon': method,
-                            'enabled': True,
-                            'min_amount': 0.01,
-                            'max_amount': 10000.00
-                        })
+                for method in mapping["methods"]:
+                    if not any(m["id"] == method for m in methods):
+                        methods.append(
+                            {
+                                "id": method,
+                                "name": method.replace("_", " ").title(),
+                                "icon": method,
+                                "enabled": True,
+                                "min_amount": 0.01,
+                                "max_amount": 10000.00,
+                            }
+                        )
                     # Use lowest fee if multiple providers support same method
-                    if method not in fees or mapping['fees']['percentage'] < fees[method]['percentage']:
-                        fees[method] = mapping['fees']
-        
-        return {
-            'methods': methods,
-            'fees': fees
-        }
-        
+                    if (
+                        method not in fees
+                        or mapping["fees"]["percentage"] < fees[method]["percentage"]
+                    ):
+                        fees[method] = mapping["fees"]
+
+        return {"methods": methods, "fees": fees}
+
     except Exception as e:
         logger.error(f"Error getting payment methods: {str(e)}")
         raise PaymentException(message="Failed to get payment methods")
@@ -275,13 +288,15 @@ async def get_payment_methods(
 async def process_refund(
     refund_request: RefundRequest,
     request: Request,
-    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
+    current_restaurant_id: Optional[str] = Query(
+        None, description="Restaurant ID for multi-location owners"
+    ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """
     Process a payment refund
-    
+
     Security features:
     - Authentication required
     - Stricter rate limiting (5 requests per minute)
@@ -293,46 +308,47 @@ async def process_refund(
         await TenantSecurity.validate_restaurant_access(
             current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
-        restaurant_id = current_restaurant_id or current_user.restaurant_id
-        
+
         # Check permissions - only managers and above can process refunds
-        if current_user.role not in ['manager', 'restaurant_owner', 'platform_owner']:
+        if current_user.role not in ["manager", "restaurant_owner", "platform_owner"]:
             return APIResponseHelper.error(
                 message="Insufficient permissions to process refunds",
                 status_code=403,
-                error_code="PERMISSION_DENIED"
+                error_code="PERMISSION_DENIED",
             )
-        
-                # This would look up the original payment and process through the same provider
-        
+
+            # This would look up the original payment and process through the same provider
+
         return APIResponseHelper.success(
             data={
-                'refund_id': str(uuid.uuid4()),
-                'status': 'pending',
-                'message': 'Refund processing not yet implemented'
+                "refund_id": str(uuid.uuid4()),
+                "status": "pending",
+                "message": "Refund processing not yet implemented",
             },
-            message="Refund initiated"
+            message="Refund initiated",
         )
-        
+
     except Exception as e:
         logger.error(f"Error processing refund: {str(e)}")
         return APIResponseHelper.error(
             message="Refund processing failed",
             status_code=500,
-            error_code="INTERNAL_ERROR"
+            error_code="INTERNAL_ERROR",
         )
 
 
 @router.get("/status/{payment_id}", response_model=PaymentStatusResponse)
 async def get_payment_status(
     payment_id: str = Path(..., description="Payment ID"),
-    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
+    current_restaurant_id: Optional[str] = Query(
+        None, description="Restaurant ID for multi-location owners"
+    ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """
     Get payment status
-    
+
     Returns current status of a payment transaction
     """
     try:
@@ -341,41 +357,42 @@ async def get_payment_status(
             current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
         restaurant_id = current_restaurant_id or current_user.restaurant_id
-        
+
         # Get payment from database
         from app.services.secure_payment_processor import Payment
-        
-        payment = db.query(Payment).filter_by(
-            id=payment_id,
-            restaurant_id=str(restaurant_id)
-        ).first()
-        
+
+        payment = (
+            db.query(Payment)
+            .filter_by(id=payment_id, restaurant_id=str(restaurant_id))
+            .first()
+        )
+
         if not payment:
             return APIResponseHelper.error(
-                message="Payment not found",
-                status_code=404,
-                error_code="NOT_FOUND"
+                message="Payment not found", status_code=404, error_code="NOT_FOUND"
             )
-        
+
         return APIResponseHelper.success(
             data={
-                'payment_id': payment.id,
-                'status': payment.status.value,
-                'provider': payment.provider,
-                'amount': float(payment.amount),
-                'currency': payment.currency,
-                'created_at': payment.created_at.isoformat(),
-                'completed_at': payment.completed_at.isoformat() if payment.completed_at else None,
-                'error_message': payment.error_message
+                "payment_id": payment.id,
+                "status": payment.status.value,
+                "provider": payment.provider,
+                "amount": float(payment.amount),
+                "currency": payment.currency,
+                "created_at": payment.created_at.isoformat(),
+                "completed_at": (
+                    payment.completed_at.isoformat() if payment.completed_at else None
+                ),
+                "error_message": payment.error_message,
             }
         )
-        
+
     except Exception as e:
         logger.error(f"Error getting payment status: {str(e)}")
         return APIResponseHelper.error(
             message="Failed to get payment status",
             status_code=500,
-            error_code="INTERNAL_ERROR"
+            error_code="INTERNAL_ERROR",
         )
 
 
@@ -384,11 +401,11 @@ async def handle_payment_webhook(
     request: Request,
     provider: str = Path(..., description="Payment provider name"),
     db: Session = Depends(get_db),
-    webhook_signature: Optional[str] = Header(None, alias="stripe-signature")
+    webhook_signature: Optional[str] = Header(None, alias="stripe-signature"),
 ):
     """
     Handle payment provider webhooks
-    
+
     Security features:
     - Signature validation
     - IP whitelist (in production)
@@ -396,14 +413,14 @@ async def handle_payment_webhook(
     """
     try:
         # Get webhook body
-        body = await request.body()
-        
-                # This would validate signatures and process events
-        
+        await request.body()
+
+        # This would validate signatures and process events
+
         logger.info(f"Received webhook from {provider}")
-        
+
         return {"status": "received"}
-        
+
     except Exception as e:
         logger.error(f"Error handling webhook: {str(e)}")
         # Don't expose internal errors to webhook callers

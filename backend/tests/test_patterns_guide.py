@@ -177,6 +177,7 @@ def mock_redis():
 @pytest.fixture
 def auth_headers(test_db):
     """Create authenticated headers for different user roles"""
+    pass  # TODO: Implement
     def _create_headers(user_id: int, role: str, restaurant_id: Optional[int] = None):
         token_data = {
             "sub": str(user_id),

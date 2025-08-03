@@ -1,6 +1,7 @@
 """
 Rate limiting middleware using fastapi-limiter.
 """
+
 import logging
 from typing import Optional
 
@@ -8,24 +9,19 @@ from fastapi import Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-<<<<<<< HEAD
-from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
-=======
->>>>>>> origin/main
 from jose import JWTError, jwt
 
 from app.core.config import settings
-from app.core.redis_client import redis_client # Import global instance
+from app.core.redis_client import redis_client  # Import global instance
 
 logger = logging.getLogger(__name__)
 
 # --- User Identification ---
 security = HTTPBearer(auto_error=False)
 
+
 async def get_current_user_id(
-    request: Request,
-    token: Optional[HTTPAuthorizationCredentials] = Depends(security)
+    request: Request, token: Optional[HTTPAuthorizationCredentials] = Depends(security)
 ) -> Optional[str]:
     """
     Extracts user ID from JWT token if present.
@@ -34,25 +30,32 @@ async def get_current_user_id(
     if token is None:
         return None
     try:
-        payload = jwt.decode(token.credentials, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        user_id: Optional[str] = payload.get("sub") # Assuming 'sub' contains the user ID
+        payload = jwt.decode(
+            token.credentials, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        user_id: Optional[str] = payload.get(
+            "sub"
+        )  # Assuming 'sub' contains the user ID
         if user_id is None:
             return None
-        return str(user_id) # Ensure it's a string
+        return str(user_id)  # Ensure it's a string
     except JWTError:
-        return None # Invalid token
+        return None  # Invalid token
+
 
 # --- Limiter Configuration ---
+
 
 # This function determines the key for rate limiting.
 # It prioritizes user ID if available, otherwise falls back to IP address.
 async def identify_client(request: Request) -> str:
     user_id = await get_current_user_id(request)
     client_type = request.headers.get("X-Client-Type", "unknown")
-    
+
     if user_id:
         return f"user:{user_id}:{client_type}"
     return f"ip:{get_remote_address(request)}:{client_type}"
+
 
 # Specialized key functions for different client types
 async def identify_mobile_client(request: Request) -> str:
@@ -61,11 +64,13 @@ async def identify_mobile_client(request: Request) -> str:
         return f"mobile:user:{user_id}"
     return f"mobile:ip:{get_remote_address(request)}"
 
+
 async def identify_portal_client(request: Request) -> str:
     user_id = await get_current_user_id(request)
     if user_id:
         return f"portal:user:{user_id}"
     return f"portal:ip:{get_remote_address(request)}"
+
 
 # Initialize the Limiter with our identifier function
 # The redis_client.get_client() will provide the actual aioredis.Redis instance
@@ -83,6 +88,7 @@ limiter = Limiter(key_func=identify_client, strategy="moving-window")
 # fastapi-limiter's global limiter state can be tricky.
 # We'll ensure it's configured when the app starts.
 
+
 async def init_fastapi_limiter():
     """
     Initializes the fastapi-limiter with the Redis client.
@@ -90,22 +96,28 @@ async def init_fastapi_limiter():
     """
     try:
         # Try to ping Redis to check connectivity
-        if redis_client and hasattr(redis_client, 'ping'):
+        if redis_client and hasattr(redis_client, "ping"):
             await redis_client.ping()
             logger.info("✅ Redis is available for rate limiting")
         else:
             # Check if we're in mock mode
-            if settings.ENVIRONMENT in ["development", "testing", "local"] and hasattr(redis_client, '_mock_storage'):
+            if settings.ENVIRONMENT in ["development", "testing", "local"] and hasattr(
+                redis_client, "_mock_storage"
+            ):
                 logger.info("✅ Rate limiter using mock storage in development mode")
             else:
-                logger.warning("Rate limiter cannot be initialized: Redis is not available and not in mock mode.")
+                logger.warning(
+                    "Rate limiter cannot be initialized: Redis is not available and not in mock mode."
+                )
                 return
     except Exception as e:
         # Redis connection failed
         if settings.ENVIRONMENT in ["development", "testing", "local"]:
             logger.warning(f"Redis connection failed, using mock storage: {e}")
         else:
-            logger.error(f"Rate limiter cannot be initialized in production: Redis connection failed: {e}")
+            logger.error(
+                f"Rate limiter cannot be initialized in production: Redis connection failed: {e}"
+            )
             return
 
     # The `limiter` object we created earlier will be used by route decorators.
@@ -134,6 +146,7 @@ async def init_fastapi_limiter():
     # For now, the global `limiter` instance should work with decorators.
     logger.info("✅ Rate limiter configured to use Redis client (or mock).")
 
+
 # Custom exception handler for RateLimitExceeded to provide a standard API response.
 # This is already handled by slowapi's default handler if we add it to the app.
 # We can customize it if needed.
@@ -159,18 +172,20 @@ DEFAULT_RATE = "60/minute"
 
 # Define specific limits for endpoint categories
 AUTH_RATE = "5/minute"
-PAYMENT_RATE = "15/minute" # As per requirement "10-20", using 15
+PAYMENT_RATE = "15/minute"  # As per requirement "10-20", using 15
 
 # Portal vs Mobile specific limits
 MOBILE_APP_RATE = "100/minute"
 PORTAL_DASHBOARD_RATE = "300/minute"  # Higher for analytics
-PORTAL_EXPORT_RATE = "10/minute"     # Lower for resource-intensive operations
+PORTAL_EXPORT_RATE = "10/minute"  # Lower for resource-intensive operations
 
 # API-specific limits
-ANALYTICS_RATE = "200/minute"        # High for dashboard queries
-WEBSOCKET_RATE = "500/minute"        # Very high for real-time updates
-SYNC_RATE = "200/minute"             # High for synchronization
+ANALYTICS_RATE = "200/minute"  # High for dashboard queries
+WEBSOCKET_RATE = "500/minute"  # Very high for real-time updates
+SYNC_RATE = "200/minute"  # High for synchronization
 
-logger.info(f"Rate Limiter Configured: DEFAULT_RATE={DEFAULT_RATE}, AUTH_RATE={AUTH_RATE}, PAYMENT_RATE={PAYMENT_RATE}")
+logger.info(
+    f"Rate Limiter Configured: DEFAULT_RATE={DEFAULT_RATE}, AUTH_RATE={AUTH_RATE}, PAYMENT_RATE={PAYMENT_RATE}"
+)
 logger.info("Rate limiting strategy: User ID if authenticated, otherwise IP address.")
 logger.info("Rate limits will be applied via decorators on specific routes.")
