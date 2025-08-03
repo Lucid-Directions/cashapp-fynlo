@@ -14,7 +14,7 @@ interface Props {
 
 const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style }) => {
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
+  // Styles are now static - theme values applied inline where needed
   const [isFocused, setIsFocused] = useState(false);
   const [query, setQuery] = useState('');
   const inputRef = useRef<TextInput>(null);
@@ -53,25 +53,25 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style 
   if (!isFocused && !query) {
     return (
       <TouchableOpacity
-        style={[styles.bubble, style]}
+        style={[styles.bubble, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }, style]}
         onPress={handleBubblePress}
         testID="category-search-bubble-inactive"
       >
         <Icon name="search" size={20} color={theme.colors.textSecondary} style={styles.iconStyle} />
-        <Text style={styles.placeholderText}>Search food...</Text>
+        <Text style={[styles.placeholderText, { color: theme.colors.textSecondary }]}>Search food...</Text>
       </TouchableOpacity>
     );
   }
 
   return (
     <View
-      style={[styles.searchContainer, styles.bubbleActive, style]}
+      style={[styles.searchContainer, styles.bubbleActive, { backgroundColor: theme.colors.surface, borderColor: theme.colors.primary }, style]}
       testID="category-search-bubble-active"
     >
       <Icon name="search" size={20} color={theme.colors.primary} style={styles.iconStyle} />
       <TextInput
         ref={inputRef}
-        style={styles.input}
+        style={[styles.input, { color: theme.colors.text }]}
         placeholder="Search food..."
         placeholderTextColor={theme.colors.textSecondary}
         value={query}
@@ -95,31 +95,26 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style 
   );
 };
 
-const createStyles = (theme: any) =>
-  StyleSheet.create({
+const styles = StyleSheet.create({
     bubble: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: theme.colors.surface, // Matches category pill background
-      borderRadius: 24, // Matches category pill border radius
-      paddingVertical: 12, // Matches category tab padding
+      borderRadius: 24,
+      paddingVertical: 12,
       paddingHorizontal: 16,
-      marginRight: 8, // Consistent with category tab spacing
-      height: 44, // Consistent height with category pills
+      marginRight: 8,
+      height: 44,
       borderWidth: 1,
-      borderColor: theme.colors.border,
     },
     bubbleActive: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: theme.colors.surface,
       borderRadius: 24,
-      paddingVertical: 0, // Input handles its own padding
+      paddingVertical: 0,
       paddingHorizontal: 16,
       marginRight: 8,
-      height: 44, // Consistent height
+      height: 44,
       borderWidth: 1,
-      borderColor: theme.colors.primary, // Highlight when active
     },
     searchContainer: {
       flex: 1, // Take available space in the category scroll view
@@ -130,16 +125,14 @@ const createStyles = (theme: any) =>
       marginRight: 8,
     },
     placeholderText: {
-      color: theme.colors.textSecondary,
       fontSize: 16,
-      flex: 1, // Ensure text takes space to be clickable
+      flex: 1,
     },
     input: {
       flex: 1,
       fontSize: 16,
-      color: theme.colors.text,
-      paddingVertical: 10, // Ensure text is vertically centered
-      height: '100%', // Fill the container height
+      paddingVertical: 10,
+      height: '100%',
     },
     clearButton: {
       padding: 4, // Make it easier to tap

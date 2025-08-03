@@ -17,7 +17,7 @@ import {
   ActivityIndicator
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
+import { useTheme } from '../../design-system/ThemeProvider';
 import { EnhancedOrderItem, SplitMethod } from '../../types/cart';
 import { useSplitBill } from '../../hooks/useSplitBill';
 import SplitBillGroupCard from './SplitBillGroupCard';
@@ -41,7 +41,6 @@ export default function SplitBillModal({
   useEnhancedCart = true
 }: SplitBillModalProps) {
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
   
   const [numberOfGroups, setNumberOfGroups] = useState(2);
   const [showGroupSetup, setShowGroupSetup] = useState(true);
@@ -414,7 +413,7 @@ export default function SplitBillModal({
   );
 }
 
-const createStyles = (theme: any) => StyleSheet.create({
+const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -422,7 +421,6 @@ const createStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: theme.colors.background,
     width: '90%',
     maxWidth: 600,
     height: '85%',

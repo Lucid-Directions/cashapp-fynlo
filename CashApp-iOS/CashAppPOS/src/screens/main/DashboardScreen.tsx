@@ -37,8 +37,7 @@ const DashboardScreen: React.FC = () => {
   const navigation = useNavigation();
   const restaurantDisplayName = useRestaurantDisplayName();
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
-  const dynamicStyles = createDynamicStyles(theme);
+  // Styles are now static - theme values applied inline where needed
 
   // Mock KPI data
   const kpiData: KPICardProps[] = [
@@ -109,14 +108,14 @@ const DashboardScreen: React.FC = () => {
   ];
 
   const KPICard: React.FC<KPICardProps> = ({ title, value, change, changeType, icon, color }) => (
-    <View style={styles.kpiCard}>
+    <View style={[styles.kpiCard, { backgroundColor: theme.colors.white }]}>
       <View style={styles.kpiHeader}>
-        <View style={[styles.kpiIcon, dynamicStyles.kpiIcon(color)]}>
+        <View style={[styles.kpiIcon, { backgroundColor: color }]}>
           <Icon name={icon} size={24} color={theme.colors.white} />
         </View>
         <View style={styles.kpiContent}>
-          <Text style={styles.kpiTitle}>{title}</Text>
-          <Text style={styles.kpiValue}>{value}</Text>
+          <Text style={[styles.kpiTitle, { color: theme.colors.lightText }]}>{title}</Text>
+          <Text style={[styles.kpiValue, { color: theme.colors.text }]}>{value}</Text>
         </View>
       </View>
       <View style={styles.kpiChange}>
@@ -129,12 +128,12 @@ const DashboardScreen: React.FC = () => {
               : 'trending-flat'
           }
           size={16}
-          color={dynamicStyles.kpiChangeIcon(changeType).color}
+          color={getKpiChangeColor(theme, changeType)}
         />
-        <Text style={[styles.kpiChangeText, dynamicStyles.kpiChangeText(changeType)]}>
+        <Text style={[styles.kpiChangeText, { color: getKpiChangeColor(theme, changeType) }]}>
           {change}
         </Text>
-        <Text style={styles.kpiChangeLabel}>vs yesterday</Text>
+        <Text style={[styles.kpiChangeLabel, { color: theme.colors.lightText }]}>vs yesterday</Text>
       </View>
     </View>
   );
@@ -152,21 +151,21 @@ const DashboardScreen: React.FC = () => {
   }) => (
     <View style={styles.goalCard}>
       <View style={styles.goalHeader}>
-        <Text style={styles.goalLabel}>{label}</Text>
-        <Text style={styles.goalPercentage}>{percentage.toFixed(1)}%</Text>
+        <Text style={[styles.goalLabel, { color: theme.colors.text }]}>{label}</Text>
+        <Text style={[styles.goalPercentage, { color: theme.colors.primary }]}>{percentage.toFixed(1)}%</Text>
       </View>
       <View style={styles.goalProgress}>
-        <View style={styles.goalProgressTrack}>
-          <View style={[styles.goalProgressFill, dynamicStyles.goalProgressFill(percentage)]} />
+        <View style={[styles.goalProgressTrack, { backgroundColor: theme.colors.lightGray }]}>
+          <View style={[styles.goalProgressFill, { backgroundColor: theme.colors.primary, width: `${Math.min(percentage, 100)}%` }]} />
         </View>
       </View>
       <View style={styles.goalValues}>
-        <Text style={styles.goalCurrent}>
+        <Text style={[styles.goalCurrent, { color: theme.colors.text }]}>
           {label.includes('Revenue') || label.includes('Sales')
             ? `£${current.toLocaleString()}`
             : current}
         </Text>
-        <Text style={styles.goalTarget}>
+        <Text style={[styles.goalTarget, { color: theme.colors.lightText }]}>
           of{' '}
           {label.includes('Revenue') || label.includes('Sales')
             ? `£${target.toLocaleString()}`
@@ -177,8 +176,8 @@ const DashboardScreen: React.FC = () => {
   );
 
   const AlertCard = ({ alert }: { alert: AlertItem }) => (
-    <View style={styles.alertCard}>
-      <View style={[styles.alertIcon, dynamicStyles.alertIcon(alert.type)]}>
+    <View style={[styles.alertCard, { borderBottomColor: theme.colors.lightGray }]}>
+      <View style={[styles.alertIcon, { backgroundColor: getAlertIconColor(theme, alert.type) }]}>
         <Icon
           name={
             alert.type === 'warning'
@@ -193,24 +192,24 @@ const DashboardScreen: React.FC = () => {
       </View>
       <View style={styles.alertContent}>
         <View style={styles.alertHeader}>
-          <Text style={styles.alertTitle}>{alert.title}</Text>
-          <Text style={styles.alertTime}>{alert.time}</Text>
+          <Text style={[styles.alertTitle, { color: theme.colors.text }]}>{alert.title}</Text>
+          <Text style={[styles.alertTime, { color: theme.colors.lightText }]}>{alert.time}</Text>
         </View>
-        <Text style={styles.alertMessage}>{alert.message}</Text>
+        <Text style={[styles.alertMessage, { color: theme.colors.lightText }]}>{alert.message}</Text>
       </View>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Icon name="arrow-back" size={24} color={theme.colors.white} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{restaurantDisplayName} Dashboard</Text>
+        <Text style={[styles.headerTitle, { color: theme.colors.white }]}>{restaurantDisplayName} Dashboard</Text>
         <TouchableOpacity style={styles.refreshButton}>
           <Icon name="refresh" size={24} color={theme.colors.white} />
         </TouchableOpacity>
@@ -219,7 +218,7 @@ const DashboardScreen: React.FC = () => {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* KPI Cards */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Key Performance Indicators</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Key Performance Indicators</Text>
           <View style={styles.kpiGrid}>
             {kpiData.map((kpi, index) => (
               <KPICard key={index} {...kpi} />
@@ -229,8 +228,8 @@ const DashboardScreen: React.FC = () => {
 
         {/* Goals Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Goals & Targets</Text>
-          <View style={styles.goalsContainer}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Goals & Targets</Text>
+          <View style={[styles.goalsContainer, { backgroundColor: theme.colors.white }]}>
             {goalsData.map((goal, index) => (
               <GoalCard key={index} {...goal} />
             ))}
@@ -239,43 +238,43 @@ const DashboardScreen: React.FC = () => {
 
         {/* Quick Actions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Quick Actions</Text>
           <View style={styles.quickActions}>
             <TouchableOpacity
-              style={styles.actionButton}
+              style={[styles.actionButton, { backgroundColor: theme.colors.white }]}
               onPress={() => navigation.navigate('Reports' as never)}
             >
               <Icon name="bar-chart" size={24} color={theme.colors.secondary} />
-              <Text style={styles.actionText}>View Reports</Text>
+              <Text style={[styles.actionText, { color: theme.colors.text }]}>View Reports</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.actionButton}
+              style={[styles.actionButton, { backgroundColor: theme.colors.white }]}
               onPress={() => navigation.navigate('Inventory' as never)}
             >
               <Icon name="inventory" size={24} color={theme.colors.warning} />
-              <Text style={styles.actionText}>Check Inventory</Text>
+              <Text style={[styles.actionText, { color: theme.colors.text }]}>Check Inventory</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.actionButton}
+              style={[styles.actionButton, { backgroundColor: theme.colors.white }]}
               onPress={() => navigation.navigate('Employees' as never)}
             >
               <Icon name="people" size={24} color={theme.colors.success} />
-              <Text style={styles.actionText}>Manage Staff</Text>
+              <Text style={[styles.actionText, { color: theme.colors.text }]}>Manage Staff</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.actionButton}
+              style={[styles.actionButton, { backgroundColor: theme.colors.white }]}
               onPress={() => navigation.navigate('Settings' as never)}
             >
               <Icon name="settings" size={24} color={theme.colors.darkGray} />
-              <Text style={styles.actionText}>Settings</Text>
+              <Text style={[styles.actionText, { color: theme.colors.text }]}>Settings</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Alerts & Notifications */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Alerts</Text>
-          <View style={styles.alertsContainer}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Recent Alerts</Text>
+          <View style={[styles.alertsContainer, { backgroundColor: theme.colors.white }]}>
             {alertsData.map((alert) => (
               <AlertCard key={alert.id} alert={alert} />
             ))}
@@ -284,11 +283,11 @@ const DashboardScreen: React.FC = () => {
 
         {/* Backend Status */}
         <View style={styles.section}>
-          <View style={styles.backendNotice}>
+          <View style={[styles.backendNotice, { backgroundColor: theme.colors.white }]}>
             <Icon name="info" size={24} color={theme.colors.secondary} />
             <View style={styles.backendNoticeContent}>
-              <Text style={styles.backendNoticeTitle}>Development Mode</Text>
-              <Text style={styles.backendNoticeText}>
+              <Text style={[styles.backendNoticeTitle, { color: theme.colors.text }]}>Development Mode</Text>
+              <Text style={[styles.backendNoticeText, { color: theme.colors.lightText }]}>
                 This dashboard shows mock data for testing. Real-time data will be available once
                 the backend is connected.
               </Text>
@@ -300,48 +299,28 @@ const DashboardScreen: React.FC = () => {
   );
 };
 
-// Dynamic styles creator for conditional styling
-const createDynamicStyles = (theme: unknown) => ({
-  kpiIcon: (color: string) => ({
-    backgroundColor: color,
-  }),
-  kpiChangeText: (changeType: 'positive' | 'negative' | 'neutral') => ({
-    color:
-      changeType === 'positive'
-        ? theme.colors.success
-        : changeType === 'negative'
-        ? theme.colors.danger
-        : theme.colors.lightText,
-  }),
-  kpiChangeIcon: (changeType: 'positive' | 'negative' | 'neutral') => ({
-    color:
-      changeType === 'positive'
-        ? theme.colors.success
-        : changeType === 'negative'
-        ? theme.colors.danger
-        : theme.colors.lightText,
-  }),
-  goalProgressFill: (percentage: number) => ({
-    width: `${Math.min(percentage, 100)}%`,
-  }),
-  alertIcon: (type: 'warning' | 'info' | 'success') => ({
-    backgroundColor:
-      type === 'warning'
-        ? theme.colors.warning
-        : type === 'success'
-        ? theme.colors.success
-        : theme.colors.secondary,
-  }),
-});
+// Helper functions for dynamic styles
+const getKpiChangeColor = (theme: any, changeType: 'positive' | 'negative' | 'neutral') => {
+  return changeType === 'positive'
+    ? theme.colors.success
+    : changeType === 'negative'
+    ? theme.colors.danger
+    : theme.colors.lightText;
+};
 
-const createStyles = (theme: unknown) =>
-  StyleSheet.create({
+const getAlertIconColor = (theme: any, type: 'warning' | 'info' | 'success') => {
+  return type === 'warning'
+    ? theme.colors.warning
+    : type === 'success'
+    ? theme.colors.success
+    : theme.colors.secondary;
+};
+
+const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.colors.background,
     },
     header: {
-      backgroundColor: theme.colors.primary,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -355,7 +334,6 @@ const createStyles = (theme: unknown) =>
     headerTitle: {
       fontSize: 20,
       fontWeight: 'bold',
-      color: theme.colors.white,
     },
     refreshButton: {
       padding: 8,
@@ -370,7 +348,6 @@ const createStyles = (theme: unknown) =>
     sectionTitle: {
       fontSize: 20,
       fontWeight: 'bold',
-      color: theme.colors.text,
       marginBottom: 16,
     },
     kpiGrid: {
@@ -379,7 +356,6 @@ const createStyles = (theme: unknown) =>
       justifyContent: 'space-between',
     },
     kpiCard: {
-      backgroundColor: theme.colors.white,
       borderRadius: 12,
       padding: 16,
       width: '48%',
@@ -408,13 +384,11 @@ const createStyles = (theme: unknown) =>
     },
     kpiTitle: {
       fontSize: 12,
-      color: theme.colors.lightText,
       marginBottom: 2,
     },
     kpiValue: {
       fontSize: 18,
       fontWeight: 'bold',
-      color: theme.colors.text,
     },
     kpiChange: {
       flexDirection: 'row',
@@ -427,11 +401,9 @@ const createStyles = (theme: unknown) =>
     },
     kpiChangeLabel: {
       fontSize: 12,
-      color: theme.colors.lightText,
       marginLeft: 4,
     },
     goalsContainer: {
-      backgroundColor: theme.colors.white,
       borderRadius: 12,
       padding: 16,
       elevation: 2,
@@ -452,24 +424,20 @@ const createStyles = (theme: unknown) =>
     goalLabel: {
       fontSize: 14,
       fontWeight: '500',
-      color: theme.colors.text,
     },
     goalPercentage: {
       fontSize: 16,
       fontWeight: 'bold',
-      color: theme.colors.primary,
     },
     goalProgress: {
       marginBottom: 8,
     },
     goalProgressTrack: {
       height: 8,
-      backgroundColor: theme.colors.lightGray,
       borderRadius: 4,
     },
     goalProgressFill: {
       height: 8,
-      backgroundColor: theme.colors.primary,
       borderRadius: 4,
     },
     goalValues: {
@@ -479,11 +447,9 @@ const createStyles = (theme: unknown) =>
     goalCurrent: {
       fontSize: 16,
       fontWeight: 'bold',
-      color: theme.colors.text,
     },
     goalTarget: {
       fontSize: 14,
-      color: theme.colors.lightText,
     },
     quickActions: {
       flexDirection: 'row',
@@ -491,7 +457,6 @@ const createStyles = (theme: unknown) =>
       justifyContent: 'space-between',
     },
     actionButton: {
-      backgroundColor: theme.colors.white,
       borderRadius: 12,
       padding: 16,
       width: '48%',
@@ -506,12 +471,10 @@ const createStyles = (theme: unknown) =>
     actionText: {
       fontSize: 14,
       fontWeight: '500',
-      color: theme.colors.text,
       marginTop: 8,
       textAlign: 'center',
     },
     alertsContainer: {
-      backgroundColor: theme.colors.white,
       borderRadius: 12,
       padding: 16,
       elevation: 2,
@@ -525,7 +488,6 @@ const createStyles = (theme: unknown) =>
       alignItems: 'flex-start',
       paddingVertical: 12,
       borderBottomWidth: 1,
-      borderBottomColor: theme.colors.lightGray,
     },
     alertIcon: {
       width: 32,
@@ -547,19 +509,15 @@ const createStyles = (theme: unknown) =>
     alertTitle: {
       fontSize: 14,
       fontWeight: '600',
-      color: theme.colors.text,
     },
     alertTime: {
       fontSize: 12,
-      color: theme.colors.lightText,
     },
     alertMessage: {
       fontSize: 13,
-      color: theme.colors.lightText,
       lineHeight: 18,
     },
     backendNotice: {
-      backgroundColor: theme.colors.white,
       borderRadius: 12,
       padding: 16,
       flexDirection: 'row',
@@ -577,12 +535,10 @@ const createStyles = (theme: unknown) =>
     backendNoticeTitle: {
       fontSize: 16,
       fontWeight: '600',
-      color: theme.colors.text,
       marginBottom: 4,
     },
     backendNoticeText: {
       fontSize: 14,
-      color: theme.colors.lightText,
       lineHeight: 20,
     },
   });

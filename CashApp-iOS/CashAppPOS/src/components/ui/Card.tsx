@@ -34,7 +34,6 @@ const Card: React.FC<CardProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
   // Get variant styles
   const getVariantStyles = (): ViewStyle => {
@@ -117,9 +116,20 @@ export interface CardHeaderProps {
 
 export const CardHeader: React.FC<CardHeaderProps> = ({ children, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
-  return <View style={[styles.header, style]}>{children}</View>;
+  return (
+    <View style={[
+      styles.header,
+      {
+        paddingBottom: theme.spacing[3],
+        borderBottomColor: theme.colors.neutral[100],
+        marginBottom: theme.spacing[3],
+      },
+      style
+    ]}>
+      {children}
+    </View>
+  );
 };
 
 // Card Body Component
@@ -130,7 +140,6 @@ export interface CardBodyProps {
 
 export const CardBody: React.FC<CardBodyProps> = ({ children, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
   return <View style={[styles.body, style]}>{children}</View>;
 };
@@ -143,34 +152,38 @@ export interface CardFooterProps {
 
 export const CardFooter: React.FC<CardFooterProps> = ({ children, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
-  return <View style={[styles.footer, style]}>{children}</View>;
+  return (
+    <View style={[
+      styles.footer,
+      {
+        paddingTop: theme.spacing[3],
+        borderTopColor: theme.colors.neutral[100],
+        marginTop: theme.spacing[3],
+      },
+      style
+    ]}>
+      {children}
+    </View>
+  );
 };
 
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
-    base: {
-      overflow: 'hidden',
-    },
-    disabled: {
-      opacity: 0.6,
-    },
-    header: {
-      paddingBottom: theme.spacing[3],
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.neutral[100],
-      marginBottom: theme.spacing[3],
-    },
-    body: {
-      // No default styles - flexible content area
-    },
-    footer: {
-      paddingTop: theme.spacing[3],
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.neutral[100],
-      marginTop: theme.spacing[3],
-    },
-  });
+const styles = StyleSheet.create({
+  base: {
+    overflow: 'hidden',
+  },
+  disabled: {
+    opacity: 0.6,
+  },
+  header: {
+    borderBottomWidth: 1,
+  },
+  body: {
+    // No default styles - flexible content area
+  },
+  footer: {
+    borderTopWidth: 1,
+  },
+});
 
 export default Card;

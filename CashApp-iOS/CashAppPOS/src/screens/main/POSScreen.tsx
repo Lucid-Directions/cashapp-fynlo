@@ -131,6 +131,8 @@ const POSScreen: React.FC = () => {
   const navigation = useNavigation<POSScreenNavigationProp>();
   const restaurantDisplayName = useRestaurantDisplayName();
   const { theme } = useTheme();
+  // TODO: Migrate 71 dynamic styles to inline pattern
+  // This file has too many theme-dependent styles for automatic migration
   const styles = useThemedStyles(createStyles);
 
   const [customerName, setCustomerName] = useState('');

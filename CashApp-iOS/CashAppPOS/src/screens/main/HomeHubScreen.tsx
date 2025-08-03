@@ -39,7 +39,7 @@ interface HubIcon {
 const HomeHubScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
+  // Styles are now static - theme values applied inline where needed
   const { user, signOut } = useAuth();
   const { cartItemCount } = useAppStore();
   const { connected: wsConnected } = useWebSocket({ autoConnect: true });
@@ -237,7 +237,7 @@ const HomeHubScreen: React.FC = () => {
     return (
       <Animated.View style={[{ transform: [{ scale: scaleValue }] }]}>
         <TouchableOpacity
-          style={[styles.iconCard, { width: cardWidth }]}
+          style={[styles.iconCard, { width: cardWidth, backgroundColor: theme.colors.white, borderColor: theme.colors.border }]}
           onPress={() => handleIconPress(icon)}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
@@ -248,13 +248,13 @@ const HomeHubScreen: React.FC = () => {
           <View style={[styles.iconContainer, { backgroundColor: `${icon.color}15` }]}>
             <Icon name={icon.icon} size={iconSize} color={icon.color} />
             {icon.badge && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{icon.badge}</Text>
+              <View style={[styles.badge, { backgroundColor: theme.colors.danger[500] }]}>
+                <Text style={[styles.badgeText, { color: theme.colors.white }]}>{icon.badge}</Text>
               </View>
             )}
           </View>
-          <Text style={styles.iconTitle}>{icon.title}</Text>
-          <Text style={styles.iconSubtitle}>{icon.subtitle}</Text>
+          <Text style={[styles.iconTitle, { color: theme.colors.text }]}>{icon.title}</Text>
+          <Text style={[styles.iconSubtitle, { color: theme.colors.darkGray }]}>{icon.subtitle}</Text>
         </TouchableOpacity>
       </Animated.View>
     );
@@ -275,7 +275,7 @@ const HomeHubScreen: React.FC = () => {
 
     return (
       <View style={styles.categorySection}>
-        <Text style={styles.categoryTitle}>
+        <Text style={[styles.categoryTitle, { color: theme.colors.darkGray }]}>
           {categoryTitles[category as keyof typeof categoryTitles]}
         </Text>
         <View style={styles.iconGrid}>
@@ -288,14 +288,14 @@ const HomeHubScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar backgroundColor={theme.colors.primary} barStyle="light-content" />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Welcome</Text>
-          <Text style={styles.headerSubtitle}>
+          <Text style={[styles.headerTitle, { color: theme.colors.white }]}>Welcome</Text>
+          <Text style={[styles.headerSubtitle, { color: 'rgba(255, 255, 255, 0.8)' }]}>
             {user?.firstName || 'User'} • {user?.role?.replace('_', ' ') || 'Staff'}
           </Text>
         </View>
@@ -315,18 +315,18 @@ const HomeHubScreen: React.FC = () => {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Quick Stats */}
-        <View style={styles.quickStats}>
+        <View style={[styles.quickStats, { backgroundColor: theme.colors.white }]}>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{cartItemCount()}</Text>
-            <Text style={styles.statLabel}>Cart Items</Text>
+            <Text style={[styles.statValue, { color: theme.colors.primary }]}>{cartItemCount()}</Text>
+            <Text style={[styles.statLabel, { color: theme.colors.darkGray }]}>Cart Items</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{visibleIcons.length}</Text>
-            <Text style={styles.statLabel}>Available Features</Text>
+            <Text style={[styles.statValue, { color: theme.colors.primary }]}>{visibleIcons.length}</Text>
+            <Text style={[styles.statLabel, { color: theme.colors.darkGray }]}>Available Features</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{user?.role === 'manager' ? 'Manager' : 'Staff'}</Text>
-            <Text style={styles.statLabel}>Access Level</Text>
+            <Text style={[styles.statValue, { color: theme.colors.primary }]}>{user?.role === 'manager' ? 'Manager' : 'Staff'}</Text>
+            <Text style={[styles.statLabel, { color: theme.colors.darkGray }]}>Access Level</Text>
           </View>
         </View>
 
@@ -350,22 +350,19 @@ const HomeHubScreen: React.FC = () => {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.versionText}>Fynlo POS v1.0.0</Text>
-          <Text style={styles.copyrightText}>© 2024 Fynlo Ltd.</Text>
+          <Text style={[styles.versionText, { color: theme.colors.darkGray }]}>Fynlo POS v1.0.0</Text>
+          <Text style={[styles.copyrightText, { color: theme.colors.lightText }]}>© 2024 Fynlo Ltd.</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-const createStyles = (theme: unknown) =>
-  StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.colors.background,
     },
     header: {
-      backgroundColor: theme.colors.primary,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -378,7 +375,6 @@ const createStyles = (theme: unknown) =>
     headerTitle: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: theme.colors.white,
     },
     headerSubtitle: {
       fontSize: 14,
@@ -409,7 +405,6 @@ const createStyles = (theme: unknown) =>
     quickStats: {
       flexDirection: 'row',
       justifyContent: 'space-around',
-      backgroundColor: theme.colors.white,
       marginHorizontal: 16,
       marginTop: 16,
       padding: 16,
@@ -426,11 +421,9 @@ const createStyles = (theme: unknown) =>
     statValue: {
       fontSize: 20,
       fontWeight: 'bold',
-      color: theme.colors.primary,
     },
     statLabel: {
       fontSize: 12,
-      color: theme.colors.darkGray,
       marginTop: 4,
     },
     categorySection: {
@@ -439,7 +432,6 @@ const createStyles = (theme: unknown) =>
     categoryTitle: {
       fontSize: 14,
       fontWeight: '600',
-      color: theme.colors.darkGray,
       textTransform: 'uppercase',
       letterSpacing: 0.5,
       marginBottom: 12,
@@ -452,7 +444,6 @@ const createStyles = (theme: unknown) =>
       justifyContent: 'flex-start',
     },
     iconCard: {
-      backgroundColor: theme.colors.white,
       borderRadius: 12,
       padding: 16,
       marginHorizontal: 8,
@@ -466,7 +457,6 @@ const createStyles = (theme: unknown) =>
       shadowRadius: 4,
       elevation: 2,
       borderWidth: 1,
-      borderColor: theme.colors.border,
     },
     iconContainer: {
       width: 80,
@@ -481,7 +471,6 @@ const createStyles = (theme: unknown) =>
       position: 'absolute',
       top: -4,
       right: -4,
-      backgroundColor: theme.colors.danger[500],
       borderRadius: 10,
       paddingHorizontal: 6,
       paddingVertical: 2,
@@ -493,18 +482,15 @@ const createStyles = (theme: unknown) =>
     badgeText: {
       fontSize: 12,
       fontWeight: '600',
-      color: theme.colors.white,
     },
     iconTitle: {
       fontSize: 16,
       fontWeight: '600',
-      color: theme.colors.text,
       textAlign: 'center',
       marginBottom: 4,
     },
     iconSubtitle: {
       fontSize: 12,
-      color: theme.colors.darkGray,
       textAlign: 'center',
     },
     footer: {
@@ -514,11 +500,9 @@ const createStyles = (theme: unknown) =>
     },
     versionText: {
       fontSize: 14,
-      color: theme.colors.darkGray,
     },
     copyrightText: {
       fontSize: 12,
-      color: theme.colors.lightText,
       marginTop: 4,
     },
   });

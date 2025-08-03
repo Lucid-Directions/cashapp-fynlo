@@ -60,7 +60,6 @@ const Modal: React.FC<ModalProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -143,6 +142,11 @@ const Modal: React.FC<ModalProps> = ({
 
   const modalContentStyle: ViewStyle = [
     styles.modalContent,
+    {
+      backgroundColor: theme.colors.white,
+      borderRadius: theme.borderRadius['2xl'],
+      ...theme.shadows.xl,
+    },
     sizeStyles,
     position === 'bottom' && styles.bottomModal,
     position === 'top' && styles.topModal,
@@ -158,8 +162,11 @@ const Modal: React.FC<ModalProps> = ({
 
   const ContentComponent = scrollable ? ScrollView : View;
   const contentProps = scrollable
-    ? { showsVerticalScrollIndicator: false, contentContainerStyle: styles.scrollContent }
-    : { style: styles.content };
+    ? { 
+        showsVerticalScrollIndicator: false, 
+        contentContainerStyle: [styles.scrollContent, { padding: theme.spacing[6] }]
+      }
+    : { style: [styles.content, { padding: theme.spacing[6] }] };
 
   return (
     <RNModal
@@ -180,15 +187,30 @@ const Modal: React.FC<ModalProps> = ({
         <Animated.View style={[modalContentStyle, getPositionTransform()]}>
           {/* Header */}
           {(title || closable) && (
-            <View style={styles.header}>
+            <View style={[
+              styles.header,
+              {
+                paddingHorizontal: theme.spacing[6],
+                paddingVertical: theme.spacing[4],
+                borderBottomColor: theme.colors.neutral[100],
+              }
+            ]}>
               {title && (
-                <Text style={styles.title} numberOfLines={1}>
+                <Text style={[
+                  styles.title,
+                  {
+                    fontSize: theme.typography.fontSize.lg,
+                    fontWeight: theme.typography.fontWeight.semibold,
+                    color: theme.colors.text,
+                    marginRight: theme.spacing[4],
+                  }
+                ]} numberOfLines={1}>
                   {title}
                 </Text>
               )}
               {closable && (
                 <TouchableOpacity
-                  style={styles.closeButton}
+                  style={[styles.closeButton, { padding: theme.spacing[1] }]}
                   onPress={onClose}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
@@ -202,7 +224,16 @@ const Modal: React.FC<ModalProps> = ({
           <ContentComponent {...contentProps}>{children}</ContentComponent>
 
           {/* Footer */}
-          {footer && <View style={styles.footer}>{footer}</View>}
+          {footer && (
+            <View style={[
+              styles.footer,
+              {
+                paddingHorizontal: theme.spacing[6],
+                paddingVertical: theme.spacing[4],
+                borderTopColor: theme.colors.neutral[100],
+              }
+            ]}>{footer}</View>
+          )}
         </Animated.View>
       </KeyboardAvoidingView>
     </RNModal>
@@ -226,7 +257,6 @@ export const ModalAction: React.FC<ModalActionProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
   const getVariantStyle = (): ViewStyle => {
     switch (variant) {
@@ -249,19 +279,36 @@ export const ModalAction: React.FC<ModalActionProps> = ({
     switch (variant) {
       case 'primary':
       case 'danger':
-        return styles.actionTextLight;
+        return { color: theme.colors.white };
       default:
-        return styles.actionTextDark;
+        return { color: theme.colors.text };
     }
   };
 
   return (
     <TouchableOpacity
-      style={[styles.actionButton, getVariantStyle(), disabled && styles.disabledAction, style]}
+      style={[
+        styles.actionButton,
+        {
+          paddingHorizontal: theme.spacing[4],
+          paddingVertical: theme.spacing[3],
+          borderRadius: theme.borderRadius.lg,
+        },
+        getVariantStyle(),
+        disabled && styles.disabledAction,
+        style
+      ]}
       onPress={onPress}
       disabled={disabled}
     >
-      <Text style={[styles.actionText, getTextStyle()]}>{children}</Text>
+      <Text style={[
+        styles.actionText,
+        {
+          fontSize: theme.typography.fontSize.base,
+          fontWeight: theme.typography.fontWeight.medium,
+        },
+        getTextStyle()
+      ]}>{children}</Text>
     </TouchableOpacity>
   );
 };
@@ -274,114 +321,102 @@ export interface ModalActionsProps {
 
 export const ModalActions: React.FC<ModalActionsProps> = ({ children, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
-  return <View style={[styles.actions, style]}>{children}</View>;
+  return (
+    <View style={[
+      styles.actions,
+      { gap: theme.spacing[3] },
+      style
+    ]}>
+      {children}
+    </View>
+  );
 };
 
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    backdrop: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    modalContent: {
-      backgroundColor: theme.colors.white,
-      borderRadius: theme.borderRadius['2xl'],
-      ...theme.shadows.xl,
-      overflow: 'hidden',
-    },
-    bottomModal: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      width: screenWidth,
-      borderBottomLeftRadius: 0,
-      borderBottomRightRadius: 0,
-    },
-    topModal: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      width: screenWidth,
-      borderTopLeftRadius: 0,
-      borderTopRightRadius: 0,
-    },
-    fullModal: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      borderRadius: 0,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: theme.spacing[6],
-      paddingVertical: theme.spacing[4],
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.neutral[100],
-    },
-    title: {
-      fontSize: theme.typography.fontSize.lg,
-      fontWeight: theme.typography.fontWeight.semibold,
-      color: theme.colors.text,
-      flex: 1,
-      marginRight: theme.spacing[4],
-    },
-    closeButton: {
-      padding: theme.spacing[1],
-    },
-    content: {
-      padding: theme.spacing[6],
-    },
-    scrollContent: {
-      padding: theme.spacing[6],
-    },
-    footer: {
-      paddingHorizontal: theme.spacing[6],
-      paddingVertical: theme.spacing[4],
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.neutral[100],
-    },
-    actions: {
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-      gap: theme.spacing[3],
-    },
-    actionButton: {
-      paddingHorizontal: theme.spacing[4],
-      paddingVertical: theme.spacing[3],
-      borderRadius: theme.borderRadius.lg,
-      minWidth: 80,
-      alignItems: 'center',
-    },
-    actionText: {
-      fontSize: theme.typography.fontSize.base,
-      fontWeight: theme.typography.fontWeight.medium,
-    },
-    actionTextLight: {
-      color: theme.colors.white,
-    },
-    actionTextDark: {
-      color: theme.colors.text,
-    },
-    disabledAction: {
-      opacity: 0.5,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    overflow: 'hidden',
+  },
+  bottomModal: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    width: screenWidth,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  topModal: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    width: screenWidth,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+  },
+  fullModal: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 0,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+  },
+  title: {
+    flex: 1,
+  },
+  closeButton: {
+    // Theme styles will be applied inline
+  },
+  content: {
+    // Theme styles will be applied inline
+  },
+  scrollContent: {
+    // Theme styles will be applied inline
+  },
+  footer: {
+    borderTopWidth: 1,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  actionButton: {
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  actionText: {
+    // Theme styles will be applied inline
+  },
+  actionTextLight: {
+    // Theme styles will be applied inline
+  },
+  actionTextDark: {
+    // Theme styles will be applied inline
+  },
+  disabledAction: {
+    opacity: 0.5,
+  },
+});
 
 export default Modal;

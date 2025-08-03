@@ -18,13 +18,13 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import ErrorBoundary from '../../components/ErrorBoundary';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
+import { useTheme } from '../../design-system/ThemeProvider';
 import useAppStore from '../../store/useAppStore';
 
 const ProfileScreenContent: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
+  // Theme-dependent styles applied inline
   const dynamicStyles = useThemedStyles(createDynamicStyles);
   const { user, session } = useAppStore();
   const { updateUser } = useAuth();

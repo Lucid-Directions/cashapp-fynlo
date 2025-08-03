@@ -50,7 +50,6 @@ const Input: React.FC<InputProps> = ({
 }) => {
   const { theme } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
-  const styles = createStyles(theme);
 
   // Determine variant based on error
   const currentVariant = error ? 'error' : variant;
@@ -127,10 +126,11 @@ const Input: React.FC<InputProps> = ({
     styles.container,
     sizeStyles.container,
     {
+      backgroundColor: theme.colors.white,
       borderColor: variantStyles.border,
       borderWidth: isFocused ? 2 : 1,
     },
-    disabled && styles.disabled,
+    disabled && { ...styles.disabled, backgroundColor: theme.colors.neutral[50] },
     style,
   ].filter(Boolean) as ViewStyle;
 
@@ -138,19 +138,27 @@ const Input: React.FC<InputProps> = ({
     styles.input,
     sizeStyles.input,
     {
+      fontFamily: theme.typography.fontFamily.sans,
       color: disabled ? theme.colors.neutral[400] : theme.colors.text,
     },
     inputStyle,
   ].filter(Boolean) as TextStyle;
 
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, { marginBottom: theme.spacing[4] }]}>
       {/* Label */}
       {label && (
-        <View style={styles.labelContainer}>
-          <Text style={[styles.label, sizeStyles.label]}>
+        <View style={[styles.labelContainer, { marginBottom: theme.spacing[2] }]}>
+          <Text style={[
+            styles.label,
+            sizeStyles.label,
+            {
+              fontWeight: theme.typography.fontWeight.medium,
+              color: theme.colors.text,
+            }
+          ]}>
             {label}
-            {required && <Text style={styles.required}> *</Text>}
+            {required && <Text style={[styles.required, { color: theme.colors.danger[500] }]}> *</Text>}
           </Text>
         </View>
       )}
@@ -163,7 +171,7 @@ const Input: React.FC<InputProps> = ({
             name={leftIcon}
             size={sizeStyles.icon}
             color={variantStyles.icon}
-            style={styles.leftIcon}
+            style={[styles.leftIcon, { marginRight: theme.spacing[3] }]}
           />
         )}
 
@@ -183,7 +191,13 @@ const Input: React.FC<InputProps> = ({
           <TouchableOpacity
             onPress={onRightIconPress}
             disabled={!onRightIconPress}
-            style={styles.rightIconContainer}
+            style={[
+              styles.rightIconContainer,
+              {
+                marginLeft: theme.spacing[3],
+                padding: theme.spacing[1],
+              }
+            ]}
           >
             <Icon name={rightIcon} size={sizeStyles.icon} color={variantStyles.icon} />
           </TouchableOpacity>
@@ -192,82 +206,86 @@ const Input: React.FC<InputProps> = ({
 
       {/* Helper/Error Text */}
       {(error || helper) && (
-        <View style={styles.helperContainer}>
+        <View style={[styles.helperContainer, { marginTop: theme.spacing[1] }]}>
           {error && (
             <View style={styles.errorContainer}>
               <Icon
                 name="error"
                 size={14}
                 color={theme.colors.danger[500]}
-                style={styles.errorIcon}
+                style={[styles.errorIcon, { marginRight: theme.spacing[1] }]}
               />
-              <Text style={styles.errorText}>{error}</Text>
+              <Text style={[
+                styles.errorText,
+                {
+                  fontSize: theme.typography.fontSize.sm,
+                  color: theme.colors.danger[500],
+                }
+              ]}>{error}</Text>
             </View>
           )}
-          {helper && !error && <Text style={styles.helperText}>{helper}</Text>}
+          {helper && !error && (
+            <Text style={[
+              styles.helperText,
+              {
+                fontSize: theme.typography.fontSize.sm,
+                color: theme.colors.neutral[500],
+              }
+            ]}>{helper}</Text>
+          )}
         </View>
       )}
     </View>
   );
 };
 
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
-    wrapper: {
-      marginBottom: theme.spacing[4],
-    },
-    labelContainer: {
-      marginBottom: theme.spacing[2],
-    },
-    label: {
-      fontWeight: theme.typography.fontWeight.medium,
-      color: theme.colors.text,
-    },
-    required: {
-      color: theme.colors.danger[500],
-    },
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.colors.white,
-      borderWidth: 1,
-    },
-    disabled: {
-      backgroundColor: theme.colors.neutral[50],
-      opacity: 0.6,
-    },
-    input: {
-      flex: 1,
-      fontFamily: theme.typography.fontFamily.sans,
-      color: theme.colors.text,
-      padding: 0, // Remove default padding
-    },
-    leftIcon: {
-      marginRight: theme.spacing[3],
-    },
-    rightIconContainer: {
-      marginLeft: theme.spacing[3],
-      padding: theme.spacing[1],
-    },
-    helperContainer: {
-      marginTop: theme.spacing[1],
-    },
-    errorContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    errorIcon: {
-      marginRight: theme.spacing[1],
-    },
-    errorText: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.danger[500],
-      flex: 1,
-    },
-    helperText: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.neutral[500],
-    },
-  });
+const styles = StyleSheet.create({
+  wrapper: {
+    // Theme styles will be applied inline
+  },
+  labelContainer: {
+    // Theme styles will be applied inline
+  },
+  label: {
+    // Theme styles will be applied inline
+  },
+  required: {
+    // Theme styles will be applied inline
+  },
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  disabled: {
+    opacity: 0.6,
+  },
+  input: {
+    flex: 1,
+    padding: 0, // Remove default padding
+  },
+  leftIcon: {
+    // Theme styles will be applied inline
+  },
+  rightIconContainer: {
+    // Theme styles will be applied inline
+  },
+  helperContainer: {
+    // Theme styles will be applied inline
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  errorIcon: {
+    // Theme styles will be applied inline
+  },
+  errorText: {
+    flex: 1,
+  },
+  helperText: {
+    // Theme styles will be applied inline
+  },
+});
 
 export default Input;
