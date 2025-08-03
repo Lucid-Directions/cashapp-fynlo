@@ -24,6 +24,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import CartIcon from '../../components/cart/CartIcon';
 import ItemModificationModal from '../../components/cart/ItemModificationModal';
+import SplitBillModal from '../../components/cart/SplitBillModal';
 import { QuantityPill } from '../../components/inputs';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
@@ -146,10 +147,20 @@ const POSScreen: React.FC = () => {
   const [serviceChargeDebugInfo, setServiceChargeDebugInfo] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
   const [showModificationModal, setShowModificationModal] = useState(false);
+  const [showSplitBillModal, setShowSplitBillModal] = useState(false);
   const [selectedItemForModification, setSelectedItemForModification] = useState<OrderItem | null>(null);
 
   // Dynamic styles that depend on state
   const dynamicStyles = createDynamicStyles(theme, serviceChargeConfig);
+
+  // For split bill integration - convert cart items to enhanced format
+  const cartItems = cart.map(item => ({
+    ...item,
+    id: item.id.toString(), // Ensure string ID for enhanced cart
+  }));
+  
+  // Using regular cart for now
+  const useEnhancedCart = false;
 
   // Dynamic menu state
   const [dynamicMenuItems, setDynamicMenuItems] = useState<MenuItem[]>([]);
@@ -1332,9 +1343,22 @@ const POSScreen: React.FC = () => {
                 </Text>
               </View>
 
-              <TouchableOpacity style={styles.confirmButton} onPress={processPayment}>
-                <Text style={styles.confirmButtonText}>Confirm Payment</Text>
-              </TouchableOpacity>
+              <View style={styles.modalActions}>
+                <TouchableOpacity 
+                  style={styles.splitBillButton} 
+                  onPress={() => {
+                    setShowCartModal(false);
+                    setShowSplitBillModal(true);
+                  }}
+                >
+                  <Icon name="people" size={20} color={theme.colors.primary} />
+                  <Text style={styles.splitBillButtonText}>Split Bill</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.confirmButton} onPress={processPayment}>
+                  <Text style={styles.confirmButtonText}>Confirm Payment</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
@@ -1371,6 +1395,26 @@ const POSScreen: React.FC = () => {
           // The cart will be automatically updated by the modal
         }}
         useEnhancedCart={false} // Using regular cart for now
+      />
+
+      {/* Split Bill Modal */}
+      <SplitBillModal
+        visible={showSplitBillModal}
+        cartItems={cartItems}
+        cartTotal={calculateCartTotal()}
+        onClose={() => setShowSplitBillModal(false)}
+        onConfirm={(splitGroups) => {
+          // Handle split bill confirmation
+          logger.info('Split bill confirmed with groups:', splitGroups);
+          // TODO: Integrate with payment processing for split bills
+          Alert.alert(
+            'Split Bill',
+            `Bill has been split into ${splitGroups.length} groups. Payment processing for split bills will be available soon.`,
+            [{ text: 'OK' }]
+          );
+          setShowSplitBillModal(false);
+        }}
+        useEnhancedCart={useEnhancedCart}
       />
     </SafeAreaView>
   );
@@ -2021,11 +2065,33 @@ const createStyles = (theme: unknown) =>
       fontWeight: '700',
       color: theme.colors.text,
     },
+    modalActions: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    splitBillButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+      borderRadius: 8,
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      gap: 8,
+    },
+    splitBillButtonText: {
+      color: theme.colors.primary,
+      fontSize: 16,
+      fontWeight: '600',
+    },
     confirmButton: {
       backgroundColor: theme.colors.success,
       borderRadius: 8,
       paddingVertical: 16,
       alignItems: 'center',
+      flex: 1,
     },
     confirmButtonText: {
       color: theme.colors.white,
