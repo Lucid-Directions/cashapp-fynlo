@@ -6,7 +6,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { useResponsive, useResponsiveValue } from '../../hooks/useResponsive';
 
-import type { Theme, spacing } from '../../design-system/theme';
+import type { spacing } from '../../design-system/theme';
 
 // Container variants
 export type ContainerVariant = 'fluid' | 'constrained';
@@ -47,7 +47,6 @@ const Container: React.FC<ContainerProps> = ({
 }) => {
   const { theme } = useTheme();
   const { width: screenWidth, isPhone, isTablet } = useResponsive();
-  const styles = createStyles(theme);
 
   // Get responsive padding
   const currentPadding = useResponsiveValue(padding, 4);
@@ -112,7 +111,6 @@ export const Section: React.FC<SectionProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
   const currentPadding = useResponsiveValue(padding, 4);
 
   const getBackgroundColor = () => {
@@ -124,6 +122,26 @@ export const Section: React.FC<SectionProps> = ({
       default:
         return 'transparent';
     }
+  };
+
+  // Theme-based dynamic styles for section header
+  const sectionHeaderStyle = {
+    ...styles.sectionHeader,
+    marginBottom: theme.spacing[6],
+  };
+
+  const sectionTitleStyle = {
+    ...styles.sectionTitle,
+    fontSize: theme.typography.fontSize['2xl'],
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text,
+    marginBottom: theme.spacing[2],
+  };
+
+  const sectionSubtitleStyle = {
+    ...styles.sectionSubtitle,
+    fontSize: theme.typography.fontSize.lg,
+    color: theme.colors.neutral[600],
   };
 
   return (
@@ -139,9 +157,9 @@ export const Section: React.FC<SectionProps> = ({
     >
       <Container>
         {(title || subtitle) && (
-          <View style={styles.sectionHeader}>
-            {title && <Text style={styles.sectionTitle}>{title}</Text>}
-            {subtitle && <Text style={styles.sectionSubtitle}>{subtitle}</Text>}
+          <View style={sectionHeaderStyle}>
+            {title && <Text style={sectionTitleStyle}>{title}</Text>}
+            {subtitle && <Text style={sectionSubtitleStyle}>{subtitle}</Text>}
           </View>
         )}
         {children}
@@ -243,27 +261,23 @@ export const Row: React.FC<RowProps> = ({
   );
 };
 
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
-    container: {
-      width: '100%',
-    },
-    section: {
-      width: '100%',
-    },
-    sectionHeader: {
-      marginBottom: theme.spacing[6],
-    },
-    sectionTitle: {
-      fontSize: theme.typography.fontSize['2xl'],
-      fontWeight: theme.typography.fontWeight.bold,
-      color: theme.colors.text,
-      marginBottom: theme.spacing[2],
-    },
-    sectionSubtitle: {
-      fontSize: theme.typography.fontSize.lg,
-      color: theme.colors.neutral[600],
-    },
-  });
+// Static styles - no theme dependencies
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+  },
+  section: {
+    width: '100%',
+  },
+  sectionHeader: {
+    // marginBottom will be added inline with theme.spacing[6]
+  },
+  sectionTitle: {
+    // fontSize, fontWeight, color, marginBottom will be added inline
+  },
+  sectionSubtitle: {
+    // fontSize and color will be added inline
+  },
+});
 
 export default Container;

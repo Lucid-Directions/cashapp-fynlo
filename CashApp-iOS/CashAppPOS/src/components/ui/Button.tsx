@@ -7,8 +7,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme } from '../../design-system/ThemeProvider';
 
-import type { Theme } from '../../design-system/theme';
-
 // Button variants
 export type ButtonVariant =
   | 'primary'
@@ -53,7 +51,6 @@ const Button: React.FC<ButtonProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
   // Get variant styles
   const getVariantStyles = (): { container: ViewStyle; text: TextStyle } => {
@@ -176,8 +173,19 @@ const Button: React.FC<ButtonProps> = ({
   const variantStyles = getVariantStyles();
   const sizeStyles = getSizeStyles();
 
+  // Create theme-dependent styles inline
+  const baseStyle = {
+    ...styles.base,
+    ...theme.shadows.sm,
+  };
+
+  const textBaseStyle = {
+    ...styles.text,
+    fontWeight: theme.typography.fontWeight.semibold,
+  };
+
   const containerStyle: ViewStyle = [
-    styles.base,
+    baseStyle,
     sizeStyles.container,
     variantStyles.container,
     fullWidth && styles.fullWidth,
@@ -186,7 +194,7 @@ const Button: React.FC<ButtonProps> = ({
   ].filter(Boolean) as ViewStyle;
 
   const textStyleCombined: TextStyle = [
-    styles.text,
+    textBaseStyle,
     sizeStyles.text,
     variantStyles.text,
     textStyle,
@@ -194,11 +202,27 @@ const Button: React.FC<ButtonProps> = ({
 
   const iconColor = variantStyles.text.color as string;
 
+  // Create theme-dependent spacing styles inline
+  const loadingIndicatorStyle = {
+    ...styles.loadingIndicator,
+    marginRight: theme.spacing[2],
+  };
+
+  const iconLeftStyle = {
+    ...styles.iconLeft,
+    marginRight: theme.spacing[2],
+  };
+
+  const iconRightStyle = {
+    ...styles.iconRight,
+    marginLeft: theme.spacing[2],
+  };
+
   const renderContent = () => {
     if (loading) {
       return (
         <View style={styles.contentContainer}>
-          <ActivityIndicator size="small" color={iconColor} style={styles.loadingIndicator} />
+          <ActivityIndicator size="small" color={iconColor} style={loadingIndicatorStyle} />
           <Text style={[textStyleCombined, styles.loadingText]}>{title}</Text>
         </View>
       );
@@ -208,11 +232,11 @@ const Button: React.FC<ButtonProps> = ({
       return (
         <View style={styles.contentContainer}>
           {iconPosition === 'left' && (
-            <Icon name={icon} size={sizeStyles.icon} color={iconColor} style={styles.iconLeft} />
+            <Icon name={icon} size={sizeStyles.icon} color={iconColor} style={iconLeftStyle} />
           )}
           <Text style={textStyleCombined}>{title}</Text>
           {iconPosition === 'right' && (
-            <Icon name={icon} size={sizeStyles.icon} color={iconColor} style={styles.iconRight} />
+            <Icon name={icon} size={sizeStyles.icon} color={iconColor} style={iconRightStyle} />
           )}
         </View>
       );
@@ -234,41 +258,39 @@ const Button: React.FC<ButtonProps> = ({
   );
 };
 
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
-    base: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexDirection: 'row',
-      ...theme.shadows.sm,
-    },
-    fullWidth: {
-      width: '100%',
-    },
-    disabled: {
-      opacity: 0.6,
-    },
-    text: {
-      fontWeight: theme.typography.fontWeight.semibold,
-      textAlign: 'center',
-    },
-    contentContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    iconLeft: {
-      marginRight: theme.spacing[2],
-    },
-    iconRight: {
-      marginLeft: theme.spacing[2],
-    },
-    loadingIndicator: {
-      marginRight: theme.spacing[2],
-    },
-    loadingText: {
-      opacity: 0.8,
-    },
-  });
+// Static styles - no theme dependencies
+const styles = StyleSheet.create({
+  base: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+  fullWidth: {
+    width: '100%',
+  },
+  disabled: {
+    opacity: 0.6,
+  },
+  text: {
+    textAlign: 'center',
+  },
+  contentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconLeft: {
+    // marginRight will be added inline with theme.spacing[2]
+  },
+  iconRight: {
+    // marginLeft will be added inline with theme.spacing[2]
+  },
+  loadingIndicator: {
+    // marginRight will be added inline with theme.spacing[2]
+  },
+  loadingText: {
+    opacity: 0.8,
+  },
+});
 
 export default Button;
