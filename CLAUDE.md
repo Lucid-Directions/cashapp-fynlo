@@ -1,5 +1,15 @@
 # CLAUDE.md - Fynlo POS Development Guide
 
+## 🛑 STOP - MANDATORY SYNTAX CHECKS BEFORE ANY PYTHON EDIT
+
+**AFTER A WEEK OF SYNTAX ERROR CLEANUP, YOU MUST:**
+1. Run `python3 -m py_compile <file>` after EVERY Python edit
+2. Run `python3 -m compileall app/` before EVERY commit
+3. Run `ruff check app/` before EVERY commit
+4. See "MANDATORY SYNTAX CHECKING WORKFLOW" section below for full details
+
+**FAILURE TO FOLLOW THESE CHECKS = WASTED TIME & CONFLICTS**
+
 ## 🚨 CRITICAL RULE: NO ASSUMPTIONS
 **NEVER make assumptions about code structure, imports, or functionality.**
 - ALWAYS analyze the actual codebase first before writing any code
@@ -498,17 +508,111 @@ When dealing with large PRs with many conflicts (like PR #459):
    pip install --upgrade package-name>=safe-version
    ```
 
+## 🛑 MANDATORY SYNTAX CHECKING WORKFLOW - NEVER SKIP
+
+**CRITICAL: After a week of syntax error cleanup, these checks are NOW MANDATORY before ANY commit**
+
+### Pre-Commit Checklist (MUST DO ALL):
+
+#### 1. **Immediate Syntax Validation** (After EVERY file edit)
+```bash
+# For Python files - RUN THIS AFTER EVERY EDIT
+cd backend && python3 -m py_compile path/to/edited/file.py
+
+# If multiple files edited
+cd backend && python3 -m compileall app/
+```
+
+#### 2. **Before ANY Commit** (NO EXCEPTIONS)
+```bash
+# Step 1: Basic syntax check (catches indentation/syntax errors)
+cd backend && python3 -m compileall app/
+
+# Step 2: Run Ruff (catches style issues, missing imports)
+cd backend && ruff check app/ --fix
+
+# Step 3: Format with Black (ensures consistent formatting)
+cd backend && black app/
+
+# Step 4: Run the comprehensive check
+python3 scripts/python-quality-check.py --backend-path backend
+```
+
+#### 3. **Use MCP Tools for Deep Analysis**
+- **Tree-sitter**: `"Parse all Python files in backend/app and identify syntax errors or incomplete functions"`
+- **Semgrep**: `"Run semgrep security check on backend/app"`
+
+#### 4. **Before Creating ANY PR**
+```bash
+# Run ALL these checks - NO SHORTCUTS
+cd backend && python3 -m compileall app/  # Must pass
+cd backend && ruff check app/              # Must have 0 errors
+python3 scripts/pr459_fixer.py --validate-only  # Must pass
+trivy fs --scanners vuln backend/         # Check for vulnerabilities
+```
+
+### Why Each Tool Matters:
+
+1. **python3 -m compileall**: Catches syntax errors (indentation, missing colons, etc.)
+2. **Ruff**: Catches undefined names, unused imports, style issues
+3. **Black**: Prevents formatting conflicts
+4. **Tree-sitter MCP**: AST-level analysis for structural issues
+5. **Semgrep MCP**: Security vulnerabilities and code patterns
+6. **PR #459 Fixer**: Specific to our codebase issues
+7. **Trivy**: Dependency vulnerabilities
+
+### Common Syntax Errors to Watch For:
+
+1. **Missing function definitions**:
+   ```python
+   @validator('field')  # WRONG - missing function def
+       return value
+   
+   @validator('field')  # CORRECT
+   def validate_field(cls, v):
+       return v
+   ```
+
+2. **Indentation after docstrings**:
+   ```python
+   def function():
+       """Docstring"""
+           code  # WRONG - extra indent
+   
+   def function():
+       """Docstring"""
+       code  # CORRECT
+   ```
+
+3. **Missing try blocks**:
+   ```python
+   async def endpoint():
+       code
+   except Exception:  # WRONG - except without try
+   
+   async def endpoint():
+       try:
+           code
+       except Exception:  # CORRECT
+   ```
+
 ## 🚨 When to Use Which Tool
+
+### ALWAYS Use These Tools (Non-Negotiable):
+- **After editing Python**: `python3 -m py_compile <file>`
+- **Before commits**: `python3 -m compileall` + `ruff check` + `black`
+- **Before PRs**: Full quality check script + pr459_fixer
 
 ### Use MCP Tools When:
 - **File System**: Reading/writing multiple files, searching patterns
 - **Sequential Thinking**: Breaking down complex problems
+- **Tree-sitter**: ALWAYS for Python syntax validation before commits
 - **SemGrep**: Deep security analysis beyond Bandit
 
 ### Use Python Quality Tools When:
-- **Before commits**: Run at least Ruff and Black
-- **Before PRs**: Run full python-quality-check.py
-- **After merge conflicts**: Run pr459_fixer.py
+- **Before commits**: Run at least Ruff and Black (MANDATORY)
+- **Before PRs**: Run full python-quality-check.py (MANDATORY)
+- **After merge conflicts**: Run pr459_fixer.py (MANDATORY)
 
 ### Use Security Tools When:
 - **Before deployments**: Always run Trivy
@@ -520,4 +624,4 @@ When dealing with large PRs with many conflicts (like PR #459):
 - **Syntax errors**: fix-syntax-errors.py
 - **Import cleanup**: pr459_fixer.py
 
-**Remember**: Always commit before switching branches. Keep changes simple. Check logs for common issues. Run quality checks before pushing.
+**Remember**: Always commit before switching branches. Keep changes simple. Check logs for common issues. Run quality checks before pushing. NEVER skip syntax validation - it wastes everyone's time.
