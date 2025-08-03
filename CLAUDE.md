@@ -32,7 +32,7 @@
 - **Pieces**: `pieces` - Context management (`pieces search`, `pieces ask`, `pieces create`)
 - **Supabase**: `/opt/homebrew/bin/supabase` - Auth & database management
 - **GitHub**: `gh` - Repository & PR management
-- **DigitalOcean**: `doctl` - Infrastructure control (configured with API token)
+- **DigitalOcean CLI**: `doctl` - Infrastructure control via command line (NOT an MCP server, uses API token)
 - **Vercel**: `vercel` - Deployment (requires VERCEL_TOKEN env var)
 - **Trivy**: `trivy` - Vulnerability scanner for dependencies and Docker images
 
