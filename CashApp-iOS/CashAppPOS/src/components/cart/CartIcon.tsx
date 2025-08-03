@@ -16,7 +16,6 @@ interface Props {
 
 const CartIcon: React.FC<Props> = ({ count, onPress, testID, size = 40 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
   const iconColor = count > 0 ? theme.colors.danger[500] : theme.colors.text;
   const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
@@ -25,6 +24,18 @@ const CartIcon: React.FC<Props> = ({ count, onPress, testID, size = 40 }) => {
     count > 0
       ? `Shopping cart with ${count} ${count === 1 ? 'item' : 'items'}`
       : 'Shopping cart, empty';
+
+  // Theme-based dynamic styles
+  const badgeStyles = {
+    ...styles.badge,
+    backgroundColor: theme.colors.danger[500],
+    borderColor: theme.colors.white,
+  };
+
+  const badgeTxtStyles = {
+    ...styles.badgeTxt,
+    color: theme.colors.white,
+  };
 
   return (
     <TouchableOpacity
@@ -39,8 +50,8 @@ const CartIcon: React.FC<Props> = ({ count, onPress, testID, size = 40 }) => {
       <View style={styles.iconContainer}>
         <Icon name="shopping-cart" size={size} color={iconColor} />
         {count > 0 && (
-          <View style={styles.badge} testID="cart-badge">
-            <Text style={styles.badgeTxt}>{count > 99 ? '99+' : count}</Text>
+          <View style={badgeStyles} testID="cart-badge">
+            <Text style={badgeTxtStyles}>{count > 99 ? '99+' : count}</Text>
           </View>
         )}
       </View>
@@ -48,40 +59,36 @@ const CartIcon: React.FC<Props> = ({ count, onPress, testID, size = 40 }) => {
   );
 };
 
-const createStyles = (theme: any) =>
-  StyleSheet.create({
-    container: {
-      padding: 8,
-      minWidth: 44,
-      minHeight: 44,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    iconContainer: {
-      position: 'relative',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    badge: {
-      position: 'absolute',
-      top: -8,
-      right: -8,
-      backgroundColor: theme.colors.danger[500],
-      borderRadius: 10,
-      minWidth: 20,
-      height: 20,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: 4,
-      borderWidth: 2,
-      borderColor: theme.colors.white,
-    },
-    badgeTxt: {
-      color: theme.colors.white,
-      fontSize: 14,
-      fontWeight: '600',
-      lineHeight: 16,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    padding: 8,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 2,
+  },
+  badgeTxt: {
+    fontSize: 14,
+    fontWeight: '600',
+    lineHeight: 16,
+  },
+});
 
 export default CartIcon;
