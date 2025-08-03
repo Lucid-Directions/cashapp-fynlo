@@ -1,5 +1,8 @@
 // Global types for the CashApp POS application
 
+// Export enhanced cart types
+export * from './cart';
+
 // Import shared types from the shared package
 export {
   // API types

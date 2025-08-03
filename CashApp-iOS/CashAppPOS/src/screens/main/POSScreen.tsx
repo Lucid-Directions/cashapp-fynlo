@@ -23,6 +23,8 @@ import { Swipeable } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import CartIcon from '../../components/cart/CartIcon';
+import ItemModificationModal from '../../components/cart/ItemModificationModal';
+import SplitBillModal from '../../components/cart/SplitBillModal';
 import { QuantityPill } from '../../components/inputs';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
@@ -144,9 +146,21 @@ const POSScreen: React.FC = () => {
   const [showSumUpTest, setShowSumUpTest] = useState(false);
   const [serviceChargeDebugInfo, setServiceChargeDebugInfo] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
+  const [showModificationModal, setShowModificationModal] = useState(false);
+  const [showSplitBillModal, setShowSplitBillModal] = useState(false);
+  const [selectedItemForModification, setSelectedItemForModification] = useState<OrderItem | null>(null);
 
   // Dynamic styles that depend on state
   const dynamicStyles = createDynamicStyles(theme, serviceChargeConfig);
+
+  // For split bill integration - convert cart items to enhanced format
+  const cartItems = cart.map(item => ({
+    ...item,
+    id: item.id.toString(), // Ensure string ID for enhanced cart
+  }));
+  
+  // Using regular cart for now
+  const useEnhancedCart = false;
 
   // Dynamic menu state
   const [dynamicMenuItems, setDynamicMenuItems] = useState<MenuItem[]>([]);
@@ -663,6 +677,9 @@ const POSScreen: React.FC = () => {
 
   const MenuItemCard = ({ item }: { item: MenuItem }) => {
     const existingItem = cart.find((cartItem) => cartItem.id === item.id);
+    // Check if item category supports modifications
+    const supportsModifications = ['coffee', 'tea', 'hot drinks', 'beverages']
+      .includes(item.category?.toLowerCase() || '');
 
     return (
       <View style={[styles.menuCard, !item.available && styles.menuCardDisabled]}>
@@ -690,6 +707,13 @@ const POSScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
 
+        {/* Modifications Available Badge */}
+        {supportsModifications && (
+          <View style={styles.modificationBadge}>
+            <Icon name="tune" size={14} color={theme.colors.primary} />
+          </View>
+        )}
+
         {/* Quick Quantity Controls */}
         {existingItem && (
           <View style={styles.menuItemQuantityControls}>
@@ -715,6 +739,57 @@ const POSScreen: React.FC = () => {
   const CartItem = ({ item }: { item: OrderItem }) => {
     const menuItem = dynamicMenuItems.find((mi) => mi.id === item.id);
 
+    // Check for modifications or modifiers
+    const hasModifications = (item.modifiers && item.modifiers.length > 0) || 
+                            (item.modifications && item.modifications.some(mod => mod.selected));
+    
+    const renderModificationSummary = () => {
+      if (!hasModifications) return null;
+      
+      // Handle both old modifiers and new modifications format
+      let modificationText = '';
+      
+      if (item.modifiers && item.modifiers.length > 0) {
+        // Old format with modifiers array
+        modificationText = item.modifiers
+          .map(mod => {
+            if (mod.quantity && mod.quantity > 1) {
+              return `${mod.quantity}x ${mod.name}`;
+            }
+            return mod.name;
+          })
+          .join(', ');
+      } else if (item.modifications) {
+        // New format with modifications
+        const selected = item.modifications.filter(mod => mod.selected);
+        if (selected.length > 0) {
+          modificationText = selected
+            .map(mod => {
+              if (mod.quantity && mod.quantity > 1) {
+                return `${mod.quantity}x ${mod.name}`;
+              }
+              return mod.name;
+            })
+            .join(', ');
+        }
+      }
+      
+      if (!modificationText && item.specialInstructions) {
+        modificationText = 'Special instructions';
+      }
+      
+      if (!modificationText) return null;
+      
+      return (
+        <View style={styles.cartItemModifications}>
+          <Icon name="tune" size={12} color={theme.colors.textSecondary} />
+          <Text style={styles.cartItemModificationText} numberOfLines={1}>
+            {modificationText}
+          </Text>
+        </View>
+      );
+    };
+
     const renderRightActions = (
       progress: Animated.AnimatedInterpolation<number>,
       dragX: Animated.AnimatedValue
@@ -737,7 +812,14 @@ const POSScreen: React.FC = () => {
 
     return (
       <Swipeable renderRightActions={renderRightActions} overshootRight={false} friction={2}>
-        <View style={styles.cartItem}>
+        <TouchableOpacity 
+          style={styles.cartItem} 
+          onPress={() => {
+            setSelectedItemForModification(item);
+            setShowModificationModal(true);
+          }}
+          activeOpacity={0.7}
+        >
           <View style={styles.cartItemInfo}>
             <View style={styles.cartItemHeader}>
               <Text style={styles.cartItemEmoji}>{item.emoji}</Text>
@@ -753,6 +835,7 @@ const POSScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
+            {renderModificationSummary()}
             {menuItem?.description && (
               <Text style={styles.cartItemDescription} numberOfLines={2}>
                 {menuItem.description}
@@ -783,7 +866,7 @@ const POSScreen: React.FC = () => {
               })}
             </Text>
           </View>
-        </View>
+        </TouchableOpacity>
       </Swipeable>
     );
   };
@@ -1260,9 +1343,22 @@ const POSScreen: React.FC = () => {
                 </Text>
               </View>
 
-              <TouchableOpacity style={styles.confirmButton} onPress={processPayment}>
-                <Text style={styles.confirmButtonText}>Confirm Payment</Text>
-              </TouchableOpacity>
+              <View style={styles.modalActions}>
+                <TouchableOpacity 
+                  style={styles.splitBillButton} 
+                  onPress={() => {
+                    setShowCartModal(false);
+                    setShowSplitBillModal(true);
+                  }}
+                >
+                  <Icon name="people" size={20} color={theme.colors.primary} />
+                  <Text style={styles.splitBillButtonText}>Split Bill</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.confirmButton} onPress={processPayment}>
+                  <Text style={styles.confirmButtonText}>Confirm Payment</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
@@ -1284,6 +1380,42 @@ const POSScreen: React.FC = () => {
           />
         </>
       )}
+
+      {/* Item Modification Modal */}
+      <ItemModificationModal
+        visible={showModificationModal}
+        item={selectedItemForModification}
+        onClose={() => {
+          setShowModificationModal(false);
+          setSelectedItemForModification(null);
+        }}
+        onSave={() => {
+          setShowModificationModal(false);
+          setSelectedItemForModification(null);
+          // The cart will be automatically updated by the modal
+        }}
+        useEnhancedCart={false} // Using regular cart for now
+      />
+
+      {/* Split Bill Modal */}
+      <SplitBillModal
+        visible={showSplitBillModal}
+        cartItems={cartItems}
+        cartTotal={calculateCartTotal()}
+        onClose={() => setShowSplitBillModal(false)}
+        onConfirm={(splitGroups) => {
+          // Handle split bill confirmation
+          logger.info('Split bill confirmed with groups:', splitGroups);
+          // TODO: Integrate with payment processing for split bills
+          Alert.alert(
+            'Split Bill',
+            `Bill has been split into ${splitGroups.length} groups. Payment processing for split bills will be available soon.`,
+            [{ text: 'OK' }]
+          );
+          setShowSplitBillModal(false);
+        }}
+        useEnhancedCart={useEnhancedCart}
+      />
     </SafeAreaView>
   );
 };
@@ -1462,6 +1594,17 @@ const createStyles = (theme: unknown) =>
       borderRadius: 8,
       overflow: 'hidden',
     },
+    modificationBadge: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      backgroundColor: theme.colors.primaryLight || 'rgba(0, 166, 81, 0.1)',
+      borderRadius: 12,
+      width: 24,
+      height: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     quantityPillContainer: {
       alignItems: 'center',
       justifyContent: 'center',
@@ -1568,6 +1711,20 @@ const createStyles = (theme: unknown) =>
       color: theme.colors.lightText,
       lineHeight: 16,
       marginLeft: 36,
+    },
+    cartItemModifications: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginLeft: 36,
+      marginTop: 4,
+      marginBottom: 4,
+    },
+    cartItemModificationText: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+      fontStyle: 'italic',
+      marginLeft: 4,
+      flex: 1,
     },
     cartItemActions: {
       flexDirection: 'row',
@@ -1908,11 +2065,33 @@ const createStyles = (theme: unknown) =>
       fontWeight: '700',
       color: theme.colors.text,
     },
+    modalActions: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    splitBillButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+      borderRadius: 8,
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      gap: 8,
+    },
+    splitBillButtonText: {
+      color: theme.colors.primary,
+      fontSize: 16,
+      fontWeight: '600',
+    },
     confirmButton: {
       backgroundColor: theme.colors.success,
       borderRadius: 8,
       paddingVertical: 16,
       alignItems: 'center',
+      flex: 1,
     },
     confirmButtonText: {
       color: theme.colors.white,
