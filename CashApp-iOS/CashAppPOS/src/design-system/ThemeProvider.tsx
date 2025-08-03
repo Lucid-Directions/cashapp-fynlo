@@ -276,7 +276,7 @@ export function withTheme<P extends object>(
   };
 }
 
-// Utility hook for creating themed styles
+// Utility hook for creating themed styles (DEPRECATED - use static styles with inline theme values)
 export const useThemedStyles = <T>(
   createStyles: (theme: Theme) => T
 ): T => {

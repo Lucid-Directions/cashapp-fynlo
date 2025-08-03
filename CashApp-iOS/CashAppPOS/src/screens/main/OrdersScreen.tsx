@@ -25,7 +25,7 @@ import type { Order } from '../../types';
 const OrdersScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
+  // Styles are now static - theme values applied inline where needed
   const [orders, setOrders] = useState<Order[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -41,7 +41,10 @@ const OrdersScreen: React.FC = () => {
     cancelled: theme.colors.danger,
   };
 
-  const dynamicStyles = createDynamicStyles(theme, statusColors);
+  // Helper function for status badge colors
+  const getStatusBadgeStyle = (status: string) => ({
+    backgroundColor: statusColors[status] || theme.colors.lightText,
+  });
 
   const statusIcons = {
     draft: 'edit',
@@ -129,27 +132,27 @@ const OrdersScreen: React.FC = () => {
 
   const OrderCard = ({ order }: { order: Order }) => (
     <TouchableOpacity
-      style={styles.orderCard}
+      style={[styles.orderCard, { backgroundColor: theme.colors.white }]}
       onPress={() => handleOrderPress(order)}
       activeOpacity={0.7}
     >
-      <View style={styles.orderHeader}>
+      <View style={[styles.orderHeader, { borderBottomColor: theme.colors.lightGray }]}>
         <View style={styles.orderInfo}>
-          <Text style={styles.orderNumber}>Order #{order.id}</Text>
-          <Text style={styles.orderTime}>
+          <Text style={[styles.orderNumber, { color: theme.colors.text }]}>Order #{order.id}</Text>
+          <Text style={[styles.orderTime, { color: theme.colors.lightText }]}>
             {formatTime(order.createdAt)} • {getTimeSince(order.createdAt)}
           </Text>
         </View>
-        <View style={[styles.statusBadge, dynamicStyles.statusBadge(order.status)]}>
+        <View style={[styles.statusBadge, getStatusBadgeStyle(order.status)]}>
           <Icon name={statusIcons[order.status]} size={16} color={theme.colors.white} />
-          <Text style={styles.statusText}>{order.status.toUpperCase()}</Text>
+          <Text style={[styles.statusText, { color: theme.colors.white }]}>{order.status.toUpperCase()}</Text>
         </View>
       </View>
 
       <View style={styles.orderDetails}>
         <View style={styles.customerInfo}>
           <Icon name="person" size={16} color={theme.colors.lightText} />
-          <Text style={styles.customerText}>{order.customerName || 'Walk-in'}</Text>
+          <Text style={[styles.customerText, { color: theme.colors.text }]}>{order.customerName || 'Walk-in'}</Text>
           {order.tableNumber && (
             <>
               <Icon
@@ -158,16 +161,16 @@ const OrdersScreen: React.FC = () => {
                 color={theme.colors.lightText}
                 style={styles.tableIcon}
               />
-              <Text style={styles.tableText}>Table {order.tableNumber}</Text>
+              <Text style={[styles.tableText, { color: theme.colors.text }]}>Table {order.tableNumber}</Text>
             </>
           )}
         </View>
 
         <View style={styles.itemsPreview}>
-          <Text style={styles.itemsText}>
+          <Text style={[styles.itemsText, { color: theme.colors.text }]}>
             {order.items.length} item{order.items.length !== 1 ? 's' : ''}
           </Text>
-          <Text style={styles.itemsList}>
+          <Text style={[styles.itemsList, { color: theme.colors.lightText }]}>
             {order.items.map((item) => `${item.emoji} ${item.name}`).join(', ')}
           </Text>
         </View>
@@ -185,11 +188,11 @@ const OrdersScreen: React.FC = () => {
               size={16}
               color={theme.colors.lightText}
             />
-            <Text style={styles.paymentText}>
+            <Text style={[styles.paymentText, { color: theme.colors.lightText }]}>
               {order.paymentMethod?.replace('_', ' ').toUpperCase()}
             </Text>
           </View>
-          <Text style={styles.totalAmount}>£{order.total.toFixed(2)}</Text>
+          <Text style={[styles.totalAmount, { color: theme.colors.secondary }]}>£{order.total.toFixed(2)}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -205,22 +208,32 @@ const OrdersScreen: React.FC = () => {
     count: number;
   }) => (
     <TouchableOpacity
-      style={[styles.filterButton, filter === value && styles.filterButtonActive]}
+      style={[
+        styles.filterButton,
+        { backgroundColor: theme.colors.lightGray },
+        filter === value && { backgroundColor: theme.colors.secondary },
+      ]}
       onPress={() => setFilter(value)}
     >
-      <Text style={[styles.filterButtonText, filter === value && styles.filterButtonTextActive]}>
+      <Text
+        style={[
+          styles.filterButtonText,
+          { color: theme.colors.text },
+          filter === value && { color: theme.colors.white },
+        ]}
+      >
         {title}
       </Text>
       {count > 0 && (
-        <View style={styles.filterBadge}>
-          <Text style={styles.filterBadgeText}>{count}</Text>
+        <View style={[styles.filterBadge, { backgroundColor: theme.colors.danger }]}>
+          <Text style={[styles.filterBadgeText, { color: theme.colors.white }]}>{count}</Text>
         </View>
       )}
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
 
       {/* Header with Back Button */}
@@ -236,7 +249,7 @@ const OrdersScreen: React.FC = () => {
       />
 
       {/* Filters */}
-      <View style={styles.filtersContainer}>
+      <View style={[styles.filtersContainer, { backgroundColor: theme.colors.white, borderBottomColor: theme.colors.lightGray }]}>
         <FilterButton title="All" value="all" count={orders.length} />
         <FilterButton
           title="Preparing"
@@ -280,18 +293,11 @@ const OrdersScreen: React.FC = () => {
   );
 };
 
-// Dynamic styles creator for conditional styling
-const createDynamicStyles = (theme: unknown, statusColors: Record<string, string>) => ({
-  statusBadge: (status: string) => ({
-    backgroundColor: statusColors[status] || theme.colors.lightText,
-  }),
-});
 
-const createStyles = (theme: unknown) =>
-  StyleSheet.create({
+
+const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.colors.background,
     },
     searchButton: {
       padding: 8,
@@ -300,9 +306,7 @@ const createStyles = (theme: unknown) =>
       flexDirection: 'row',
       paddingHorizontal: 20,
       paddingVertical: 15,
-      backgroundColor: theme.colors.white,
       borderBottomWidth: 1,
-      borderBottomColor: theme.colors.lightGray,
     },
     filterButton: {
       flexDirection: 'row',
@@ -311,21 +315,12 @@ const createStyles = (theme: unknown) =>
       paddingVertical: 8,
       borderRadius: 20,
       marginRight: 12,
-      backgroundColor: theme.colors.lightGray,
-    },
-    filterButtonActive: {
-      backgroundColor: theme.colors.secondary,
     },
     filterButtonText: {
       fontSize: 14,
       fontWeight: '600',
-      color: theme.colors.text,
-    },
-    filterButtonTextActive: {
-      color: theme.colors.white,
     },
     filterBadge: {
-      backgroundColor: theme.colors.danger,
       borderRadius: 10,
       paddingHorizontal: 6,
       paddingVertical: 2,
@@ -336,13 +331,11 @@ const createStyles = (theme: unknown) =>
     filterBadgeText: {
       fontSize: 12,
       fontWeight: 'bold',
-      color: theme.colors.white,
     },
     ordersList: {
       padding: 20,
     },
     orderCard: {
-      backgroundColor: theme.colors.white,
       borderRadius: 12,
       marginBottom: 15,
       elevation: 2,
@@ -357,7 +350,6 @@ const createStyles = (theme: unknown) =>
       alignItems: 'center',
       padding: 16,
       borderBottomWidth: 1,
-      borderBottomColor: theme.colors.lightGray,
     },
     orderInfo: {
       flex: 1,
@@ -365,11 +357,9 @@ const createStyles = (theme: unknown) =>
     orderNumber: {
       fontSize: 18,
       fontWeight: 'bold',
-      color: theme.colors.text,
     },
     orderTime: {
       fontSize: 14,
-      color: theme.colors.lightText,
       marginTop: 2,
     },
     statusBadge: {
@@ -382,7 +372,6 @@ const createStyles = (theme: unknown) =>
     statusText: {
       fontSize: 12,
       fontWeight: 'bold',
-      color: theme.colors.white,
       marginLeft: 4,
     },
     orderDetails: {
@@ -395,7 +384,6 @@ const createStyles = (theme: unknown) =>
     },
     customerText: {
       fontSize: 14,
-      color: theme.colors.text,
       marginLeft: 6,
       fontWeight: '600',
     },
@@ -404,7 +392,6 @@ const createStyles = (theme: unknown) =>
     },
     tableText: {
       fontSize: 14,
-      color: theme.colors.text,
       marginLeft: 6,
     },
     itemsPreview: {
@@ -413,12 +400,10 @@ const createStyles = (theme: unknown) =>
     itemsText: {
       fontSize: 14,
       fontWeight: '600',
-      color: theme.colors.text,
       marginBottom: 4,
     },
     itemsList: {
       fontSize: 14,
-      color: theme.colors.lightText,
       lineHeight: 20,
     },
     orderFooter: {
@@ -432,14 +417,12 @@ const createStyles = (theme: unknown) =>
     },
     paymentText: {
       fontSize: 12,
-      color: theme.colors.lightText,
       marginLeft: 6,
       fontWeight: '600',
     },
     totalAmount: {
       fontSize: 18,
       fontWeight: 'bold',
-      color: theme.colors.secondary,
     },
   });
 

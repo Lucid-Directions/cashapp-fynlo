@@ -17,7 +17,7 @@ import {
   ActivityIndicator
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
+import { useTheme } from '../../design-system/ThemeProvider';
 import { EnhancedOrderItem, CartItemModification } from '../../types/cart';
 import { useItemModifications } from '../../hooks/useItemModifications';
 
@@ -37,7 +37,6 @@ export default function ItemModificationModal({
   useEnhancedCart = true
 }: ItemModificationModalProps) {
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
   
   const {
     modifications,
@@ -99,15 +98,15 @@ export default function ItemModificationModal({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.modalContainer}
       >
-        <View style={styles.modalContent}>
+        <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
           {/* Header */}
-          <View style={styles.header}>
+          <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
             <View style={styles.headerLeft}>
-              <Text style={styles.itemName}>
+              <Text style={[styles.itemName, { color: theme.colors.text }]}>
                 {item.emoji && <Text>{item.emoji} </Text>}
                 {item.name}
               </Text>
-              <Text style={styles.basePrice}>
+              <Text style={[styles.basePrice, { color: theme.colors.textSecondary }]}>
                 Base price: ${item.originalPrice.toFixed(2)}
               </Text>
             </View>
@@ -124,29 +123,32 @@ export default function ItemModificationModal({
           >
             {/* Modification Categories */}
             {Object.entries(modificationsByCategory).map(([category, mods]) => (
-              <View key={category} style={styles.categorySection}>
-                <Text style={styles.categoryTitle}>{category}</Text>
+              <View key={category} style={[styles.categorySection, { borderBottomColor: theme.colors.border }]}>
+                <Text style={[styles.categoryTitle, { color: theme.colors.text }]}>{category}</Text>
                 
                 {mods.map((mod) => (
                   <TouchableOpacity
                     key={mod.id}
                     style={[
                       styles.modificationItem,
-                      mod.selected && styles.modificationItemSelected
+                      { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                      mod.selected && { backgroundColor: theme.colors.primaryLight, borderColor: theme.colors.primary }
                     ]}
                     onPress={() => toggleModification(mod.id)}
                   >
                     <View style={styles.modificationInfo}>
                       <Text style={[
                         styles.modificationName,
-                        mod.selected && styles.modificationNameSelected
+                        { color: theme.colors.text },
+                        mod.selected && { ...styles.modificationNameSelected, color: theme.colors.primary }
                       ]}>
                         {mod.name}
                       </Text>
                       {mod.price !== 0 && (
                         <Text style={[
                           styles.modificationPrice,
-                          mod.selected && styles.modificationPriceSelected
+                          { color: theme.colors.textSecondary },
+                          mod.selected && { ...styles.modificationPriceSelected, color: theme.colors.primary }
                         ]}>
                           {mod.price > 0 ? '+' : ''}${Math.abs(mod.price).toFixed(2)}
                         </Text>
@@ -155,14 +157,14 @@ export default function ItemModificationModal({
                     
                     {/* Quantity selector for items that support it */}
                     {mod.selected && mod.quantity !== undefined && (
-                      <View style={styles.quantitySelector}>
+                      <View style={[styles.quantitySelector, { backgroundColor: theme.colors.background }]}>
                         <TouchableOpacity
                           style={styles.quantityButton}
                           onPress={() => updateModificationQuantity(mod.id, (mod.quantity || 1) - 1)}
                         >
                           <Icon name="remove" size={20} color={theme.colors.primary} />
                         </TouchableOpacity>
-                        <Text style={styles.quantityText}>{mod.quantity}</Text>
+                        <Text style={[styles.quantityText, { color: theme.colors.text }]}>{mod.quantity}</Text>
                         <TouchableOpacity
                           style={styles.quantityButton}
                           onPress={() => updateModificationQuantity(mod.id, (mod.quantity || 1) + 1)}
@@ -186,10 +188,10 @@ export default function ItemModificationModal({
             ))}
             
             {/* Special Instructions */}
-            <View style={styles.categorySection}>
-              <Text style={styles.categoryTitle}>Special Instructions</Text>
+            <View style={[styles.categorySection, { borderBottomColor: theme.colors.border }]}>
+              <Text style={[styles.categoryTitle, { color: theme.colors.text }]}>Special Instructions</Text>
               <TextInput
-                style={styles.instructionsInput}
+                style={[styles.instructionsInput, { backgroundColor: theme.colors.surface, color: theme.colors.text, borderColor: theme.colors.border }]}
                 placeholder="Add any special requests..."
                 placeholderTextColor={theme.colors.textSecondary}
                 multiline
@@ -201,9 +203,9 @@ export default function ItemModificationModal({
             
             {/* Error Messages */}
             {errors.length > 0 && (
-              <View style={styles.errorContainer}>
+              <View style={[styles.errorContainer, { backgroundColor: theme.colors.errorLight }]}>
                 {errors.map((error, index) => (
-                  <Text key={index} style={styles.errorText}>
+                  <Text key={index} style={[styles.errorText, { color: theme.colors.error }]}>
                     • {error}
                   </Text>
                 ))}
@@ -212,37 +214,38 @@ export default function ItemModificationModal({
           </ScrollView>
           
           {/* Footer */}
-          <View style={styles.footer}>
+          <View style={[styles.footer, { borderTopColor: theme.colors.border, backgroundColor: theme.colors.background }]}>
             <View style={styles.pricingSummary}>
-              <Text style={styles.pricingLabel}>Modifications:</Text>
-              <Text style={styles.pricingValue}>{getPriceImpactSummary()}</Text>
+              <Text style={[styles.pricingLabel, { color: theme.colors.textSecondary }]}>Modifications:</Text>
+              <Text style={[styles.pricingValue, { color: theme.colors.text }]}>{getPriceImpactSummary()}</Text>
             </View>
             <View style={styles.pricingSummary}>
-              <Text style={styles.totalLabel}>Total Price:</Text>
-              <Text style={styles.totalValue}>
+              <Text style={[styles.totalLabel, { color: theme.colors.text }]}>Total Price:</Text>
+              <Text style={[styles.totalValue, { color: theme.colors.primary }]}>
                 ${totalPrice.toFixed(2)} 
-                <Text style={styles.quantityNote}> ({item.quantity}x)</Text>
+                <Text style={[styles.quantityNote, { color: theme.colors.textSecondary }]}> ({item.quantity}x)</Text>
               </Text>
             </View>
             
             <View style={styles.buttonRow}>
               <TouchableOpacity 
-                style={[styles.button, styles.cancelButton]} 
+                style={[styles.button, styles.cancelButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]} 
                 onPress={handleClose}
               >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={[styles.cancelButtonText, { color: theme.colors.text }]}>Cancel</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
                 style={[
                   styles.button, 
                   styles.saveButton,
-                  (!isValid || !hasChanges) && styles.saveButtonDisabled
+                  { backgroundColor: theme.colors.primary },
+                  (!isValid || !hasChanges) && { backgroundColor: theme.colors.disabled }
                 ]} 
                 onPress={handleSave}
                 disabled={!isValid || !hasChanges}
               >
-                <Text style={styles.saveButtonText}>
+                <Text style={[styles.saveButtonText]}>
                   {hasChanges ? 'Save Changes' : 'No Changes'}
                 </Text>
               </TouchableOpacity>
@@ -254,14 +257,13 @@ export default function ItemModificationModal({
   );
 }
 
-const createStyles = (theme: any) => StyleSheet.create({
+const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '90%',
@@ -273,7 +275,6 @@ const createStyles = (theme: any) => StyleSheet.create({
     alignItems: 'flex-start',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
   },
   headerLeft: {
     flex: 1,
@@ -282,12 +283,10 @@ const createStyles = (theme: any) => StyleSheet.create({
   itemName: {
     fontSize: 20,
     fontWeight: '600',
-    color: theme.colors.text,
     marginBottom: 4,
   },
   basePrice: {
     fontSize: 14,
-    color: theme.colors.textSecondary,
   },
   closeButton: {
     padding: 5,
@@ -299,12 +298,10 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
   },
   categoryTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.colors.text,
     marginBottom: 12,
   },
   modificationItem: {
@@ -313,14 +310,11 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 15,
     marginBottom: 8,
-    backgroundColor: theme.colors.surface,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: theme.colors.border,
   },
   modificationItemSelected: {
-    backgroundColor: theme.colors.primaryLight,
-    borderColor: theme.colors.primary,
+    // Themed styles will be applied inline
   },
   modificationInfo: {
     flex: 1,
@@ -331,26 +325,21 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   modificationName: {
     fontSize: 15,
-    color: theme.colors.text,
     flex: 1,
   },
   modificationNameSelected: {
     fontWeight: '500',
-    color: theme.colors.primary,
   },
   modificationPrice: {
     fontSize: 14,
-    color: theme.colors.textSecondary,
     marginLeft: 10,
   },
   modificationPriceSelected: {
-    color: theme.colors.primary,
     fontWeight: '500',
   },
   quantitySelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.background,
     borderRadius: 20,
     paddingHorizontal: 5,
     marginRight: 10,
@@ -361,7 +350,6 @@ const createStyles = (theme: any) => StyleSheet.create({
   quantityText: {
     fontSize: 14,
     fontWeight: '600',
-    color: theme.colors.text,
     marginHorizontal: 10,
     minWidth: 20,
     textAlign: 'center',
@@ -370,33 +358,26 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginLeft: 10,
   },
   instructionsInput: {
-    backgroundColor: theme.colors.surface,
     borderRadius: 10,
     padding: 12,
     fontSize: 15,
-    color: theme.colors.text,
     minHeight: 80,
     textAlignVertical: 'top',
     borderWidth: 1,
-    borderColor: theme.colors.border,
   },
   errorContainer: {
-    backgroundColor: theme.colors.errorLight,
     padding: 15,
     marginHorizontal: 20,
     marginTop: 10,
     borderRadius: 10,
   },
   errorText: {
-    color: theme.colors.error,
     fontSize: 14,
     marginBottom: 5,
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    backgroundColor: theme.colors.background,
   },
   pricingSummary: {
     flexDirection: 'row',
@@ -406,27 +387,22 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   pricingLabel: {
     fontSize: 14,
-    color: theme.colors.textSecondary,
   },
   pricingValue: {
     fontSize: 14,
-    color: theme.colors.text,
     fontWeight: '500',
   },
   totalLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.colors.text,
   },
   totalValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: theme.colors.primary,
   },
   quantityNote: {
     fontSize: 14,
     fontWeight: '400',
-    color: theme.colors.textSecondary,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -440,20 +416,17 @@ const createStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.border,
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.colors.text,
   },
   saveButton: {
-    backgroundColor: theme.colors.primary,
+    // Theme styles will be applied inline
   },
   saveButtonDisabled: {
-    backgroundColor: theme.colors.disabled,
+    // Theme styles will be applied inline
   },
   saveButtonText: {
     fontSize: 16,

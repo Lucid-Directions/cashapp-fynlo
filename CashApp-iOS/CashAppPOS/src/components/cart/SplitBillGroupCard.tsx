@@ -13,7 +13,7 @@ import {
   ScrollView
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
+import { useTheme } from '../../design-system/ThemeProvider';
 import { SplitBillGroup, SplitMethod } from '../../types/cart';
 import { GroupTotal } from '../../services/SplitBillService';
 import { formatPrice } from '../../utils/priceValidation';
@@ -53,7 +53,6 @@ export default function SplitBillGroupCard({
   onToggleTax
 }: SplitBillGroupCardProps) {
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
   
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(group.name);
@@ -75,25 +74,25 @@ export default function SplitBillGroupCard({
   const renderItems = () => {
     if (group.items.length === 0) {
       return (
-        <Text style={styles.emptyText}>No items assigned</Text>
+        <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>No items assigned</Text>
       );
     }
     
     return (
       <View style={styles.itemsList}>
         {group.items.map(item => (
-          <View key={item.id} style={styles.itemRow}>
+          <View key={item.id} style={[styles.itemRow, { backgroundColor: theme.colors.background }]}>
             <Text style={styles.itemEmoji}>{item.emoji}</Text>
             <View style={styles.itemDetails}>
-              <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemQuantity}>
+              <Text style={[styles.itemName, { color: theme.colors.text }]}>{item.name}</Text>
+              <Text style={[styles.itemQuantity, { color: theme.colors.textSecondary }]}>
                 {item.splitQuantity < item.originalQuantity 
                   ? `${item.splitQuantity} of ${item.originalQuantity}`
                   : `x${item.splitQuantity}`
                 }
               </Text>
             </View>
-            <Text style={styles.itemPrice}>
+            <Text style={[styles.itemPrice, { color: theme.colors.text }]}>
               {formatPrice(item.price * item.splitQuantity, '£')}
             </Text>
             <TouchableOpacity
@@ -133,7 +132,7 @@ export default function SplitBillGroupCard({
   
   const renderTipSelector = () => (
     <View style={styles.tipSelector}>
-      <Text style={styles.optionLabel}>Tip:</Text>
+      <Text style={[styles.optionLabel, { color: theme.colors.textSecondary }]}>Tip:</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={styles.tipOptions}>
           {TIP_PERCENTAGES.map(percent => (
@@ -141,13 +140,15 @@ export default function SplitBillGroupCard({
               key={percent}
               style={[
                 styles.tipButton,
-                group.tipPercent === percent && styles.tipButtonActive
+                { backgroundColor: theme.colors.background, borderColor: theme.colors.border },
+                group.tipPercent === percent && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
               ]}
               onPress={() => onSetTipPercent(percent)}
             >
               <Text style={[
                 styles.tipButtonText,
-                group.tipPercent === percent && styles.tipButtonTextActive
+                { color: theme.colors.text },
+                group.tipPercent === percent && { color: theme.colors.white }
               ]}>
                 {percent}%
               </Text>
@@ -159,7 +160,7 @@ export default function SplitBillGroupCard({
   );
   
   return (
-    <View style={[styles.container, { borderLeftColor: group.color }]}>
+    <View style={[styles.container, { borderLeftColor: group.color, backgroundColor: theme.colors.surface }]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -171,7 +172,7 @@ export default function SplitBillGroupCard({
         
         {isEditingName ? (
           <TextInput
-            style={styles.nameInput}
+            style={[styles.nameInput, { color: theme.colors.text, borderBottomColor: theme.colors.primary }]}
             value={tempName}
             onChangeText={setTempName}
             onSubmitEditing={handleNameSubmit}
@@ -181,27 +182,44 @@ export default function SplitBillGroupCard({
           />
         ) : (
           <TouchableOpacity onPress={() => setIsEditingName(true)}>
-            <Text style={styles.groupName}>{group.name}</Text>
+            <Text style={[styles.groupName, { color: theme.colors.text }]}>{group.name}</Text>
           </TouchableOpacity>
         )}
         
         {groupTotal && (
-          <Text style={styles.headerTotal}>
+          <Text style={[styles.headerTotal, { color: theme.colors.primary }]}>
             {formatPrice(groupTotal.total, '£')}
           </Text>
         )}
       </View>
       
       {/* Color Picker */}
-      {renderColorPicker()}
+      {showColorPicker && (
+        <View style={[styles.colorPicker, { backgroundColor: theme.colors.background }]}>
+          {AVAILABLE_COLORS.map(color => (
+            <TouchableOpacity
+              key={color}
+              style={[styles.colorOption, { backgroundColor: color }]}
+              onPress={() => {
+                onUpdateColor(color);
+                setShowColorPicker(false);
+              }}
+            >
+              {color === group.color && (
+                <Icon name="check" size={16} color="#FFF" />
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
       
       {/* Content based on split method */}
       {splitMethod === 'equal' || group.customAmount > 0 ? (
-        <View style={styles.customAmountSection}>
-          <Text style={styles.customAmountLabel}>Custom Amount:</Text>
+        <View style={[styles.customAmountSection, { backgroundColor: theme.colors.background }]}>
+          <Text style={[styles.customAmountLabel, { color: theme.colors.textSecondary }]}>Custom Amount:</Text>
           {isEditingCustomAmount ? (
             <TextInput
-              style={styles.customAmountInput}
+              style={[styles.customAmountInput, { color: theme.colors.primary, borderBottomColor: theme.colors.primary }]}
               value={tempCustomAmount}
               onChangeText={setTempCustomAmount}
               onSubmitEditing={handleCustomAmountSubmit}
@@ -212,7 +230,7 @@ export default function SplitBillGroupCard({
             />
           ) : (
             <TouchableOpacity onPress={() => setIsEditingCustomAmount(true)}>
-              <Text style={styles.customAmountValue}>
+              <Text style={[styles.customAmountValue, { color: theme.colors.primary }]}>
                 {formatPrice(group.customAmount, '£')}
               </Text>
             </TouchableOpacity>
@@ -223,7 +241,7 @@ export default function SplitBillGroupCard({
       )}
       
       {/* Options */}
-      <View style={styles.options}>
+      <View style={[styles.options, { borderTopColor: theme.colors.border }]}>
         <View style={styles.toggleOptions}>
           <TouchableOpacity 
             style={styles.toggleOption}
@@ -231,13 +249,14 @@ export default function SplitBillGroupCard({
           >
             <View style={[
               styles.checkbox,
-              group.includeServiceCharge && styles.checkboxChecked
+              { borderColor: theme.colors.border },
+              group.includeServiceCharge && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
             ]}>
               {group.includeServiceCharge && (
                 <Icon name="check" size={14} color={theme.colors.white} />
               )}
             </View>
-            <Text style={styles.toggleLabel}>Service Charge</Text>
+            <Text style={[styles.toggleLabel, { color: theme.colors.text }]}>Service Charge</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
@@ -246,13 +265,14 @@ export default function SplitBillGroupCard({
           >
             <View style={[
               styles.checkbox,
-              group.includeTax && styles.checkboxChecked
+              { borderColor: theme.colors.border },
+              group.includeTax && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
             ]}>
               {group.includeTax && (
                 <Icon name="check" size={14} color={theme.colors.white} />
               )}
             </View>
-            <Text style={styles.toggleLabel}>Tax</Text>
+            <Text style={[styles.toggleLabel, { color: theme.colors.text }]}>Tax</Text>
           </TouchableOpacity>
         </View>
         
@@ -261,18 +281,18 @@ export default function SplitBillGroupCard({
       
       {/* Totals Breakdown */}
       {groupTotal && (
-        <View style={styles.totalsBreakdown}>
+        <View style={[styles.totalsBreakdown, { borderTopColor: theme.colors.border }]}>
           <View style={styles.totalRow}>
-            <Text style={styles.totalRowLabel}>Subtotal:</Text>
-            <Text style={styles.totalRowValue}>
+            <Text style={[styles.totalRowLabel, { color: theme.colors.textSecondary }]}>Subtotal:</Text>
+            <Text style={[styles.totalRowValue, { color: theme.colors.text }]}>
               {formatPrice(groupTotal.subtotal, '£')}
             </Text>
           </View>
           
           {groupTotal.tax > 0 && (
             <View style={styles.totalRow}>
-              <Text style={styles.totalRowLabel}>Tax:</Text>
-              <Text style={styles.totalRowValue}>
+              <Text style={[styles.totalRowLabel, { color: theme.colors.textSecondary }]}>Tax:</Text>
+              <Text style={[styles.totalRowValue, { color: theme.colors.text }]}>
                 {formatPrice(groupTotal.tax, '£')}
               </Text>
             </View>
@@ -280,8 +300,8 @@ export default function SplitBillGroupCard({
           
           {groupTotal.serviceCharge > 0 && (
             <View style={styles.totalRow}>
-              <Text style={styles.totalRowLabel}>Service:</Text>
-              <Text style={styles.totalRowValue}>
+              <Text style={[styles.totalRowLabel, { color: theme.colors.textSecondary }]}>Service:</Text>
+              <Text style={[styles.totalRowValue, { color: theme.colors.text }]}>
                 {formatPrice(groupTotal.serviceCharge, '£')}
               </Text>
             </View>
@@ -289,16 +309,16 @@ export default function SplitBillGroupCard({
           
           {groupTotal.tip > 0 && (
             <View style={styles.totalRow}>
-              <Text style={styles.totalRowLabel}>Tip:</Text>
-              <Text style={styles.totalRowValue}>
+              <Text style={[styles.totalRowLabel, { color: theme.colors.textSecondary }]}>Tip:</Text>
+              <Text style={[styles.totalRowValue, { color: theme.colors.text }]}>
                 {formatPrice(groupTotal.tip, '£')}
               </Text>
             </View>
           )}
           
-          <View style={[styles.totalRow, styles.totalRowFinal]}>
-            <Text style={styles.totalRowLabelFinal}>Total:</Text>
-            <Text style={styles.totalRowValueFinal}>
+          <View style={[styles.totalRow, styles.totalRowFinal, { borderTopColor: theme.colors.border }]}>
+            <Text style={[styles.totalRowLabelFinal, { color: theme.colors.text }]}>Total:</Text>
+            <Text style={[styles.totalRowValueFinal, { color: theme.colors.primary }]}>
               {formatPrice(groupTotal.total, '£')}
             </Text>
           </View>
@@ -308,9 +328,8 @@ export default function SplitBillGroupCard({
   );
 }
 
-const createStyles = (theme: any) => StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.surface,
     borderRadius: 12,
     padding: 16,
     borderLeftWidth: 4,
@@ -331,23 +350,19 @@ const createStyles = (theme: any) => StyleSheet.create({
   groupName: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme.colors.text,
     flex: 1,
   },
   nameInput: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme.colors.text,
     flex: 1,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.primary,
     paddingVertical: 0,
     marginRight: 12,
   },
   headerTotal: {
     fontSize: 18,
     fontWeight: '700',
-    color: theme.colors.primary,
   },
   
   // Color Picker
@@ -356,7 +371,6 @@ const createStyles = (theme: any) => StyleSheet.create({
     flexWrap: 'wrap',
     marginBottom: 12,
     padding: 8,
-    backgroundColor: theme.colors.background,
     borderRadius: 8,
     gap: 8,
   },
@@ -375,25 +389,20 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginBottom: 16,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: theme.colors.background,
     borderRadius: 8,
   },
   customAmountLabel: {
     fontSize: 14,
-    color: theme.colors.textSecondary,
     marginRight: 12,
   },
   customAmountValue: {
     fontSize: 20,
     fontWeight: '600',
-    color: theme.colors.primary,
   },
   customAmountInput: {
     fontSize: 20,
     fontWeight: '600',
-    color: theme.colors.primary,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.primary,
     paddingVertical: 0,
     minWidth: 100,
   },
@@ -407,7 +416,6 @@ const createStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: theme.colors.background,
     borderRadius: 8,
     marginBottom: 6,
   },
@@ -421,16 +429,13 @@ const createStyles = (theme: any) => StyleSheet.create({
   itemName: {
     fontSize: 14,
     fontWeight: '500',
-    color: theme.colors.text,
   },
   itemQuantity: {
     fontSize: 12,
-    color: theme.colors.textSecondary,
   },
   itemPrice: {
     fontSize: 14,
     fontWeight: '500',
-    color: theme.colors.text,
     marginRight: 8,
   },
   removeButton: {
@@ -438,7 +443,6 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: theme.colors.textSecondary,
     fontStyle: 'italic',
     textAlign: 'center',
     paddingVertical: 20,
@@ -447,7 +451,6 @@ const createStyles = (theme: any) => StyleSheet.create({
   // Options
   options: {
     borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
     paddingTop: 12,
   },
   toggleOptions: {
@@ -464,22 +467,18 @@ const createStyles = (theme: any) => StyleSheet.create({
     height: 20,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: theme.colors.border,
     marginRight: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxChecked: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
+    // Theme styles will be applied inline
   },
   toggleLabel: {
     fontSize: 14,
-    color: theme.colors.text,
   },
   optionLabel: {
     fontSize: 14,
-    color: theme.colors.textSecondary,
     marginBottom: 8,
   },
   
@@ -495,21 +494,17 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: theme.colors.background,
     borderWidth: 1,
-    borderColor: theme.colors.border,
   },
   tipButtonActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
+    // Theme styles will be applied inline
   },
   tipButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: theme.colors.text,
   },
   tipButtonTextActive: {
-    color: theme.colors.white,
+    // Theme styles will be applied inline
   },
   
   // Totals Breakdown
@@ -517,7 +512,6 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
   },
   totalRow: {
     flexDirection: 'row',
@@ -526,26 +520,21 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   totalRowLabel: {
     fontSize: 14,
-    color: theme.colors.textSecondary,
   },
   totalRowValue: {
     fontSize: 14,
-    color: theme.colors.text,
   },
   totalRowFinal: {
     marginTop: 6,
     paddingTop: 6,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
   },
   totalRowLabelFinal: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.colors.text,
   },
   totalRowValueFinal: {
     fontSize: 16,
     fontWeight: '700',
-    color: theme.colors.primary,
   },
 });

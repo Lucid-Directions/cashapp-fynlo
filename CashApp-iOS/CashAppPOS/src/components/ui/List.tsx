@@ -51,20 +51,27 @@ export const ListItem: React.FC<ListItemProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
   const Component = onPress ? TouchableOpacity : View;
 
   return (
     <Component
-      style={[styles.listItem, disabled && styles.listItemDisabled, style]}
+      style={[
+        styles.listItem,
+        {
+          paddingHorizontal: theme.spacing[4],
+          paddingVertical: theme.spacing[3],
+        },
+        disabled && styles.listItemDisabled,
+        style
+      ]}
       onPress={onPress}
       disabled={disabled}
       activeOpacity={onPress ? 0.7 : 1}
       testID={testID}
     >
       {/* Left Content */}
-      <View style={styles.leftSection}>
+      <View style={[styles.leftSection, { marginRight: theme.spacing[3] }]}>
         {leftContent && <View style={styles.leftContent}>{leftContent}</View>}
         {leftIcon && !leftContent && (
           <View style={styles.leftIconContainer}>
@@ -79,19 +86,46 @@ export const ListItem: React.FC<ListItemProps> = ({
 
       {/* Main Content */}
       <View style={styles.mainContent}>
-        <Text style={[styles.title, disabled && styles.titleDisabled]} numberOfLines={1}>
+        <Text style={[
+          styles.title,
+          {
+            fontSize: theme.typography.fontSize.base,
+            fontWeight: theme.typography.fontWeight.medium,
+            color: theme.colors.text,
+            lineHeight: theme.typography.lineHeight.tight * theme.typography.fontSize.base,
+          },
+          disabled && { color: theme.colors.neutral[400] }
+        ]} numberOfLines={1}>
           {title}
         </Text>
 
         {subtitle && (
-          <Text style={[styles.subtitle, disabled && styles.subtitleDisabled]} numberOfLines={1}>
+          <Text style={[
+            styles.subtitle,
+            {
+              fontSize: theme.typography.fontSize.sm,
+              color: theme.colors.neutral[600],
+              marginTop: theme.spacing[1],
+              lineHeight: theme.typography.lineHeight.tight * theme.typography.fontSize.sm,
+            },
+            disabled && { color: theme.colors.neutral[300] }
+          ]} numberOfLines={1}>
             {subtitle}
           </Text>
         )}
 
         {description && (
           <Text
-            style={[styles.description, disabled && styles.descriptionDisabled]}
+            style={[
+              styles.description,
+              {
+                fontSize: theme.typography.fontSize.sm,
+                color: theme.colors.neutral[500],
+                marginTop: theme.spacing[1],
+                lineHeight: theme.typography.lineHeight.normal * theme.typography.fontSize.sm,
+              },
+              disabled && { color: theme.colors.neutral[300] }
+            ]}
             numberOfLines={2}
           >
             {description}
@@ -100,7 +134,7 @@ export const ListItem: React.FC<ListItemProps> = ({
       </View>
 
       {/* Right Content */}
-      <View style={styles.rightSection}>
+      <View style={[styles.rightSection, { marginLeft: theme.spacing[3] }]}>
         {rightContent && <View style={styles.rightContent}>{rightContent}</View>}
         {rightIcon && !rightContent && (
           <View style={styles.rightIconContainer}>
@@ -126,15 +160,42 @@ export interface ListHeaderProps {
 
 export const ListHeader: React.FC<ListHeaderProps> = ({ title, subtitle, rightContent, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
   return (
-    <View style={[styles.listHeader, style]}>
+    <View style={[
+      styles.listHeader,
+      {
+        paddingHorizontal: theme.spacing[4],
+        paddingVertical: theme.spacing[4],
+        backgroundColor: theme.colors.neutral[50],
+      },
+      style
+    ]}>
       <View style={styles.headerMainContent}>
-        <Text style={styles.headerTitle}>{title}</Text>
-        {subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
+        <Text style={[
+          styles.headerTitle,
+          {
+            fontSize: theme.typography.fontSize.lg,
+            fontWeight: theme.typography.fontWeight.semibold,
+            color: theme.colors.text,
+          }
+        ]}>{title}</Text>
+        {subtitle && (
+          <Text style={[
+            styles.headerSubtitle,
+            {
+              fontSize: theme.typography.fontSize.sm,
+              color: theme.colors.neutral[600],
+              marginTop: theme.spacing[1],
+            }
+          ]}>{subtitle}</Text>
+        )}
       </View>
-      {rightContent && <View style={styles.headerRightContent}>{rightContent}</View>}
+      {rightContent && (
+        <View style={[styles.headerRightContent, { marginLeft: theme.spacing[4] }]}>
+          {rightContent}
+        </View>
+      )}
     </View>
   );
 };
@@ -149,13 +210,35 @@ export interface ListSectionProps {
 
 export const ListSection: React.FC<ListSectionProps> = ({ children, header, footer, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
   return (
-    <View style={[styles.listSection, style]}>
-      {header && <Text style={styles.sectionHeader}>{header}</Text>}
-      <View style={styles.sectionContent}>{children}</View>
-      {footer && <Text style={styles.sectionFooter}>{footer}</Text>}
+    <View style={[styles.listSection, { marginVertical: theme.spacing[2] }, style]}>
+      {header && (
+        <Text style={[
+          styles.sectionHeader,
+          {
+            fontSize: theme.typography.fontSize.sm,
+            fontWeight: theme.typography.fontWeight.semibold,
+            color: theme.colors.neutral[600],
+            paddingHorizontal: theme.spacing[4],
+            paddingVertical: theme.spacing[2],
+            backgroundColor: theme.colors.neutral[50],
+          }
+        ]}>{header}</Text>
+      )}
+      <View style={[styles.sectionContent, { backgroundColor: theme.colors.white }]}>{children}</View>
+      {footer && (
+        <Text style={[
+          styles.sectionFooter,
+          {
+            fontSize: theme.typography.fontSize.xs,
+            color: theme.colors.neutral[500],
+            paddingHorizontal: theme.spacing[4],
+            paddingVertical: theme.spacing[2],
+            backgroundColor: theme.colors.neutral[50],
+          }
+        ]}>{footer}</Text>
+      )}
     </View>
   );
 };
@@ -169,16 +252,28 @@ const List: React.FC<ListProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
   const getVariantStyle = () => {
     switch (variant) {
       case 'card':
-        return styles.listVariantCard;
+        return {
+          ...styles.listVariantCard,
+          backgroundColor: theme.colors.white,
+          borderRadius: theme.borderRadius.xl,
+          ...theme.shadows.md,
+        };
       case 'inset':
-        return styles.listVariantInset;
+        return {
+          ...styles.listVariantInset,
+          backgroundColor: theme.colors.white,
+          marginHorizontal: theme.spacing[4],
+          borderRadius: theme.borderRadius.xl,
+          ...theme.shadows.sm,
+        };
       default:
-        return styles.listVariantDefault;
+        return {
+          backgroundColor: theme.colors.white,
+        };
     }
   };
 
@@ -191,7 +286,15 @@ const List: React.FC<ListProps> = ({
     return (
       <React.Fragment key={index}>
         {child}
-        {showDividers && !isLastChild && <View style={styles.divider} />}
+        {showDividers && !isLastChild && (
+          <View style={[
+            styles.divider,
+            {
+              backgroundColor: theme.colors.neutral[100],
+              marginLeft: theme.spacing[4] + 32 + theme.spacing[3], // Align with main content
+            }
+          ]} />
+        )}
       </React.Fragment>
     );
   });
@@ -203,144 +306,107 @@ const List: React.FC<ListProps> = ({
   );
 };
 
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
-    list: {
-      // Base list styles
-    },
-    listVariantDefault: {
-      backgroundColor: theme.colors.white,
-    },
-    listVariantCard: {
-      backgroundColor: theme.colors.white,
-      borderRadius: theme.borderRadius.xl,
-      ...theme.shadows.md,
-      overflow: 'hidden',
-    },
-    listVariantInset: {
-      backgroundColor: theme.colors.white,
-      marginHorizontal: theme.spacing[4],
-      borderRadius: theme.borderRadius.xl,
-      ...theme.shadows.sm,
-      overflow: 'hidden',
-    },
-    listItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: theme.spacing[4],
-      paddingVertical: theme.spacing[3],
-      minHeight: 56,
-    },
-    listItemDisabled: {
-      opacity: 0.5,
-    },
-    leftSection: {
-      marginRight: theme.spacing[3],
-    },
-    leftContent: {
-      // Custom left content container
-    },
-    leftIconContainer: {
-      width: 32,
-      height: 32,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    mainContent: {
-      flex: 1,
-      justifyContent: 'center',
-    },
-    title: {
-      fontSize: theme.typography.fontSize.base,
-      fontWeight: theme.typography.fontWeight.medium,
-      color: theme.colors.text,
-      lineHeight: theme.typography.lineHeight.tight * theme.typography.fontSize.base,
-    },
-    titleDisabled: {
-      color: theme.colors.neutral[400],
-    },
-    subtitle: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.neutral[600],
-      marginTop: theme.spacing[1],
-      lineHeight: theme.typography.lineHeight.tight * theme.typography.fontSize.sm,
-    },
-    subtitleDisabled: {
-      color: theme.colors.neutral[300],
-    },
-    description: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.neutral[500],
-      marginTop: theme.spacing[1],
-      lineHeight: theme.typography.lineHeight.normal * theme.typography.fontSize.sm,
-    },
-    descriptionDisabled: {
-      color: theme.colors.neutral[300],
-    },
-    rightSection: {
-      marginLeft: theme.spacing[3],
-    },
-    rightContent: {
-      alignItems: 'flex-end',
-    },
-    rightIconContainer: {
-      width: 24,
-      height: 24,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    divider: {
-      height: 1,
-      backgroundColor: theme.colors.neutral[100],
-      marginLeft: theme.spacing[4] + 32 + theme.spacing[3], // Align with main content
-    },
-    listHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: theme.spacing[4],
-      paddingVertical: theme.spacing[4],
-      backgroundColor: theme.colors.neutral[50],
-    },
-    headerMainContent: {
-      flex: 1,
-    },
-    headerTitle: {
-      fontSize: theme.typography.fontSize.lg,
-      fontWeight: theme.typography.fontWeight.semibold,
-      color: theme.colors.text,
-    },
-    headerSubtitle: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.neutral[600],
-      marginTop: theme.spacing[1],
-    },
-    headerRightContent: {
-      marginLeft: theme.spacing[4],
-    },
-    listSection: {
-      marginVertical: theme.spacing[2],
-    },
-    sectionHeader: {
-      fontSize: theme.typography.fontSize.sm,
-      fontWeight: theme.typography.fontWeight.semibold,
-      color: theme.colors.neutral[600],
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-      paddingHorizontal: theme.spacing[4],
-      paddingVertical: theme.spacing[2],
-      backgroundColor: theme.colors.neutral[50],
-    },
-    sectionContent: {
-      backgroundColor: theme.colors.white,
-    },
-    sectionFooter: {
-      fontSize: theme.typography.fontSize.xs,
-      color: theme.colors.neutral[500],
-      paddingHorizontal: theme.spacing[4],
-      paddingVertical: theme.spacing[2],
-      backgroundColor: theme.colors.neutral[50],
-    },
-  });
+const styles = StyleSheet.create({
+  list: {
+    // Base list styles
+  },
+  listVariantDefault: {
+    // Theme styles will be applied inline
+  },
+  listVariantCard: {
+    overflow: 'hidden',
+  },
+  listVariantInset: {
+    overflow: 'hidden',
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 56,
+  },
+  listItemDisabled: {
+    opacity: 0.5,
+  },
+  leftSection: {
+    // Theme styles will be applied inline
+  },
+  leftContent: {
+    // Custom left content container
+  },
+  leftIconContainer: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mainContent: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  title: {
+    // Theme styles will be applied inline
+  },
+  titleDisabled: {
+    // Theme styles will be applied inline
+  },
+  subtitle: {
+    // Theme styles will be applied inline
+  },
+  subtitleDisabled: {
+    // Theme styles will be applied inline
+  },
+  description: {
+    // Theme styles will be applied inline
+  },
+  descriptionDisabled: {
+    // Theme styles will be applied inline
+  },
+  rightSection: {
+    // Theme styles will be applied inline
+  },
+  rightContent: {
+    alignItems: 'flex-end',
+  },
+  rightIconContainer: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  divider: {
+    height: 1,
+    // Theme styles will be applied inline
+  },
+  listHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerMainContent: {
+    flex: 1,
+  },
+  headerTitle: {
+    // Theme styles will be applied inline
+  },
+  headerSubtitle: {
+    // Theme styles will be applied inline
+  },
+  headerRightContent: {
+    // Theme styles will be applied inline
+  },
+  listSection: {
+    // Theme styles will be applied inline
+  },
+  sectionHeader: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  sectionContent: {
+    // Theme styles will be applied inline
+  },
+  sectionFooter: {
+    // Theme styles will be applied inline
+  },
+});
 
 export default List;

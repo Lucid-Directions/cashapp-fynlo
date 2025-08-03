@@ -48,7 +48,6 @@ const Badge: React.FC<BadgeProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
   // Get variant styles
   const getVariantStyles = (): { container: ViewStyle; text: TextStyle } => {
@@ -206,6 +205,7 @@ const Badge: React.FC<BadgeProps> = ({
 
   const textDisplayStyle: TextStyle = [
     styles.text,
+    { fontWeight: theme.typography.fontWeight.semibold },
     sizeStyles.text,
     variantStyles.text,
     textStyle,
@@ -238,7 +238,7 @@ export const PositionedBadge: React.FC<PositionedBadgeProps> = ({
   ...badgeProps
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+
 
   const getPositionStyles = (): ViewStyle => {
     const { x = 0, y = 0 } = offset;
@@ -270,30 +270,27 @@ export const PositionedBadge: React.FC<PositionedBadgeProps> = ({
   return (
     <View style={styles.positionedContainer}>
       {children}
-      <View style={[styles.badgePosition, getPositionStyles()]}>
+      <View style={[styles.badgePosition, { zIndex: theme.zIndex.overlay }, getPositionStyles()]}>
         <Badge {...badgeProps}>{badge}</Badge>
       </View>
     </View>
   );
 };
 
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
-    container: {
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    text: {
-      fontWeight: theme.typography.fontWeight.semibold,
-      textAlign: 'center',
-    },
-    positionedContainer: {
-      position: 'relative',
-    },
-    badgePosition: {
-      position: 'absolute',
-      zIndex: theme.zIndex.overlay,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text: {
+    textAlign: 'center',
+  },
+  positionedContainer: {
+    position: 'relative',
+  },
+  badgePosition: {
+    position: 'absolute',
+  },
+});
 
 export default Badge;
