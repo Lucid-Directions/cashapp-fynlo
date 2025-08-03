@@ -203,16 +203,22 @@ export function formatSplitQuantity(item: SplitBillItem): string {
   
   // Check if it's a clean fraction
   const fraction = item.splitQuantity / item.originalQuantity;
+  const EPSILON = 0.001; // Tolerance for floating-point comparison
   
-  if (fraction === 0.5) {
+  // Helper function for safe floating-point comparison
+  const isApproximately = (value: number, target: number): boolean => {
+    return Math.abs(value - target) < EPSILON;
+  };
+  
+  if (isApproximately(fraction, 0.5)) {
     return `½ of ${item.originalQuantity}`;
-  } else if (fraction === 0.33 || fraction === 1/3) {
+  } else if (isApproximately(fraction, 1/3)) {
     return `⅓ of ${item.originalQuantity}`;
-  } else if (fraction === 0.25) {
+  } else if (isApproximately(fraction, 0.25)) {
     return `¼ of ${item.originalQuantity}`;
-  } else if (fraction === 0.67 || fraction === 2/3) {
+  } else if (isApproximately(fraction, 2/3)) {
     return `⅔ of ${item.originalQuantity}`;
-  } else if (fraction === 0.75) {
+  } else if (isApproximately(fraction, 0.75)) {
     return `¾ of ${item.originalQuantity}`;
   }
   

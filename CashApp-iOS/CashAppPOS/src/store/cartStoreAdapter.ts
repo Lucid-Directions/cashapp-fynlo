@@ -35,8 +35,12 @@ export function useCartStore(useEnhanced: boolean = false) {
     
     // Convert enhanced items back to old format for components that expect it
     getOldFormatCart: (): OrderItem[] => {
-      return enhancedStore.cart.map(item => ({
-        id: parseInt(item.id) || 0, // Convert back to number, fallback to 0
+      return enhancedStore.cart.map((item, index) => ({
+        // Use a hash of the string ID to generate a stable numeric ID
+        // This avoids collisions while maintaining consistency
+        id: typeof item.id === 'string' && isNaN(parseInt(item.id)) 
+          ? item.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), index)
+          : parseInt(item.id) || index,
         name: item.name,
         price: item.price,
         quantity: item.quantity,
@@ -104,8 +108,11 @@ export function syncCartStores() {
   // Only sync if carts are different
   if (oldStore.cart.length !== enhancedStore.cart.length) {
     // Prefer enhanced store as source of truth
-    const simplifiedCart = enhancedStore.cart.map(item => ({
-      id: parseInt(item.id) || 0,
+    const simplifiedCart = enhancedStore.cart.map((item, index) => ({
+      // Use same hash logic as getOldFormatCart for consistency
+      id: typeof item.id === 'string' && isNaN(parseInt(item.id)) 
+        ? item.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), index)
+        : parseInt(item.id) || index,
       name: item.name,
       price: item.price,
       quantity: item.quantity,

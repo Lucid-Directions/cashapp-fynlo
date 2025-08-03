@@ -43,7 +43,8 @@ export function useItemModifications({
   useEnhancedCart = true
 }: UseItemModificationsProps): UseItemModificationsReturn {
   const pricingService = ModificationPricingService.getInstance();
-  const store = useCartStore(useEnhancedCart) as ReturnType<typeof useEnhancedCartStore>;
+  const store = useCartStore(useEnhancedCart);
+  const enhancedStore = useEnhancedCartStore();
   
   // Initialize modifications from item or defaults
   const [modifications, setModifications] = useState<CartItemModification[]>(() => {
@@ -166,14 +167,21 @@ export function useItemModifications({
   const applyModifications = useCallback(() => {
     if (!item || !validation.isValid) return;
     
-    // Update the item in the store
-    store.modifyCartItem(item.id, modifications);
-    
-    // Update special instructions if changed
-    if (specialInstructions !== item.specialInstructions) {
-      store.setItemSpecialInstructions(item.id, specialInstructions);
+    // Only use enhanced methods if we're using the enhanced cart
+    if (useEnhancedCart) {
+      // Update the item in the store using enhanced methods
+      enhancedStore.modifyCartItem(item.id, modifications);
+      
+      // Update special instructions if changed
+      if (specialInstructions !== item.specialInstructions) {
+        enhancedStore.setItemSpecialInstructions(item.id, specialInstructions);
+      }
+    } else {
+      // For old store, we need to update the entire item
+      // This is a limitation of the old store structure
+      console.warn('Modifications not supported in old cart store');
     }
-  }, [item, modifications, specialInstructions, validation.isValid, store]);
+  }, [item, modifications, specialInstructions, validation.isValid, useEnhancedCart, enhancedStore]);
   
   // Helpers
   
