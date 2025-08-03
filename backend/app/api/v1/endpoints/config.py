@@ -4,7 +4,7 @@ Provides endpoints for managing payment system configuration
 """
 
 from typing import Dict, Any, Optional
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
@@ -208,7 +208,9 @@ async def get_security_configuration(current_user: User = Depends(get_current_us
 
         config_data = {
             "encrypt_api_keys": security_config.encrypt_api_keys,
-            "webhook_signature_validation": security_config.webhook_signature_validation,
+            "webhook_signature_validation": (
+                security_config.webhook_signature_validation
+            ),
             "rate_limiting_enabled": security_config.rate_limiting_enabled,
             "max_requests_per_minute": security_config.max_requests_per_minute,
             "allowed_origins": security_config.allowed_origins,
@@ -244,26 +246,6 @@ async def get_system_metrics(
     except Exception as e:
         raise FynloException(message=str(e))
 
-@router.get("/monitoring/metrics")
-async def get_system_metrics(
-    hours: int = Query(24, description="Number of hours to look back"),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Get system metrics for the specified time period"""
-    try:
-        monitoring_service = get_monitoring_service(db)
-        metrics = await monitoring_service.get_system_metrics(hours)
-
-        return APIResponseHelper.success(
-            data=metrics,
-            message=f"System metrics for last {hours} hours retrieved successfully",
-        )
-
-    except FynloException:
-        raise
-    except Exception as e:
-        raise FynloException(message=str(e))
 
 
 @router.put("/monitoring/thresholds")
@@ -273,13 +255,7 @@ async def update_monitoring_thresholds(
     current_user: User = Depends(get_current_user),
 ):
     """Update monitoring alert thresholds"""
-@router.get("/monitoring/metrics")
-async def get_system_metrics(
-    hours: int = Query(24, description="Number of hours to look back"),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Get system metrics for the specified time period"""
+    try:
         monitoring_service = get_monitoring_service(db)
         await monitoring_service.update_thresholds(threshold_update.thresholds)
 
@@ -294,6 +270,7 @@ async def get_system_metrics(
 @router.post("/backup")
 async def backup_configuration(current_user: User = Depends(get_current_user)):
     """Create a backup of current configuration"""
+    try:
         # Save all configurations
         config_manager.save_configuration("all")
 
@@ -303,7 +280,9 @@ async def backup_configuration(current_user: User = Depends(get_current_user)):
         return APIResponseHelper.success(
             data={
                 "backup_timestamp": summary,
-                "backup_location": f"config/payment_config_{config_manager.environment.value}.json",
+                "backup_location": (
+                    f"config/payment_config_{config_manager.environment.value}.json"
+                ),
             },
             message="Configuration backup created successfully",
         )
