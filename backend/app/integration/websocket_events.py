@@ -8,10 +8,6 @@ from datetime import datetime
 import asyncio
 
 from app.core.websocket import (
-import logging
-
-logger = logging.getLogger(__name__)
-
     websocket_manager,
     notify_order_created,
     notify_order_status_changed,

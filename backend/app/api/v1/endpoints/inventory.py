@@ -332,10 +332,6 @@ async def scan_receipt_api(
     
     # Integration with OCRService
     from app.services.ocr_service import OCRService
-import logging
-
-logger = logging.getLogger(__name__)
-
     ocr_service = OCRService()
 
     try:
