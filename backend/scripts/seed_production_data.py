@@ -17,6 +17,8 @@ from decimal import Decimal
 from typing import List, Dict
 import uuid
 import random
+import secrets
+import string
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -29,6 +31,20 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+def generate_secure_password(length: int = 16) -> str:
+    """Generate a secure random password"""
+    alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
+
+
+def get_password_from_env(env_key: str, default_length: int = 16) -> str:
+    """Get password from environment or generate a secure one"""
+    password = os.getenv(env_key)
+    if not password:
+        password = generate_secure_password(default_length)
+        logger.warning(f"No {env_key} found, generated random password: {password}")
+    return password
 
 
 class ProductionSeeder:
@@ -128,7 +144,8 @@ class ProductionSeeder:
         self.platform_id = platform.id
         
         # Create platform owner user
-        hashed_password = bcrypt.hashpw("FynloPlatform2025!".encode('utf-8'), bcrypt.gensalt())
+        platform_password = get_password_from_env("SEED_PLATFORM_PASSWORD")
+        hashed_password = bcrypt.hashpw(platform_password.encode('utf-8'), bcrypt.gensalt())
         platform_owner = User(
             id=str(uuid.uuid4()),
             email="admin@fynlo.com",
@@ -205,7 +222,8 @@ class ProductionSeeder:
         logger.info("3️⃣ Creating Restaurant Management...")
         
         # Restaurant Owner
-        owner_password = bcrypt.hashpw("CasaEstrella2025!".encode('utf-8'), bcrypt.gensalt())
+        owner_password_str = get_password_from_env("SEED_OWNER_PASSWORD")
+        owner_password = bcrypt.hashpw(owner_password_str.encode('utf-8'), bcrypt.gensalt())
         owner = User(
             id=str(uuid.uuid4()),
             email="carlos@casaestrella.co.uk",
@@ -220,7 +238,8 @@ class ProductionSeeder:
         self.owner_user_id = owner.id
         
         # Restaurant Manager
-        manager_password = bcrypt.hashpw("Manager2025!".encode('utf-8'), bcrypt.gensalt())
+        manager_password_str = get_password_from_env("SEED_MANAGER_PASSWORD")
+        manager_password = bcrypt.hashpw(manager_password_str.encode('utf-8'), bcrypt.gensalt())
         manager = User(
             id=str(uuid.uuid4()),
             email="maria@casaestrella.co.uk",
@@ -301,7 +320,10 @@ class ProductionSeeder:
         
         for staff in staff_data:
             # Create User account
-            password = bcrypt.hashpw(f"{staff['first_name']}2025!".encode('utf-8'), bcrypt.gensalt())
+            # Generate secure password for each staff member
+            staff_password = generate_secure_password()
+            logger.info(f"Generated password for {staff['email']}: {staff_password}")
+            password = bcrypt.hashpw(staff_password.encode('utf-8'), bcrypt.gensalt())
             user = User(
                 id=str(uuid.uuid4()),
                 email=staff["email"],

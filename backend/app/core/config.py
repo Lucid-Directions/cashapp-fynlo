@@ -34,13 +34,19 @@ class Settings(BaseSettings):
     BASE_URL: str = "https://fynlopos-9eg2c.ondigitalocean.app"  # Production URL, override in dev
     
     # Database - Must be set via environment variable in production
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://fynlo_user:fynlo_password@localhost:5432/fynlo_pos")
+    DATABASE_URL: str = os.getenv("DATABASE_URL")
+    if not DATABASE_URL:
+        raise ValueError("DATABASE_URL environment variable is required")
     
     # Redis - Must be set via environment variable in production
-    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    REDIS_URL: str = os.getenv("REDIS_URL")
+    if not REDIS_URL:
+        raise ValueError("REDIS_URL environment variable is required")
     
     # Security
-    SECRET_KEY: str = "your-super-secret-key-change-in-production"
+    SECRET_KEY: str = os.getenv("SECRET_KEY")
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY environment variable is required")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     CORS_ORIGINS: Optional[str] = None  # Will be parsed as list in validator
