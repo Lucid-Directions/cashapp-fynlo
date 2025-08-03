@@ -5,6 +5,10 @@ Quick test script to verify backend setup and dependencies
 
 import sys
 import subprocess
+import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 def check_python_version():
     """Check Python version"""
@@ -78,9 +82,6 @@ def test_redis_connection():
     try:
         import redis
         from app.core.config import settings
-import logging
-
-logger = logging.getLogger(__name__)
 
         
         r = redis.from_url(settings.REDIS_URL)

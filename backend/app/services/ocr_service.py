@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 # from app.api.v1.endpoints.inventory import ScannedItemResponse
 # For now, let's define a similar structure here or assume it's passed appropriately.
 
+
 class OCRService:
     def __init__(self, ocr_provider_config: Dict[str, Any] = None):
         """
@@ -53,20 +54,56 @@ class OCRService:
         # or just return a fixed mock response.
         # This is a very naive check just for basic mock differentiation.
         try:
-            decoded_string_for_check = image_bytes.decode('utf-8', errors='ignore')
+            decoded_string_for_check = image_bytes.decode("utf-8", errors="ignore")
             if "milk" in decoded_string_for_check.lower():
-                 return [
-                    {"raw_text_name": "Milk 1L", "raw_text_quantity": "2", "raw_text_price": "1.50", "parsed_quantity": 2.0, "parsed_price": 1.50},
-                    {"raw_text_name": "Bread Loaf", "raw_text_quantity": "1", "raw_text_price": "2.20", "parsed_quantity": 1.0, "parsed_price": 2.20},
-                    {"raw_text_name": "Organic Eggs", "raw_text_quantity": "1 dz", "raw_text_price": "4.99", "parsed_quantity": 1.0, "parsed_price": 4.99},
+                return [
+                    {
+                        "raw_text_name": "Milk 1L",
+                        "raw_text_quantity": "2",
+                        "raw_text_price": "1.50",
+                        "parsed_quantity": 2.0,
+                        "parsed_price": 1.50,
+                    },
+                    {
+                        "raw_text_name": "Bread Loaf",
+                        "raw_text_quantity": "1",
+                        "raw_text_price": "2.20",
+                        "parsed_quantity": 1.0,
+                        "parsed_price": 2.20,
+                    },
+                    {
+                        "raw_text_name": "Organic Eggs",
+                        "raw_text_quantity": "1 dz",
+                        "raw_text_price": "4.99",
+                        "parsed_quantity": 1.0,
+                        "parsed_price": 4.99,
+                    },
                 ]
         except Exception:
-            pass # Ignore if it's not easily decodable for a simple check
+            pass  # Ignore if it's not easily decodable for a simple check
 
         return [
-            {"raw_text_name": "Generic Item A", "raw_text_quantity": "1", "raw_text_price": "10.00", "parsed_quantity": 1.0, "parsed_price": 10.00},
-            {"raw_text_name": "Another Item B", "raw_text_quantity": "3 units", "raw_text_price": "7.50", "parsed_quantity": 3.0, "parsed_price": 7.50},
-            {"raw_text_name": "Service Charge", "raw_text_quantity": "", "raw_text_price": "1.20", "parsed_quantity": None, "parsed_price": 1.20}, # Example of non-item
+            {
+                "raw_text_name": "Generic Item A",
+                "raw_text_quantity": "1",
+                "raw_text_price": "10.00",
+                "parsed_quantity": 1.0,
+                "parsed_price": 10.00,
+            },
+            {
+                "raw_text_name": "Another Item B",
+                "raw_text_quantity": "3 units",
+                "raw_text_price": "7.50",
+                "parsed_quantity": 3.0,
+                "parsed_price": 7.50,
+            },
+            {
+                "raw_text_name": "Service Charge",
+                "raw_text_quantity": "",
+                "raw_text_price": "1.20",
+                "parsed_quantity": None,
+                "parsed_price": 1.20,
+            },  # Example of non-item
         ]
 
     def _extract_text_from_ocr_response(self, ocr_response: Any) -> str:
@@ -79,7 +116,9 @@ class OCRService:
         # if texts:
         #     return texts[0].description
         # return ""
-        raise NotImplementedError("Actual OCR response parsing not implemented in mock.")
+        raise NotImplementedError(
+            "Actual OCR response parsing not implemented in mock."
+        )
 
     def _parse_line_items_from_text(self, raw_text: str) -> List[Dict[str, Any]]:
         """
@@ -91,7 +130,10 @@ class OCRService:
         # - Quantity: \d+\s*(pcs?|kg|g|ltr|ml|dozen|dz)?
         # - Price: \£?\d+\.\d{2}
         # - Item name: usually the text before quantity and price on a line
-        raise NotImplementedError("Actual line item parsing from text not implemented in mock.")
+        raise NotImplementedError(
+            "Actual line item parsing from text not implemented in mock."
+        )
+
 
 # Example of how this service might be instantiated and used:
 # ocr_service_instance = OCRService(ocr_provider_config={"provider": "mock"})
@@ -113,6 +155,7 @@ class OCRService:
 #         matched_product = next((p for p in product_list if p["name"] == match[0]), None)
 #         return matched_product["sku"] if matched_product else None
 #     return None
+
 
 def get_ocr_service():
     # This function can be used for dependency injection in FastAPI

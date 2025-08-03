@@ -7,7 +7,11 @@ Provides essential endpoints without complex dependencies
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import json
+import logging
 from datetime import datetime
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Fynlo POS - Minimal Server",
@@ -204,10 +208,6 @@ async def process_payment():
 
 if __name__ == "__main__":
     import uvicorn
-import logging
-
-logger = logging.getLogger(__name__)
-
     logger.info("🚀 Starting Fynlo POS Backend Server...")
     logger.info("📡 Network Configuration:")
     logger.info("   • Host: 0.0.0.0 (accepting all network interfaces)")

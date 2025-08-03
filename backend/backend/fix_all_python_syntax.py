@@ -2,10 +2,9 @@
 """Script to fix ALL Python syntax errors in the backend directory."""
 
 import ast
-import os
 import re
 from pathlib import Path
-from typing import Tuple, List
+from typing import Tuple
 
 
 def check_syntax(content: str) -> Tuple[bool, str]:
@@ -37,7 +36,7 @@ def fix_docstring_errors(content: str) -> str:
         # Fix standalone """ after function/class definitions
         if i > 0 and re.match(r'^\s*(def|class)\s+', lines[i-1]) and line.strip() == '"""':
             # This is likely a malformed docstring start
-            indent = len(line) - len(line.lstrip())
+            len(line) - len(line.lstrip())
             if i + 1 < len(lines) and not lines[i + 1].strip().startswith('"""'):
                 # There's content after, so this is a docstring start
                 fixed_lines.append(line)
@@ -70,7 +69,6 @@ def fix_complex_docstring_patterns(content: str) -> str:
     lines = content.split('\n')
     fixed_lines = []
     in_docstring = False
-    docstring_start_line = -1
     docstring_indent = 0
     
     i = 0
@@ -88,7 +86,6 @@ def fix_complex_docstring_patterns(content: str) -> str:
             else:
                 # Multi-line docstring start
                 in_docstring = True
-                docstring_start_line = i
                 docstring_indent = len(line) - len(line.lstrip())
                 fixed_lines.append(line)
         elif in_docstring:
@@ -251,7 +248,7 @@ def main():
     
     # Summary
     print(f"\n{'='*60}")
-    print(f"SUMMARY:")
+    print("SUMMARY:")
     print(f"Total Python files: {len(python_files)}")
     print(f"Files with syntax errors: {len(broken_files)}")
     print(f"Files successfully fixed: {fixed_count}")
@@ -259,12 +256,12 @@ def main():
     print(f"{'='*60}")
     
     if still_broken:
-        print(f"\nFiles that still need manual attention:")
+        print("\nFiles that still need manual attention:")
         for filepath, error in still_broken:
             print(f"  - {filepath}")
     
     # Final validation
-    print(f"\nRunning final validation...")
+    print("\nRunning final validation...")
     final_broken = 0
     for filepath in python_files:
         try:

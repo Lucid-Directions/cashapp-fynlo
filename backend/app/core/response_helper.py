@@ -17,17 +17,17 @@ class APIResponseHelper:
         data: Optional[Union[Dict[str, Any], List[Any]]] = None,
         message: str = "Success",
         status_code: int = status.HTTP_200_OK,
-        meta: Optional[Dict[str, Any]] = None
+        meta: Optional[Dict[str, Any]] = None,
     ) -> JSONResponse:
         """
         Create a successful API response
-        
+
         Args:
             data: The response data
             message: Success message
             status_code: HTTP status code
             meta: Additional metadata
-            
+
         Returns:
             JSONResponse with standardized format
         """
@@ -36,34 +36,31 @@ class APIResponseHelper:
             "message": message,
             "timestamp": datetime.utcnow().isoformat(),
         }
-        
+
         if data is not None:
             response["data"] = data
-            
+
         if meta:
             response["meta"] = meta
-            
-        return JSONResponse(
-            content=response,
-            status_code=status_code
-        )
+
+        return JSONResponse(content=response, status_code=status_code)
 
     @staticmethod
     def error(
         message: str = "An error occurred",
         status_code: int = status.HTTP_400_BAD_REQUEST,
         error_code: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None
+        details: Optional[Dict[str, Any]] = None,
     ) -> JSONResponse:
         """
         Create an error API response
-        
+
         Args:
             message: Error message
             status_code: HTTP status code
             error_code: Application-specific error code
             details: Additional error details
-            
+
         Returns:
             JSONResponse with standardized error format
         """
@@ -72,41 +69,34 @@ class APIResponseHelper:
             "message": message,
             "timestamp": datetime.utcnow().isoformat(),
         }
-        
+
         if error_code:
             response["error_code"] = error_code
-            
+
         if details:
             response["details"] = details
-            
-        return JSONResponse(
-            content=response,
-            status_code=status_code
-        )
+
+        return JSONResponse(content=response, status_code=status_code)
 
     @staticmethod
     def paginated(
-        data: List[Any],
-        page: int,
-        page_size: int,
-        total: int,
-        message: str = "Success"
+        data: List[Any], page: int, page_size: int, total: int, message: str = "Success"
     ) -> JSONResponse:
         """
         Create a paginated API response
-        
+
         Args:
             data: List of items for current page
             page: Current page number
             page_size: Items per page
             total: Total number of items
             message: Success message
-            
+
         Returns:
             JSONResponse with pagination metadata
         """
         total_pages = (total + page_size - 1) // page_size
-        
+
         return APIResponseHelper.success(
             data=data,
             message=message,
@@ -117,23 +107,22 @@ class APIResponseHelper:
                     "total": total,
                     "total_pages": total_pages,
                     "has_next": page < total_pages,
-                    "has_prev": page > 1
+                    "has_prev": page > 1,
                 }
-            }
+            },
         )
 
     @staticmethod
     def onboarding_required(
-        user_data: Dict[str, Any],
-        message: str = "Restaurant setup required"
+        user_data: Dict[str, Any], message: str = "Restaurant setup required"
     ) -> JSONResponse:
         """
         Create response for users who need to complete onboarding
-        
+
         Args:
             user_data: Basic user information
             message: Onboarding message
-            
+
         Returns:
             JSONResponse indicating onboarding is required
         """
@@ -145,5 +134,5 @@ class APIResponseHelper:
                 "user": user_data,
                 "timestamp": datetime.utcnow().isoformat(),
             },
-            status_code=status.HTTP_403_FORBIDDEN
+            status_code=status.HTTP_403_FORBIDDEN,
         )

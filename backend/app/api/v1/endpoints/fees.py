@@ -3,42 +3,67 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.core.database import get_db
-from app.core.exceptions import FynloException, ResourceNotFoundException, ValidationException
+from app.core.exceptions import (
+    FynloException,
+    ResourceNotFoundException,
+    ValidationException,
+)
 from app.schemas.fee_schemas import (
     PaymentMethodEnum,
     CustomerTotalBreakdown,
-    ServiceChargeBreakdown, # For potential separate return or internal use
-    PlatformFeeRecordSchema # For response model
+    ServiceChargeBreakdown,  # For potential separate return or internal use
+    PlatformFeeRecordSchema,  # For response model
 )
 from app.services.platform_service import PlatformSettingsService
 from app.services.payment_fee_calculator import PaymentFeeCalculator
 from app.services.platform_fee_service import PlatformFeeService
 from app.services.service_charge_calculator import ServiceChargeCalculator
 from app.services.payment_config_service import PaymentConfigService
-from app.services.financial_records_service import FinancialRecordsService # New service
+from app.services.financial_records_service import (
+    FinancialRecordsService,
+)  # New service
 from pydantic import BaseModel, Field
-from app.core.exceptions import ValidationException, FynloException, ResourceNotFoundException
+from app.core.exceptions import (
+    ValidationException,
+    FynloException,
+    ResourceNotFoundException,
+)
 
 router = APIRouter()
 
+
 # --- Request Models ---
 class FeeCalculationRequest(BaseModel):
-    subtotal: float = Field(..., gt=0, description="Order subtotal before VAT and any service charges or fees.")
+    subtotal: float = Field(
+        ...,
+        gt=0,
+        description="Order subtotal before VAT and any service charges or fees.",
+    )
     vat_amount: float = Field(..., ge=0, description="Total VAT amount for the order.")
 
     # If service charge is applied, its configured rate (e.g., 0.1 for 10%)
     # This rate is determined by the client based on restaurant/platform settings for service charge.
-    service_charge_config_rate: Optional[float] = Field(None, ge=0, le=1, description="Configured service charge rate, e.g., 0.1 for 10%. Null if no SC.")
+    service_charge_config_rate: Optional[float] = Field(
+        None,
+        ge=0,
+        le=1,
+        description="Configured service charge rate, e.g., 0.1 for 10%. Null if no SC.",
+    )
 
     payment_method: PaymentMethodEnum
-    restaurant_id: Optional[str] = Field(None, description="ID of the restaurant, if applicable.")
+    restaurant_id: Optional[str] = Field(
+        None, description="ID of the restaurant, if applicable."
+    )
 
     # Optional: For payment providers like SumUp that might have volume-based pricing
-    monthly_volume_for_restaurant: Optional[float] = Field(None, description="Estimated monthly transaction volume for the restaurant.")
+    monthly_volume_for_restaurant: Optional[float] = Field(
+        None, description="Estimated monthly transaction volume for the restaurant."
+    )
 
     # Optional: Client can specify if they want to override the default customer_pays_processor_fees setting.
     # This would only be allowed if `allow_toggle_by_merchant` is true for the payment method.
     force_customer_pays_processor_fees: Optional[bool] = None
+
 
 class PlatformFeeRecordInput(BaseModel):
     order_id: str = Field(..., description="Client-generated or Odoo order reference.")
@@ -53,38 +78,56 @@ class PlatformFeeRecordInput(BaseModel):
 # These would typically be more sophisticated in a full app, e.g., using a DI container
 # or FastAPI's Depends with classes. For now, direct instantiation in endpoint.
 
-def get_platform_settings_service(db: Session = Depends(get_db)) -> PlatformSettingsService:
+
+def get_platform_settings_service(
+    db: Session = Depends(get_db),
+) -> PlatformSettingsService:
     return PlatformSettingsService(db=db)
+
 
 def get_payment_config_service(db: Session = Depends(get_db)) -> PaymentConfigService:
     return PaymentConfigService(db=db)
 
+
 def get_payment_fee_calculator(
-    pss: PlatformSettingsService = Depends(get_platform_settings_service)
+    pss: PlatformSettingsService = Depends(get_platform_settings_service),
 ) -> PaymentFeeCalculator:
     return PaymentFeeCalculator(platform_settings_service=pss)
 
+
 def get_service_charge_calculator(
     pfc: PaymentFeeCalculator = Depends(get_payment_fee_calculator),
-    pss: PlatformSettingsService = Depends(get_platform_settings_service)) -> ServiceChargeCalculator:
-    return ServiceChargeCalculator(payment_fee_calculator=pfc, platform_settings_service=pss)
+    pss: PlatformSettingsService = Depends(get_platform_settings_service),
+) -> ServiceChargeCalculator:
+    return ServiceChargeCalculator(
+        payment_fee_calculator=pfc, platform_settings_service=pss
+    )
+
 
 def get_platform_fee_service(
     pfc: PaymentFeeCalculator = Depends(get_payment_fee_calculator),
-    pss: PlatformSettingsService = Depends(get_platform_settings_service)) -> PlatformFeeService:
+    pss: PlatformSettingsService = Depends(get_platform_settings_service),
+) -> PlatformFeeService:
     return PlatformFeeService(payment_fee_calculator=pfc, platform_settings_service=pss)
 
-def get_financial_records_service(db: Session = Depends(get_db)) -> FinancialRecordsService:
+
+def get_financial_records_service(
+    db: Session = Depends(get_db),
+) -> FinancialRecordsService:
     return FinancialRecordsService(db=db)
 
 
 @router.post("/calculate-fees", response_model=CustomerTotalBreakdown)
 async def calculate_fees_for_order(
     request: FeeCalculationRequest,
-    db: Session = Depends(get_db), # get_db for direct session if needed by services not using DI functions above
+    db: Session = Depends(
+        get_db
+    ),  # get_db for direct session if needed by services not using DI functions above
     payment_config_service: PaymentConfigService = Depends(get_payment_config_service),
-    service_charge_calc: ServiceChargeCalculator = Depends(get_service_charge_calculator),
-    platform_fee_service: PlatformFeeService = Depends(get_platform_fee_service)
+    service_charge_calc: ServiceChargeCalculator = Depends(
+        get_service_charge_calculator
+    ),
+    platform_fee_service: PlatformFeeService = Depends(get_platform_fee_service),
 ):
     """
     Calculates the detailed fee breakdown for a given order's subtotal and payment method.
@@ -93,8 +136,7 @@ async def calculate_fees_for_order(
 
     # 1. Determine fee payment rules (who pays processor fee, is it part of SC)
     payment_method_setting = payment_config_service.get_payment_method_setting(
-        payment_method=request.payment_method,
-        restaurant_id=request.restaurant_id
+        payment_method=request.payment_method, restaurant_id=request.restaurant_id
     )
 
     if not payment_method_setting:
@@ -102,7 +144,7 @@ async def calculate_fees_for_order(
         raise ResourceNotFoundException(
             resource="Fee configuration",
             resource_id=request.payment_method.value,
-            details={"restaurant_id": request.restaurant_id or "platform default"}
+            details={"restaurant_id": request.restaurant_id or "platform default"},
         )
     # Determine who pays processor fees
     customer_pays_processor_fees = payment_method_setting.customer_pays_default
@@ -111,26 +153,34 @@ async def calculate_fees_for_order(
             customer_pays_processor_fees = request.force_customer_pays_processor_fees
         else:
             # Client tried to override but not allowed
-            raise ValidationException(message=f"Toggling who pays processor fee is not allowed for payment method {request.payment_method.value}."
+            raise ValidationException(
+                message=f"Toggling who pays processor fee is not allowed for payment method {request.payment_method.value}."
             )
-    include_processor_fee_in_sc = payment_method_setting.include_processor_fee_in_service_charge
+    include_processor_fee_in_sc = (
+        payment_method_setting.include_processor_fee_in_service_charge
+    )
 
     # 2. Calculate final Service Charge
     final_service_charge_amount = 0.0
     service_charge_breakdown_details: Optional[ServiceChargeBreakdown] = None
 
-    if request.service_charge_config_rate is not None and request.service_charge_config_rate > 0:
+    if (
+        request.service_charge_config_rate is not None
+        and request.service_charge_config_rate > 0
+    ):
         try:
             service_charge_breakdown_details = await service_charge_calc.calculate_service_charge_with_fees(
                 order_subtotal=request.subtotal,
                 service_charge_config_rate=request.service_charge_config_rate,
                 payment_method=request.payment_method,
-                customer_pays_processor_fees=customer_pays_processor_fees, # Crucial: SC structure depends on this
+                customer_pays_processor_fees=customer_pays_processor_fees,  # Crucial: SC structure depends on this
                 include_processor_fee_in_service_charge=include_processor_fee_in_sc,
                 restaurant_id=request.restaurant_id,
-                monthly_volume_for_restaurant=request.monthly_volume_for_restaurant
+                monthly_volume_for_restaurant=request.monthly_volume_for_restaurant,
             )
-            final_service_charge_amount = service_charge_breakdown_details['final_service_charge_amount']
+            final_service_charge_amount = service_charge_breakdown_details[
+                "final_service_charge_amount"
+            ]
         except Exception as e:
             # Log the exception details
             # logger.error(f"Error in ServiceChargeCalculator: {e}", exc_info=True)
@@ -143,19 +193,23 @@ async def calculate_fees_for_order(
             vat_amount=request.vat_amount,
             service_charge_final_amount=final_service_charge_amount,
             payment_method=request.payment_method,
-            customer_pays_processor_fees=customer_pays_processor_fees, # This is the effective decision
+            customer_pays_processor_fees=customer_pays_processor_fees,  # This is the effective decision
             restaurant_id=request.restaurant_id,
-            monthly_volume_for_restaurant=request.monthly_volume_for_restaurant
+            monthly_volume_for_restaurant=request.monthly_volume_for_restaurant,
         )
         # Could augment with more details if needed
         # customer_total_breakdown['service_charge_details'] = service_charge_breakdown_details
         return customer_total_breakdown
 
-    except ValueError as ve: # From underlying services if config is missing etc.
+    except ValueError as ve:  # From underlying services if config is missing etc.
         raise ValidationException(message=str(ve))
     except Exception as e:
         # logger.error(f"Error in PlatformFeeService's calculate_customer_total: {e}", exc_info=True)
-        raise FynloException(message=f"Error calculating final customer total: {str(e)}")
+        raise FynloException(
+            message=f"Error calculating final customer total: {str(e)}"
+        )
+
+
 # To include this router in the main application:
 # In backend/app/api/v1/api.py (or equivalent main router aggregation file):
 # from .endpoints import fees
@@ -169,10 +223,14 @@ async def calculate_fees_for_order(
 # e.g. from .fee_schemas import *
 
 
-@router.post("/platform-fees/record", response_model=PlatformFeeRecordSchema, status_code=201)
+@router.post(
+    "/platform-fees/record", response_model=PlatformFeeRecordSchema, status_code=201
+)
 async def record_platform_fee(
-    fee_data_input: PlatformFeeRecordInput, # Using the Pydantic model for input
-    financial_records_service: FinancialRecordsService = Depends(get_financial_records_service)
+    fee_data_input: PlatformFeeRecordInput,  # Using the Pydantic model for input
+    financial_records_service: FinancialRecordsService = Depends(
+        get_financial_records_service
+    ),
 ):
     """
     Records a platform fee transaction.
@@ -193,7 +251,9 @@ async def record_platform_fee(
             # transaction_timestamp is not in input, will be set by server_default or None
         )
 
-        db_record = financial_records_service.create_platform_fee_record(fee_data_schema)
+        db_record = financial_records_service.create_platform_fee_record(
+            fee_data_schema
+        )
 
         # Convert SQLAlchemy model back to Pydantic schema for response
         # (FastAPI does this automatically if response_model is a Pydantic model and ORM mode is enabled)
@@ -204,10 +264,12 @@ async def record_platform_fee(
             platform_fee_amount=float(db_record.platform_fee_amount),
             processor_fee_amount=float(db_record.processor_fee_amount),
             customer_paid_processor=db_record.customer_paid_processor_fee,
-            payment_method=PaymentMethodEnum(db_record.payment_method), # Ensure enum conversion
-            transaction_timestamp=db_record.transaction_timestamp.isoformat()
+            payment_method=PaymentMethodEnum(
+                db_record.payment_method
+            ),  # Ensure enum conversion
+            transaction_timestamp=db_record.transaction_timestamp.isoformat(),
         )
-    except ValueError as ve: # Catch specific errors if service raises them
+    except ValueError as ve:  # Catch specific errors if service raises them
         raise ValidationException(message=str(ve))
     except Exception as e:
         # logger.error(f"Error recording platform fee for order {fee_data_input.order_id}: {e}", exc_info=True)

@@ -7,6 +7,8 @@ Seeds the Chucho restaurant menu data into the production database
 import sys
 import os
 import asyncio
+import logging
+import traceback
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
@@ -17,6 +19,9 @@ from app.core.database import SessionLocal, Restaurant, Category, Product, User
 from app.core.config import settings
 import uuid
 from decimal import Decimal
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Chucho Restaurant Menu Data (from src/data/chuchoMenu.ts)
 CHUCHO_CATEGORIES = [
@@ -335,11 +340,6 @@ def main():
     except Exception as e:
         logger.error(f"❌ Error seeding menu: {e}")
         db.rollback()
-        import traceback
-import logging
-
-logger = logging.getLogger(__name__)
-
         traceback.print_exc()
         sys.exit(1)
         

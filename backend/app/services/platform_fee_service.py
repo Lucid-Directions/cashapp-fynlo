@@ -8,6 +8,7 @@ from app.schemas.fee_schemas import PaymentMethodEnum, CustomerTotalBreakdown
 
 logger = logging.getLogger(__name__)
 
+
 class PlatformFeeService:
     """
     Calculates the platform's transaction fee and the final customer total.
@@ -20,7 +21,7 @@ class PlatformFeeService:
     def __init__(
         self,
         payment_fee_calculator: PaymentFeeCalculator,
-        platform_settings_service: PlatformSettingsService, # Potentially to fetch PLATFORM_FEE_RATE
+        platform_settings_service: PlatformSettingsService,  # Potentially to fetch PLATFORM_FEE_RATE
     ):
         self.payment_fee_calculator = payment_fee_calculator
         self.platform_settings_service = platform_settings_service
@@ -31,7 +32,9 @@ class PlatformFeeService:
         quantizer = Decimal("0.01")
         return float(amount.quantize(quantizer, rounding=ROUND_HALF_UP))
 
-    def calculate_platform_fee(self, amount_subject_to_platform_fee: Decimal) -> Decimal:
+    def calculate_platform_fee(
+        self, amount_subject_to_platform_fee: Decimal
+    ) -> Decimal:
         """
         Calculates the 1% platform fee on the given amount.
 
@@ -43,7 +46,9 @@ class PlatformFeeService:
         """
         if amount_subject_to_platform_fee < Decimal("0"):
             # Or handle as an error, fees typically not on negative amounts unless it's a refund scenario with specific rules
-            logger.warning("amount_subject_to_platform_fee is negative, platform fee will be 0.")
+            logger.warning(
+                "amount_subject_to_platform_fee is negative, platform fee will be 0."
+            )
             return Decimal("0.00")
 
         # fee_rate = await self.platform_settings_service.get_platform_setting("platform.transaction_fee.rate") # Example
@@ -56,8 +61,8 @@ class PlatformFeeService:
     async def calculate_customer_total(
         self,
         subtotal: float,
-        vat_amount: float, # Explicit VAT amount
-        service_charge_final_amount: float, # Final service charge (could already include processor fee)
+        vat_amount: float,  # Explicit VAT amount
+        service_charge_final_amount: float,  # Final service charge (could already include processor fee)
         payment_method: PaymentMethodEnum,
         customer_pays_processor_fees: bool,
         restaurant_id: Optional[str] = None,
@@ -92,14 +97,20 @@ class PlatformFeeService:
 
         # Tentative amount that the processor will handle, before processor fee itself and platform fee.
         # This is Subtotal + VAT + Service Charge.
-        amount_before_processor_and_platform_fees = dec_subtotal + dec_vat_amount + dec_service_charge_final_amount
+        amount_before_processor_and_platform_fees = (
+            dec_subtotal + dec_vat_amount + dec_service_charge_final_amount
+        )
 
-        if payment_method != PaymentMethodEnum.CASH: # No processor fees for cash
-            raw_processor_fee = await self.payment_fee_calculator.calculate_processor_fee(
-                transaction_amount=float(amount_before_processor_and_platform_fees), # pass as float
-                payment_method=payment_method,
-                restaurant_id=restaurant_id,
-                monthly_volume_for_restaurant=monthly_volume_for_restaurant,
+        if payment_method != PaymentMethodEnum.CASH:  # No processor fees for cash
+            raw_processor_fee = (
+                await self.payment_fee_calculator.calculate_processor_fee(
+                    transaction_amount=float(
+                        amount_before_processor_and_platform_fees
+                    ),  # pass as float
+                    payment_method=payment_method,
+                    restaurant_id=restaurant_id,
+                    monthly_volume_for_restaurant=monthly_volume_for_restaurant,
+                )
             )
             calculated_processor_fee = Decimal(str(raw_processor_fee))
 
@@ -109,9 +120,16 @@ class PlatformFeeService:
 
         # Amount on which platform fee is calculated:
         # Subtotal + VAT + Service Charge + Processor Fee (if customer pays it directly)
-        amount_subject_to_platform_fee = dec_subtotal + dec_vat_amount + dec_service_charge_final_amount + actual_processor_fee_paid_by_customer
+        amount_subject_to_platform_fee = (
+            dec_subtotal
+            + dec_vat_amount
+            + dec_service_charge_final_amount
+            + actual_processor_fee_paid_by_customer
+        )
 
-        calculated_platform_fee = self.calculate_platform_fee(amount_subject_to_platform_fee)
+        calculated_platform_fee = self.calculate_platform_fee(
+            amount_subject_to_platform_fee
+        )
 
         # Final total for the customer
         dec_final_total = amount_subject_to_platform_fee + calculated_platform_fee
@@ -119,13 +137,18 @@ class PlatformFeeService:
         return CustomerTotalBreakdown(
             subtotal=self._round_currency(dec_subtotal),
             vat_amount=self._round_currency(dec_vat_amount),
-            service_charge_calculated=self._round_currency(dec_service_charge_final_amount),
+            service_charge_calculated=self._round_currency(
+                dec_service_charge_final_amount
+            ),
             platform_fee=self._round_currency(calculated_platform_fee),
-            processor_fee=self._round_currency(calculated_processor_fee), # This is the actual processor fee value
+            processor_fee=self._round_currency(
+                calculated_processor_fee
+            ),  # This is the actual processor fee value
             customer_pays_processor_fees=customer_pays_processor_fees,
             final_total=self._round_currency(dec_final_total),
-            notes=None
+            notes=None,
         )
+
 
 # Example Usage (conceptual)
 # async def main_pf_example():

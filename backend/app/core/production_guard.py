@@ -16,24 +16,28 @@ def production_guard(func):
     Works with both sync and async functions
     """
     if asyncio.iscoroutinefunction(func):
+
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
             if settings.ENVIRONMENT == "production":
                 raise FynloException(
-                    message='This endpoint is not available in production environment',
-                    error_code='OPERATION_NOT_ALLOWED'
+                    message="This endpoint is not available in production environment",
+                    error_code="OPERATION_NOT_ALLOWED",
                 )
             return await func(*args, **kwargs)
+
         return async_wrapper
     else:
+
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
             if settings.ENVIRONMENT == "production":
                 raise FynloException(
-                    message='This endpoint is not available in production environment',
-                    error_code='OPERATION_NOT_ALLOWED'
+                    message="This endpoint is not available in production environment",
+                    error_code="OPERATION_NOT_ALLOWED",
                 )
             return func(*args, **kwargs)
+
         return sync_wrapper
 
 

@@ -4,6 +4,10 @@ Standalone script to verify SQL injection fixes are working
 """
 import sys
 import os
+import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Add backend directory to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -139,10 +143,6 @@ def test_pydantic_schemas():
     logger.info("\n=== Testing Pydantic Schema Validation ===")
     
     from app.schemas.search_schemas import CustomerSearchRequest
-import logging
-
-logger = logging.getLogger(__name__)
-
     
     # Valid request
     try:

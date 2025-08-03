@@ -6,7 +6,12 @@ Tests comprehensive error handling and validation for iOS integration
 
 import asyncio
 import json
+import logging
+import uuid
 from datetime import datetime, time
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 def test_exception_system():
     """Test the exception system"""
@@ -272,12 +277,7 @@ def test_error_tracking():
     logger.error("\n📊 Testing Error Tracking...")
     
     from app.core.exceptions import FynloException, ErrorCodes
-    import uuid
-import logging
-
-logger = logging.getLogger(__name__)
-
-    
+        
     # Test error ID generation
     try:
         raise FynloException(

@@ -8,6 +8,8 @@ import asyncio
 import os
 import sys
 import subprocess
+import logging
+import uuid
 from pathlib import Path
 
 # Add the project root to Python path
@@ -18,6 +20,9 @@ from app.core.config import settings
 from app.core.database import init_db, engine, SessionLocal
 from sqlalchemy import text, create_engine
 from sqlalchemy.exc import OperationalError, ProgrammingError
+
+# Configure logging
+logger = logging.getLogger(__name__)
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
@@ -133,10 +138,6 @@ def create_sample_data():
     try:
         from app.core.database import Platform, Restaurant, User
         from app.api.v1.endpoints.auth import get_password_hash
-        import uuid
-import logging
-
-logger = logging.getLogger(__name__)
 
         
         db = SessionLocal()
