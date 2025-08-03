@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.main import app # Assuming your FastAPI app instance is here
 from app.core.database import Order, Product, Category, User # Import models used for seeding
-from app.api.v1.endpoints.auth import create_access_token # For authenticated requests
+from app.core.auth import create_access_token # For authenticated requests
 
 # It's good practice to use a separate test database or ensure cleanup.
 # For now, assuming tests run against a test DB or are designed to be non-destructive/idempotent.

@@ -11,6 +11,9 @@ from sqlalchemy.orm import Session
 from app.core.database import SessionLocal, User
 from app.core.supabase import supabase_admin
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 def test_uuid_consistency():
     """Test that all supabase_id fields use UUID objects, not strings"""
@@ -102,10 +105,6 @@ def test_uuid_consistency():
     except Exception as e:
         logger.error(f"\n❌ Test error: {str(e)}")
         import traceback
-import logging
-
-logger = logging.getLogger(__name__)
-
         traceback.print_exc()
     finally:
         db.close()

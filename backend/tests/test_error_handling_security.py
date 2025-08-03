@@ -241,9 +241,6 @@ class TestSensitiveLoggingFilter:
 if __name__ == "__main__":
     # Run tests manually
     import asyncio
-
-logger = logging.getLogger(__name__)
-
     
     logger.error("Running error handling security tests...\n")
     

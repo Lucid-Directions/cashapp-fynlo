@@ -17,8 +17,9 @@ pip install pre-commit && pre-commit install
 ## 🚨 PR WORKFLOW - MANDATORY
 1. **Always create feature branch**: `git checkout -b fix/descriptive-name`
 2. **Create detailed PR with What/Why/Testing sections**
-3. **Fix Cursor bot findings within same PR** (never create new PR for fixes)
-4. **Wait for all checks to pass before merging**
+3. **Fix Cursor bot findings within same PR** (never create new PR for fixes unless the task is too big)
+4. **Wait for all checks to pass before merging, i merge all PR after my review**
+5. **Plan the work To be distributed amongst the agents.Then use multiple agents in parallel.Make sure the work is distributed to the specialized agents**
 
 ## 🛠️ Quick Reference
 
@@ -100,7 +101,7 @@ price = Column(DECIMAL(10, 2), nullable=False)
 - `doctl` - DigitalOcean
 - `trivy` - Security scanning
 
-### Specialized Agents (via Task tool)
+### Specialized Agents (in parallel via Task tool)
 - fynlo-test-runner, fynlo-bundle-deployer
 - fynlo-security-auditor, fynlo-api-optimizer
 - planning-agent, development-agent, testing-agent

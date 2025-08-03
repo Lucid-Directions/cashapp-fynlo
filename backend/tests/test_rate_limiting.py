@@ -96,10 +96,6 @@ def test_user_based_rate_limit_on_protected_endpoint():
         # A better way would be to import get_password_hash from auth.py
         # For now, let's assume a user can be created or use an existing one if pwd_context is hard to get here
         from app.api.v1.endpoints.auth import get_password_hash as util_get_password_hash
-import logging
-
-logger = logging.getLogger(__name__)
-
 
         user = User(
             email=test_user_email,

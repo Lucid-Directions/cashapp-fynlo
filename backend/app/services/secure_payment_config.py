@@ -53,20 +53,15 @@ class SecurePaymentConfigService:
     def __init__(self, db: Session):
         self.db = db
 
-        # Get encryption key from environment
+        # Get encryption key from environment - REQUIRED for security
         encryption_key = os.environ.get("PAYMENT_CONFIG_ENCRYPTION_KEY")
         if not encryption_key:
-            # Use a fixed development key to prevent data loss
-            if os.environ.get("ENVIRONMENT", "development") == "development":
-                # Fixed development key - prevents losing encrypted data on restart
-                encryption_key = "8J5AOuMMykQkzj6EU5Z8QgPYLE1Aye4OuIjUER2b8w0="
-                logger.warning(
-                    f"WARNING: Using fixed development encryption key. Set PAYMENT_CONFIG_ENCRYPTION_KEY in production!"
-                )
-            else:
-                raise ValueError(
-                    "PAYMENT_CONFIG_ENCRYPTION_KEY environment variable not set"
-                )
+            raise FynloException(
+                "PAYMENT_CONFIG_ENCRYPTION_KEY environment variable is required. "
+                "This key encrypts sensitive payment provider credentials. "
+                "Generate a key with: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'",
+                status_code=500
+            )
 
         # Handle both string and bytes format
         if isinstance(encryption_key, str):

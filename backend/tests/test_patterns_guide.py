@@ -30,7 +30,7 @@ import httpx
 # Import your app components
 from app.main import app
 from app.core.database import Base, get_db
-from app.core.security import create_access_token
+from app.core.auth import create_access_token
 from app.models.user import User
 from app.models.restaurant import Restaurant
 from app.models.order import Order

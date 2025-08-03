@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 import redis
 import httpx
 
-from app.models.order import Order
+from app.core.database import Order
 from app.services.order_service import OrderService
 from app.api.endpoints.orders import router
 from tests.test_helpers import (
@@ -253,13 +253,13 @@ class TestOrderManagementFullCoverage:
         assert self.redis.lpush.call_count == 5
         
         # Process queue with batch size
-        await self.redis.lrange.return_value = [str(i) for i in order_ids[:3]]
+        self.redis.lrange.return_value = [str(i) for i in order_ids[:3]]
         
         processed = await order_service.process_order_queue(batch_size=3)
         assert len(processed) == 3
         
         # Test empty queue
-        await self.redis.lrange.return_value = []
+        self.redis.lrange.return_value = []
         processed = await order_service.process_order_queue()
         assert len(processed) == 0
     
@@ -770,10 +770,6 @@ class TestOrderManagementFullCoverage:
 def generate_coverage_report():
     """Generate detailed coverage report with recommendations"""
     import coverage
-import logging
-
-logger = logging.getLogger(__name__)
-
     
     cov = coverage.Coverage()
     cov.load()
