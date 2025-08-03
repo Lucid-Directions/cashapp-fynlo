@@ -48,7 +48,7 @@ class SubscriptionPlanResponse(SubscriptionPlanBase):
     
     @validator('yearly_discount_percentage', pre=False, always=True)
     def calculate_yearly_discount_percentage(cls, v, values):
-            """Calculate discount percentage for yearly plans"""
+        """Calculate discount percentage for yearly plans"""
         if 'price_monthly' in values and 'price_yearly' in values and values['price_monthly'] > 0:
             monthly_yearly_cost = values['price_monthly'] * 12
             discount = (monthly_yearly_cost - values['price_yearly']) / monthly_yearly_cost * 100

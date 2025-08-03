@@ -115,6 +115,7 @@ async def update_provider_configuration(
     current_user: User = Depends(get_current_user),
 ):
     """Update configuration for a specific provider"""
+    try:
         # Get current configuration
         config_manager.get_provider_config(provider_name)
 
@@ -154,6 +155,7 @@ async def update_provider_configuration(
 @router.get("/routing")
 async def get_routing_configuration(current_user: User = Depends(get_current_user)):
     """Get smart routing configuration"""
+    try:
         routing_config = config_manager.get_routing_config()
 
         config_data = {
@@ -177,6 +179,7 @@ async def get_routing_configuration(current_user: User = Depends(get_current_use
 @router.get("/features")
 async def get_feature_flags(current_user: User = Depends(get_current_user)):
     """Get all feature flags"""
+    try:
         features = config_manager.features
 
         feature_flags = {
@@ -200,6 +203,7 @@ async def get_feature_flags(current_user: User = Depends(get_current_user)):
 @router.get("/security")
 async def get_security_configuration(current_user: User = Depends(get_current_user)):
     """Get security configuration"""
+    try:
         security_config = config_manager.get_security_config()
 
         config_data = {
@@ -230,6 +234,7 @@ async def get_system_metrics(
     current_user: User = Depends(get_current_user)
 ):
     """Get system metrics for the specified time period"""
+    try:
         monitoring_service = get_monitoring_service(db)
         health_status = await monitoring_service.check_system_health()
 
@@ -246,6 +251,7 @@ async def get_system_metrics(
     current_user: User = Depends(get_current_user)
 ):
     """Get system metrics for the specified time period"""
+    try:
         monitoring_service = get_monitoring_service(db)
         metrics = await monitoring_service.get_system_metrics(hours)
 

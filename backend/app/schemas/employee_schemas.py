@@ -136,6 +136,7 @@ class ScheduleUpdateRequest(BaseModel):
 
     @field_validator('end_time')
     @classmethod
+    def validate_end_time(cls, v, info):
         if v and info.data and 'start_time' in info.data and info.data['start_time'] and v <= info.data['start_time']:
             raise ValueError('End time must be after start time')
         return v
@@ -171,13 +172,13 @@ class ShiftResponse(BaseModel):
 
     @property
     def scheduled_hours(self) -> float:
-                """Calculate scheduled hours for the shift"""
+        """Calculate scheduled hours for the shift"""
         delta = self.scheduled_end - self.scheduled_start
         return round(delta.total_seconds() / 3600, 2)
 
     @property
     def actual_hours(self) -> Optional[float]:
-                """Calculate actual hours worked"""
+        """Calculate actual hours worked"""
         if not self.actual_start or not self.actual_end:
             return None
         delta = self.actual_end - self.actual_start
