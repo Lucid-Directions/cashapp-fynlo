@@ -579,9 +579,11 @@ def main():
 
         if success:
             if dry_run:
-                            else:
-                        else:
-                        sys.exit(1)
+                print("✅ Dry run completed successfully!")
+            else:
+                print("✅ Migration completed successfully!")
+        else:
+            sys.exit(1)
 
 
 if __name__ == "__main__":

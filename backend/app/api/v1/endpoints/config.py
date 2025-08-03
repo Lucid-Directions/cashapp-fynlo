@@ -52,6 +52,7 @@ class ThresholdUpdateRequest(BaseModel):
 @router.get("/summary")
 async def get_configuration_summary(current_user: User = Depends(get_current_user)):
     """Get comprehensive configuration summary"""
+    try:
         summary = config_manager.get_configuration_summary()
 
         # Add runtime information
@@ -75,6 +76,7 @@ async def get_provider_configuration(
     provider_name: str, current_user: User = Depends(get_current_user)
 ):
     """Get configuration for a specific provider"""
+    try:
         config = config_manager.get_provider_config(provider_name)
 
         if not config:

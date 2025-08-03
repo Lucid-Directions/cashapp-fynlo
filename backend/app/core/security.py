@@ -529,6 +529,7 @@ class FilePathValidator(BaseModel):
     path: str = Field(..., max_length=500)
     
     @validator('path')
+    def validate_path(cls, v):
         return InputValidator.sanitize_string(v, context="path", max_length=500)
     
     class Config:

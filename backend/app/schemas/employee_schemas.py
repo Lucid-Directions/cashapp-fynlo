@@ -110,6 +110,7 @@ class ScheduleBase(BaseModel):
 
     @field_validator('end_time')
     @classmethod
+    def validate_end_time(cls, v, info):
         if info.data and 'start_time' in info.data and v <= info.data['start_time']:
             raise ValueError('End time must be after start time')
         return v
@@ -120,6 +121,7 @@ class ScheduleCreateRequest(ScheduleBase):
 
     @field_validator('effective_date')
     @classmethod
+    def validate_effective_date(cls, v):
         if v < date.today():
             raise ValueError('Effective date cannot be in the past')
         return v

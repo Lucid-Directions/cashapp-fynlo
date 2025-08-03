@@ -236,8 +236,9 @@ def main():
         success = initializer.initialize()
 
         if success:
-                    else:
-                        sys.exit(1)
+            print("✅ Platform defaults initialized successfully!")
+        else:
+            sys.exit(1)
 
 
 if __name__ == "__main__":

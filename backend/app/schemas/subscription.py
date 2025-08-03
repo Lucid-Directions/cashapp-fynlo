@@ -40,7 +40,7 @@ class SubscriptionPlanResponse(SubscriptionPlanBase):
     
     @validator('yearly_savings', pre=False, always=True)
     def calculate_yearly_savings(cls, v, values):
-            """Calculate yearly savings based on monthly vs yearly pricing"""
+        """Calculate yearly savings based on monthly vs yearly pricing"""
         if 'price_monthly' in values and 'price_yearly' in values:
             monthly_yearly_cost = values['price_monthly'] * 12
             return monthly_yearly_cost - values['price_yearly']

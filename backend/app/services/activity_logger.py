@@ -99,6 +99,7 @@ class ActivityLogger:
         )
     
     @staticmethod
+    def log_dashboard_view(db: Session, user_id: int, restaurant_id: int):
         """Log dashboard viewing activity"""
         ActivityLogger.log_activity(
             db=db,
@@ -113,6 +114,7 @@ class ActivityLogger:
         )
     
     @staticmethod
+    def log_settings_change(db: Session, user_id: int, restaurant_id: int, settings_type: str, changes: Dict):
         """Log settings change activity"""
         ActivityLogger.log_activity(
             db=db,
