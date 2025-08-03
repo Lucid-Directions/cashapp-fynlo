@@ -43,7 +43,7 @@ def get_password_from_env(env_key: str, default_length: int = 16) -> str:
     password = os.getenv(env_key)
     if not password:
         password = generate_secure_password(default_length)
-        logger.warning(f"No {env_key} found, generated random password: {password}")
+        logger.warning(f"No {env_key} found, generated random password of length {len(password)}")
     return password
 
 
@@ -368,7 +368,7 @@ class ProductionSeeder:
             # Create User account
             # Generate secure password for each staff member
             staff_password = generate_secure_password()
-            logger.info(f"Generated password for {staff['email']}: {staff_password}")
+            logger.info(f"Generated secure password for {staff['email']}")
             password = bcrypt.hashpw(staff_password.encode("utf-8"), bcrypt.gensalt())
             user = User(
                 id=str(uuid.uuid4()),

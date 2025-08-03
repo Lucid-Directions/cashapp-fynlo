@@ -37,19 +37,13 @@ class Settings(BaseSettings):
     )
 
     # Database - Must be set via environment variable in production
-    DATABASE_URL: str = os.getenv("DATABASE_URL")
-    if not DATABASE_URL:
-        raise ValueError("DATABASE_URL environment variable is required")
+    DATABASE_URL: str = None
 
     # Redis - Must be set via environment variable in production
-    REDIS_URL: str = os.getenv("REDIS_URL")
-    if not REDIS_URL:
-        raise ValueError("REDIS_URL environment variable is required")
+    REDIS_URL: str = None
 
     # Security
-    SECRET_KEY: str = os.getenv("SECRET_KEY")
-    if not SECRET_KEY:
-        raise ValueError("SECRET_KEY environment variable is required")
+    SECRET_KEY: str = None
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     CORS_ORIGINS: Optional[str] = None  # Will be parsed as list in validator
@@ -150,6 +144,36 @@ class Settings(BaseSettings):
             else:
                 raise ValueError(f"Invalid boolean value: {v}")
         return bool(v)
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def validate_database_url(cls, v: Any) -> str:
+        """Validate DATABASE_URL environment variable is set"""
+        if v is None:
+            v = os.getenv("DATABASE_URL")
+        if not v:
+            raise ValueError("DATABASE_URL environment variable is required")
+        return v
+
+    @field_validator("REDIS_URL", mode="before")
+    @classmethod
+    def validate_redis_url(cls, v: Any) -> str:
+        """Validate REDIS_URL environment variable is set"""
+        if v is None:
+            v = os.getenv("REDIS_URL")
+        if not v:
+            raise ValueError("REDIS_URL environment variable is required")
+        return v
+
+    @field_validator("SECRET_KEY", mode="before")
+    @classmethod
+    def validate_secret_key(cls, v: Any) -> str:
+        """Validate SECRET_KEY environment variable is set"""
+        if v is None:
+            v = os.getenv("SECRET_KEY")
+        if not v:
+            raise ValueError("SECRET_KEY environment variable is required")
+        return v
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
