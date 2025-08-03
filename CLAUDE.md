@@ -8,6 +8,11 @@
 3. Run `ruff check app/` before EVERY commit
 4. See "MANDATORY SYNTAX CHECKING WORKFLOW" section below for full details
 
+**PRE-COMMIT HOOKS EXIST BUT ARE NOT INSTALLED!**
+- Config file: `.pre-commit-config.yaml` (includes Python syntax, ESLint, TypeScript checks)
+- To install: `pip install pre-commit && pre-commit install`
+- This would catch ALL syntax errors automatically!
+
 **FAILURE TO FOLLOW THESE CHECKS = WASTED TIME & CONFLICTS**
 
 ## 🚨 CRITICAL RULE: NO ASSUMPTIONS
@@ -511,6 +516,21 @@ When dealing with large PRs with many conflicts (like PR #459):
 ## 🛑 MANDATORY SYNTAX CHECKING WORKFLOW - NEVER SKIP
 
 **CRITICAL: After a week of syntax error cleanup, these checks are NOW MANDATORY before ANY commit**
+
+### Pre-Commit Configuration (ALREADY EXISTS!):
+
+**We have `.pre-commit-config.yaml` with these checks:**
+- Python syntax validation (ruff, py_compile, AST parsing)
+- ESLint with zero warnings tolerance
+- TypeScript type checking
+- No console statements allowed
+- No TypeScript `any` types allowed
+
+**BUT IT'S NOT INSTALLED! Run:**
+```bash
+pip install pre-commit
+pre-commit install
+```
 
 ### Pre-Commit Checklist (MUST DO ALL):
 
