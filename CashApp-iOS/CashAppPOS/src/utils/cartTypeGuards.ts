@@ -9,7 +9,7 @@ import {
   CartItemModification,
   SplitBillGroup,
   CartTemplate,
-  SplitBillConfig
+  SplitBillConfig,
 } from '../types/cart';
 
 /**
@@ -76,7 +76,8 @@ export function isCartItemModification(mod: any): mod is CartItemModification {
     typeof mod.price === 'number' &&
     typeof mod.selected === 'boolean' &&
     isFinite(mod.price) &&
-    (mod.quantity === undefined || (typeof mod.quantity === 'number' && mod.quantity > 0 && isFinite(mod.quantity)))
+    (mod.quantity === undefined ||
+      (typeof mod.quantity === 'number' && mod.quantity > 0 && isFinite(mod.quantity)))
   );
 }
 
@@ -182,52 +183,60 @@ export function validateCartIntegrity(items: EnhancedOrderItem[]): {
 } {
   const errors: string[] = [];
   const seenIds = new Set<string>();
-  
+
   items.forEach((item, index) => {
     // Check for duplicate IDs
     if (seenIds.has(item.id)) {
       errors.push(`Duplicate item ID found: ${item.id}`);
     }
     seenIds.add(item.id);
-    
+
     // Validate pricing consistency
     const expectedModPrice = item.modifications
-      .filter(mod => mod.selected)
-      .reduce((sum, mod) => sum + (mod.price * (mod.quantity || 1)), 0);
-    
+      .filter((mod) => mod.selected)
+      .reduce((sum, mod) => sum + mod.price * (mod.quantity || 1), 0);
+
     if (Math.abs(expectedModPrice - item.modificationPrice) > 0.01) {
-      errors.push(`Item "${item.name}" has inconsistent modification price. Expected: ${expectedModPrice}, Actual: ${item.modificationPrice}`);
+      errors.push(
+        `Item "${item.name}" has inconsistent modification price. Expected: ${expectedModPrice}, Actual: ${item.modificationPrice}`
+      );
     }
-    
+
     const expectedTotal = (item.originalPrice + item.modificationPrice) * item.quantity;
     if (Math.abs(expectedTotal - item.totalPrice) > 0.01) {
-      errors.push(`Item "${item.name}" has inconsistent total price. Expected: ${expectedTotal}, Actual: ${item.totalPrice}`);
+      errors.push(
+        `Item "${item.name}" has inconsistent total price. Expected: ${expectedTotal}, Actual: ${item.totalPrice}`
+      );
     }
-    
+
     // Check for invalid dates
     if (isNaN(Date.parse(item.addedAt))) {
       errors.push(`Item "${item.name}" has invalid addedAt date: ${item.addedAt}`);
     }
-    
+
     if (isNaN(Date.parse(item.lastModified))) {
       errors.push(`Item "${item.name}" has invalid lastModified date: ${item.lastModified}`);
     }
-    
+
     // Check modification conflicts
-    const sizeModifications = item.modifications.filter(mod => mod.type === 'size' && mod.selected);
+    const sizeModifications = item.modifications.filter(
+      (mod) => mod.type === 'size' && mod.selected
+    );
     if (sizeModifications.length > 1) {
       errors.push(`Item "${item.name}" has multiple size selections`);
     }
-    
-    const tempModifications = item.modifications.filter(mod => mod.type === 'temperature' && mod.selected);
+
+    const tempModifications = item.modifications.filter(
+      (mod) => mod.type === 'temperature' && mod.selected
+    );
     if (tempModifications.length > 1) {
       errors.push(`Item "${item.name}" has multiple temperature selections`);
     }
   });
-  
+
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -238,22 +247,22 @@ export function validateCartIntegrity(items: EnhancedOrderItem[]): {
 export function safeParseCartData(jsonString: string): EnhancedOrderItem[] | null {
   try {
     const parsed = JSON.parse(jsonString);
-    
+
     if (!Array.isArray(parsed)) {
       return null;
     }
-    
+
     // Check if all items are valid
     if (parsed.every(isEnhancedOrderItem)) {
       return parsed;
     }
-    
+
     // Check if they're old format items that need migration
     if (parsed.every(isOrderItem)) {
       // Return null here - caller should handle migration
       return null;
     }
-    
+
     return null;
   } catch {
     return null;
@@ -267,7 +276,7 @@ export function cartNeedsMigration(cart: any[]): boolean {
   if (!Array.isArray(cart) || cart.length === 0) {
     return false;
   }
-  
+
   // If any item is in old format, migration is needed
-  return cart.some(item => isOrderItem(item) && !isEnhancedOrderItem(item));
+  return cart.some((item) => isOrderItem(item) && !isEnhancedOrderItem(item));
 }

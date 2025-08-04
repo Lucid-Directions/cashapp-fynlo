@@ -14,7 +14,7 @@ import {
   Platform,
   Alert,
   TextInput,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../design-system/ThemeProvider';
@@ -38,14 +38,14 @@ export default function SplitBillModal({
   cartTotal,
   onClose,
   onConfirm,
-  useEnhancedCart = true
+  useEnhancedCart = true,
 }: SplitBillModalProps) {
   const { theme } = useTheme();
-  
+
   const [numberOfGroups, setNumberOfGroups] = useState(2);
   const [showGroupSetup, setShowGroupSetup] = useState(true);
   const [selectedItemForSplit, setSelectedItemForSplit] = useState<EnhancedOrderItem | null>(null);
-  
+
   const {
     groups,
     splitMethod,
@@ -68,9 +68,9 @@ export default function SplitBillModal({
     getUnassignedItems,
     getGroupByItem,
     canProcessPayments,
-    exportSplitBill
+    exportSplitBill,
   } = useSplitBill({ cartItems, cartTotal, useEnhancedCart });
-  
+
   // Initialize split when modal opens
   useEffect(() => {
     if (visible && groups.length === 0) {
@@ -78,57 +78,53 @@ export default function SplitBillModal({
       setShowGroupSetup(false);
     }
   }, [visible]);
-  
+
   const handleClose = () => {
     resetSplit();
     setShowGroupSetup(true);
     onClose();
   };
-  
+
   const handleConfirm = () => {
     if (!canProcessPayments()) {
-      Alert.alert(
-        'Split Not Complete',
-        validation.errors.join('\n'),
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Split Not Complete', validation.errors.join('\n'), [{ text: 'OK' }]);
       return;
     }
-    
+
     onConfirm(groups);
     handleClose();
   };
-  
+
   const handleSplitMethodChange = (method: SplitMethod) => {
     setSplitMethod(method);
     setTimeout(() => applySplitMethod(), 100);
   };
-  
+
   const handleItemPress = (item: EnhancedOrderItem) => {
     if (splitMethod === 'item' || splitMethod === 'custom') {
       setSelectedItemForSplit(item);
     }
   };
-  
+
   const handleAssignToGroup = (groupId: string) => {
     if (selectedItemForSplit) {
       assignItemToGroup(selectedItemForSplit, groupId);
       setSelectedItemForSplit(null);
     }
   };
-  
+
   const handleSplitAcrossGroups = () => {
     if (selectedItemForSplit) {
-      const groupIds = groups.map(g => g.id);
+      const groupIds = groups.map((g) => g.id);
       splitItemAcrossGroups(selectedItemForSplit, groupIds);
       setSelectedItemForSplit(null);
     }
   };
-  
+
   const renderGroupSetup = () => (
     <View style={styles.setupContainer}>
       <Text style={styles.setupTitle}>How many ways to split?</Text>
-      
+
       <View style={styles.groupCountSelector}>
         <TouchableOpacity
           style={styles.countButton}
@@ -136,12 +132,12 @@ export default function SplitBillModal({
         >
           <Icon name="remove" size={24} color={theme.colors.text} />
         </TouchableOpacity>
-        
+
         <View style={styles.countDisplay}>
           <Text style={styles.countText}>{numberOfGroups}</Text>
           <Text style={styles.countLabel}>Groups</Text>
         </View>
-        
+
         <TouchableOpacity
           style={styles.countButton}
           onPress={() => setNumberOfGroups(Math.min(10, numberOfGroups + 1))}
@@ -149,7 +145,7 @@ export default function SplitBillModal({
           <Icon name="add" size={24} color={theme.colors.text} />
         </TouchableOpacity>
       </View>
-      
+
       <TouchableOpacity
         style={styles.startButton}
         onPress={() => {
@@ -161,10 +157,10 @@ export default function SplitBillModal({
       </TouchableOpacity>
     </View>
   );
-  
+
   const renderSplitMethods = () => (
-    <ScrollView 
-      horizontal 
+    <ScrollView
+      horizontal
       showsHorizontalScrollIndicator={false}
       style={styles.methodSelector}
       contentContainerStyle={styles.methodSelectorContent}
@@ -173,73 +169,91 @@ export default function SplitBillModal({
         style={[styles.methodButton, splitMethod === 'even' && styles.methodButtonActive]}
         onPress={() => handleSplitMethodChange('even')}
       >
-        <Icon name="view-module" size={20} color={
-          splitMethod === 'even' ? theme.colors.white : theme.colors.text
-        } />
-        <Text style={[
-          styles.methodButtonText,
-          splitMethod === 'even' && styles.methodButtonTextActive
-        ]}>Split Evenly</Text>
+        <Icon
+          name="view-module"
+          size={20}
+          color={splitMethod === 'even' ? theme.colors.white : theme.colors.text}
+        />
+        <Text
+          style={[styles.methodButtonText, splitMethod === 'even' && styles.methodButtonTextActive]}
+        >
+          Split Evenly
+        </Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity
         style={[styles.methodButton, splitMethod === 'equal' && styles.methodButtonActive]}
         onPress={() => handleSplitMethodChange('equal')}
       >
-        <Icon name="attach-money" size={20} color={
-          splitMethod === 'equal' ? theme.colors.white : theme.colors.text
-        } />
-        <Text style={[
-          styles.methodButtonText,
-          splitMethod === 'equal' && styles.methodButtonTextActive
-        ]}>Equal Amount</Text>
+        <Icon
+          name="attach-money"
+          size={20}
+          color={splitMethod === 'equal' ? theme.colors.white : theme.colors.text}
+        />
+        <Text
+          style={[
+            styles.methodButtonText,
+            splitMethod === 'equal' && styles.methodButtonTextActive,
+          ]}
+        >
+          Equal Amount
+        </Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity
         style={[styles.methodButton, splitMethod === 'item' && styles.methodButtonActive]}
         onPress={() => handleSplitMethodChange('item')}
       >
-        <Icon name="restaurant" size={20} color={
-          splitMethod === 'item' ? theme.colors.white : theme.colors.text
-        } />
-        <Text style={[
-          styles.methodButtonText,
-          splitMethod === 'item' && styles.methodButtonTextActive
-        ]}>By Item</Text>
+        <Icon
+          name="restaurant"
+          size={20}
+          color={splitMethod === 'item' ? theme.colors.white : theme.colors.text}
+        />
+        <Text
+          style={[styles.methodButtonText, splitMethod === 'item' && styles.methodButtonTextActive]}
+        >
+          By Item
+        </Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity
         style={[styles.methodButton, splitMethod === 'custom' && styles.methodButtonActive]}
         onPress={() => handleSplitMethodChange('custom')}
       >
-        <Icon name="tune" size={20} color={
-          splitMethod === 'custom' ? theme.colors.white : theme.colors.text
-        } />
-        <Text style={[
-          styles.methodButtonText,
-          splitMethod === 'custom' && styles.methodButtonTextActive
-        ]}>Custom</Text>
+        <Icon
+          name="tune"
+          size={20}
+          color={splitMethod === 'custom' ? theme.colors.white : theme.colors.text}
+        />
+        <Text
+          style={[
+            styles.methodButtonText,
+            splitMethod === 'custom' && styles.methodButtonTextActive,
+          ]}
+        >
+          Custom
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
-  
+
   const renderUnassignedItems = () => {
     const unassignedItems = getUnassignedItems();
-    
+
     if (unassignedItems.length === 0 || splitMethod === 'equal') {
       return null;
     }
-    
+
     return (
       <View style={styles.unassignedSection}>
         <Text style={styles.unassignedTitle}>Unassigned Items</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {unassignedItems.map(item => (
+          {unassignedItems.map((item) => (
             <TouchableOpacity
               key={item.id}
               style={[
                 styles.unassignedItem,
-                selectedItemForSplit?.id === item.id && styles.unassignedItemSelected
+                selectedItemForSplit?.id === item.id && styles.unassignedItemSelected,
               ]}
               onPress={() => handleItemPress(item)}
             >
@@ -252,29 +266,25 @@ export default function SplitBillModal({
       </View>
     );
   };
-  
+
   const renderItemAssignment = () => {
     if (!selectedItemForSplit) return null;
-    
+
     return (
       <View style={styles.assignmentOverlay}>
         <View style={styles.assignmentCard}>
-          <Text style={styles.assignmentTitle}>
-            Assign "{selectedItemForSplit.name}"
-          </Text>
-          
+          <Text style={styles.assignmentTitle}>Assign "{selectedItemForSplit.name}"</Text>
+
           <ScrollView style={styles.assignmentGroups}>
-            {groups.map(group => {
-              const groupTotal = groupTotals.find(gt => gt.groupId === group.id);
+            {groups.map((group) => {
+              const groupTotal = groupTotals.find((gt) => gt.groupId === group.id);
               return (
                 <TouchableOpacity
                   key={group.id}
                   style={styles.assignmentGroup}
                   onPress={() => handleAssignToGroup(group.id)}
                 >
-                  <View 
-                    style={[styles.assignmentGroupColor, { backgroundColor: group.color }]} 
-                  />
+                  <View style={[styles.assignmentGroupColor, { backgroundColor: group.color }]} />
                   <Text style={styles.assignmentGroupName}>{group.name}</Text>
                   <Text style={styles.assignmentGroupTotal}>
                     {formatPrice(groupTotal?.total || 0, '£')}
@@ -283,15 +293,12 @@ export default function SplitBillModal({
               );
             })}
           </ScrollView>
-          
+
           <View style={styles.assignmentActions}>
-            <TouchableOpacity
-              style={styles.assignmentButton}
-              onPress={handleSplitAcrossGroups}
-            >
+            <TouchableOpacity style={styles.assignmentButton} onPress={handleSplitAcrossGroups}>
               <Text style={styles.assignmentButtonText}>Split Across All</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.assignmentButton, styles.assignmentButtonCancel]}
               onPress={() => setSelectedItemForSplit(null)}
@@ -303,14 +310,9 @@ export default function SplitBillModal({
       </View>
     );
   };
-  
+
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={handleClose}
-    >
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={handleClose}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           {/* Header */}
@@ -320,26 +322,23 @@ export default function SplitBillModal({
               <Icon name="close" size={28} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
-          
+
           {showGroupSetup ? (
             renderGroupSetup()
           ) : (
             <>
               {/* Split Methods */}
               {renderSplitMethods()}
-              
+
               {/* Main Content */}
-              <ScrollView 
-                style={styles.scrollView}
-                showsVerticalScrollIndicator={false}
-              >
+              <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 {/* Unassigned Items */}
                 {renderUnassignedItems()}
-                
+
                 {/* Groups */}
                 <View style={styles.groupsContainer}>
                   {groups.map((group, index) => {
-                    const groupTotal = groupTotals.find(gt => gt.groupId === group.id);
+                    const groupTotal = groupTotals.find((gt) => gt.groupId === group.id);
                     return (
                       <SplitBillGroupCard
                         key={group.id}
@@ -359,7 +358,7 @@ export default function SplitBillModal({
                   })}
                 </View>
               </ScrollView>
-              
+
               {/* Footer */}
               <View style={styles.footer}>
                 <View style={styles.totalSummary}>
@@ -376,7 +375,7 @@ export default function SplitBillModal({
                     </Text>
                   )}
                 </View>
-                
+
                 <View style={styles.footerButtons}>
                   <TouchableOpacity
                     style={styles.exportButton}
@@ -387,11 +386,11 @@ export default function SplitBillModal({
                   >
                     <Icon name="share" size={20} color={theme.colors.primary} />
                   </TouchableOpacity>
-                  
+
                   <TouchableOpacity
                     style={[
                       styles.confirmButton,
-                      !canProcessPayments() && styles.confirmButtonDisabled
+                      !canProcessPayments() && styles.confirmButtonDisabled,
                     ]}
                     onPress={handleConfirm}
                     disabled={!canProcessPayments()}
@@ -406,7 +405,7 @@ export default function SplitBillModal({
           )}
         </View>
       </View>
-      
+
       {/* Item Assignment Overlay */}
       {renderItemAssignment()}
     </Modal>
@@ -443,7 +442,7 @@ const styles = StyleSheet.create({
   closeButton: {
     padding: 5,
   },
-  
+
   // Setup Screen
   setupContainer: {
     flex: 1,
@@ -497,7 +496,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: theme.colors.white,
   },
-  
+
   // Method Selector
   methodSelector: {
     maxHeight: 60,
@@ -532,12 +531,12 @@ const styles = StyleSheet.create({
   methodButtonTextActive: {
     color: theme.colors.white,
   },
-  
+
   // Main Content
   scrollView: {
     flex: 1,
   },
-  
+
   // Unassigned Items
   unassignedSection: {
     padding: 16,
@@ -579,13 +578,13 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     marginTop: 2,
   },
-  
+
   // Groups
   groupsContainer: {
     padding: 16,
     gap: 16,
   },
-  
+
   // Assignment Overlay
   assignmentOverlay: {
     position: 'absolute',
@@ -662,7 +661,7 @@ const styles = StyleSheet.create({
   assignmentButtonCancelText: {
     color: theme.colors.text,
   },
-  
+
   // Footer
   footer: {
     borderTopWidth: 1,

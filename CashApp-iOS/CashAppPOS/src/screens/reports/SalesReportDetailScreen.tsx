@@ -212,7 +212,7 @@ const SalesReportDetailScreen = () => {
             <Icon name="arrow-back" size={24} color={Colors.white} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Sales Report</Text>
-          <View style={{ width: 24 }} />
+          <View style={styles.style1} />
           {/* Placeholder for balance */}
         </View>
         <View style={styles.centeredError}>

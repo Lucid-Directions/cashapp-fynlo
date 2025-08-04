@@ -53,19 +53,30 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style 
   if (!isFocused && !query) {
     return (
       <TouchableOpacity
-        style={[styles.bubble, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }, style]}
+        style={[
+          styles.bubble,
+          { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+          style,
+        ]}
         onPress={handleBubblePress}
         testID="category-search-bubble-inactive"
       >
         <Icon name="search" size={20} color={theme.colors.textSecondary} style={styles.iconStyle} />
-        <Text style={[styles.placeholderText, { color: theme.colors.textSecondary }]}>Search food...</Text>
+        <Text style={[styles.placeholderText, { color: theme.colors.textSecondary }]}>
+          Search food...
+        </Text>
       </TouchableOpacity>
     );
   }
 
   return (
     <View
-      style={[styles.searchContainer, styles.bubbleActive, { backgroundColor: theme.colors.surface, borderColor: theme.colors.primary }, style]}
+      style={[
+        styles.searchContainer,
+        styles.bubbleActive,
+        { backgroundColor: theme.colors.surface, borderColor: theme.colors.primary },
+        style,
+      ]}
       testID="category-search-bubble-active"
     >
       <Icon name="search" size={20} color={theme.colors.primary} style={styles.iconStyle} />
@@ -96,48 +107,48 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style 
 };
 
 const styles = StyleSheet.create({
-    bubble: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderRadius: 24,
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      marginRight: 8,
-      height: 44,
-      borderWidth: 1,
-    },
-    bubbleActive: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderRadius: 24,
-      paddingVertical: 0,
-      paddingHorizontal: 16,
-      marginRight: 8,
-      height: 44,
-      borderWidth: 1,
-    },
-    searchContainer: {
-      flex: 1, // Take available space in the category scroll view
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    iconStyle: {
-      marginRight: 8,
-    },
-    placeholderText: {
-      fontSize: 16,
-      flex: 1,
-    },
-    input: {
-      flex: 1,
-      fontSize: 16,
-      paddingVertical: 10,
-      height: '100%',
-    },
-    clearButton: {
-      padding: 4, // Make it easier to tap
-      marginLeft: 8,
-    },
-  });
+  bubble: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginRight: 8,
+    height: 44,
+    borderWidth: 1,
+  },
+  bubbleActive: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 24,
+    paddingVertical: 0,
+    paddingHorizontal: 16,
+    marginRight: 8,
+    height: 44,
+    borderWidth: 1,
+  },
+  searchContainer: {
+    flex: 1, // Take available space in the category scroll view
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconStyle: {
+    marginRight: 8,
+  },
+  placeholderText: {
+    fontSize: 16,
+    flex: 1,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 10,
+    height: '100%',
+  },
+  clearButton: {
+    padding: 4, // Make it easier to tap
+    marginLeft: 8,
+  },
+});
 
 export default CategorySearchBubble;

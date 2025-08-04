@@ -150,17 +150,19 @@ const POSScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
   const [showModificationModal, setShowModificationModal] = useState(false);
   const [showSplitBillModal, setShowSplitBillModal] = useState(false);
-  const [selectedItemForModification, setSelectedItemForModification] = useState<OrderItem | null>(null);
+  const [selectedItemForModification, setSelectedItemForModification] = useState<OrderItem | null>(
+    null
+  );
 
   // Dynamic styles that depend on state
   const dynamicStyles = createDynamicStyles(theme, serviceChargeConfig);
 
   // For split bill integration - convert cart items to enhanced format
-  const cartItems = cart.map(item => ({
+  const cartItems = cart.map((item) => ({
     ...item,
     id: item.id.toString(), // Ensure string ID for enhanced cart
   }));
-  
+
   // Using regular cart for now
   const useEnhancedCart = false;
 
@@ -680,8 +682,9 @@ const POSScreen: React.FC = () => {
   const MenuItemCard = ({ item }: { item: MenuItem }) => {
     const existingItem = cart.find((cartItem) => cartItem.id === item.id);
     // Check if item category supports modifications
-    const supportsModifications = ['coffee', 'tea', 'hot drinks', 'beverages']
-      .includes(item.category?.toLowerCase() || '');
+    const supportsModifications = ['coffee', 'tea', 'hot drinks', 'beverages'].includes(
+      item.category?.toLowerCase() || ''
+    );
 
     return (
       <View style={[styles.menuCard, !item.available && styles.menuCardDisabled]}>
@@ -742,19 +745,20 @@ const POSScreen: React.FC = () => {
     const menuItem = dynamicMenuItems.find((mi) => mi.id === item.id);
 
     // Check for modifications or modifiers
-    const hasModifications = (item.modifiers && item.modifiers.length > 0) || 
-                            (item.modifications && item.modifications.some(mod => mod.selected));
-    
+    const hasModifications =
+      (item.modifiers && item.modifiers.length > 0) ||
+      (item.modifications && item.modifications.some((mod) => mod.selected));
+
     const renderModificationSummary = () => {
       if (!hasModifications) return null;
-      
+
       // Handle both old modifiers and new modifications format
       let modificationText = '';
-      
+
       if (item.modifiers && item.modifiers.length > 0) {
         // Old format with modifiers array
         modificationText = item.modifiers
-          .map(mod => {
+          .map((mod) => {
             if (mod.quantity && mod.quantity > 1) {
               return `${mod.quantity}x ${mod.name}`;
             }
@@ -763,10 +767,10 @@ const POSScreen: React.FC = () => {
           .join(', ');
       } else if (item.modifications) {
         // New format with modifications
-        const selected = item.modifications.filter(mod => mod.selected);
+        const selected = item.modifications.filter((mod) => mod.selected);
         if (selected.length > 0) {
           modificationText = selected
-            .map(mod => {
+            .map((mod) => {
               if (mod.quantity && mod.quantity > 1) {
                 return `${mod.quantity}x ${mod.name}`;
               }
@@ -775,13 +779,13 @@ const POSScreen: React.FC = () => {
             .join(', ');
         }
       }
-      
+
       if (!modificationText && item.specialInstructions) {
         modificationText = 'Special instructions';
       }
-      
+
       if (!modificationText) return null;
-      
+
       return (
         <View style={styles.cartItemModifications}>
           <Icon name="tune" size={12} color={theme.colors.textSecondary} />
@@ -814,8 +818,8 @@ const POSScreen: React.FC = () => {
 
     return (
       <Swipeable renderRightActions={renderRightActions} overshootRight={false} friction={2}>
-        <TouchableOpacity 
-          style={styles.cartItem} 
+        <TouchableOpacity
+          style={styles.cartItem}
           onPress={() => {
             setSelectedItemForModification(item);
             setShowModificationModal(true);
@@ -1346,8 +1350,8 @@ const POSScreen: React.FC = () => {
               </View>
 
               <View style={styles.modalActions}>
-                <TouchableOpacity 
-                  style={styles.splitBillButton} 
+                <TouchableOpacity
+                  style={styles.splitBillButton}
                   onPress={() => {
                     setShowCartModal(false);
                     setShowSplitBillModal(true);
@@ -1356,7 +1360,7 @@ const POSScreen: React.FC = () => {
                   <Icon name="people" size={20} color={theme.colors.primary} />
                   <Text style={styles.splitBillButtonText}>Split Bill</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity style={styles.confirmButton} onPress={processPayment}>
                   <Text style={styles.confirmButtonText}>Confirm Payment</Text>
                 </TouchableOpacity>

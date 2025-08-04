@@ -149,16 +149,20 @@ const Input: React.FC<InputProps> = ({
       {/* Label */}
       {label && (
         <View style={[styles.labelContainer, { marginBottom: theme.spacing[2] }]}>
-          <Text style={[
-            styles.label,
-            sizeStyles.label,
-            {
-              fontWeight: theme.typography.fontWeight.medium,
-              color: theme.colors.text,
-            }
-          ]}>
+          <Text
+            style={[
+              styles.label,
+              sizeStyles.label,
+              {
+                fontWeight: theme.typography.fontWeight.medium,
+                color: theme.colors.text,
+              },
+            ]}
+          >
             {label}
-            {required && <Text style={[styles.required, { color: theme.colors.danger[500] }]}> *</Text>}
+            {required && (
+              <Text style={[styles.required, { color: theme.colors.danger[500] }]}> *</Text>
+            )}
           </Text>
         </View>
       )}
@@ -196,7 +200,7 @@ const Input: React.FC<InputProps> = ({
               {
                 marginLeft: theme.spacing[3],
                 padding: theme.spacing[1],
-              }
+              },
             ]}
           >
             <Icon name={rightIcon} size={sizeStyles.icon} color={variantStyles.icon} />
@@ -215,23 +219,31 @@ const Input: React.FC<InputProps> = ({
                 color={theme.colors.danger[500]}
                 style={[styles.errorIcon, { marginRight: theme.spacing[1] }]}
               />
-              <Text style={[
-                styles.errorText,
-                {
-                  fontSize: theme.typography.fontSize.sm,
-                  color: theme.colors.danger[500],
-                }
-              ]}>{error}</Text>
+              <Text
+                style={[
+                  styles.errorText,
+                  {
+                    fontSize: theme.typography.fontSize.sm,
+                    color: theme.colors.danger[500],
+                  },
+                ]}
+              >
+                {error}
+              </Text>
             </View>
           )}
           {helper && !error && (
-            <Text style={[
-              styles.helperText,
-              {
-                fontSize: theme.typography.fontSize.sm,
-                color: theme.colors.neutral[500],
-              }
-            ]}>{helper}</Text>
+            <Text
+              style={[
+                styles.helperText,
+                {
+                  fontSize: theme.typography.fontSize.sm,
+                  color: theme.colors.neutral[500],
+                },
+              ]}
+            >
+              {helper}
+            </Text>
           )}
         </View>
       )}

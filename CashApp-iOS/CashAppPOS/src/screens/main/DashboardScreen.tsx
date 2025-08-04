@@ -152,11 +152,18 @@ const DashboardScreen: React.FC = () => {
     <View style={styles.goalCard}>
       <View style={styles.goalHeader}>
         <Text style={[styles.goalLabel, { color: theme.colors.text }]}>{label}</Text>
-        <Text style={[styles.goalPercentage, { color: theme.colors.primary }]}>{percentage.toFixed(1)}%</Text>
+        <Text style={[styles.goalPercentage, { color: theme.colors.primary }]}>
+          {percentage.toFixed(1)}%
+        </Text>
       </View>
       <View style={styles.goalProgress}>
         <View style={[styles.goalProgressTrack, { backgroundColor: theme.colors.lightGray }]}>
-          <View style={[styles.goalProgressFill, { backgroundColor: theme.colors.primary, width: `${Math.min(percentage, 100)}%` }]} />
+          <View
+            style={[
+              styles.goalProgressFill,
+              { backgroundColor: theme.colors.primary, width: `${Math.min(percentage, 100)}%` },
+            ]}
+          />
         </View>
       </View>
       <View style={styles.goalValues}>
@@ -195,7 +202,9 @@ const DashboardScreen: React.FC = () => {
           <Text style={[styles.alertTitle, { color: theme.colors.text }]}>{alert.title}</Text>
           <Text style={[styles.alertTime, { color: theme.colors.lightText }]}>{alert.time}</Text>
         </View>
-        <Text style={[styles.alertMessage, { color: theme.colors.lightText }]}>{alert.message}</Text>
+        <Text style={[styles.alertMessage, { color: theme.colors.lightText }]}>
+          {alert.message}
+        </Text>
       </View>
     </View>
   );
@@ -209,7 +218,9 @@ const DashboardScreen: React.FC = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Icon name="arrow-back" size={24} color={theme.colors.white} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.colors.white }]}>{restaurantDisplayName} Dashboard</Text>
+        <Text style={[styles.headerTitle, { color: theme.colors.white }]}>
+          {restaurantDisplayName} Dashboard
+        </Text>
         <TouchableOpacity style={styles.refreshButton}>
           <Icon name="refresh" size={24} color={theme.colors.white} />
         </TouchableOpacity>
@@ -218,7 +229,9 @@ const DashboardScreen: React.FC = () => {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* KPI Cards */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Key Performance Indicators</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            Key Performance Indicators
+          </Text>
           <View style={styles.kpiGrid}>
             {kpiData.map((kpi, index) => (
               <KPICard key={index} {...kpi} />
@@ -286,7 +299,9 @@ const DashboardScreen: React.FC = () => {
           <View style={[styles.backendNotice, { backgroundColor: theme.colors.white }]}>
             <Icon name="info" size={24} color={theme.colors.secondary} />
             <View style={styles.backendNoticeContent}>
-              <Text style={[styles.backendNoticeTitle, { color: theme.colors.text }]}>Development Mode</Text>
+              <Text style={[styles.backendNoticeTitle, { color: theme.colors.text }]}>
+                Development Mode
+              </Text>
               <Text style={[styles.backendNoticeText, { color: theme.colors.lightText }]}>
                 This dashboard shows mock data for testing. Real-time data will be available once
                 the backend is connected.
@@ -317,230 +332,230 @@ const getAlertIconColor = (theme: any, type: 'warning' | 'info' | 'success') => 
 };
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      paddingTop: 48,
-    },
-    backButton: {
-      padding: 8,
-    },
-    headerTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-    },
-    refreshButton: {
-      padding: 8,
-    },
-    content: {
-      flex: 1,
-      padding: 16,
-    },
-    section: {
-      marginBottom: 24,
-    },
-    sectionTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginBottom: 16,
-    },
-    kpiGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'space-between',
-    },
-    kpiCard: {
-      borderRadius: 12,
-      padding: 16,
-      width: '48%',
-      marginBottom: 12,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-    },
-    kpiHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    kpiIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginRight: 12,
-    },
-    kpiContent: {
-      flex: 1,
-    },
-    kpiTitle: {
-      fontSize: 12,
-      marginBottom: 2,
-    },
-    kpiValue: {
-      fontSize: 18,
-      fontWeight: 'bold',
-    },
-    kpiChange: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    kpiChangeText: {
-      fontSize: 14,
-      fontWeight: '600',
-      marginLeft: 4,
-    },
-    kpiChangeLabel: {
-      fontSize: 12,
-      marginLeft: 4,
-    },
-    goalsContainer: {
-      borderRadius: 12,
-      padding: 16,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-    },
-    goalCard: {
-      marginBottom: 20,
-    },
-    goalHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 8,
-    },
-    goalLabel: {
-      fontSize: 14,
-      fontWeight: '500',
-    },
-    goalPercentage: {
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    goalProgress: {
-      marginBottom: 8,
-    },
-    goalProgressTrack: {
-      height: 8,
-      borderRadius: 4,
-    },
-    goalProgressFill: {
-      height: 8,
-      borderRadius: 4,
-    },
-    goalValues: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-    },
-    goalCurrent: {
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    goalTarget: {
-      fontSize: 14,
-    },
-    quickActions: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'space-between',
-    },
-    actionButton: {
-      borderRadius: 12,
-      padding: 16,
-      width: '48%',
-      alignItems: 'center',
-      marginBottom: 12,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-    },
-    actionText: {
-      fontSize: 14,
-      fontWeight: '500',
-      marginTop: 8,
-      textAlign: 'center',
-    },
-    alertsContainer: {
-      borderRadius: 12,
-      padding: 16,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-    },
-    alertCard: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      paddingVertical: 12,
-      borderBottomWidth: 1,
-    },
-    alertIcon: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginRight: 12,
-    },
-    alertContent: {
-      flex: 1,
-    },
-    alertHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 4,
-    },
-    alertTitle: {
-      fontSize: 14,
-      fontWeight: '600',
-    },
-    alertTime: {
-      fontSize: 12,
-    },
-    alertMessage: {
-      fontSize: 13,
-      lineHeight: 18,
-    },
-    backendNotice: {
-      borderRadius: 12,
-      padding: 16,
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-    },
-    backendNoticeContent: {
-      flex: 1,
-      marginLeft: 12,
-    },
-    backendNoticeTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      marginBottom: 4,
-    },
-    backendNoticeText: {
-      fontSize: 14,
-      lineHeight: 20,
-    },
-  });
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingTop: 48,
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  refreshButton: {
+    padding: 8,
+  },
+  content: {
+    flex: 1,
+    padding: 16,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  kpiGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  kpiCard: {
+    borderRadius: 12,
+    padding: 16,
+    width: '48%',
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  kpiHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  kpiIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  kpiContent: {
+    flex: 1,
+  },
+  kpiTitle: {
+    fontSize: 12,
+    marginBottom: 2,
+  },
+  kpiValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  kpiChange: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  kpiChangeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  kpiChangeLabel: {
+    fontSize: 12,
+    marginLeft: 4,
+  },
+  goalsContainer: {
+    borderRadius: 12,
+    padding: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  goalCard: {
+    marginBottom: 20,
+  },
+  goalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  goalLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  goalPercentage: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  goalProgress: {
+    marginBottom: 8,
+  },
+  goalProgressTrack: {
+    height: 8,
+    borderRadius: 4,
+  },
+  goalProgressFill: {
+    height: 8,
+    borderRadius: 4,
+  },
+  goalValues: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  goalCurrent: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  goalTarget: {
+    fontSize: 14,
+  },
+  quickActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  actionButton: {
+    borderRadius: 12,
+    padding: 16,
+    width: '48%',
+    alignItems: 'center',
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  actionText: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  alertsContainer: {
+    borderRadius: 12,
+    padding: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  alertCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  alertIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  alertContent: {
+    flex: 1,
+  },
+  alertHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  alertTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  alertTime: {
+    fontSize: 12,
+  },
+  alertMessage: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  backendNotice: {
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  backendNoticeContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  backendNoticeTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  backendNoticeText: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+});
 
 export default DashboardScreen;

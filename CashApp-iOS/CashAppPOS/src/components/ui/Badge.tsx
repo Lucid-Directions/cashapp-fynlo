@@ -239,7 +239,6 @@ export const PositionedBadge: React.FC<PositionedBadgeProps> = ({
 }) => {
   const { theme } = useTheme();
 
-
   const getPositionStyles = (): ViewStyle => {
     const { x = 0, y = 0 } = offset;
 

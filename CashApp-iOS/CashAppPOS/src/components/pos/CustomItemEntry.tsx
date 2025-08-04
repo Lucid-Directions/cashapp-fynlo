@@ -236,7 +236,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
                   minValue={0.01}
                   decimalPlaces={2}
                   placeholder="5.00"
-                  style={{ marginVertical: 8 }}
+                  style={styles.style1}
                 />
               </View>
 

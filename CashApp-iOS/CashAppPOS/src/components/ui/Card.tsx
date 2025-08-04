@@ -118,15 +118,17 @@ export const CardHeader: React.FC<CardHeaderProps> = ({ children, style }) => {
   const { theme } = useTheme();
 
   return (
-    <View style={[
-      styles.header,
-      {
-        paddingBottom: theme.spacing[3],
-        borderBottomColor: theme.colors.neutral[100],
-        marginBottom: theme.spacing[3],
-      },
-      style
-    ]}>
+    <View
+      style={[
+        styles.header,
+        {
+          paddingBottom: theme.spacing[3],
+          borderBottomColor: theme.colors.neutral[100],
+          marginBottom: theme.spacing[3],
+        },
+        style,
+      ]}
+    >
       {children}
     </View>
   );
@@ -154,15 +156,17 @@ export const CardFooter: React.FC<CardFooterProps> = ({ children, style }) => {
   const { theme } = useTheme();
 
   return (
-    <View style={[
-      styles.footer,
-      {
-        paddingTop: theme.spacing[3],
-        borderTopColor: theme.colors.neutral[100],
-        marginTop: theme.spacing[3],
-      },
-      style
-    ]}>
+    <View
+      style={[
+        styles.footer,
+        {
+          paddingTop: theme.spacing[3],
+          borderTopColor: theme.colors.neutral[100],
+          marginTop: theme.spacing[3],
+        },
+        style,
+      ]}
+    >
       {children}
     </View>
   );

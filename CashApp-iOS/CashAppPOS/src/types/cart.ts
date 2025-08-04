@@ -30,26 +30,26 @@ export interface EnhancedOrderItem {
   price: number; // Base price before modifications
   quantity: number;
   emoji?: string;
-  
+
   // Category info for kitchen display
   categoryId?: string;
   categoryName?: string;
-  
+
   // Modification fields
   modifications: CartItemModification[];
   specialInstructions?: string;
-  
+
   // Pricing breakdown
   originalPrice: number; // Base price
   modificationPrice: number; // Sum of all modification prices
   totalPrice: number; // (originalPrice + modificationPrice) * quantity
-  
+
   // Metadata
   addedAt: string; // ISO timestamp
   lastModified: string; // ISO timestamp
   addedBy?: string; // Staff member ID who added the item
   modifiedBy?: string; // Staff member ID who last modified
-  
+
   // For split bill tracking
   splitGroupId?: string; // Which split group this item belongs to
 }
@@ -63,13 +63,13 @@ export interface CartTemplate {
   description: string;
   emoji?: string; // Visual identifier
   items: EnhancedOrderItem[];
-  
+
   // Usage tracking
   createdAt: string;
   createdBy: string;
   lastUsed?: string;
   useCount: number;
-  
+
   // Template settings
   isPublic: boolean; // Available to all staff
   tags: string[]; // e.g., ["breakfast", "lunch special"]
@@ -84,10 +84,10 @@ export interface SplitBillGroup {
   name: string; // e.g., "Table 1", "John", "Split 1"
   color: string; // Hex color for visual identification
   emoji?: string; // Alternative visual identifier
-  
+
   // Items assigned to this group
   itemIds: string[]; // Array of EnhancedOrderItem IDs
-  
+
   // Financial breakdown
   subtotal: number;
   serviceCharge: number;
@@ -97,7 +97,7 @@ export interface SplitBillGroup {
   discount?: number;
   discountPercentage?: number;
   total: number;
-  
+
   // Payment info
   paymentMethod?: 'cash' | 'card' | 'apple_pay' | 'tap_to_pay' | 'custom';
   paymentStatus: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
@@ -107,7 +107,7 @@ export interface SplitBillGroup {
     processor?: string;
     last4?: string; // Last 4 digits of card
   };
-  
+
   // Metadata
   createdAt: string;
   paidAt?: string;
@@ -120,26 +120,26 @@ export interface SplitBillGroup {
 export interface SplitBillConfig {
   id: string;
   orderId?: string; // Link to order if already created
-  
+
   // Split configuration
   splitType: 'equal' | 'by_items' | 'custom' | 'percentage';
   numberOfSplits: number;
   groups: SplitBillGroup[];
-  
+
   // Unassigned items (not yet allocated to any group)
   unassignedItemIds: string[];
-  
+
   // Overall totals
   originalTotal: number;
   currentTotal: number; // May differ if items removed
   totalPaid: number;
   remainingBalance: number;
-  
+
   // Settings
   allowPartialPayments: boolean;
   requireAllGroupsPaid: boolean; // Before completing order
   autoAssignServiceCharge: boolean;
-  
+
   // Metadata
   createdAt: string;
   createdBy: string;
@@ -153,17 +153,17 @@ export interface BulkCartOperation {
   id: string;
   type: 'discount' | 'remove' | 'duplicate' | 'move_to_group' | 'add_modifier';
   itemIds: string[];
-  
+
   // Operation-specific data
   discountAmount?: number;
   discountPercentage?: number;
   targetGroupId?: string; // For move operations
   modificationId?: string; // For add modifier operations
-  
+
   // Metadata
   performedAt: string;
   performedBy: string;
-  
+
   // For undo functionality
   previousState?: any; // Snapshot of affected items before operation
   isReversible: boolean;
@@ -176,16 +176,16 @@ export interface CartHistoryEntry {
   id: string;
   timestamp: string;
   action: string; // Human-readable description
-  
+
   // State snapshots
   cartBefore: EnhancedOrderItem[];
   cartAfter: EnhancedOrderItem[];
-  
+
   // What changed
   itemsAdded: string[];
   itemsRemoved: string[];
   itemsModified: string[];
-  
+
   // Who made the change
   userId: string;
   userName: string;
@@ -197,22 +197,22 @@ export interface CartHistoryEntry {
 export interface EnhancedCartState {
   // Enhanced cart items
   cart: EnhancedOrderItem[];
-  
+
   // Templates
   templates: CartTemplate[];
   recentTemplates: string[]; // Template IDs for quick access
-  
+
   // Split bill
   splitBillConfig: SplitBillConfig | null;
-  
+
   // History for undo/redo
   cartHistory: CartHistoryEntry[];
   historyIndex: number; // Current position in history
   maxHistorySize: number; // Limit history entries
-  
+
   // Selection for bulk operations
   selectedItemIds: string[];
-  
+
   // UI state
   isModificationModalOpen: boolean;
   isSplitBillModalOpen: boolean;
@@ -223,7 +223,7 @@ export interface EnhancedCartState {
 /**
  * Cart validation error types
  */
-export type CartValidationError = 
+export type CartValidationError =
   | { type: 'INVALID_ID'; itemId: string }
   | { type: 'INVALID_PRICE'; itemId: string; price: number }
   | { type: 'INVALID_QUANTITY'; itemId: string; quantity: number }

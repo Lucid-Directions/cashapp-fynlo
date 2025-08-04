@@ -237,7 +237,14 @@ const HomeHubScreen: React.FC = () => {
     return (
       <Animated.View style={[{ transform: [{ scale: scaleValue }] }]}>
         <TouchableOpacity
-          style={[styles.iconCard, { width: cardWidth, backgroundColor: theme.colors.white, borderColor: theme.colors.border }]}
+          style={[
+            styles.iconCard,
+            {
+              width: cardWidth,
+              backgroundColor: theme.colors.white,
+              borderColor: theme.colors.border,
+            },
+          ]}
           onPress={() => handleIconPress(icon)}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
@@ -254,7 +261,9 @@ const HomeHubScreen: React.FC = () => {
             )}
           </View>
           <Text style={[styles.iconTitle, { color: theme.colors.text }]}>{icon.title}</Text>
-          <Text style={[styles.iconSubtitle, { color: theme.colors.darkGray }]}>{icon.subtitle}</Text>
+          <Text style={[styles.iconSubtitle, { color: theme.colors.darkGray }]}>
+            {icon.subtitle}
+          </Text>
         </TouchableOpacity>
       </Animated.View>
     );
@@ -317,15 +326,23 @@ const HomeHubScreen: React.FC = () => {
         {/* Quick Stats */}
         <View style={[styles.quickStats, { backgroundColor: theme.colors.white }]}>
           <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: theme.colors.primary }]}>{cartItemCount()}</Text>
+            <Text style={[styles.statValue, { color: theme.colors.primary }]}>
+              {cartItemCount()}
+            </Text>
             <Text style={[styles.statLabel, { color: theme.colors.darkGray }]}>Cart Items</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: theme.colors.primary }]}>{visibleIcons.length}</Text>
-            <Text style={[styles.statLabel, { color: theme.colors.darkGray }]}>Available Features</Text>
+            <Text style={[styles.statValue, { color: theme.colors.primary }]}>
+              {visibleIcons.length}
+            </Text>
+            <Text style={[styles.statLabel, { color: theme.colors.darkGray }]}>
+              Available Features
+            </Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: theme.colors.primary }]}>{user?.role === 'manager' ? 'Manager' : 'Staff'}</Text>
+            <Text style={[styles.statValue, { color: theme.colors.primary }]}>
+              {user?.role === 'manager' ? 'Manager' : 'Staff'}
+            </Text>
             <Text style={[styles.statLabel, { color: theme.colors.darkGray }]}>Access Level</Text>
           </View>
         </View>
@@ -350,8 +367,12 @@ const HomeHubScreen: React.FC = () => {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={[styles.versionText, { color: theme.colors.darkGray }]}>Fynlo POS v1.0.0</Text>
-          <Text style={[styles.copyrightText, { color: theme.colors.lightText }]}>© 2024 Fynlo Ltd.</Text>
+          <Text style={[styles.versionText, { color: theme.colors.darkGray }]}>
+            Fynlo POS v1.0.0
+          </Text>
+          <Text style={[styles.copyrightText, { color: theme.colors.lightText }]}>
+            © 2024 Fynlo Ltd.
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -359,152 +380,152 @@ const HomeHubScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      paddingVertical: 16,
-    },
-    headerContent: {
-      flex: 1,
-    },
-    headerTitle: {
-      fontSize: 24,
-      fontWeight: 'bold',
-    },
-    headerSubtitle: {
-      fontSize: 14,
-      color: 'rgba(255, 255, 255, 0.8)',
-      marginTop: 4,
-    },
-    headerActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-    },
-    connectionDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: '#4CAF50',
-      marginLeft: -4,
-    },
-    signOutButton: {
-      padding: 8,
-      borderRadius: 8,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      marginLeft: 8,
-    },
-    content: {
-      flex: 1,
-    },
-    quickStats: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      marginHorizontal: 16,
-      marginTop: 16,
-      padding: 16,
-      borderRadius: 12,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 4,
-      elevation: 2,
-    },
-    statItem: {
-      alignItems: 'center',
-    },
-    statValue: {
-      fontSize: 20,
-      fontWeight: 'bold',
-    },
-    statLabel: {
-      fontSize: 12,
-      marginTop: 4,
-    },
-    categorySection: {
-      marginTop: 24,
-    },
-    categoryTitle: {
-      fontSize: 14,
-      fontWeight: '600',
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-      marginBottom: 12,
-      marginHorizontal: 20,
-    },
-    iconGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      paddingHorizontal: 16,
-      justifyContent: 'flex-start',
-    },
-    iconCard: {
-      borderRadius: 12,
-      padding: 16,
-      marginHorizontal: 8,
-      marginBottom: 12,
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: 120,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 4,
-      elevation: 2,
-      borderWidth: 1,
-    },
-    iconContainer: {
-      width: 80,
-      height: 80,
-      borderRadius: 20,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 12,
-      position: 'relative',
-    },
-    badge: {
-      position: 'absolute',
-      top: -4,
-      right: -4,
-      borderRadius: 10,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      minWidth: 20,
-      height: 20,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    badgeText: {
-      fontSize: 12,
-      fontWeight: '600',
-    },
-    iconTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      textAlign: 'center',
-      marginBottom: 4,
-    },
-    iconSubtitle: {
-      fontSize: 12,
-      textAlign: 'center',
-    },
-    footer: {
-      alignItems: 'center',
-      paddingVertical: 32,
-      marginTop: 24,
-    },
-    versionText: {
-      fontSize: 14,
-    },
-    copyrightText: {
-      fontSize: 12,
-      marginTop: 4,
-    },
-  });
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  headerContent: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginTop: 4,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  connectionDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#4CAF50',
+    marginLeft: -4,
+  },
+  signOutButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginLeft: 8,
+  },
+  content: {
+    flex: 1,
+  },
+  quickStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginHorizontal: 16,
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  statLabel: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+  categorySection: {
+    marginTop: 24,
+  },
+  categoryTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 12,
+    marginHorizontal: 20,
+  },
+  iconGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 16,
+    justifyContent: 'flex-start',
+  },
+  iconCard: {
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 8,
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 120,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  iconTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  iconSubtitle: {
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  footer: {
+    alignItems: 'center',
+    paddingVertical: 32,
+    marginTop: 24,
+  },
+  versionText: {
+    fontSize: 14,
+  },
+  copyrightText: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+});
 
 export default HomeHubScreen;
