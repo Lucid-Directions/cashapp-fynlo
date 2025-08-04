@@ -435,7 +435,6 @@ class EmployeeService:
                     raise ValueError(
                         f"Recurring schedule already exists for this day of week"
                     )
-
             new_schedule = Schedule(
                 employee_id=employee_id,
                 day_of_week=schedule_data.day_of_week,
@@ -655,7 +654,6 @@ class EmployeeService:
                 .group_by(EmployeeProfile.role)
                 .all()
             )
-
             roles_breakdown = {role: count for role, count in roles_query}
 
             # Get employment type breakdown
@@ -677,7 +675,6 @@ class EmployeeService:
             employment_status_breakdown = {
                 status: count for status, count in status_query
             }
-
             return EmployeeSummary(
                 total_employees=total_employees,
                 active_employees=active_employees,
