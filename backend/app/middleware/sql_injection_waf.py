@@ -8,7 +8,6 @@ import json
 import logging
 from typing import Dict, List, Any, Optional
 from fastapi import Request
-from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.datastructures import QueryParams
 from urllib.parse import unquote
@@ -184,11 +183,10 @@ class SQLInjectionWAFMiddleware(BaseHTTPMiddleware):
                 )
 
             # Return a generic error to avoid information disclosure
-            return JSONResponse(
-                status_code=400,
-                content=APIResponseHelper.error(
-                    "Invalid request parameters", status_code=400
-                ),
+            # Fix: APIResponseHelper.error already returns a JSONResponse, don't wrap it
+            return APIResponseHelper.error(
+                "Invalid request parameters",
+                status_code=400
             )
 
         # Process the request normally

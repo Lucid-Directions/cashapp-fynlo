@@ -1,0 +1,72 @@
+name: fynlopos
+region: lon
+services:
+- name: cashapp-fynlo
+  environment_slug: python
+  github:
+    branch: main
+    deploy_on_push: true
+    repo: Lucid-Directions/cashapp-fynlo
+  source_dir: /backend
+  http_port: 8080
+  instance_count: 2
+  instance_size_slug: apps-s-1vcpu-1gb
+  run_command: python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080} --log-level info
+  envs:
+  # Database connections
+  - key: DATABASE_URL
+    scope: RUN_TIME
+    value: ${fynlo-pos-db.DATABASE_URL}
+  - key: REDIS_URL
+    scope: RUN_TIME
+    value: ${fynlo-pos-cache.DATABASE_URL}
+  
+  # CRITICAL - Required for app to start
+  - key: SECRET_KEY
+    scope: RUN_TIME
+    type: SECRET
+    value: # Generate with: python -c "import secrets; print(secrets.token_urlsafe(64))"
+  - key: ENVIRONMENT
+    scope: RUN_TIME
+    value: "production"
+  
+  # Supabase Auth Configuration
+  - key: SUPABASE_URL
+    scope: RUN_TIME
+    value: # Your Supabase project URL
+  - key: SUPABASE_ANON_KEY
+    scope: RUN_TIME
+    value: # Your Supabase anon key
+  - key: SUPABASE_SERVICE_ROLE_KEY
+    scope: RUN_TIME
+    type: SECRET
+    value: # Your Supabase service role key
+  
+  # CORS Configuration
+  - key: CORS_ORIGINS
+    scope: RUN_TIME
+    value: "https://app.fynlo.co.uk,https://fynlo.co.uk,https://api.fynlo.co.uk"
+  
+  # Additional recommended settings
+  - key: DEBUG
+    scope: RUN_TIME
+    value: "false"
+  - key: LOG_LEVEL
+    scope: RUN_TIME
+    value: "info"
+  - key: ACCESS_TOKEN_EXPIRE_MINUTES
+    scope: RUN_TIME
+    value: "30"
+  - key: REFRESH_TOKEN_EXPIRE_DAYS
+    scope: RUN_TIME
+    value: "7"
+
+databases:
+- name: fynlo-pos-cache
+  engine: REDIS
+  production: true
+  version: "7"
+- name: fynlo-pos-db
+  engine: PG
+  production: true
+  version: "15"
