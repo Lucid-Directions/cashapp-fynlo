@@ -47,7 +47,7 @@ export class PlatformWebSocketService {
   }
 
   async connect(): Promise<void> {
-    if (this.status \!== 'disconnected' && this.status \!== 'reconnecting') {
+    if (this.status !== 'disconnected' && this.status !== 'reconnecting') {
       return;
     }
 
@@ -56,13 +56,13 @@ export class PlatformWebSocketService {
       
       // Get auth session
       const { data: { session } } = await supabase.auth.getSession();
-      if (\!session) {
+      if (!session) {
         throw new Error('No authentication session found');
       }
 
       // Get user details
       const { data: { user } } = await supabase.auth.getUser();
-      if (\!user) {
+      if (!user) {
         throw new Error('No user found');
       }
 
@@ -126,7 +126,7 @@ export class PlatformWebSocketService {
   }
 
   private setupEventHandlers(): void {
-    if (\!this.ws) return;
+    if (!this.ws) return;
     
     this.ws.onmessage = (event) => {
       try {
@@ -266,7 +266,7 @@ export class PlatformWebSocketService {
     this.emit(WebSocketEvent.DISCONNECT, { code, reason });
     
     // Schedule reconnect for non-normal closures
-    if (code \!== 1000) {
+    if (code !== 1000) {
       this.scheduleReconnect();
     }
   }
@@ -339,7 +339,7 @@ export class PlatformWebSocketService {
   send(message: Partial<WebSocketMessage>): void {
     const fullMessage: WebSocketMessage = {
       id: message.id || this.generateMessageId(),
-      type: message.type\!,
+      type: message.type!,
       data: message.data,
       restaurant_id: message.restaurant_id || '',
       timestamp: message.timestamp || new Date().toISOString()
@@ -363,7 +363,7 @@ export class PlatformWebSocketService {
     
     console.log(`Platform WebSocket: Processing ${this.messageQueue.length} queued messages`);
     while (this.messageQueue.length > 0) {
-      const message = this.messageQueue.shift()\!;
+      const message = this.messageQueue.shift()!;
       this.send(message);
     }
   }
@@ -389,10 +389,10 @@ export class PlatformWebSocketService {
 
   // Event emitter methods
   on(event: string, listener: Function): void {
-    if (\!this.listeners.has(event)) {
+    if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
-    this.listeners.get(event)\!.add(listener);
+    this.listeners.get(event)!.add(listener);
   }
 
   once(event: string, listener: Function): void {
@@ -423,7 +423,7 @@ export class PlatformWebSocketService {
 
   // Utilities
   private setStatus(newStatus: ConnectionStatus): void {
-    if (this.status \!== newStatus) {
+    if (this.status !== newStatus) {
       this.status = newStatus;
       console.log(`Platform WebSocket: Status changed to ${newStatus}`);
     }

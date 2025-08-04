@@ -52,12 +52,12 @@ export class EnhancedWebSocketService {
     };
 
     // Initialize exponential backoff with proper configuration
-    this.exponentialBackoff = new ExponentialBackoff({
-      initialDelay: 1000, // 1 second
-      maxDelay: 30000, // 30 seconds max
-      factor: 2,
-      jitter: 0.3,
-    });
+    this.exponentialBackoff = new ExponentialBackoff(
+      1000, // baseDelay: 1 second
+      30000, // maxDelay: 30 seconds max
+      10, // maxAttempts
+      0.3 // jitterFactor: 30%
+    );
 
     this.setupNetworkMonitoring();
   }
