@@ -28,7 +28,11 @@ app.add_middleware(
 
 # Database connection - Use environment variable or fallback to localhost for development
 import os
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://fynlo_user:fynlo_password@localhost/fynlo_pos")
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql://fynlo_user:fynlo_password@localhost/fynlo_pos"
+)
+
 
 def get_db_connection():
     """Get database connection"""
@@ -38,6 +42,7 @@ def get_db_connection():
     except Exception as e:
         logger.error(f"Database connection failed: {e}")
         return None
+
 
 @app.get("/health")
 async def health_check():
@@ -49,31 +54,37 @@ async def health_check():
                 cursor.execute("SELECT version();")
                 db_version = cursor.fetchone()
             conn.close()
-            
+
             return {
                 "status": "healthy",
                 "timestamp": datetime.now().isoformat(),
                 "database": "connected",
-                "db_version": db_version['version'] if db_version else "unknown"
+                "db_version": db_version["version"] if db_version else "unknown",
             }
         else:
             return {
                 "status": "degraded",
                 "timestamp": datetime.now().isoformat(),
-                "database": "disconnected"
+                "database": "disconnected",
             }
     except Exception as e:
         logger.error(f"Health check error: {e}")
         return {
             "status": "unhealthy",
             "timestamp": datetime.now().isoformat(),
-            "error": str(e)
+            "error": str(e),
         }
+
 
 @app.get("/")
 async def root():
     """Root endpoint"""
-    return {"message": "Fynlo POS Backend API", "status": "running", "timestamp": datetime.now().isoformat()}
+    return {
+        "message": "Fynlo POS Backend API",
+        "status": "running",
+        "timestamp": datetime.now().isoformat(),
+    }
+
 
 @app.get("/api/v1/platform/settings/service-charge")
 async def get_service_charge():
@@ -82,17 +93,18 @@ async def get_service_charge():
         conn = get_db_connection()
         if not conn:
             return {"error": "Database connection failed", "default_rate": 12.5}
-        
+
         # For now, return a default value - later we'll read from database
         return {
             "enabled": True,
             "rate": 12.5,
             "timestamp": datetime.now().isoformat(),
-            "source": "platform_default"
+            "source": "platform_default",
         }
     except Exception as e:
         logger.error(f"Service charge get error: {e}")
         return {"error": str(e), "default_rate": 12.5}
+
 
 @app.post("/api/v1/platform/settings/service-charge")
 async def update_service_charge(data: dict):
@@ -100,20 +112,21 @@ async def update_service_charge(data: dict):
     try:
         rate = data.get("rate", 12.5)
         enabled = data.get("enabled", True)
-        
+
         logger.info(f"📊 Service charge update request: {rate}% enabled={enabled}")
-        
+
         # For now, just log the change - later we'll save to database
         return {
             "success": True,
             "rate": rate,
             "enabled": enabled,
             "timestamp": datetime.now().isoformat(),
-            "message": f"Service charge updated to {rate}%"
+            "message": f"Service charge updated to {rate}%",
         }
     except Exception as e:
         logger.error(f"Service charge update error: {e}")
         return {"error": str(e), "success": False}
+
 
 # Also add legacy endpoints without /v1 for direct testing
 @app.get("/api/platform/settings/service-charge")
@@ -121,10 +134,12 @@ async def get_service_charge_legacy():
     """Legacy endpoint for direct testing"""
     return await get_service_charge()
 
+
 @app.post("/api/platform/settings/service-charge")
 async def update_service_charge_legacy(data: dict):
     """Legacy endpoint for direct testing"""
     return await update_service_charge(data)
+
 
 # Restaurant Management Endpoints
 @app.get("/api/v1/platform/restaurants/{platform_owner_id}")
@@ -132,7 +147,7 @@ async def get_platform_restaurants(platform_owner_id: str):
     """Get all restaurants for a platform owner"""
     try:
         logger.info(f"📊 Returning restaurants for platform owner: {platform_owner_id}")
-        
+
         # TODO: Query actual database when tables are set up
         # For now, return mock data from backend
         restaurants_data = {
@@ -164,10 +179,10 @@ async def get_platform_restaurants(platform_owner_id: str):
                     "todayTransactions": 47,
                     "todayRevenue": 1280,
                     "activeOrders": 3,
-                    "averageOrderValue": 27.23
+                    "averageOrderValue": 27.23,
                 },
                 {
-                    "id": "restaurant2", 
+                    "id": "restaurant2",
                     "name": "Fynlo Pizza Palace",
                     "displayName": "Fynlo Pizza Palace",
                     "businessType": "restaurant",
@@ -193,18 +208,18 @@ async def get_platform_restaurants(platform_owner_id: str):
                     "todayTransactions": 32,
                     "todayRevenue": 890,
                     "activeOrders": 1,
-                    "averageOrderValue": 27.81
+                    "averageOrderValue": 27.81,
                 },
                 {
                     "id": "restaurant3",
-                    "name": "Fynlo Burger Bar", 
+                    "name": "Fynlo Burger Bar",
                     "displayName": "Fynlo Burger Bar",
                     "businessType": "restaurant",
                     "address": "789 Broadway, Birmingham, B1 3CD",
                     "phone": "+44 121 987 6543",
                     "email": "burgers@fynlopos.com",
                     "website": "https://fynloburgers.com",
-                    "vatNumber": "GB456789123", 
+                    "vatNumber": "GB456789123",
                     "registrationNumber": "45678912",
                     "platformOwnerId": platform_owner_id,
                     "ownerId": "owner_burger_1",
@@ -222,60 +237,65 @@ async def get_platform_restaurants(platform_owner_id: str):
                     "todayTransactions": 28,
                     "todayRevenue": 920,
                     "activeOrders": 2,
-                    "averageOrderValue": 32.86
-                }
+                    "averageOrderValue": 32.86,
+                },
             ],
             "total": 3,
-            "source": "real_backend_api"
+            "source": "real_backend_api",
         }
         return restaurants_data
-        
+
     except Exception as e:
         logger.error(f"Restaurant fetch error: {e}")
         return {"error": str(e), "restaurants": []}
+
 
 @app.post("/api/v1/platform/restaurants")
 async def create_restaurant(restaurant_data: dict):
     """Create a new restaurant for the platform"""
     try:
-        logger.info(f"📊 Creating new restaurant: {restaurant_data.get('name', 'Unknown')}")
-        
+        logger.info(
+            f"📊 Creating new restaurant: {restaurant_data.get('name', 'Unknown')}"
+        )
+
         # TODO: Save to database when tables are set up
         # For now, just return success
         return {
             "success": True,
             "restaurant_id": f"restaurant_{datetime.now().timestamp()}",
             "message": "Restaurant created successfully",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:
         logger.error(f"Restaurant creation error: {e}")
         return {"error": str(e), "success": False}
+
 
 @app.put("/api/v1/platform/restaurants/{restaurant_id}")
 async def update_restaurant(restaurant_id: str, restaurant_data: dict):
     """Update restaurant data"""
     try:
         logger.info(f"📊 Updating restaurant: {restaurant_id}")
-        
+
         # TODO: Update in database when tables are set up
         # For now, just return success
         return {
             "success": True,
             "restaurant_id": restaurant_id,
             "message": "Restaurant updated successfully",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:
         logger.error(f"Restaurant update error: {e}")
         return {"error": str(e), "success": False}
+
 
 @app.get("/api/v1/restaurants/{restaurant_id}")
 async def get_restaurant_details(restaurant_id: str):
     """Get specific restaurant details"""
     try:
         logger.info(f"📊 Getting restaurant details: {restaurant_id}")
-        
+
         # TODO: Query database when tables are set up
         # For now, return mock data for the requested restaurant
         return {
@@ -283,12 +303,14 @@ async def get_restaurant_details(restaurant_id: str):
             "name": f"Restaurant {restaurant_id}",
             "isActive": True,
             "lastActivity": datetime.now().isoformat(),
-            "source": "mock_backend_data"
+            "source": "mock_backend_data",
         }
     except Exception as e:
         logger.error(f"Restaurant details error: {e}")
         return {"error": str(e)}
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

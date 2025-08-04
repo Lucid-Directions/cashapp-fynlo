@@ -6,6 +6,7 @@ This ensures users can authenticate with Supabase while maintaining data integri
 
 import sys
 import os
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy import func
@@ -20,50 +21,56 @@ logger = logging.getLogger(__name__)
 
 def link_supabase_users():
     """Link existing Supabase users to database records"""
-    
+
     # Initialize database session
     db = SessionLocal()
-    
+
     try:
         # Initialize Supabase client
         supabase = get_supabase_client()
-        
+
         # Get all users from Supabase
         logger.info("Fetching users from Supabase...")
         response = supabase.auth.admin.list_users()
-        
+
         # Extract users from response object
-        supabase_users = response.users if hasattr(response, 'users') else []
-        
+        supabase_users = response.users if hasattr(response, "users") else []
+
         if not supabase_users:
             logger.info("No users found in Supabase")
             return
-        
+
         logger.info(f"Found {len(supabase_users)} users in Supabase")
-        
+
         for su_user in supabase_users:
             # Skip users without email (e.g., phone-only auth)
-            email = getattr(su_user, 'email', None)
+            email = getattr(su_user, "email", None)
             if not email:
-                logger.info(f"\nSkipping user without email (ID: {getattr(su_user, 'id', 'unknown')})")
+                logger.info(
+                    f"\nSkipping user without email (ID: {getattr(su_user, 'id', 'unknown')})"
+                )
                 continue
-            
+
             # Safely get user ID
-            user_id = getattr(su_user, 'id', None)
+            user_id = getattr(su_user, "id", None)
             if not user_id:
                 logger.info(f"\nSkipping user without ID (Email: {email})")
                 continue
-                
+
             logger.info(f"\nProcessing user: {email}")
-            
+
             # Check if user exists in database (case-insensitive)
-            db_user = db.query(User).filter(func.lower(User.email) == func.lower(email)).first()
-            
+            db_user = (
+                db.query(User)
+                .filter(func.lower(User.email) == func.lower(email))
+                .first()
+            )
+
             if db_user:
                 # Update existing user with Supabase ID
                 if not db_user.supabase_id:
                     db_user.supabase_id = user_id
-                    db_user.auth_provider = 'supabase'
+                    db_user.auth_provider = "supabase"
                     db_user.updated_at = datetime.utcnow()
                     logger.info(f"  ✓ Updated existing user with Supabase ID")
                 else:
@@ -71,19 +78,23 @@ def link_supabase_users():
             else:
                 # Create new user record for Supabase user
                 # Safe extraction of name from email
-                first_name = 'User'
-                last_name = 'User'
-                
+                first_name = "User"
+                last_name = "User"
+
                 try:
                     # Only try to extract from email if it's valid
-                    if '@' in email:
-                        username_part = email.split('@')[0]
+                    if "@" in email:
+                        username_part = email.split("@")[0]
                         if username_part:  # Ensure we have something before @
                             # Split by common separators
-                            parts = username_part.replace('_', '.').replace('-', '.').split('.')
+                            parts = (
+                                username_part.replace("_", ".")
+                                .replace("-", ".")
+                                .split(".")
+                            )
                             # Filter out empty parts
                             parts = [p for p in parts if p]
-                            
+
                             if parts:
                                 first_name = parts[0].capitalize()
                                 if len(parts) > 1:
@@ -91,41 +102,41 @@ def link_supabase_users():
                 except Exception:
                     # If any error occurs, keep default names
                     pass
-                
+
                 # Check user metadata for actual name
-                user_metadata = getattr(su_user, 'user_metadata', {}) or {}
-                if 'first_name' in user_metadata and user_metadata['first_name']:
-                    first_name = user_metadata['first_name']
-                if 'last_name' in user_metadata and user_metadata['last_name']:
-                    last_name = user_metadata['last_name']
-                
+                user_metadata = getattr(su_user, "user_metadata", {}) or {}
+                if "first_name" in user_metadata and user_metadata["first_name"]:
+                    first_name = user_metadata["first_name"]
+                if "last_name" in user_metadata and user_metadata["last_name"]:
+                    last_name = user_metadata["last_name"]
+
                 # Determine role based on email or metadata
-                role = user_metadata.get('role', 'employee')
-                
+                role = user_metadata.get("role", "employee")
+
                 # Create new user
                 new_user = User(
                     id=uuid.uuid4(),
                     email=email,
                     supabase_id=user_id,
-                    auth_provider='supabase',
+                    auth_provider="supabase",
                     first_name=first_name,
                     last_name=last_name,
                     role=role,
                     is_active=True,
-                    created_at=datetime.utcnow()
+                    created_at=datetime.utcnow(),
                 )
-                
+
                 db.add(new_user)
                 logger.info(f"  ✓ Created new user record for Supabase user")
-        
+
         # Commit all changes
         db.commit()
         logger.info("\n✅ Successfully linked all Supabase users to database")
-        
+
         # Show summary
         total_users = db.query(User).filter(User.supabase_id.isnot(None)).count()
         logger.info(f"\nTotal users linked to Supabase: {total_users}")
-        
+
     except Exception as e:
         logger.error(f"\n❌ Error linking users: {str(e)}")
         db.rollback()
@@ -133,19 +144,21 @@ def link_supabase_users():
     finally:
         db.close()
 
+
 def main():
     """Main entry point"""
     logger.info("=== Supabase User Linking Script ===")
     logger.info("This script will link existing Supabase users to database records")
     logger.info()
-    
+
     # Confirm before proceeding
     response = input("Continue? (y/n): ")
-    if response.lower() != 'y':
+    if response.lower() != "y":
         logger.info("Cancelled")
         return
-    
+
     link_supabase_users()
+
 
 if __name__ == "__main__":
     main()

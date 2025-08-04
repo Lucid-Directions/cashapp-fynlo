@@ -1,0 +1,11 @@
+{
+  "files_processed": 2,
+  "fixes_applied": 1,
+  "initial_errors": 2,
+  "remaining_errors": 2,
+  "remaining_files": [
+    "backend/scripts/fix_docstring_syntax.py",
+    "backend/backend/scripts/fix_docstring_syntax_app_only.py"
+  ],
+  "process_errors": []
+}

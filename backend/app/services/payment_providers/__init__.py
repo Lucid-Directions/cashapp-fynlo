@@ -9,10 +9,10 @@ from .sumup_provider import SumUpProvider
 from .payment_factory import PaymentProviderFactory
 
 __all__ = [
-    'PaymentProvider',
-    'PaymentStatus',
-    'StripeProvider',
-    'SquareProvider',
-    'SumUpProvider',
-    'PaymentProviderFactory'
+    "PaymentProvider",
+    "PaymentStatus",
+    "StripeProvider",
+    "SquareProvider",
+    "SumUpProvider",
+    "PaymentProviderFactory",
 ]

@@ -8,8 +8,12 @@ import base64
 import os
 import sys
 import tempfile
+import logging
 from pathlib import Path
 from io import BytesIO
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Add the project root to Python path
 project_root = Path(__file__).parent
@@ -32,10 +36,6 @@ except ImportError as e:
 try:
     from app.core.file_upload import FileUploadService, FileUploadConfig
     from app.core.exceptions import FynloException
-import logging
-
-logger = logging.getLogger(__name__)
-
     UPLOAD_SERVICE_AVAILABLE = True
 except ImportError as e:
     UPLOAD_SERVICE_AVAILABLE = False

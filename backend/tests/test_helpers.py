@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
 import redis
 
-from app.models.user import User
+from app.core.database import User
 from app.models.restaurant import Restaurant
 from app.models.order import Order
 from app.models.menu_item import MenuItem

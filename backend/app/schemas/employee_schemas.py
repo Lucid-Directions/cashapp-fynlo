@@ -9,6 +9,7 @@ from decimal import Decimal
 from pydantic import BaseModel, Field, field_validator
 from enum import Enum
 
+
 # Enums for employee roles and statuses
 class EmployeeRole(str, Enum):
     CHEF = "chef"
@@ -22,11 +23,13 @@ class EmployeeRole(str, Enum):
     ASSISTANT_MANAGER = "assistant_manager"
     CLEANER = "cleaner"
 
+
 class EmploymentStatus(str, Enum):
     FULL_TIME = "full_time"
     PART_TIME = "part_time"
     CONTRACT = "contract"
     INTERN = "intern"
+
 
 class ShiftStatus(str, Enum):
     SCHEDULED = "scheduled"
@@ -35,47 +38,51 @@ class ShiftStatus(str, Enum):
     MISSED = "missed"
     CANCELLED = "cancelled"
 
+
 # Base Employee Schemas
 class EmployeeBase(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=50)
     last_name: str = Field(..., min_length=1, max_length=50)
-    email: str = Field(..., pattern=r'^[^@]+@[^@]+\.[^@]+$')
-    phone: Optional[str] = Field(None, pattern=r'^\+?[\d\s\-\(\)]+$')
+    email: str = Field(..., pattern=r"^[^@]+@[^@]+\.[^@]+$")
+    phone: Optional[str] = Field(None, pattern=r"^\+?[\d\s\-\(\)]+$")
     role: EmployeeRole
     employment_status: EmploymentStatus
     hourly_rate: Optional[Decimal] = Field(None, ge=0)
     weekly_hours: Optional[int] = Field(None, ge=0, le=80)
     is_active: bool = True
 
+
 class EmployeeCreateRequest(EmployeeBase):
     restaurant_id: int = Field(..., gt=0)
     hire_date: Optional[date] = None
     emergency_contact_name: Optional[str] = Field(None, max_length=100)
-    emergency_contact_phone: Optional[str] = Field(None, pattern=r'^\+?[\d\s\-\(\)]+$')
+    emergency_contact_phone: Optional[str] = Field(None, pattern=r"^\+?[\d\s\-\(\)]+$")
     notes: Optional[str] = Field(None, max_length=500)
 
-    @field_validator('hire_date')
+    @field_validator("hire_date")
     @classmethod
     def validate_hire_date(cls, v):
         if v is None:
             return date.today()
         if v > date.today():
-            raise ValueError('Hire date cannot be in the future')
+            raise ValueError("Hire date cannot be in the future")
         return v
+
 
 class EmployeeUpdateRequest(BaseModel):
     first_name: Optional[str] = Field(None, min_length=1, max_length=50)
     last_name: Optional[str] = Field(None, min_length=1, max_length=50)
-    email: Optional[str] = Field(None, pattern=r'^[^@]+@[^@]+\.[^@]+$')
-    phone: Optional[str] = Field(None, pattern=r'^\+?[\d\s\-\(\)]+$')
+    email: Optional[str] = Field(None, pattern=r"^[^@]+@[^@]+\.[^@]+$")
+    phone: Optional[str] = Field(None, pattern=r"^\+?[\d\s\-\(\)]+$")
     role: Optional[EmployeeRole] = None
     employment_status: Optional[EmploymentStatus] = None
     hourly_rate: Optional[Decimal] = Field(None, ge=0)
     weekly_hours: Optional[int] = Field(None, ge=0, le=80)
     is_active: Optional[bool] = None
     emergency_contact_name: Optional[str] = Field(None, max_length=100)
-    emergency_contact_phone: Optional[str] = Field(None, pattern=r'^\+?[\d\s\-\(\)]+$')
+    emergency_contact_phone: Optional[str] = Field(None, pattern=r"^\+?[\d\s\-\(\)]+$")
     notes: Optional[str] = Field(None, max_length=500)
+
 
 class EmployeeResponse(BaseModel):
     id: int
@@ -100,6 +107,7 @@ class EmployeeResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 # Schedule Schemas
 class ScheduleBase(BaseModel):
     day_of_week: int = Field(..., ge=0, le=6, description="0=Monday, 6=Sunday")
@@ -107,23 +115,25 @@ class ScheduleBase(BaseModel):
     end_time: time
     is_recurring: bool = True
 
-    @field_validator('end_time')
+    @field_validator("end_time")
     @classmethod
     def validate_end_time(cls, v, info):
-        if info.data and 'start_time' in info.data and v <= info.data['start_time']:
-            raise ValueError('End time must be after start time')
+        if info.data and "start_time" in info.data and v <= info.data["start_time"]:
+            raise ValueError("End time must be after start time")
         return v
+
 
 class ScheduleCreateRequest(ScheduleBase):
     effective_date: date = Field(default_factory=date.today)
     notes: Optional[str] = Field(None, max_length=200)
 
-    @field_validator('effective_date')
+    @field_validator("effective_date")
     @classmethod
     def validate_effective_date(cls, v):
         if v < date.today():
-            raise ValueError('Effective date cannot be in the past')
+            raise ValueError("Effective date cannot be in the past")
         return v
+
 
 class ScheduleUpdateRequest(BaseModel):
     day_of_week: Optional[int] = Field(None, ge=0, le=6)
@@ -133,12 +143,19 @@ class ScheduleUpdateRequest(BaseModel):
     effective_date: Optional[date] = None
     notes: Optional[str] = Field(None, max_length=200)
 
-    @field_validator('end_time')
+    @field_validator("end_time")
     @classmethod
     def validate_end_time(cls, v, info):
-        if v and info.data and 'start_time' in info.data and info.data['start_time'] and v <= info.data['start_time']:
-            raise ValueError('End time must be after start time')
+        if (
+            v
+            and info.data
+            and "start_time" in info.data
+            and info.data["start_time"]
+            and v <= info.data["start_time"]
+        ):
+            raise ValueError("End time must be after start time")
         return v
+
 
 class ScheduleResponse(BaseModel):
     id: int
@@ -154,6 +171,7 @@ class ScheduleResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 # Shift Schemas
 class ShiftResponse(BaseModel):
@@ -189,19 +207,25 @@ class ShiftResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 # Time Entry Schemas
 class TimeEntryResponse(BaseModel):
     id: int
     employee_id: int
     shift_id: Optional[int]
-    entry_type: str = Field(..., description="clock_in, clock_out, break_start, break_end")
+    entry_type: str = Field(
+        ..., description="clock_in, clock_out, break_start, break_end"
+    )
     timestamp: datetime
-    location: Optional[str] = Field(None, description="GPS coordinates or location name")
+    location: Optional[str] = Field(
+        None, description="GPS coordinates or location name"
+    )
     notes: Optional[str]
     created_at: datetime
 
     class Config:
         from_attributes = True
+
 
 # Performance Metrics Schemas
 class PerformanceMetricResponse(BaseModel):
@@ -220,6 +244,7 @@ class PerformanceMetricResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 # Dashboard and Summary Schemas
 class EmployeeSummary(BaseModel):
     total_employees: int
@@ -229,18 +254,18 @@ class EmployeeSummary(BaseModel):
     roles_breakdown: Dict[str, int]
     employment_status_breakdown: Dict[str, int]
 
+
 class WeeklyScheduleDay(BaseModel):
     date: date
     day_name: str
     employees: List[Dict[str, Any]] = Field(
-        ..., 
-        description="List of employees with their scheduled shifts for this day"
+        ..., description="List of employees with their scheduled shifts for this day"
     )
     total_scheduled_hours: float
     coverage_gaps: List[Dict[str, Any]] = Field(
-        default_factory=list,
-        description="Time periods with insufficient coverage"
+        default_factory=list, description="Time periods with insufficient coverage"
     )
+
 
 class WeeklyScheduleResponse(BaseModel):
     week_start: date
@@ -250,19 +275,27 @@ class WeeklyScheduleResponse(BaseModel):
     total_week_hours: float
     total_labor_cost: Optional[Decimal] = Field(None)
     coverage_summary: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Summary of coverage adequacy across the week"
+        default_factory=dict, description="Summary of coverage adequacy across the week"
     )
+
 
 # Clock In/Out Request Schemas
 class ClockInRequest(BaseModel):
-    location: Optional[str] = Field(None, description="GPS coordinates or location name")
+    location: Optional[str] = Field(
+        None, description="GPS coordinates or location name"
+    )
     notes: Optional[str] = Field(None, max_length=200)
 
+
 class ClockOutRequest(BaseModel):
-    location: Optional[str] = Field(None, description="GPS coordinates or location name")
+    location: Optional[str] = Field(
+        None, description="GPS coordinates or location name"
+    )
     notes: Optional[str] = Field(None, max_length=200)
-    break_duration: Optional[int] = Field(None, ge=0, description="Total break time in minutes")
+    break_duration: Optional[int] = Field(
+        None, ge=0, description="Total break time in minutes"
+    )
+
 
 # Error Response Schema
 class EmployeeErrorResponse(BaseModel):
@@ -270,14 +303,17 @@ class EmployeeErrorResponse(BaseModel):
     message: str
     details: Optional[Dict[str, Any]] = None
 
+
 # Batch Operations Schemas
 class EmployeeBatchUpdateRequest(BaseModel):
     employee_ids: List[int] = Field(..., min_items=1, max_items=50)
     updates: EmployeeUpdateRequest
 
+
 class ScheduleBatchCreateRequest(BaseModel):
     employee_id: int
     schedules: List[ScheduleCreateRequest] = Field(..., min_items=1, max_items=7)
+
 
 # Analytics and Reporting Schemas
 class EmployeeHoursReport(BaseModel):
@@ -288,6 +324,7 @@ class EmployeeHoursReport(BaseModel):
     overtime_hours: float
     attendance_rate: Decimal = Field(..., description="Percentage")
     average_rating: Optional[Decimal] = Field(None)
+
 
 class RestaurantLaborReport(BaseModel):
     period_start: date

@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 import os
 
-from app.services.payment_service import PaymentService
+from app.services.secure_payment_processor import SecurePaymentProcessor
 from app.models import Payment
 
 

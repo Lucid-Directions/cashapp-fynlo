@@ -6,9 +6,13 @@ Test script for Financial Data DECIMAL Precision verification
 import asyncio
 import sys
 import os
+import logging
 from decimal import Decimal
 import psycopg2
 from psycopg2.extras import RealDictCursor
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Add the backend directory to the Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '.'))
@@ -173,9 +177,6 @@ async def test_model_compatibility():
     try:
         # Import the models to verify they load correctly
         from app.core.database import Product, Order, Payment, QRPayment, Customer
-import logging
-
-logger = logging.getLogger(__name__)
 
         
         logger.info("✅ All database models import successfully")

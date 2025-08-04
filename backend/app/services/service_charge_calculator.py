@@ -3,10 +3,13 @@ from typing import Optional
 from decimal import Decimal, ROUND_HALF_UP
 
 from app.services.payment_fee_calculator import PaymentFeeCalculator
-from app.services.platform_service import PlatformSettingsService # May not be needed directly if rate is passed
+from app.services.platform_service import (
+    PlatformSettingsService,
+)  # May not be needed directly if rate is passed
 from app.schemas.fee_schemas import PaymentMethodEnum, ServiceChargeBreakdown
 
 logger = logging.getLogger(__name__)
+
 
 class ServiceChargeCalculator:
     """
@@ -18,11 +21,10 @@ class ServiceChargeCalculator:
         payment_fee_calculator: PaymentFeeCalculator,
         # platform_settings_service is kept if we need to fetch default service charge rates
         # or other related configurations directly within this service in the future.
-        platform_settings_service: PlatformSettingsService
+        platform_settings_service: PlatformSettingsService,
     ):
         self.payment_fee_calculator = payment_fee_calculator
         self.platform_settings_service = platform_settings_service
-
 
     def _round_currency(self, amount: Decimal) -> float:
         """Rounds a Decimal amount to 2 decimal places for currency representation."""
@@ -32,7 +34,7 @@ class ServiceChargeCalculator:
     async def calculate_service_charge_with_fees(
         self,
         order_subtotal: float,
-        service_charge_config_rate: float, # e.g., 0.10 for 10%. Fetched from PlatformSettingsService by caller.
+        service_charge_config_rate: float,  # e.g., 0.10 for 10%. Fetched from PlatformSettingsService by caller.
         payment_method: PaymentMethodEnum,
         customer_pays_processor_fees: bool,
         # This flag below determines if the service charge should absorb the processor fee
@@ -60,16 +62,20 @@ class ServiceChargeCalculator:
         dec_service_charge_config_rate = Decimal(str(service_charge_config_rate))
 
         if dec_order_subtotal < Decimal("0"):
-            logger.warning("Order subtotal is negative. Service charge calculation will result in zero.")
+            logger.warning(
+                "Order subtotal is negative. Service charge calculation will result in zero."
+            )
             return ServiceChargeBreakdown(
                 original_service_charge_on_subtotal=0.0,
                 processor_fee_added_to_service_charge=0.0,
                 final_service_charge_amount=0.0,
                 service_charge_rate_applied=float(dec_service_charge_config_rate),
-                include_transaction_fees_in_service_charge=include_processor_fee_in_service_charge
+                include_transaction_fees_in_service_charge=include_processor_fee_in_service_charge,
             )
 
-        base_service_charge_on_subtotal = dec_order_subtotal * dec_service_charge_config_rate
+        base_service_charge_on_subtotal = (
+            dec_order_subtotal * dec_service_charge_config_rate
+        )
 
         dec_processor_fee_component = Decimal("0.00")
 
@@ -97,7 +103,11 @@ class ServiceChargeCalculator:
         # and if processor fees are included, they are calculated on `order_subtotal + base_service_charge`.
         # This implies VAT is handled separately by the caller when determining the final transaction amount for processor.
 
-        if include_processor_fee_in_service_charge and customer_pays_processor_fees and payment_method != PaymentMethodEnum.CASH:
+        if (
+            include_processor_fee_in_service_charge
+            and customer_pays_processor_fees
+            and payment_method != PaymentMethodEnum.CASH
+        ):
             # Amount that would be processed if only subtotal + base SC were considered (excluding VAT for simplicity here,
             # assuming payment_fee_calculator gets the full amount including VAT from its caller)
             # A better approach: the caller (PlatformFeeService) should calculate processor_fee once on the correct total
@@ -123,25 +133,38 @@ class ServiceChargeCalculator:
             # This is the fee that would apply to the (subtotal + base_service_charge) part.
             # It's an *estimation* of the fee to be included in the SC.
             # The final, definitive processor fee calculation will be in PlatformFeeService.
-            amount_for_fee_estimation = float(dec_order_subtotal + base_service_charge_on_subtotal)
+            amount_for_fee_estimation = float(
+                dec_order_subtotal + base_service_charge_on_subtotal
+            )
 
-            estimated_processor_fee_for_sc = await self.payment_fee_calculator.calculate_processor_fee(
-                transaction_amount=amount_for_fee_estimation,
-                payment_method=payment_method,
-                restaurant_id=restaurant_id,
-                monthly_volume_for_restaurant=monthly_volume_for_restaurant
+            estimated_processor_fee_for_sc = (
+                await self.payment_fee_calculator.calculate_processor_fee(
+                    transaction_amount=amount_for_fee_estimation,
+                    payment_method=payment_method,
+                    restaurant_id=restaurant_id,
+                    monthly_volume_for_restaurant=monthly_volume_for_restaurant,
+                )
             )
             dec_processor_fee_component = Decimal(str(estimated_processor_fee_for_sc))
 
-        final_service_charge_amount = base_service_charge_on_subtotal + dec_processor_fee_component
+        final_service_charge_amount = (
+            base_service_charge_on_subtotal + dec_processor_fee_component
+        )
 
         return ServiceChargeBreakdown(
-            original_service_charge_on_subtotal=self._round_currency(base_service_charge_on_subtotal),
-            processor_fee_added_to_service_charge=self._round_currency(dec_processor_fee_component),
-            final_service_charge_amount=self._round_currency(final_service_charge_amount),
+            original_service_charge_on_subtotal=self._round_currency(
+                base_service_charge_on_subtotal
+            ),
+            processor_fee_added_to_service_charge=self._round_currency(
+                dec_processor_fee_component
+            ),
+            final_service_charge_amount=self._round_currency(
+                final_service_charge_amount
+            ),
             service_charge_rate_applied=float(dec_service_charge_config_rate),
-            include_transaction_fees_in_service_charge=include_processor_fee_in_service_charge
+            include_transaction_fees_in_service_charge=include_processor_fee_in_service_charge,
         )
+
 
 # Example Usage (conceptual)
 # async def main_sc_example():

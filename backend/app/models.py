@@ -18,25 +18,25 @@ from app.core.database import (
     Recipe,
     InventoryLedgerEntry,
     Table,
-    PosSession
+    PosSession,
 )
 
 # Re-export all models
 __all__ = [
-    'Platform',
-    'Restaurant',
-    'User',
-    'UserRestaurant',
-    'Customer',
-    'Category',
-    'Product',
-    'Order',
-    'Payment',
-    'QRPayment',
-    'Section',
-    'InventoryItem',
-    'Recipe',
-    'InventoryLedgerEntry',
-    'Table',
-    'PosSession'
+    "Platform",
+    "Restaurant",
+    "User",
+    "UserRestaurant",
+    "Customer",
+    "Category",
+    "Product",
+    "Order",
+    "Payment",
+    "QRPayment",
+    "Section",
+    "InventoryItem",
+    "Recipe",
+    "InventoryLedgerEntry",
+    "Table",
+    "PosSession",
 ]

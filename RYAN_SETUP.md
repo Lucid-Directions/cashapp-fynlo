@@ -45,6 +45,25 @@ brew install gh
 gh auth login
 ```
 
+## Environment Configuration
+
+### Required Environment Variables
+Copy `.env.example` to `.env` and configure:
+
+```bash
+cp .env.example .env
+```
+
+**CRITICAL**: Generate the payment encryption key:
+```bash
+# Generate a secure encryption key for payment configurations
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+Add this key to your `.env` file as `PAYMENT_CONFIG_ENCRYPTION_KEY=<generated-key>`
+
+⚠️ **Security Note**: This key encrypts sensitive payment provider credentials. Never commit this key to version control!
+
 ## Verify Installation
 
 Run these commands to verify everything is installed:

@@ -8,6 +8,7 @@ from typing import Optional, List
 
 class RegisterRestaurantRequest(BaseModel):
     """Request model for registering a new restaurant"""
+
     restaurant_name: str
     phone: Optional[str] = None
     address: Optional[str] = None
@@ -15,6 +16,7 @@ class RegisterRestaurantRequest(BaseModel):
 
 class UserInfo(BaseModel):
     """User information returned in auth responses"""
+
     id: str
     email: str
     name: str
@@ -29,4 +31,5 @@ class UserInfo(BaseModel):
 
 class AuthVerifyResponse(BaseModel):
     """Response model for auth verification"""
+
     user: UserInfo

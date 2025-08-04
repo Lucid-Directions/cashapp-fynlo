@@ -7,7 +7,7 @@ repos:
     rev: v0.8.6
     hooks:
       - id: ruff
-        args: [--select, E999, --fix]  # E999: SyntaxError
+        args: [--select, E, --fix]  # E: All error codes including syntax
         files: ^backend/.*\.py$
         name: Check Python syntax errors
         description: Prevents committing files with syntax errors
