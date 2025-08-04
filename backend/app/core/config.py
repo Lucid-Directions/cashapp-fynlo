@@ -238,10 +238,15 @@ class Settings(BaseSettings):
         # 1. .env.local (for local overrides, git-ignored)
         # 2. .env.test (when APP_ENV=test)
         # 3. .env (default development config)
+        # CRITICAL: Don't load .env files in production - use only OS env vars
         env_file = (
-            ".env.local"
+            None
+            if os.getenv("ENVIRONMENT") == "production"
+            else ".env.local"
             if os.path.exists(".env.local")
-            else ".env.test" if os.getenv("APP_ENV") == "test" else ".env"
+            else ".env.test"
+            if os.getenv("APP_ENV") == "test"
+            else ".env"
         )
         extra = "ignore"  # Allow extra environment variables
 
@@ -315,8 +320,7 @@ def validate_production_settings(s: Settings):
             )
         if s.REDIS_URL and "localhost" in s.REDIS_URL:
             warnings.append(
-                "REDIS_URL contains localhost - ensure this is correct "
-                "for production."
+                "REDIS_URL contains localhost - ensure this is correct for production."
             )
 
         # Payment provider validation
