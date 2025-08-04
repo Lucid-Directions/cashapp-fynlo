@@ -1,9 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
+import { ExponentialBackoff } from '@fynlo/shared/src/utils/exponentialBackoff';
 
 import API_CONFIG from '../../config/api';
 import { WebSocketEvent } from '../../types/websocket';
 import tokenManager from '../../utils/enhancedTokenManager';
+import logger from '../../utils/logger';
 
 import type { WebSocketMessage, WebSocketConfig } from '../../types/websocket';
 
@@ -26,9 +28,8 @@ export class EnhancedWebSocketService {
   private maxMissedPongs: number = 3;
 
   // Reconnection logic
-  private reconnectAttempts: number = 0;
   private reconnectTimer: NodeJS.Timeout | null = null;
-  private maxBackoffDelay: number = 64000; // 64 seconds max
+  private exponentialBackoff: ExponentialBackoff;
 
   // Message queue for offline/reconnecting
   private messageQueue: WebSocketMessage[] = [];
@@ -49,6 +50,14 @@ export class EnhancedWebSocketService {
       authTimeout: 10000, // 10 seconds
       ...config,
     };
+
+    // Initialize exponential backoff with proper configuration
+    this.exponentialBackoff = new ExponentialBackoff({
+      initialDelay: 1000, // 1 second
+      maxDelay: 30000, // 30 seconds max
+      factor: 2,
+      jitter: 0.3,
+    });
 
     this.setupNetworkMonitoring();
   }
@@ -223,7 +232,9 @@ export class EnhancedWebSocketService {
   private handleAuthenticated(): void {
     logger.info('✅ WebSocket authenticated successfully');
     this.setState('CONNECTED');
-    this.reconnectAttempts = 0;
+    
+    // Reset exponential backoff on successful connection
+    this.exponentialBackoff.reset();
 
     // Start heartbeat
     this.startHeartbeat();
@@ -319,33 +330,36 @@ export class EnhancedWebSocketService {
     }
   }
 
-  private calculateBackoff(attempt: number): number {
-    // Exponential backoff with jitter
-    const base = Math.min(1000 * Math.pow(2, attempt), this.maxBackoffDelay);
-    const jitter = Math.random() * 0.3 * base; // 30% jitter
-    return Math.floor(base + jitter);
-  }
-
   private scheduleReconnect(): void {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
     }
 
-    if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
+    const currentAttempt = this.exponentialBackoff.getAttemptCount();
+    
+    if (currentAttempt >= this.config.maxReconnectAttempts) {
       logger.error('❌ Max reconnection attempts reached');
       this.emit('max_reconnect_attempts', {
-        attempts: this.reconnectAttempts,
+        attempts: currentAttempt,
       });
       return;
     }
 
-    const delay = this.calculateBackoff(this.reconnectAttempts);
+    const delay = this.exponentialBackoff.getNextDelay();
+    const nextAttempt = currentAttempt + 1;
 
-    logger.info(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`);
+    logger.info(`🔄 Reconnecting in ${delay}ms (attempt ${nextAttempt})`);
     this.setState('RECONNECTING');
 
+    // Emit reconnection status for UI feedback
+    this.emit('reconnection_status', {
+      attempt: nextAttempt,
+      maxAttempts: this.config.maxReconnectAttempts,
+      nextDelay: delay,
+      timestamp: Date.now(),
+    });
+
     this.reconnectTimer = setTimeout(() => {
-      this.reconnectAttempts++;
       this.connect();
     }, delay);
   }
@@ -404,6 +418,9 @@ export class EnhancedWebSocketService {
       this.networkUnsubscribe();
       this.networkUnsubscribe = null;
     }
+
+    // Reset exponential backoff when disconnecting
+    this.exponentialBackoff.reset();
 
     this.setState('DISCONNECTED');
     this.removeAllListeners();

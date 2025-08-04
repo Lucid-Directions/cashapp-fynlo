@@ -210,14 +210,16 @@ async def perform_security_checks(
     limiter = await get_rate_limiter()
 
     # Check connection rate limit
-    allowed, error_msg = await limiter.check_connection_limit(client_host, user_id)
+    allowed, error_msg, rate_limit_info = await limiter.check_connection_limit(
+        client_host, user_id
+    )
     if not allowed:
         # Log rate limit violation
         await security_monitor.log_rate_limit_violation(
             ip_address=client_host,
             user_id=user_id,
             limit_type="websocket_connection",
-            details={"error": error_msg},
+            details={"error": error_msg, "rate_limit_info": rate_limit_info},
         )
         await websocket.close(code=4008, reason=error_msg)
         return False

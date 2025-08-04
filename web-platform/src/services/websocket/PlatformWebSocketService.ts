@@ -9,6 +9,7 @@ import {
 } from '../../types';
 import { API_CONFIG } from '@/config/api.config';
 import { supabase } from '@/integrations/supabase/client';
+import { ExponentialBackoff } from '@fynlo/shared/src/utils/exponentialBackoff';
 
 /**
  * Platform WebSocket Service
@@ -19,12 +20,12 @@ export class PlatformWebSocketService {
   private ws: WebSocket | null = null;
   private status: ConnectionStatus = 'disconnected';
   private config: WebSocketConfig;
-  private reconnectAttempts = 0;
   private reconnectTimer: NodeJS.Timeout | null = null;
   private heartbeatTimer: NodeJS.Timeout | null = null;
   private pongTimer: NodeJS.Timeout | null = null;
   private listeners: Map<string, Set<Function>> = new Map();
   private messageQueue: WebSocketMessage[] = [];
+  private exponentialBackoff: ExponentialBackoff;
 
   constructor(config: Partial<WebSocketConfig> = {}) {
     this.config = {
@@ -32,14 +33,21 @@ export class PlatformWebSocketService {
       pongTimeout: 5000,
       maxReconnectAttempts: 10,
       authTimeout: 10000,
-      reconnectBackoff: [1000, 2000, 4000, 8000, 16000, 30000],
       maxMessageQueueSize: 100,
       ...config
     };
+
+    // Initialize exponential backoff with configuration
+    this.exponentialBackoff = new ExponentialBackoff(
+      1000,  // baseDelay: 1 second
+      30000, // maxDelay: 30 seconds
+      this.config.maxReconnectAttempts || 10,
+      0.3    // jitterFactor: ±30%
+    );
   }
 
   async connect(): Promise<void> {
-    if (this.status !== 'disconnected' && this.status !== 'reconnecting') {
+    if (this.status \!== 'disconnected' && this.status \!== 'reconnecting') {
       return;
     }
 
@@ -48,13 +56,13 @@ export class PlatformWebSocketService {
       
       // Get auth session
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      if (\!session) {
         throw new Error('No authentication session found');
       }
 
       // Get user details
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      if (\!user) {
         throw new Error('No user found');
       }
 
@@ -118,14 +126,15 @@ export class PlatformWebSocketService {
   }
 
   private setupEventHandlers(): void {
-    if (!this.ws) return;
+    if (\!this.ws) return;
     
     this.ws.onmessage = (event) => {
       try {
         const message: WebSocketMessage = JSON.parse(event.data);
         this.handleMessage(message);
       } catch (error) {
-        }
+        console.error('Failed to parse WebSocket message:', error);
+      }
     };
     
     this.ws.onclose = (event) => {
@@ -182,7 +191,9 @@ export class PlatformWebSocketService {
 
   private handleAuthenticated(): void {
     this.setStatus('connected');
-    this.reconnectAttempts = 0;
+    
+    // Reset exponential backoff on successful authentication
+    this.exponentialBackoff.reset();
     
     // Start heartbeat
     this.startHeartbeat();
@@ -255,7 +266,7 @@ export class PlatformWebSocketService {
     this.emit(WebSocketEvent.DISCONNECT, { code, reason });
     
     // Schedule reconnect for non-normal closures
-    if (code !== 1000) {
+    if (code \!== 1000) {
       this.scheduleReconnect();
     }
   }
@@ -265,32 +276,70 @@ export class PlatformWebSocketService {
       clearTimeout(this.reconnectTimer);
     }
     
-    if (this.reconnectAttempts >= this.config.maxReconnectAttempts!) {
+    // Check if max attempts reached
+    if (this.exponentialBackoff.hasReachedMaxAttempts()) {
       this.emit('max_reconnect_attempts', {
-        attempts: this.reconnectAttempts
+        attempts: this.exponentialBackoff.getAttemptCount(),
+        maxAttempts: this.config.maxReconnectAttempts
+      });
+      
+      // Emit final reconnection status
+      this.emit('reconnection_status', {
+        status: 'failed',
+        attemptNumber: this.exponentialBackoff.getAttemptCount(),
+        remainingAttempts: 0,
+        nextDelay: null,
+        message: 'Maximum reconnection attempts reached'
       });
       return;
     }
     
-    const backoffIndex = Math.min(
-      this.reconnectAttempts,
-      (this.config.reconnectBackoff?.length || 6) - 1
-    );
-    const delay = this.config.reconnectBackoff?.[backoffIndex] || 30000;
-    
-    `);
-    this.setStatus('reconnecting');
-    
-    this.reconnectTimer = setTimeout(() => {
-      this.reconnectAttempts++;
-      this.connect();
-    }, delay);
+    try {
+      // Get next delay from exponential backoff
+      const delay = this.exponentialBackoff.getNextDelay();
+      const attemptNumber = this.exponentialBackoff.getAttemptCount();
+      const remainingAttempts = this.exponentialBackoff.getRemainingAttempts();
+      
+      // Emit reconnection status event for UI feedback
+      this.emit('reconnection_status', {
+        status: 'scheduled',
+        attemptNumber,
+        remainingAttempts,
+        nextDelay: delay,
+        message: `Reconnecting in ${(delay / 1000).toFixed(1)}s (attempt ${attemptNumber}/${this.config.maxReconnectAttempts})`
+      });
+      
+      console.log(`Platform WebSocket: Scheduling reconnect in ${delay}ms (attempt ${attemptNumber}/${this.config.maxReconnectAttempts})`);
+      this.setStatus('reconnecting');
+      
+      this.reconnectTimer = setTimeout(() => {
+        // Emit attempting status
+        this.emit('reconnection_status', {
+          status: 'attempting',
+          attemptNumber,
+          remainingAttempts,
+          nextDelay: null,
+          message: `Attempting reconnection (${attemptNumber}/${this.config.maxReconnectAttempts})`
+        });
+        
+        this.connect();
+      }, delay);
+    } catch (error) {
+      // This should only happen if max attempts exceeded
+      this.emit('reconnection_status', {
+        status: 'failed',
+        attemptNumber: this.exponentialBackoff.getAttemptCount(),
+        remainingAttempts: 0,
+        nextDelay: null,
+        message: 'Failed to schedule reconnection'
+      });
+    }
   }
 
   send(message: Partial<WebSocketMessage>): void {
     const fullMessage: WebSocketMessage = {
       id: message.id || this.generateMessageId(),
-      type: message.type!,
+      type: message.type\!,
       data: message.data,
       restaurant_id: message.restaurant_id || '',
       timestamp: message.timestamp || new Date().toISOString()
@@ -302,17 +351,19 @@ export class PlatformWebSocketService {
       // Queue message for later
       if (this.messageQueue.length < (this.config.maxMessageQueueSize || 100)) {
         this.messageQueue.push(fullMessage);
-        `);
+        console.log(`Platform WebSocket: Message queued (${this.messageQueue.length} in queue)`);
       } else {
-        }
+        console.warn('Platform WebSocket: Message queue full, dropping message');
+      }
     }
   }
 
   private processMessageQueue(): void {
     if (this.messageQueue.length === 0) return;
     
+    console.log(`Platform WebSocket: Processing ${this.messageQueue.length} queued messages`);
     while (this.messageQueue.length > 0) {
-      const message = this.messageQueue.shift()!;
+      const message = this.messageQueue.shift()\!;
       this.send(message);
     }
   }
@@ -325,6 +376,9 @@ export class PlatformWebSocketService {
       this.reconnectTimer = null;
     }
     
+    // Reset exponential backoff when manually disconnecting
+    this.exponentialBackoff.reset();
+    
     if (this.ws) {
       this.ws.close(1000, 'Client disconnect');
     }
@@ -335,10 +389,10 @@ export class PlatformWebSocketService {
 
   // Event emitter methods
   on(event: string, listener: Function): void {
-    if (!this.listeners.has(event)) {
+    if (\!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
-    this.listeners.get(event)!.add(listener);
+    this.listeners.get(event)\!.add(listener);
   }
 
   once(event: string, listener: Function): void {
@@ -358,7 +412,8 @@ export class PlatformWebSocketService {
       try {
         listener(...args);
       } catch (error) {
-        }
+        console.error(`Platform WebSocket: Error in event listener for '${event}':`, error);
+      }
     });
   }
 
@@ -368,8 +423,9 @@ export class PlatformWebSocketService {
 
   // Utilities
   private setStatus(newStatus: ConnectionStatus): void {
-    if (this.status !== newStatus) {
+    if (this.status \!== newStatus) {
       this.status = newStatus;
+      console.log(`Platform WebSocket: Status changed to ${newStatus}`);
     }
   }
 
