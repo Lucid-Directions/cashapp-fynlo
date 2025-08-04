@@ -44,6 +44,9 @@ services:
       - key: SUMUP_MERCHANT_CODE
         scope: RUN_TIME
         type: SECRET # Set value in DigitalOcean App Platform dashboard
+      - key: SUMUP_ENVIRONMENT
+        scope: RUN_TIME
+        type: SECRET # Set to 'sandbox' or 'production' in DigitalOcean dashboard
     instance_size_slug: basic-s # Sufficient memory for production
     instance_count: 1
     # HTTP routes
