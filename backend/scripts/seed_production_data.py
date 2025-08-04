@@ -17,8 +17,7 @@ from decimal import Decimal
 from typing import List, Dict
 import uuid
 import random
-import secrets
-import string
+# Removed - now using shared password utility
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -32,10 +31,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def generate_secure_password(length: int = 16) -> str:
-    """Generate a secure random password"""
-    alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
-    return "".join(secrets.choice(alphabet) for _ in range(length))
+# Import the shared secure password generator
+from app.core.password_utils import generate_secure_password
 
 
 def get_password_from_env(env_key: str, default_length: int = 16) -> str:

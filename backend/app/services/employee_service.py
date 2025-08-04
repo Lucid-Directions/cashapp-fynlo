@@ -36,6 +36,7 @@ from app.core.exceptions import (
 )
 from app.core.security import get_password_hash
 from app.core.tenant_security import TenantSecurity
+from app.core.password_utils import generate_secure_password
 import logging
 
 logger = logging.getLogger(__name__)
@@ -202,8 +203,8 @@ class EmployeeService:
                 "role": "employee",
                 "is_active": employee_data.is_active,
                 "password_hash": get_password_hash(
-                    "temp_password_123"
-                ),  # Temporary password
+                    generate_secure_password(12)
+                ),  # Generate secure temporary password
                 "restaurant_id": target_restaurant_id,
                 "current_restaurant_id": target_restaurant_id,
             }
