@@ -340,9 +340,12 @@ def validate_production_settings(s: Settings):
                 )
 
         if s.SUMUP_API_KEY:
-            # Log for debugging
-            logger.error(f"DEBUG: SUMUP_ENVIRONMENT = {repr(s.SUMUP_ENVIRONMENT)}")
-            logger.error(f"DEBUG: SUMUP_API_KEY exists = {bool(s.SUMUP_API_KEY)}")
+            # DEBUG: Log the actual value
+            logger.error(f"SUMUP_ENVIRONMENT actual value: '{s.SUMUP_ENVIRONMENT}'")
+            logger.error(f"SUMUP_ENVIRONMENT repr: {repr(s.SUMUP_ENVIRONMENT)}")
+            logger.error(f"SUMUP_ENVIRONMENT type: {type(s.SUMUP_ENVIRONMENT)}")
+            sumup_len = len(s.SUMUP_ENVIRONMENT) if s.SUMUP_ENVIRONMENT else 'None'
+            logger.error(f"Length: {sumup_len}")
             
             # Check if SUMUP_ENVIRONMENT is set and valid
             if not s.SUMUP_ENVIRONMENT:
