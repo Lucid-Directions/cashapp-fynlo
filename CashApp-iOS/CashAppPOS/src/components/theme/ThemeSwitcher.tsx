@@ -143,16 +143,25 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   // Colors variant - color theme grid
   if (variant === 'colors') {
     return (
-      <View style={[styles.colorsContainer, { backgroundColor: safeTheme.colors.white }, style]} testID={testID}>
+      <View
+        style={[styles.colorsContainer, { backgroundColor: safeTheme.colors.white }, style]}
+        testID={testID}
+      >
         <View style={styles.colorsGrid}>
           {colorThemeOptions.map((colorThemeOption) => (
             <TouchableOpacity
-            key={colorThemeOption.id}
-            style={[
-            styles.colorCard,
-            { backgroundColor: safeTheme.colors.neutral[50], borderColor: safeTheme.colors.neutral[200] },
-              colorTheme === colorThemeOption.id && { borderColor: safeTheme.colors.primary, backgroundColor: safeTheme.colors.primary[50] || safeTheme.colors.neutral[50] },
-                ]}
+              key={colorThemeOption.id}
+              style={[
+                styles.colorCard,
+                {
+                  backgroundColor: safeTheme.colors.neutral[50],
+                  borderColor: safeTheme.colors.neutral[200],
+                },
+                colorTheme === colorThemeOption.id && {
+                  borderColor: safeTheme.colors.primary,
+                  backgroundColor: safeTheme.colors.primary[50] || safeTheme.colors.neutral[50],
+                },
+              ]}
               onPress={() => handleColorThemeChange(colorThemeOption)}
               accessibilityRole="button"
               accessibilityLabel={colorThemeOption.label}
@@ -177,7 +186,9 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
                   >
                     {colorThemeOption.label}
                   </Text>
-                  <Text style={[styles.colorDescription, { color: safeTheme.colors.neutral[600] }]}>{colorThemeOption.description}</Text>
+                  <Text style={[styles.colorDescription, { color: safeTheme.colors.neutral[600] }]}>
+                    {colorThemeOption.description}
+                  </Text>
                 </>
               )}
               {colorTheme === colorThemeOption.id && (
@@ -195,7 +206,10 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   // Compact variant - horizontal buttons
   if (variant === 'compact') {
     return (
-      <View style={[styles.compactContainer, { backgroundColor: safeTheme.colors.neutral[100] }, style]} testID={testID}>
+      <View
+        style={[styles.compactContainer, { backgroundColor: safeTheme.colors.neutral[100] }, style]}
+        testID={testID}
+      >
         {themeOptions.map((option) => (
           <TouchableOpacity
             key={option.mode}
@@ -242,8 +256,14 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
             key={option.mode}
             style={[
               styles.expandedCard,
-              { backgroundColor: safeTheme.colors.white, borderColor: safeTheme.colors.neutral[200] },
-              themeMode === option.mode && { borderColor: safeTheme.colors.primary, backgroundColor: safeTheme.colors.primary[50] || safeTheme.colors.neutral[50] },
+              {
+                backgroundColor: safeTheme.colors.white,
+                borderColor: safeTheme.colors.neutral[200],
+              },
+              themeMode === option.mode && {
+                borderColor: safeTheme.colors.primary,
+                backgroundColor: safeTheme.colors.primary[50] || safeTheme.colors.neutral[50],
+              },
             ]}
             onPress={() => handleThemeToggle()}
             accessibilityRole="button"
@@ -271,7 +291,9 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
             >
               {option.label}
             </Text>
-            <Text style={[styles.expandedDescription, { color: safeTheme.colors.neutral[600] }]}>{option.description}</Text>
+            <Text style={[styles.expandedDescription, { color: safeTheme.colors.neutral[600] }]}>
+              {option.description}
+            </Text>
             {themeMode === option.mode && (
               <View style={styles.expandedCheckmark}>
                 <Icon name="check-circle" size={20} color={safeTheme.colors.primary} />
@@ -285,14 +307,19 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
 
   // List variant - menu-style options
   return (
-    <View style={[styles.listContainer, { backgroundColor: safeTheme.colors.white }, style]} testID={testID}>
+    <View
+      style={[styles.listContainer, { backgroundColor: safeTheme.colors.white }, style]}
+      testID={testID}
+    >
       {themeOptions.map((option) => (
         <TouchableOpacity
           key={option.mode}
           style={[
             styles.listItem,
             { borderBottomColor: safeTheme.colors.neutral[100] },
-            themeMode === option.mode && { backgroundColor: safeTheme.colors.primary[50] || safeTheme.colors.neutral[50] },
+            themeMode === option.mode && {
+              backgroundColor: safeTheme.colors.primary[50] || safeTheme.colors.neutral[50],
+            },
           ]}
           onPress={() => handleThemeToggle()}
           accessibilityRole="button"
@@ -319,7 +346,9 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
             >
               {option.label}
             </Text>
-            <Text style={[styles.listDescription, { color: safeTheme.colors.neutral[600] }]}>{option.description}</Text>
+            <Text style={[styles.listDescription, { color: safeTheme.colors.neutral[600] }]}>
+              {option.description}
+            </Text>
           </View>
           <View style={styles.listTrailing}>
             {themeMode === option.mode && (
@@ -384,155 +413,159 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
         size={iconSize}
         color={isDark ? theme.colors.warning[500] : theme.colors.neutral[600]}
       />
-      {showLabels && <Text style={[styles.toggleLabel, { color: theme.colors.text }]}>{isDark ? 'Light' : 'Dark'}</Text>}
+      {showLabels && (
+        <Text style={[styles.toggleLabel, { color: theme.colors.text }]}>
+          {isDark ? 'Light' : 'Dark'}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-    // Compact variant styles
-    compactContainer: {
-      flexDirection: 'row',
-      borderRadius: 12,
-      padding: 4,
-    },
-    compactButton: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 8,
-      gap: 8,
-    },
-    compactLabel: {
-      fontSize: 12,
-      fontWeight: '500',
-    },
+  // Compact variant styles
+  compactContainer: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    padding: 4,
+  },
+  compactButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  compactLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
 
-    // Expanded variant styles
-    expandedContainer: {
-      gap: 12,
-    },
-    expandedCard: {
-      borderRadius: 16,
-      padding: 16,
-      borderWidth: 2,
-      alignItems: 'center',
-      position: 'relative',
-    },
-    expandedIconContainer: {
-      marginBottom: 12,
-    },
-    expandedTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      marginBottom: 4,
-    },
-    expandedDescription: {
-      fontSize: 12,
-      textAlign: 'center',
-    },
-    expandedCheckmark: {
-      position: 'absolute',
-      top: 8,
-      right: 8,
-    },
+  // Expanded variant styles
+  expandedContainer: {
+    gap: 12,
+  },
+  expandedCard: {
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 2,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  expandedIconContainer: {
+    marginBottom: 12,
+  },
+  expandedTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  expandedDescription: {
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  expandedCheckmark: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+  },
 
-    // List variant styles
-    listContainer: {
-      borderRadius: 16,
-      overflow: 'hidden',
-    },
-    listItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      borderBottomWidth: 1,
-    },
-    listIconContainer: {
-      marginRight: 12,
-      width: 32,
-      alignItems: 'center',
-    },
-    listContent: {
-      flex: 1,
-    },
-    listTitle: {
-      fontSize: 14,
-      fontWeight: '500',
-      marginBottom: 4,
-    },
-    listDescription: {
-      fontSize: 12,
-    },
-    listTrailing: {
-      marginLeft: 12,
-    },
+  // List variant styles
+  listContainer: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  listIconContainer: {
+    marginRight: 12,
+    width: 32,
+    alignItems: 'center',
+  },
+  listContent: {
+    flex: 1,
+  },
+  listTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  listDescription: {
+    fontSize: 12,
+  },
+  listTrailing: {
+    marginLeft: 12,
+  },
 
-    // Toggle styles
-    toggleButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: 9999,
-      gap: 8,
-    },
-    toggleLabel: {
-      fontSize: 12,
-      fontWeight: '500',
-    },
+  // Toggle styles
+  toggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 9999,
+    gap: 8,
+  },
+  toggleLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
 
-    // Colors variant styles
-    colorsContainer: {
-      borderRadius: 16,
-      padding: 16,
-    },
-    colorsGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 12,
-      justifyContent: 'space-between',
-    },
-    colorCard: {
-      width: '48%',
-      borderRadius: 12,
-      padding: 12,
-      borderWidth: 2,
-      alignItems: 'center',
-      position: 'relative',
-      minHeight: 120,
-    },
-    colorPreview: {
-      flexDirection: 'row',
-      marginBottom: 8,
-      gap: 4,
-    },
-    colorSwatch: {
-      width: 16,
-      height: 16,
-      borderRadius: 4,
-      borderWidth: 1,
-      borderColor: '#E5E5E5',
-    },
-    colorLabel: {
-      fontSize: 12,
-      fontWeight: '600',
-      textAlign: 'center',
-      marginBottom: 4,
-    },
-    colorDescription: {
-      fontSize: 10,
-      textAlign: 'center',
-      lineHeight: 16,
-    },
-    colorCheckmark: {
-      position: 'absolute',
-      top: 8,
-      right: 8,
-    },
-  });
+  // Colors variant styles
+  colorsContainer: {
+    borderRadius: 16,
+    padding: 16,
+  },
+  colorsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    justifyContent: 'space-between',
+  },
+  colorCard: {
+    width: '48%',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 2,
+    alignItems: 'center',
+    position: 'relative',
+    minHeight: 120,
+  },
+  colorPreview: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    gap: 4,
+  },
+  colorSwatch: {
+    width: 16,
+    height: 16,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+  },
+  colorLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  colorDescription: {
+    fontSize: 10,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  colorCheckmark: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+  },
+});
 
 export default ThemeSwitcher;

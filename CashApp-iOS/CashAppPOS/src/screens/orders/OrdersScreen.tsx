@@ -409,7 +409,7 @@ const OrdersScreen: React.FC = () => {
               <Icon name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Order Details</Text>
-            <View style={{ width: 24 }} />
+            <View style={styles.style1} />
           </View>
 
           {selectedOrder && (

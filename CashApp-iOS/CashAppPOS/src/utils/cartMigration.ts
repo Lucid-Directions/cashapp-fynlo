@@ -4,24 +4,17 @@
  */
 
 import { OrderItem } from '../types';
-import { 
-  EnhancedOrderItem, 
-  CartMigrationResult, 
-  CartValidationError 
-} from '../types/cart';
+import { EnhancedOrderItem, CartMigrationResult, CartValidationError } from '../types/cart';
 import ErrorTrackingService from '../services/ErrorTrackingService';
 
 /**
  * Migrates old OrderItem format to EnhancedOrderItem format
  * Handles ID type conversion (number to string) and adds new fields
  */
-export function migrateOrderItem(
-  oldItem: OrderItem,
-  userId?: string
-): EnhancedOrderItem | null {
+export function migrateOrderItem(oldItem: OrderItem, userId?: string): EnhancedOrderItem | null {
   try {
     const now = new Date().toISOString();
-    
+
     // Convert number ID to string, handling various edge cases
     let stringId: string;
     if (typeof oldItem.id === 'number') {
@@ -32,12 +25,16 @@ export function migrateOrderItem(
       // Generate new ID if invalid
       stringId = generateUUID();
     }
-    
+
     // Validate required fields
-    if (!oldItem.name || typeof oldItem.price !== 'number' || typeof oldItem.quantity !== 'number') {
+    if (
+      !oldItem.name ||
+      typeof oldItem.price !== 'number' ||
+      typeof oldItem.quantity !== 'number'
+    ) {
       return null;
     }
-    
+
     // Create enhanced item with default values
     const enhancedItem: EnhancedOrderItem = {
       // Core fields
@@ -47,31 +44,31 @@ export function migrateOrderItem(
       price: oldItem.price,
       quantity: Math.max(1, oldItem.quantity), // Ensure minimum quantity of 1
       emoji: oldItem.emoji,
-      
+
       // New modification fields
       modifications: [],
       specialInstructions: undefined,
-      
+
       // Pricing breakdown
       originalPrice: oldItem.price,
       modificationPrice: 0,
       totalPrice: oldItem.price * Math.max(1, oldItem.quantity),
-      
+
       // Metadata
       addedAt: now,
       lastModified: now,
       addedBy: userId,
       modifiedBy: userId,
-      
+
       // Split bill tracking
-      splitGroupId: undefined
+      splitGroupId: undefined,
     };
-    
+
     return enhancedItem;
   } catch (error) {
     ErrorTrackingService.getInstance().trackError(error, {
       context: 'cartMigration',
-      item: oldItem
+      item: oldItem,
     });
     return null;
   }
@@ -81,18 +78,15 @@ export function migrateOrderItem(
  * Migrates an entire cart from old format to new format
  * Returns detailed migration results including errors and warnings
  */
-export function migrateCart(
-  oldCart: OrderItem[],
-  userId?: string
-): CartMigrationResult {
+export function migrateCart(oldCart: OrderItem[], userId?: string): CartMigrationResult {
   const migratedItems: EnhancedOrderItem[] = [];
   const errors: CartValidationError[] = [];
   const warnings: string[] = [];
-  
+
   let successCount = 0;
   let failedCount = 0;
   let modifiedCount = 0;
-  
+
   // Process each item
   oldCart.forEach((oldItem, index) => {
     try {
@@ -101,66 +95,74 @@ export function migrateCart(
         errors.push({
           type: 'MISSING_REQUIRED_FIELD',
           itemId: `index_${index}`,
-          field: 'item'
+          field: 'item',
         });
         failedCount++;
         return;
       }
-      
+
       // Check for invalid ID
       if (!oldItem.id && oldItem.id !== 0) {
         errors.push({
           type: 'INVALID_ID',
-          itemId: `index_${index}`
+          itemId: `index_${index}`,
         });
         failedCount++;
         return;
       }
-      
+
       // Check for invalid price
       if (typeof oldItem.price !== 'number' || oldItem.price < 0 || !isFinite(oldItem.price)) {
         errors.push({
           type: 'INVALID_PRICE',
           itemId: oldItem.id?.toString() || `index_${index}`,
-          price: oldItem.price
+          price: oldItem.price,
         });
         failedCount++;
         return;
       }
-      
+
       // Check for invalid quantity
-      if (typeof oldItem.quantity !== 'number' || oldItem.quantity <= 0 || !isFinite(oldItem.quantity)) {
+      if (
+        typeof oldItem.quantity !== 'number' ||
+        oldItem.quantity <= 0 ||
+        !isFinite(oldItem.quantity)
+      ) {
         errors.push({
           type: 'INVALID_QUANTITY',
           itemId: oldItem.id?.toString() || `index_${index}`,
-          quantity: oldItem.quantity
+          quantity: oldItem.quantity,
         });
         failedCount++;
         return;
       }
-      
+
       // Attempt migration
       const enhancedItem = migrateOrderItem(oldItem, userId);
-      
+
       if (enhancedItem) {
         migratedItems.push(enhancedItem);
         successCount++;
-        
+
         // Track if we had to modify the item
         if (oldItem.quantity !== enhancedItem.quantity) {
           modifiedCount++;
-          warnings.push(`Item "${oldItem.name}" quantity adjusted from ${oldItem.quantity} to ${enhancedItem.quantity}`);
+          warnings.push(
+            `Item "${oldItem.name}" quantity adjusted from ${oldItem.quantity} to ${enhancedItem.quantity}`
+          );
         }
-        
+
         // Warn about ID type conversion
         if (typeof oldItem.id === 'number') {
-          warnings.push(`Item "${oldItem.name}" ID converted from number (${oldItem.id}) to string ("${enhancedItem.id}")`);
+          warnings.push(
+            `Item "${oldItem.name}" ID converted from number (${oldItem.id}) to string ("${enhancedItem.id}")`
+          );
         }
       } else {
         errors.push({
           type: 'MISSING_REQUIRED_FIELD',
           itemId: oldItem.id?.toString() || `index_${index}`,
-          field: 'unknown'
+          field: 'unknown',
         });
         failedCount++;
       }
@@ -168,23 +170,23 @@ export function migrateCart(
       errors.push({
         type: 'MISSING_REQUIRED_FIELD',
         itemId: oldItem?.id?.toString() || `index_${index}`,
-        field: 'migration_error'
+        field: 'migration_error',
       });
       failedCount++;
-      
+
       ErrorTrackingService.getInstance().trackError(error, {
         context: 'cartMigration',
         itemIndex: index,
-        item: oldItem
+        item: oldItem,
       });
     }
   });
-  
+
   // Add summary warning if there were failures
   if (failedCount > 0) {
     warnings.push(`${failedCount} items failed to migrate and were excluded from the cart`);
   }
-  
+
   return {
     success: failedCount === 0,
     migratedItems,
@@ -194,8 +196,8 @@ export function migrateCart(
       totalItems: oldCart.length,
       successfullyMigrated: successCount,
       failed: failedCount,
-      modified: modifiedCount
-    }
+      modified: modifiedCount,
+    },
   };
 }
 
@@ -220,20 +222,20 @@ export function validateUniqueIds(items: EnhancedOrderItem[]): boolean {
 export function recalculateItemPricing(item: EnhancedOrderItem): EnhancedOrderItem {
   // Calculate total modification price
   const modificationPrice = item.modifications
-    .filter(mod => mod.selected)
+    .filter((mod) => mod.selected)
     .reduce((sum, mod) => {
       const modQuantity = mod.quantity || 1;
-      return sum + (mod.price * modQuantity);
+      return sum + mod.price * modQuantity;
     }, 0);
-  
+
   // Calculate total price
   const totalPrice = (item.originalPrice + modificationPrice) * item.quantity;
-  
+
   return {
     ...item,
     modificationPrice,
     totalPrice,
-    lastModified: new Date().toISOString()
+    lastModified: new Date().toISOString(),
   };
 }
 
@@ -247,25 +249,25 @@ export function mergeCartStates(
 ): EnhancedOrderItem[] {
   // Create a map of old items by ID for quick lookup
   const oldItemMap = new Map<string, OrderItem>();
-  oldCart.forEach(item => {
+  oldCart.forEach((item) => {
     const id = item.id?.toString();
     if (id) {
       oldItemMap.set(id, item);
     }
   });
-  
+
   // Merge any custom fields from old items
-  return enhancedCart.map(enhancedItem => {
+  return enhancedCart.map((enhancedItem) => {
     const oldItem = oldItemMap.get(enhancedItem.id);
     if (oldItem) {
       // Preserve any custom fields that might exist
       const { id, name, price, quantity, emoji, ...customFields } = oldItem as any;
-      
+
       // Only add custom fields if they exist and aren't already in enhanced item
       if (Object.keys(customFields).length > 0) {
         return {
           ...enhancedItem,
-          ...customFields // Spread any custom fields
+          ...customFields, // Spread any custom fields
         };
       }
     }

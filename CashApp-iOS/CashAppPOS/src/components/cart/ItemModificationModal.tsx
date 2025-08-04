@@ -14,7 +14,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../design-system/ThemeProvider';
@@ -34,10 +34,10 @@ export default function ItemModificationModal({
   item,
   onClose,
   onSave,
-  useEnhancedCart = true
+  useEnhancedCart = true,
 }: ItemModificationModalProps) {
   const { theme } = useTheme();
-  
+
   const {
     modifications,
     modificationPrice,
@@ -51,16 +51,16 @@ export default function ItemModificationModal({
     resetModifications,
     applyModifications,
     getModificationSummary,
-    getPriceImpactSummary
+    getPriceImpactSummary,
   } = useItemModifications({ item, useEnhancedCart });
-  
+
   // Reset when modal opens with new item
   useEffect(() => {
     if (visible && item) {
       resetModifications();
     }
   }, [visible, item?.id]);
-  
+
   const handleSave = () => {
     if (isValid) {
       applyModifications();
@@ -68,16 +68,16 @@ export default function ItemModificationModal({
       onClose();
     }
   };
-  
+
   const handleClose = () => {
     resetModifications();
     onClose();
   };
-  
+
   if (!item) {
     return null;
   }
-  
+
   // Group modifications by category
   const modificationsByCategory = modifications.reduce((acc, mod) => {
     if (!acc[mod.category]) {
@@ -86,15 +86,10 @@ export default function ItemModificationModal({
     acc[mod.category].push(mod);
     return acc;
   }, {} as Record<string, CartItemModification[]>);
-  
+
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={handleClose}
-    >
-      <KeyboardAvoidingView 
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={handleClose}>
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.modalContainer}
       >
@@ -114,71 +109,98 @@ export default function ItemModificationModal({
               <Icon name="close" size={28} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
-          
+
           {/* Scrollable Content */}
-          <ScrollView 
+          <ScrollView
             style={styles.scrollView}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
             {/* Modification Categories */}
             {Object.entries(modificationsByCategory).map(([category, mods]) => (
-              <View key={category} style={[styles.categorySection, { borderBottomColor: theme.colors.border }]}>
+              <View
+                key={category}
+                style={[styles.categorySection, { borderBottomColor: theme.colors.border }]}
+              >
                 <Text style={[styles.categoryTitle, { color: theme.colors.text }]}>{category}</Text>
-                
+
                 {mods.map((mod) => (
                   <TouchableOpacity
                     key={mod.id}
                     style={[
                       styles.modificationItem,
                       { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
-                      mod.selected && { backgroundColor: theme.colors.primaryLight, borderColor: theme.colors.primary }
+                      mod.selected && {
+                        backgroundColor: theme.colors.primaryLight,
+                        borderColor: theme.colors.primary,
+                      },
                     ]}
                     onPress={() => toggleModification(mod.id)}
                   >
                     <View style={styles.modificationInfo}>
-                      <Text style={[
-                        styles.modificationName,
-                        { color: theme.colors.text },
-                        mod.selected && { ...styles.modificationNameSelected, color: theme.colors.primary }
-                      ]}>
+                      <Text
+                        style={[
+                          styles.modificationName,
+                          { color: theme.colors.text },
+                          mod.selected && {
+                            ...styles.modificationNameSelected,
+                            color: theme.colors.primary,
+                          },
+                        ]}
+                      >
                         {mod.name}
                       </Text>
                       {mod.price !== 0 && (
-                        <Text style={[
-                          styles.modificationPrice,
-                          { color: theme.colors.textSecondary },
-                          mod.selected && { ...styles.modificationPriceSelected, color: theme.colors.primary }
-                        ]}>
+                        <Text
+                          style={[
+                            styles.modificationPrice,
+                            { color: theme.colors.textSecondary },
+                            mod.selected && {
+                              ...styles.modificationPriceSelected,
+                              color: theme.colors.primary,
+                            },
+                          ]}
+                        >
                           {mod.price > 0 ? '+' : ''}${Math.abs(mod.price).toFixed(2)}
                         </Text>
                       )}
                     </View>
-                    
+
                     {/* Quantity selector for items that support it */}
                     {mod.selected && mod.quantity !== undefined && (
-                      <View style={[styles.quantitySelector, { backgroundColor: theme.colors.background }]}>
+                      <View
+                        style={[
+                          styles.quantitySelector,
+                          { backgroundColor: theme.colors.background },
+                        ]}
+                      >
                         <TouchableOpacity
                           style={styles.quantityButton}
-                          onPress={() => updateModificationQuantity(mod.id, (mod.quantity || 1) - 1)}
+                          onPress={() =>
+                            updateModificationQuantity(mod.id, (mod.quantity || 1) - 1)
+                          }
                         >
                           <Icon name="remove" size={20} color={theme.colors.primary} />
                         </TouchableOpacity>
-                        <Text style={[styles.quantityText, { color: theme.colors.text }]}>{mod.quantity}</Text>
+                        <Text style={[styles.quantityText, { color: theme.colors.text }]}>
+                          {mod.quantity}
+                        </Text>
                         <TouchableOpacity
                           style={styles.quantityButton}
-                          onPress={() => updateModificationQuantity(mod.id, (mod.quantity || 1) + 1)}
+                          onPress={() =>
+                            updateModificationQuantity(mod.id, (mod.quantity || 1) + 1)
+                          }
                         >
                           <Icon name="add" size={20} color={theme.colors.primary} />
                         </TouchableOpacity>
                       </View>
                     )}
-                    
+
                     {/* Selection indicator */}
                     <View style={styles.selectionIndicator}>
-                      <Icon 
-                        name={mod.selected ? 'check-circle' : 'radio-button-unchecked'} 
-                        size={24} 
+                      <Icon
+                        name={mod.selected ? 'check-circle' : 'radio-button-unchecked'}
+                        size={24}
                         color={mod.selected ? theme.colors.primary : theme.colors.textSecondary}
                       />
                     </View>
@@ -186,12 +208,21 @@ export default function ItemModificationModal({
                 ))}
               </View>
             ))}
-            
+
             {/* Special Instructions */}
             <View style={[styles.categorySection, { borderBottomColor: theme.colors.border }]}>
-              <Text style={[styles.categoryTitle, { color: theme.colors.text }]}>Special Instructions</Text>
+              <Text style={[styles.categoryTitle, { color: theme.colors.text }]}>
+                Special Instructions
+              </Text>
               <TextInput
-                style={[styles.instructionsInput, { backgroundColor: theme.colors.surface, color: theme.colors.text, borderColor: theme.colors.border }]}
+                style={[
+                  styles.instructionsInput,
+                  {
+                    backgroundColor: theme.colors.surface,
+                    color: theme.colors.text,
+                    borderColor: theme.colors.border,
+                  },
+                ]}
                 placeholder="Add any special requests..."
                 placeholderTextColor={theme.colors.textSecondary}
                 multiline
@@ -200,7 +231,7 @@ export default function ItemModificationModal({
                 onChangeText={setSpecialInstructions}
               />
             </View>
-            
+
             {/* Error Messages */}
             {errors.length > 0 && (
               <View style={[styles.errorContainer, { backgroundColor: theme.colors.errorLight }]}>
@@ -212,36 +243,52 @@ export default function ItemModificationModal({
               </View>
             )}
           </ScrollView>
-          
+
           {/* Footer */}
-          <View style={[styles.footer, { borderTopColor: theme.colors.border, backgroundColor: theme.colors.background }]}>
+          <View
+            style={[
+              styles.footer,
+              { borderTopColor: theme.colors.border, backgroundColor: theme.colors.background },
+            ]}
+          >
             <View style={styles.pricingSummary}>
-              <Text style={[styles.pricingLabel, { color: theme.colors.textSecondary }]}>Modifications:</Text>
-              <Text style={[styles.pricingValue, { color: theme.colors.text }]}>{getPriceImpactSummary()}</Text>
+              <Text style={[styles.pricingLabel, { color: theme.colors.textSecondary }]}>
+                Modifications:
+              </Text>
+              <Text style={[styles.pricingValue, { color: theme.colors.text }]}>
+                {getPriceImpactSummary()}
+              </Text>
             </View>
             <View style={styles.pricingSummary}>
               <Text style={[styles.totalLabel, { color: theme.colors.text }]}>Total Price:</Text>
               <Text style={[styles.totalValue, { color: theme.colors.primary }]}>
-                ${totalPrice.toFixed(2)} 
-                <Text style={[styles.quantityNote, { color: theme.colors.textSecondary }]}> ({item.quantity}x)</Text>
+                ${totalPrice.toFixed(2)}
+                <Text style={[styles.quantityNote, { color: theme.colors.textSecondary }]}>
+                  {' '}
+                  ({item.quantity}x)
+                </Text>
               </Text>
             </View>
-            
+
             <View style={styles.buttonRow}>
-              <TouchableOpacity 
-                style={[styles.button, styles.cancelButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]} 
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  styles.cancelButton,
+                  { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                ]}
                 onPress={handleClose}
               >
                 <Text style={[styles.cancelButtonText, { color: theme.colors.text }]}>Cancel</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={[
-                  styles.button, 
+                  styles.button,
                   styles.saveButton,
                   { backgroundColor: theme.colors.primary },
-                  (!isValid || !hasChanges) && { backgroundColor: theme.colors.disabled }
-                ]} 
+                  (!isValid || !hasChanges) && { backgroundColor: theme.colors.disabled },
+                ]}
                 onPress={handleSave}
                 disabled={!isValid || !hasChanges}
               >

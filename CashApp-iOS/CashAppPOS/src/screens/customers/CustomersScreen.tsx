@@ -154,8 +154,12 @@ const CustomersScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            <Text style={[styles.customerEmail, { color: theme.colors.darkGray }]}>{item.email}</Text>
-            <Text style={[styles.customerPhone, { color: theme.colors.darkGray }]}>{item.phone}</Text>
+            <Text style={[styles.customerEmail, { color: theme.colors.darkGray }]}>
+              {item.email}
+            </Text>
+            <Text style={[styles.customerPhone, { color: theme.colors.darkGray }]}>
+              {item.phone}
+            </Text>
           </View>
           <View style={styles.customerStats}>
             <Text style={styles.statValue}>£{item.totalSpent.toFixed(2)}</Text>
@@ -166,15 +170,21 @@ const CustomersScreen: React.FC = () => {
         <View style={[styles.customerMetrics, { borderTopColor: theme.colors.border }]}>
           <View style={styles.metricItem}>
             <Icon name="shopping-cart" size={16} color={theme.colors.darkGray} />
-            <Text style={[styles.metricText, { color: theme.colors.darkGray }]}>{item.orderCount} orders</Text>
+            <Text style={[styles.metricText, { color: theme.colors.darkGray }]}>
+              {item.orderCount} orders
+            </Text>
           </View>
           <View style={styles.metricItem}>
             <Icon name="star" size={16} color={theme.colors.warning[500]} />
-            <Text style={[styles.metricText, { color: theme.colors.darkGray }]}>{item.loyaltyPoints} points</Text>
+            <Text style={[styles.metricText, { color: theme.colors.darkGray }]}>
+              {item.loyaltyPoints} points
+            </Text>
           </View>
           <View style={styles.metricItem}>
             <Icon name="schedule" size={16} color={theme.colors.darkGray} />
-            <Text style={[styles.metricText, { color: theme.colors.darkGray }]}>Last visit {formatDate(item.lastVisit)}</Text>
+            <Text style={[styles.metricText, { color: theme.colors.darkGray }]}>
+              Last visit {formatDate(item.lastVisit)}
+            </Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -198,9 +208,13 @@ const CustomersScreen: React.FC = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
-      <ActivityIndicator size="large" color={theme.colors.primary} />
-      <Text style={[styles.loadingText, { color: theme.colors.darkGray }]}>Loading Customers...</Text>
+      <SafeAreaView
+        style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}
+      >
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={[styles.loadingText, { color: theme.colors.darkGray }]}>
+          Loading Customers...
+        </Text>
       </SafeAreaView>
     );
   }
@@ -210,10 +224,15 @@ const CustomersScreen: React.FC = () => {
       return (
         <View style={styles.emptyState}>
           <Icon name="error-outline" size={64} color={theme.colors.danger[500]} />
-          <Text style={[styles.emptyStateText, { color: theme.colors.text }]}>Error Loading Customers</Text>
+          <Text style={[styles.emptyStateText, { color: theme.colors.text }]}>
+            Error Loading Customers
+          </Text>
           <Text style={[styles.emptyStateSubtext, { color: theme.colors.darkGray }]}>{error}</Text>
-          <TouchableOpacity onPress={loadCustomers} style={[styles.retryButton, { backgroundColor: theme.colors.primary }]}>
-          <Text style={[styles.retryButtonText, { color: theme.colors.white }]}>Try Again</Text>
+          <TouchableOpacity
+            onPress={loadCustomers}
+            style={[styles.retryButton, { backgroundColor: theme.colors.primary }]}
+          >
+            <Text style={[styles.retryButtonText, { color: theme.colors.white }]}>Try Again</Text>
           </TouchableOpacity>
         </View>
       );
@@ -221,7 +240,9 @@ const CustomersScreen: React.FC = () => {
     return (
       <View style={styles.emptyState}>
         <Icon name="people" size={64} color={theme.colors.lightGray} />
-        <Text style={[styles.emptyStateText, { color: theme.colors.text }]}>No customers found</Text>
+        <Text style={[styles.emptyStateText, { color: theme.colors.text }]}>
+          No customers found
+        </Text>
         <Text style={[styles.emptyStateSubtext, { color: theme.colors.darkGray }]}>
           {searchQuery ? 'Try adjusting your search' : 'Add your first customer or pull to refresh'}
         </Text>
@@ -254,7 +275,12 @@ const CustomersScreen: React.FC = () => {
       </View>
 
       {/* Stats Bar */}
-      <View style={[styles.statsBar, { backgroundColor: theme.colors.white, borderBottomColor: theme.colors.border }]}>
+      <View
+        style={[
+          styles.statsBar,
+          { backgroundColor: theme.colors.white, borderBottomColor: theme.colors.border },
+        ]}
+      >
         <View style={styles.statCard}>
           <Text style={[styles.statValue, { color: theme.colors.primary }]}>{stats.total}</Text>
           <Text style={[styles.statLabel, { color: theme.colors.darkGray }]}>Total</Text>
@@ -276,7 +302,12 @@ const CustomersScreen: React.FC = () => {
       </View>
 
       {/* Search and Filter */}
-      <View style={[styles.searchSection, { backgroundColor: theme.colors.white, borderBottomColor: theme.colors.border }]}>
+      <View
+        style={[
+          styles.searchSection,
+          { backgroundColor: theme.colors.white, borderBottomColor: theme.colors.border },
+        ]}
+      >
         <View style={[styles.searchContainer, { backgroundColor: theme.colors.background }]}>
           <Icon name="search" size={20} color={theme.colors.darkGray} />
           <TextInput
@@ -341,7 +372,9 @@ const CustomersScreen: React.FC = () => {
         <View style={styles.modalOverlay}>
           <View style={[styles.customerModal, { backgroundColor: theme.colors.white }]}>
             <View style={[styles.modalHeader, { borderBottomColor: theme.colors.border }]}>
-              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Customer Details</Text>
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
+                Customer Details
+              </Text>
               <TouchableOpacity onPress={() => setSelectedCustomer(null)}>
                 <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
@@ -353,7 +386,9 @@ const CustomersScreen: React.FC = () => {
                   <View style={styles.profileAvatar}>
                     <Icon name="account-circle" size={80} color={theme.colors.primary} />
                   </View>
-                  <Text style={[styles.profileName, { color: theme.colors.text }]}>{selectedCustomer.name}</Text>
+                  <Text style={[styles.profileName, { color: theme.colors.text }]}>
+                    {selectedCustomer.name}
+                  </Text>
                   <View
                     style={[
                       styles.profileLevel,
@@ -372,14 +407,20 @@ const CustomersScreen: React.FC = () => {
                 </View>
 
                 <View style={styles.detailsSection}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Contact Information</Text>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                    Contact Information
+                  </Text>
                   <View style={styles.detailRow}>
                     <Icon name="email" size={20} color={theme.colors.darkGray} />
-                    <Text style={[styles.detailText, { color: theme.colors.text }]}>{selectedCustomer.email}</Text>
+                    <Text style={[styles.detailText, { color: theme.colors.text }]}>
+                      {selectedCustomer.email}
+                    </Text>
                   </View>
                   <View style={styles.detailRow}>
                     <Icon name="phone" size={20} color={theme.colors.darkGray} />
-                    <Text style={[styles.detailText, { color: theme.colors.text }]}>{selectedCustomer.phone}</Text>
+                    <Text style={[styles.detailText, { color: theme.colors.text }]}>
+                      {selectedCustomer.phone}
+                    </Text>
                   </View>
                   <View style={styles.detailRow}>
                     <Icon name="calendar-today" size={20} color={theme.colors.darkGray} />
@@ -390,39 +431,69 @@ const CustomersScreen: React.FC = () => {
                 </View>
 
                 <View style={styles.detailsSection}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Purchase History</Text>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                    Purchase History
+                  </Text>
                   <View style={styles.purchaseGrid}>
-                    <View style={[styles.purchaseCard, { backgroundColor: theme.colors.background }]}>
+                    <View
+                      style={[styles.purchaseCard, { backgroundColor: theme.colors.background }]}
+                    >
                       <Text style={[styles.purchaseValue, { color: theme.colors.primary }]}>
                         £{selectedCustomer.totalSpent.toFixed(2)}
                       </Text>
-                      <Text style={[styles.purchaseLabel, { color: theme.colors.darkGray }]}>Total Spent</Text>
+                      <Text style={[styles.purchaseLabel, { color: theme.colors.darkGray }]}>
+                        Total Spent
+                      </Text>
                     </View>
-                    <View style={[styles.purchaseCard, { backgroundColor: theme.colors.background }]}>
-                      <Text style={[styles.purchaseValue, { color: theme.colors.primary }]}>{selectedCustomer.orderCount}</Text>
-                      <Text style={[styles.purchaseLabel, { color: theme.colors.darkGray }]}>Orders</Text>
+                    <View
+                      style={[styles.purchaseCard, { backgroundColor: theme.colors.background }]}
+                    >
+                      <Text style={[styles.purchaseValue, { color: theme.colors.primary }]}>
+                        {selectedCustomer.orderCount}
+                      </Text>
+                      <Text style={[styles.purchaseLabel, { color: theme.colors.darkGray }]}>
+                        Orders
+                      </Text>
                     </View>
-                    <View style={[styles.purchaseCard, { backgroundColor: theme.colors.background }]}>
+                    <View
+                      style={[styles.purchaseCard, { backgroundColor: theme.colors.background }]}
+                    >
                       <Text style={[styles.purchaseValue, { color: theme.colors.primary }]}>
                         £{selectedCustomer.averageOrderValue.toFixed(2)}
                       </Text>
-                      <Text style={[styles.purchaseLabel, { color: theme.colors.darkGray }]}>Avg Order</Text>
+                      <Text style={[styles.purchaseLabel, { color: theme.colors.darkGray }]}>
+                        Avg Order
+                      </Text>
                     </View>
-                    <View style={[styles.purchaseCard, { backgroundColor: theme.colors.background }]}>
+                    <View
+                      style={[styles.purchaseCard, { backgroundColor: theme.colors.background }]}
+                    >
                       <Text style={[styles.purchaseValue, { color: theme.colors.warning[500] }]}>
                         {selectedCustomer.loyaltyPoints}
                       </Text>
-                      <Text style={[styles.purchaseLabel, { color: theme.colors.darkGray }]}>Loyalty Points</Text>
+                      <Text style={[styles.purchaseLabel, { color: theme.colors.darkGray }]}>
+                        Loyalty Points
+                      </Text>
                     </View>
                   </View>
                 </View>
 
                 <View style={styles.detailsSection}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Preferred Items</Text>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                    Preferred Items
+                  </Text>
                   <View style={styles.preferredItems}>
                     {selectedCustomer.preferredItems?.map((item, index) => (
-                      <View key={index} style={[styles.preferredItem, { backgroundColor: theme.colors.primary + '20' }]}>
-                        <Text style={[styles.preferredItemText, { color: theme.colors.primary }]}>{item}</Text>
+                      <View
+                        key={index}
+                        style={[
+                          styles.preferredItem,
+                          { backgroundColor: theme.colors.primary + '20' },
+                        ]}
+                      >
+                        <Text style={[styles.preferredItemText, { color: theme.colors.primary }]}>
+                          {item}
+                        </Text>
                       </View>
                     ))}
                   </View>
@@ -433,8 +504,16 @@ const CustomersScreen: React.FC = () => {
                     <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Tags</Text>
                     <View style={styles.customerTags}>
                       {selectedCustomer.tags?.map((tag, index) => (
-                        <View key={index} style={[styles.customerTag, { backgroundColor: theme.colors.secondary + '20' }]}>
-                          <Text style={[styles.customerTagText, { color: theme.colors.secondary }]}>{tag}</Text>
+                        <View
+                          key={index}
+                          style={[
+                            styles.customerTag,
+                            { backgroundColor: theme.colors.secondary + '20' },
+                          ]}
+                        >
+                          <Text style={[styles.customerTagText, { color: theme.colors.secondary }]}>
+                            {tag}
+                          </Text>
                         </View>
                       ))}
                     </View>
@@ -442,13 +521,21 @@ const CustomersScreen: React.FC = () => {
                 )}
 
                 <View style={styles.actionButtons}>
-                  <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.colors.secondary }]}>
+                  <TouchableOpacity
+                    style={[styles.actionButton, { backgroundColor: theme.colors.secondary }]}
+                  >
                     <Icon name="edit" size={20} color={theme.colors.white} />
-                    <Text style={[styles.actionButtonText, { color: theme.colors.white }]}>Edit</Text>
+                    <Text style={[styles.actionButtonText, { color: theme.colors.white }]}>
+                      Edit
+                    </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.colors.success[500] }]}>
+                  <TouchableOpacity
+                    style={[styles.actionButton, { backgroundColor: theme.colors.success[500] }]}
+                  >
                     <Icon name="add-shopping-cart" size={20} color={theme.colors.white} />
-                    <Text style={[styles.actionButtonText, { color: theme.colors.white }]}>New Order</Text>
+                    <Text style={[styles.actionButtonText, { color: theme.colors.white }]}>
+                      New Order
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </ScrollView>
@@ -461,328 +548,328 @@ const CustomersScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      height: 60,
-    },
-    backButton: {
-      padding: 12,
-      marginRight: 8,
-      borderRadius: 8,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      minWidth: 44,
-      minHeight: 44,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    headerCenter: {
-      flex: 1,
-      alignItems: 'center',
-    },
-    headerTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-    },
-    headerSubtitle: {
-      fontSize: 12,
-      color: 'rgba(255, 255, 255, 0.8)',
-    },
-    addButton: {
-      padding: 8,
-    },
-    statsBar: {
-      flexDirection: 'row',
-      paddingVertical: 16,
-      paddingHorizontal: 16,
-      borderBottomWidth: 1,
-      gap: 12,
-    },
-    statCard: {
-      flex: 1,
-      alignItems: 'center',
-    },
-    statValue: {
-      fontSize: 20,
-      fontWeight: 'bold',
-    },
-    statLabel: {
-      fontSize: 12,
-      marginTop: 4,
-    },
-    searchSection: {
-      paddingVertical: 16,
-      borderBottomWidth: 1,
-    },
-    searchContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderRadius: 12,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      marginHorizontal: 16,
-      marginBottom: 12,
-    },
-    searchInput: {
-      flex: 1,
-      fontSize: 16,
-      marginLeft: 12,
-    },
-    segmentFilters: {
-      paddingHorizontal: 16,
-    },
-    segmentFilter: {
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      marginRight: 8,
-      borderRadius: 20,
-    },
-    segmentFilterText: {
-      fontSize: 14,
-      fontWeight: '500',
-    },
-    customersList: {
-      padding: 16,
-    },
-    customerCard: {
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 12,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 4,
-      elevation: 2,
-    },
-    customerHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    customerAvatar: {
-      marginRight: 12,
-    },
-    customerInfo: {
-      flex: 1,
-    },
-    customerNameRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 4,
-    },
-    customerName: {
-      fontSize: 16,
-      fontWeight: '600',
-      marginRight: 8,
-    },
-    levelBadge: {
-      paddingHorizontal: 8,
-      paddingVertical: 2,
-      borderRadius: 8,
-    },
-    levelText: {
-      fontSize: 10,
-      fontWeight: '600',
-    },
-    customerEmail: {
-      fontSize: 12,
-      marginBottom: 2,
-    },
-    customerPhone: {
-      fontSize: 12,
-    },
-    customerStats: {
-      alignItems: 'flex-end',
-    },
-    customerMetrics: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      paddingTop: 12,
-      borderTopWidth: 1,
-    },
-    metricItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    metricText: {
-      fontSize: 12,
-      marginLeft: 4,
-    },
-    emptyState: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 100,
-    },
-    emptyStateText: {
-      fontSize: 18,
-      fontWeight: '500',
-      marginTop: 16,
-    },
-    emptyStateSubtext: {
-      fontSize: 14,
-      marginTop: 8,
-    },
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    customerModal: {
-      borderRadius: 16,
-      width: '90%',
-      maxHeight: '80%',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: 0.1,
-      shadowRadius: 20,
-      elevation: 10,
-    },
-    modalHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: 20,
-      borderBottomWidth: 1,
-    },
-    modalTitle: {
-      fontSize: 20,
-      fontWeight: '600',
-    },
-    modalContent: {
-      padding: 20,
-    },
-    customerProfile: {
-      alignItems: 'center',
-      marginBottom: 24,
-    },
-    profileAvatar: {
-      marginBottom: 12,
-    },
-    profileName: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      marginBottom: 8,
-    },
-    profileLevel: {
-      paddingHorizontal: 12,
-      paddingVertical: 4,
-      borderRadius: 12,
-    },
-    profileLevelText: {
-      fontSize: 14,
-      fontWeight: '600',
-    },
-    detailsSection: {
-      marginBottom: 24,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      marginBottom: 12,
-    },
-    detailRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 8,
-    },
-    detailText: {
-      fontSize: 14,
-      marginLeft: 12,
-    },
-    purchaseGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 12,
-    },
-    purchaseCard: {
-      flex: 1,
-      minWidth: '45%',
-      borderRadius: 12,
-      padding: 16,
-      alignItems: 'center',
-    },
-    purchaseValue: {
-      fontSize: 20,
-      fontWeight: 'bold',
-    },
-    purchaseLabel: {
-      fontSize: 12,
-      marginTop: 4,
-      textAlign: 'center',
-    },
-    preferredItems: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 8,
-    },
-    preferredItem: {
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 16,
-    },
-    preferredItemText: {
-      fontSize: 12,
-      fontWeight: '500',
-    },
-    customerTags: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 8,
-    },
-    customerTag: {
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 16,
-    },
-    customerTagText: {
-      fontSize: 12,
-      fontWeight: '500',
-    },
-    actionButtons: {
-      flexDirection: 'row',
-      gap: 12,
-      marginTop: 24,
-    },
-    actionButton: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 12,
-      borderRadius: 8,
-    },
-    actionButtonText: {
-      fontSize: 14,
-      fontWeight: '600',
-      marginLeft: 8,
-    },
-    centered: {
-      // Added
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    loadingText: {
-      marginTop: 10,
-      fontSize: 16,
-    },
-    retryButton: {
-      marginTop: 20,
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 8,
-    },
-    retryButtonText: {
-      fontSize: 16,
-      fontWeight: '600',
-    },
-  });
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    height: 60,
+  },
+  backButton: {
+    padding: 12,
+    marginRight: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
+  addButton: {
+    padding: 8,
+  },
+  statsBar: {
+    flexDirection: 'row',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  statLabel: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+  searchSection: {
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginHorizontal: 16,
+    marginBottom: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: 12,
+  },
+  segmentFilters: {
+    paddingHorizontal: 16,
+  },
+  segmentFilter: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginRight: 8,
+    borderRadius: 20,
+  },
+  segmentFilterText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  customersList: {
+    padding: 16,
+  },
+  customerCard: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  customerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  customerAvatar: {
+    marginRight: 12,
+  },
+  customerInfo: {
+    flex: 1,
+  },
+  customerNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  customerName: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  levelBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  levelText: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  customerEmail: {
+    fontSize: 12,
+    marginBottom: 2,
+  },
+  customerPhone: {
+    fontSize: 12,
+  },
+  customerStats: {
+    alignItems: 'flex-end',
+  },
+  customerMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 12,
+    borderTopWidth: 1,
+  },
+  metricItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  metricText: {
+    fontSize: 12,
+    marginLeft: 4,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 100,
+  },
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: '500',
+    marginTop: 16,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    marginTop: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  customerModal: {
+    borderRadius: 16,
+    width: '90%',
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  modalContent: {
+    padding: 20,
+  },
+  customerProfile: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  profileAvatar: {
+    marginBottom: 12,
+  },
+  profileName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  profileLevel: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  profileLevelText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  detailsSection: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  detailText: {
+    fontSize: 14,
+    marginLeft: 12,
+  },
+  purchaseGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  purchaseCard: {
+    flex: 1,
+    minWidth: '45%',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  purchaseValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  purchaseLabel: {
+    fontSize: 12,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  preferredItems: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  preferredItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  preferredItemText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  customerTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  customerTag: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  customerTagText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  actionButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  centered: {
+    // Added
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+  },
+  retryButton: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
 
 export default CustomersScreen;

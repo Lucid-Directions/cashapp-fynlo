@@ -162,9 +162,9 @@ const Modal: React.FC<ModalProps> = ({
 
   const ContentComponent = scrollable ? ScrollView : View;
   const contentProps = scrollable
-    ? { 
-        showsVerticalScrollIndicator: false, 
-        contentContainerStyle: [styles.scrollContent, { padding: theme.spacing[6] }]
+    ? {
+        showsVerticalScrollIndicator: false,
+        contentContainerStyle: [styles.scrollContent, { padding: theme.spacing[6] }],
       }
     : { style: [styles.content, { padding: theme.spacing[6] }] };
 
@@ -187,24 +187,29 @@ const Modal: React.FC<ModalProps> = ({
         <Animated.View style={[modalContentStyle, getPositionTransform()]}>
           {/* Header */}
           {(title || closable) && (
-            <View style={[
-              styles.header,
-              {
-                paddingHorizontal: theme.spacing[6],
-                paddingVertical: theme.spacing[4],
-                borderBottomColor: theme.colors.neutral[100],
-              }
-            ]}>
+            <View
+              style={[
+                styles.header,
+                {
+                  paddingHorizontal: theme.spacing[6],
+                  paddingVertical: theme.spacing[4],
+                  borderBottomColor: theme.colors.neutral[100],
+                },
+              ]}
+            >
               {title && (
-                <Text style={[
-                  styles.title,
-                  {
-                    fontSize: theme.typography.fontSize.lg,
-                    fontWeight: theme.typography.fontWeight.semibold,
-                    color: theme.colors.text,
-                    marginRight: theme.spacing[4],
-                  }
-                ]} numberOfLines={1}>
+                <Text
+                  style={[
+                    styles.title,
+                    {
+                      fontSize: theme.typography.fontSize.lg,
+                      fontWeight: theme.typography.fontWeight.semibold,
+                      color: theme.colors.text,
+                      marginRight: theme.spacing[4],
+                    },
+                  ]}
+                  numberOfLines={1}
+                >
                   {title}
                 </Text>
               )}
@@ -225,14 +230,18 @@ const Modal: React.FC<ModalProps> = ({
 
           {/* Footer */}
           {footer && (
-            <View style={[
-              styles.footer,
-              {
-                paddingHorizontal: theme.spacing[6],
-                paddingVertical: theme.spacing[4],
-                borderTopColor: theme.colors.neutral[100],
-              }
-            ]}>{footer}</View>
+            <View
+              style={[
+                styles.footer,
+                {
+                  paddingHorizontal: theme.spacing[6],
+                  paddingVertical: theme.spacing[4],
+                  borderTopColor: theme.colors.neutral[100],
+                },
+              ]}
+            >
+              {footer}
+            </View>
           )}
         </Animated.View>
       </KeyboardAvoidingView>
@@ -296,19 +305,23 @@ export const ModalAction: React.FC<ModalActionProps> = ({
         },
         getVariantStyle(),
         disabled && styles.disabledAction,
-        style
+        style,
       ]}
       onPress={onPress}
       disabled={disabled}
     >
-      <Text style={[
-        styles.actionText,
-        {
-          fontSize: theme.typography.fontSize.base,
-          fontWeight: theme.typography.fontWeight.medium,
-        },
-        getTextStyle()
-      ]}>{children}</Text>
+      <Text
+        style={[
+          styles.actionText,
+          {
+            fontSize: theme.typography.fontSize.base,
+            fontWeight: theme.typography.fontWeight.medium,
+          },
+          getTextStyle(),
+        ]}
+      >
+        {children}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -322,15 +335,7 @@ export interface ModalActionsProps {
 export const ModalActions: React.FC<ModalActionsProps> = ({ children, style }) => {
   const { theme } = useTheme();
 
-  return (
-    <View style={[
-      styles.actions,
-      { gap: theme.spacing[3] },
-      style
-    ]}>
-      {children}
-    </View>
-  );
+  return <View style={[styles.actions, { gap: theme.spacing[3] }, style]}>{children}</View>;
 };
 
 const styles = StyleSheet.create({

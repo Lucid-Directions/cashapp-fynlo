@@ -254,9 +254,14 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
       <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Scan Receipt</Text>
       <View style={[styles.cameraPreviewPlaceholder, { backgroundColor: theme.colors.lightGray }]}>
         <Icon name="camera-alt" size={80} color={theme.colors.lightGray} />
-        <Text style={[styles.placeholderText, { color: theme.colors.darkGray }]}>Camera Preview Area</Text>
+        <Text style={[styles.placeholderText, { color: theme.colors.darkGray }]}>
+          Camera Preview Area
+        </Text>
       </View>
-      <TouchableOpacity style={[styles.captureButton, { backgroundColor: theme.colors.primary }]} onPress={handleCaptureImage}>
+      <TouchableOpacity
+        style={[styles.captureButton, { backgroundColor: theme.colors.primary }]}
+        onPress={handleCaptureImage}
+      >
         <Icon name="camera" size={24} color={theme.colors.white} />
         <Text style={[styles.buttonText, { color: theme.colors.white }]}>Capture Receipt</Text>
       </TouchableOpacity>
@@ -267,7 +272,9 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     <View style={styles.stepContainer}>
       <ActivityIndicator size="large" color={theme.colors.primary} />
       <Text style={[styles.loadingText, { color: theme.colors.text }]}>Processing Receipt...</Text>
-      <Text style={[styles.loadingSubtitle, { color: theme.colors.darkGray }]}>Extracting items, please wait.</Text>
+      <Text style={[styles.loadingSubtitle, { color: theme.colors.darkGray }]}>
+        Extracting items, please wait.
+      </Text>
     </View>
   );
 
@@ -279,20 +286,32 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
           <View key={item.id} style={[styles.itemRow, { borderBottomColor: theme.colors.border }]}>
             <View style={styles.itemInputs}>
               <TextInput
-                style={[styles.input, styles.nameInput, { borderColor: theme.colors.border, backgroundColor: theme.colors.white }]}
+                style={[
+                  styles.input,
+                  styles.nameInput,
+                  { borderColor: theme.colors.border, backgroundColor: theme.colors.white },
+                ]}
                 placeholder="Item Name"
                 value={item.name}
                 onChangeText={(text) => handleItemChange(item.id, 'name', text)}
               />
               <TextInput
-                style={[styles.input, styles.quantityInput, { borderColor: theme.colors.border, backgroundColor: theme.colors.white }]}
+                style={[
+                  styles.input,
+                  styles.quantityInput,
+                  { borderColor: theme.colors.border, backgroundColor: theme.colors.white },
+                ]}
                 placeholder="Qty"
                 value={item.quantity}
                 onChangeText={(text) => handleItemChange(item.id, 'quantity', text)}
                 keyboardType="numeric"
               />
               <TextInput
-                style={[styles.input, styles.priceInput, { borderColor: theme.colors.border, backgroundColor: theme.colors.white }]}
+                style={[
+                  styles.input,
+                  styles.priceInput,
+                  { borderColor: theme.colors.border, backgroundColor: theme.colors.white },
+                ]}
                 placeholder="Price"
                 value={item.price}
                 onChangeText={(text) => handleItemChange(item.id, 'price', text)}
@@ -305,12 +324,20 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
           </View>
         ))}
       </ScrollView>
-      <TouchableOpacity style={[styles.addItemButton, { borderColor: theme.colors.primary }]} onPress={handleAddItem}>
+      <TouchableOpacity
+        style={[styles.addItemButton, { borderColor: theme.colors.primary }]}
+        onPress={handleAddItem}
+      >
         <Icon name="add-circle-outline" size={22} color={theme.colors.primary} />
         <Text style={[styles.addItemButtonText, { color: theme.colors.primary }]}>Add Item</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.submitButton, { backgroundColor: theme.colors.success[500] }]} onPress={handleSubmit}>
-        <Text style={[styles.buttonText, { color: theme.colors.white }]}>Confirm and Import Items</Text>
+      <TouchableOpacity
+        style={[styles.submitButton, { backgroundColor: theme.colors.success[500] }]}
+        onPress={handleSubmit}
+      >
+        <Text style={[styles.buttonText, { color: theme.colors.white }]}>
+          Confirm and Import Items
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -340,134 +367,134 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
 };
 
 const styles = StyleSheet.create({
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    modalContainer: {
-      width: '90%',
-      maxHeight: '85%',
-      borderRadius: 16,
-      padding: 20,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5,
-    },
-    closeButton: {
-      alignSelf: 'flex-end',
-      padding: 5,
-    },
-    stepContainer: {
-      alignItems: 'center',
-      width: '100%',
-    },
-    modalTitle: {
-      fontSize: 22,
-      fontWeight: 'bold',
-      marginBottom: 20,
-      textAlign: 'center',
-    },
-    cameraPreviewPlaceholder: {
-      width: '100%',
-      height: 200,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 8,
-      marginBottom: 20,
-    },
-    placeholderText: {
-      marginTop: 10,
-    },
-    captureButton: {
-      flexDirection: 'row',
-      paddingVertical: 12,
-      paddingHorizontal: 30,
-      borderRadius: 8,
-      alignItems: 'center',
-    },
-    submitButton: {
-      paddingVertical: 12,
-      paddingHorizontal: 30,
-      borderRadius: 8,
-      alignItems: 'center',
-      marginTop: 15,
-      width: '100%',
-    },
-    buttonText: {
-      fontSize: 16,
-      fontWeight: '600',
-      marginLeft: 8,
-    },
-    loadingText: {
-      fontSize: 18,
-      fontWeight: '600',
-      marginTop: 15,
-      marginBottom: 5,
-    },
-    loadingSubtitle: {
-      fontSize: 14,
-      marginBottom: 20,
-    },
-    itemList: {
-      width: '100%',
-      maxHeight: 350, // Adjust based on screen
-      marginBottom: 10,
-    },
-    itemRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 10,
-      paddingVertical: 8,
-      borderBottomWidth: 1,
-    },
-    itemInputs: {
-      flex: 1,
-      flexDirection: 'row',
-    },
-    input: {
-      borderWidth: 1,
-      borderRadius: 6,
-      paddingHorizontal: 10,
-      paddingVertical: 8,
-      fontSize: 14,
-    },
-    nameInput: {
-      flex: 0.5, // Takes 50% of space in itemInputs
-      marginRight: 4,
-    },
-    quantityInput: {
-      flex: 0.2, // Takes 20%
-      textAlign: 'center',
-      marginHorizontal: 4,
-    },
-    priceInput: {
-      flex: 0.3, // Takes 30%
-      textAlign: 'right',
-      marginLeft: 4,
-    },
-    deleteButton: {
-      padding: 5,
-      marginLeft: 10,
-    },
-    addItemButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 10,
-      paddingHorizontal: 15,
-      borderRadius: 8,
-      borderWidth: 1,
-      alignSelf: 'flex-start',
-      marginBottom: 15,
-    },
-    addItemButtonText: {
-      fontSize: 14,
-      fontWeight: '600',
-      marginLeft: 6,
-    },
-  });
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '90%',
+    maxHeight: '85%',
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
+    padding: 5,
+  },
+  stepContainer: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  cameraPreviewPlaceholder: {
+    width: '100%',
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  placeholderText: {
+    marginTop: 10,
+  },
+  captureButton: {
+    flexDirection: 'row',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  submitButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 15,
+    width: '100%',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  loadingText: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 15,
+    marginBottom: 5,
+  },
+  loadingSubtitle: {
+    fontSize: 14,
+    marginBottom: 20,
+  },
+  itemList: {
+    width: '100%',
+    maxHeight: 350, // Adjust based on screen
+    marginBottom: 10,
+  },
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+  },
+  itemInputs: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 14,
+  },
+  nameInput: {
+    flex: 0.5, // Takes 50% of space in itemInputs
+    marginRight: 4,
+  },
+  quantityInput: {
+    flex: 0.2, // Takes 20%
+    textAlign: 'center',
+    marginHorizontal: 4,
+  },
+  priceInput: {
+    flex: 0.3, // Takes 30%
+    textAlign: 'right',
+    marginLeft: 4,
+  },
+  deleteButton: {
+    padding: 5,
+    marginLeft: 10,
+  },
+  addItemButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignSelf: 'flex-start',
+    marginBottom: 15,
+  },
+  addItemButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 6,
+  },
+});
 
 export default ReceiptScanModal;

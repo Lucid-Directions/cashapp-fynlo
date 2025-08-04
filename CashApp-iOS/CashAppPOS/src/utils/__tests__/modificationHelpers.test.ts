@@ -16,17 +16,32 @@ import {
   isModificationCombinationValid,
   getModificationIcon,
   sortModifications,
-  areModificationsEqual
+  areModificationsEqual,
 } from '../modificationHelpers';
 import { CartItemModification, EnhancedOrderItem } from '../../types/cart';
 
 describe('modificationHelpers', () => {
   const mockModifications: CartItemModification[] = [
-    { id: '1', type: 'size', category: 'Size', name: 'Large', price: 0.50, selected: true },
-    { id: '2', type: 'temperature', category: 'Temp', name: 'Iced', price: 0.00, selected: true },
-    { id: '3', type: 'addition', category: 'Add-ons', name: 'Extra Shot', price: 0.75, selected: true, quantity: 2 },
-    { id: '4', type: 'addition', category: 'Add-ons', name: 'Vanilla Syrup', price: 0.50, selected: false },
-    { id: '5', type: 'removal', category: 'Remove', name: 'No Whip', price: 0.00, selected: true },
+    { id: '1', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
+    { id: '2', type: 'temperature', category: 'Temp', name: 'Iced', price: 0.0, selected: true },
+    {
+      id: '3',
+      type: 'addition',
+      category: 'Add-ons',
+      name: 'Extra Shot',
+      price: 0.75,
+      selected: true,
+      quantity: 2,
+    },
+    {
+      id: '4',
+      type: 'addition',
+      category: 'Add-ons',
+      name: 'Vanilla Syrup',
+      price: 0.5,
+      selected: false,
+    },
+    { id: '5', type: 'removal', category: 'Remove', name: 'No Whip', price: 0.0, selected: true },
   ];
 
   describe('formatModificationSummary', () => {
@@ -40,7 +55,7 @@ describe('modificationHelpers', () => {
     });
 
     it('returns empty string for no selected modifications', () => {
-      const unselected = mockModifications.map(m => ({ ...m, selected: false }));
+      const unselected = mockModifications.map((m) => ({ ...m, selected: false }));
       const summary = formatModificationSummary(unselected);
       expect(summary).toBe('');
     });
@@ -51,8 +66,8 @@ describe('modificationHelpers', () => {
         type: 'addition' as const,
         category: 'Add-ons',
         name: `Very Long Modification Name ${i}`,
-        price: 0.50,
-        selected: true
+        price: 0.5,
+        selected: true,
       }));
 
       const summary = formatModificationSummary(manyMods, 50);
@@ -63,10 +78,10 @@ describe('modificationHelpers', () => {
     it('orders modifications by type', () => {
       const summary = formatModificationSummary(mockModifications);
       const parts = summary.split(', ');
-      
+
       // Size should come before temperature
-      const sizeIndex = parts.findIndex(p => p.includes('Large'));
-      const tempIndex = parts.findIndex(p => p.includes('Iced'));
+      const sizeIndex = parts.findIndex((p) => p.includes('Large'));
+      const tempIndex = parts.findIndex((p) => p.includes('Iced'));
       expect(sizeIndex).toBeLessThan(tempIndex);
     });
   });
@@ -75,31 +90,31 @@ describe('modificationHelpers', () => {
     it('calculates total with quantities', () => {
       const total = calculateTotalModificationPrice(mockModifications);
       // Large: 0.50 + Extra Shot: 0.75 * 2 = 2.00
-      expect(total).toBe(2.00);
+      expect(total).toBe(2.0);
     });
 
     it('returns 0 for no selected modifications', () => {
-      const unselected = mockModifications.map(m => ({ ...m, selected: false }));
+      const unselected = mockModifications.map((m) => ({ ...m, selected: false }));
       const total = calculateTotalModificationPrice(unselected);
       expect(total).toBe(0);
     });
 
     it('handles negative prices', () => {
       const mods: CartItemModification[] = [
-        { id: '1', type: 'size', category: 'Size', name: 'Small', price: -0.50, selected: true },
+        { id: '1', type: 'size', category: 'Size', name: 'Small', price: -0.5, selected: true },
       ];
       const total = calculateTotalModificationPrice(mods);
-      expect(total).toBe(-0.50);
+      expect(total).toBe(-0.5);
     });
   });
 
   describe('formatModificationPrice', () => {
     it('formats positive prices with plus sign', () => {
-      expect(formatModificationPrice(1.50)).toBe('+$1.50');
+      expect(formatModificationPrice(1.5)).toBe('+$1.50');
     });
 
     it('formats negative prices without plus sign', () => {
-      expect(formatModificationPrice(-0.50)).toBe('-$0.50');
+      expect(formatModificationPrice(-0.5)).toBe('-$0.50');
     });
 
     it('returns empty string for zero', () => {
@@ -116,15 +131,15 @@ describe('modificationHelpers', () => {
       id: '123',
       productId: 'prod-1',
       name: 'Coffee',
-      price: 3.00,
+      price: 3.0,
       quantity: 1,
-      originalPrice: 3.00,
+      originalPrice: 3.0,
       modificationPrice: 0,
-      totalPrice: 3.00,
+      totalPrice: 3.0,
       modifications: [],
       addedAt: new Date().toISOString(),
       lastModified: new Date().toISOString(),
-      addedBy: 'user-1'
+      addedBy: 'user-1',
     };
 
     it('returns true for items with selected modifications', () => {
@@ -147,15 +162,15 @@ describe('modificationHelpers', () => {
       id: '123',
       productId: 'prod-1',
       name: 'Coffee',
-      price: 3.00,
+      price: 3.0,
       quantity: 1,
-      originalPrice: 3.00,
+      originalPrice: 3.0,
       modificationPrice: 0,
-      totalPrice: 3.00,
+      totalPrice: 3.0,
       modifications: [],
       addedAt: new Date().toISOString(),
       lastModified: new Date().toISOString(),
-      addedBy: 'user-1'
+      addedBy: 'user-1',
     };
 
     it('counts selected modifications', () => {
@@ -164,10 +179,10 @@ describe('modificationHelpers', () => {
     });
 
     it('includes special instructions in count', () => {
-      const item = { 
-        ...baseItem, 
+      const item = {
+        ...baseItem,
         modifications: mockModifications,
-        specialInstructions: 'Extra foam' 
+        specialInstructions: 'Extra foam',
       };
       expect(getModificationCount(item)).toBe(5); // 4 mods + 1 instruction
     });
@@ -179,11 +194,11 @@ describe('modificationHelpers', () => {
       const deserialized = deserializeModifications(serialized, mockModifications);
 
       // Should maintain selected state
-      expect(deserialized.find(m => m.id === '1')?.selected).toBe(true);
-      expect(deserialized.find(m => m.id === '4')?.selected).toBe(false);
+      expect(deserialized.find((m) => m.id === '1')?.selected).toBe(true);
+      expect(deserialized.find((m) => m.id === '4')?.selected).toBe(false);
 
       // Should maintain quantities
-      expect(deserialized.find(m => m.id === '3')?.quantity).toBe(2);
+      expect(deserialized.find((m) => m.id === '3')?.quantity).toBe(2);
     });
 
     it('handles invalid JSON gracefully', () => {
@@ -195,7 +210,7 @@ describe('modificationHelpers', () => {
   describe('groupModificationsByCategory', () => {
     it('groups modifications correctly', () => {
       const grouped = groupModificationsByCategory(mockModifications);
-      
+
       expect(grouped['Size']).toHaveLength(1);
       expect(grouped['Temp']).toHaveLength(1);
       expect(grouped['Add-ons']).toHaveLength(2);
@@ -210,8 +225,8 @@ describe('modificationHelpers', () => {
         warning: '#FF9800',
         success: '#4CAF50',
         error: '#F44336',
-        primary: '#007AFF'
-      }
+        primary: '#007AFF',
+      },
     };
 
     it('returns correct colors for modification types', () => {
@@ -226,8 +241,8 @@ describe('modificationHelpers', () => {
   describe('isModificationCombinationValid', () => {
     it('validates single size selection', () => {
       const mods: CartItemModification[] = [
-        { id: '1', type: 'size', category: 'Size', name: 'Small', price: -0.50, selected: true },
-        { id: '2', type: 'size', category: 'Size', name: 'Large', price: 0.50, selected: true },
+        { id: '1', type: 'size', category: 'Size', name: 'Small', price: -0.5, selected: true },
+        { id: '2', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
       ];
 
       const result = isModificationCombinationValid(mods);
@@ -248,8 +263,22 @@ describe('modificationHelpers', () => {
 
     it('validates single milk selection', () => {
       const mods: CartItemModification[] = [
-        { id: '1', type: 'addition', category: 'Milk Options', name: 'Whole', price: 0, selected: true },
-        { id: '2', type: 'addition', category: 'Milk Options', name: 'Oat', price: 0.70, selected: true },
+        {
+          id: '1',
+          type: 'addition',
+          category: 'Milk Options',
+          name: 'Whole',
+          price: 0,
+          selected: true,
+        },
+        {
+          id: '2',
+          type: 'addition',
+          category: 'Milk Options',
+          name: 'Oat',
+          price: 0.7,
+          selected: true,
+        },
       ];
 
       const result = isModificationCombinationValid(mods);
@@ -278,8 +307,15 @@ describe('modificationHelpers', () => {
     it('sorts modifications by type order', () => {
       const unsorted: CartItemModification[] = [
         { id: '1', type: 'removal', category: 'Remove', name: 'No Whip', price: 0, selected: true },
-        { id: '2', type: 'size', category: 'Size', name: 'Large', price: 0.50, selected: true },
-        { id: '3', type: 'addition', category: 'Add-ons', name: 'Shot', price: 0.75, selected: true },
+        { id: '2', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
+        {
+          id: '3',
+          type: 'addition',
+          category: 'Add-ons',
+          name: 'Shot',
+          price: 0.75,
+          selected: true,
+        },
       ];
 
       const sorted = sortModifications(unsorted);
@@ -290,8 +326,22 @@ describe('modificationHelpers', () => {
 
     it('sorts by name within same type', () => {
       const unsorted: CartItemModification[] = [
-        { id: '1', type: 'addition', category: 'Add-ons', name: 'Vanilla', price: 0.50, selected: true },
-        { id: '2', type: 'addition', category: 'Add-ons', name: 'Caramel', price: 0.50, selected: true },
+        {
+          id: '1',
+          type: 'addition',
+          category: 'Add-ons',
+          name: 'Vanilla',
+          price: 0.5,
+          selected: true,
+        },
+        {
+          id: '2',
+          type: 'addition',
+          category: 'Add-ons',
+          name: 'Caramel',
+          price: 0.5,
+          selected: true,
+        },
       ];
 
       const sorted = sortModifications(unsorted);
@@ -315,17 +365,13 @@ describe('modificationHelpers', () => {
 
     it('returns false for different selections', () => {
       const mods1 = mockModifications;
-      const mods2 = mockModifications.map(m => 
-        m.id === '4' ? { ...m, selected: true } : m
-      );
+      const mods2 = mockModifications.map((m) => (m.id === '4' ? { ...m, selected: true } : m));
       expect(areModificationsEqual(mods1, mods2)).toBe(false);
     });
 
     it('returns false for different quantities', () => {
       const mods1 = mockModifications;
-      const mods2 = mockModifications.map(m => 
-        m.id === '3' ? { ...m, quantity: 3 } : m
-      );
+      const mods2 = mockModifications.map((m) => (m.id === '3' ? { ...m, quantity: 3 } : m));
       expect(areModificationsEqual(mods1, mods2)).toBe(false);
     });
 

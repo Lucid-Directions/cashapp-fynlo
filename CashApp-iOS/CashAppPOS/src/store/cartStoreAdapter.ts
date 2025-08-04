@@ -15,38 +15,42 @@ import { EnhancedOrderItem } from '../types/cart';
 export function useCartStore(useEnhanced: boolean = false) {
   const oldStore = useAppStore();
   const enhancedStore = useEnhancedCartStore();
-  
+
   if (!useEnhanced) {
     return oldStore;
   }
-  
+
   // Return enhanced store with compatibility layer
   return {
     ...enhancedStore,
-    
+
     // Provide backward-compatible methods that accept number IDs
     removeFromCart: (itemId: number | string) => {
       enhancedStore.removeFromCart(itemId);
     },
-    
-    updateCartItem: (itemId: number | string, updates: Partial<OrderItem> | Partial<EnhancedOrderItem>) => {
+
+    updateCartItem: (
+      itemId: number | string,
+      updates: Partial<OrderItem> | Partial<EnhancedOrderItem>
+    ) => {
       enhancedStore.updateCartItem(itemId, updates as Partial<EnhancedOrderItem>);
     },
-    
+
     // Convert enhanced items back to old format for components that expect it
     getOldFormatCart: (): OrderItem[] => {
       return enhancedStore.cart.map((item, index) => ({
         // Use a hash of the string ID to generate a stable numeric ID
         // This avoids collisions while maintaining consistency
-        id: typeof item.id === 'string' && isNaN(parseInt(item.id)) 
-          ? item.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), index)
-          : parseInt(item.id) || index,
+        id:
+          typeof item.id === 'string' && isNaN(parseInt(item.id))
+            ? item.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), index)
+            : parseInt(item.id) || index,
         name: item.name,
         price: item.price,
         quantity: item.quantity,
-        emoji: item.emoji
+        emoji: item.emoji,
       }));
-    }
+    },
   };
 }
 
@@ -57,7 +61,7 @@ export function useCartStore(useEnhanced: boolean = false) {
 export function isEnhancedCartEnabled(): boolean {
   // Start with it disabled, can be enabled per component
   return false;
-  
+
   // Future implementation could check:
   // - Environment variable
   // - User preference
@@ -93,7 +97,7 @@ export function convertToEnhancedDisplay(item: OrderItem): Partial<EnhancedOrder
     modifications: [],
     originalPrice: item.price,
     modificationPrice: 0,
-    totalPrice: item.price * item.quantity
+    totalPrice: item.price * item.quantity,
   };
 }
 
@@ -104,21 +108,22 @@ export function convertToEnhancedDisplay(item: OrderItem): Partial<EnhancedOrder
 export function syncCartStores() {
   const oldStore = useAppStore.getState();
   const enhancedStore = useEnhancedCartStore.getState();
-  
+
   // Only sync if carts are different
   if (oldStore.cart.length !== enhancedStore.cart.length) {
     // Prefer enhanced store as source of truth
     const simplifiedCart = enhancedStore.cart.map((item, index) => ({
       // Use same hash logic as getOldFormatCart for consistency
-      id: typeof item.id === 'string' && isNaN(parseInt(item.id)) 
-        ? item.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), index)
-        : parseInt(item.id) || index,
+      id:
+        typeof item.id === 'string' && isNaN(parseInt(item.id))
+          ? item.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), index)
+          : parseInt(item.id) || index,
       name: item.name,
       price: item.price,
       quantity: item.quantity,
-      emoji: item.emoji
+      emoji: item.emoji,
     }));
-    
+
     // Update old store
     useAppStore.setState({ cart: simplifiedCart });
   }

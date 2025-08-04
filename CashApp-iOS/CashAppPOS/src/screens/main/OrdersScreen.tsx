@@ -145,14 +145,18 @@ const OrdersScreen: React.FC = () => {
         </View>
         <View style={[styles.statusBadge, getStatusBadgeStyle(order.status)]}>
           <Icon name={statusIcons[order.status]} size={16} color={theme.colors.white} />
-          <Text style={[styles.statusText, { color: theme.colors.white }]}>{order.status.toUpperCase()}</Text>
+          <Text style={[styles.statusText, { color: theme.colors.white }]}>
+            {order.status.toUpperCase()}
+          </Text>
         </View>
       </View>
 
       <View style={styles.orderDetails}>
         <View style={styles.customerInfo}>
           <Icon name="person" size={16} color={theme.colors.lightText} />
-          <Text style={[styles.customerText, { color: theme.colors.text }]}>{order.customerName || 'Walk-in'}</Text>
+          <Text style={[styles.customerText, { color: theme.colors.text }]}>
+            {order.customerName || 'Walk-in'}
+          </Text>
           {order.tableNumber && (
             <>
               <Icon
@@ -161,7 +165,9 @@ const OrdersScreen: React.FC = () => {
                 color={theme.colors.lightText}
                 style={styles.tableIcon}
               />
-              <Text style={[styles.tableText, { color: theme.colors.text }]}>Table {order.tableNumber}</Text>
+              <Text style={[styles.tableText, { color: theme.colors.text }]}>
+                Table {order.tableNumber}
+              </Text>
             </>
           )}
         </View>
@@ -192,7 +198,9 @@ const OrdersScreen: React.FC = () => {
               {order.paymentMethod?.replace('_', ' ').toUpperCase()}
             </Text>
           </View>
-          <Text style={[styles.totalAmount, { color: theme.colors.secondary }]}>£{order.total.toFixed(2)}</Text>
+          <Text style={[styles.totalAmount, { color: theme.colors.secondary }]}>
+            £{order.total.toFixed(2)}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -249,7 +257,12 @@ const OrdersScreen: React.FC = () => {
       />
 
       {/* Filters */}
-      <View style={[styles.filtersContainer, { backgroundColor: theme.colors.white, borderBottomColor: theme.colors.lightGray }]}>
+      <View
+        style={[
+          styles.filtersContainer,
+          { backgroundColor: theme.colors.white, borderBottomColor: theme.colors.lightGray },
+        ]}
+      >
         <FilterButton title="All" value="all" count={orders.length} />
         <FilterButton
           title="Preparing"
@@ -293,137 +306,135 @@ const OrdersScreen: React.FC = () => {
   );
 };
 
-
-
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    searchButton: {
-      padding: 8,
-    },
-    filtersContainer: {
-      flexDirection: 'row',
-      paddingHorizontal: 20,
-      paddingVertical: 15,
-      borderBottomWidth: 1,
-    },
-    filterButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 20,
-      marginRight: 12,
-    },
-    filterButtonText: {
-      fontSize: 14,
-      fontWeight: '600',
-    },
-    filterBadge: {
-      borderRadius: 10,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      marginLeft: 6,
-      minWidth: 20,
-      alignItems: 'center',
-    },
-    filterBadgeText: {
-      fontSize: 12,
-      fontWeight: 'bold',
-    },
-    ordersList: {
-      padding: 20,
-    },
-    orderCard: {
-      borderRadius: 12,
-      marginBottom: 15,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-    },
-    orderHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: 16,
-      borderBottomWidth: 1,
-    },
-    orderInfo: {
-      flex: 1,
-    },
-    orderNumber: {
-      fontSize: 18,
-      fontWeight: 'bold',
-    },
-    orderTime: {
-      fontSize: 14,
-      marginTop: 2,
-    },
-    statusBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 16,
-    },
-    statusText: {
-      fontSize: 12,
-      fontWeight: 'bold',
-      marginLeft: 4,
-    },
-    orderDetails: {
-      padding: 16,
-    },
-    customerInfo: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    customerText: {
-      fontSize: 14,
-      marginLeft: 6,
-      fontWeight: '600',
-    },
-    tableIcon: {
-      marginLeft: 12,
-    },
-    tableText: {
-      fontSize: 14,
-      marginLeft: 6,
-    },
-    itemsPreview: {
-      marginBottom: 12,
-    },
-    itemsText: {
-      fontSize: 14,
-      fontWeight: '600',
-      marginBottom: 4,
-    },
-    itemsList: {
-      fontSize: 14,
-      lineHeight: 20,
-    },
-    orderFooter: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    paymentMethod: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    paymentText: {
-      fontSize: 12,
-      marginLeft: 6,
-      fontWeight: '600',
-    },
-    totalAmount: {
-      fontSize: 18,
-      fontWeight: 'bold',
-    },
-  });
+  container: {
+    flex: 1,
+  },
+  searchButton: {
+    padding: 8,
+  },
+  filtersContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 12,
+  },
+  filterButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  filterBadge: {
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginLeft: 6,
+    minWidth: 20,
+    alignItems: 'center',
+  },
+  filterBadgeText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  ordersList: {
+    padding: 20,
+  },
+  orderCard: {
+    borderRadius: 12,
+    marginBottom: 15,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  orderHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+  },
+  orderInfo: {
+    flex: 1,
+  },
+  orderNumber: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  orderTime: {
+    fontSize: 14,
+    marginTop: 2,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 4,
+  },
+  orderDetails: {
+    padding: 16,
+  },
+  customerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  customerText: {
+    fontSize: 14,
+    marginLeft: 6,
+    fontWeight: '600',
+  },
+  tableIcon: {
+    marginLeft: 12,
+  },
+  tableText: {
+    fontSize: 14,
+    marginLeft: 6,
+  },
+  itemsPreview: {
+    marginBottom: 12,
+  },
+  itemsText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  itemsList: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  orderFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  paymentMethod: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  paymentText: {
+    fontSize: 12,
+    marginLeft: 6,
+    fontWeight: '600',
+  },
+  totalAmount: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
 
 export default OrdersScreen;

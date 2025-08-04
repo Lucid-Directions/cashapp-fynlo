@@ -63,7 +63,7 @@ export const ListItem: React.FC<ListItemProps> = ({
           paddingVertical: theme.spacing[3],
         },
         disabled && styles.listItemDisabled,
-        style
+        style,
       ]}
       onPress={onPress}
       disabled={disabled}
@@ -86,30 +86,36 @@ export const ListItem: React.FC<ListItemProps> = ({
 
       {/* Main Content */}
       <View style={styles.mainContent}>
-        <Text style={[
-          styles.title,
-          {
-            fontSize: theme.typography.fontSize.base,
-            fontWeight: theme.typography.fontWeight.medium,
-            color: theme.colors.text,
-            lineHeight: theme.typography.lineHeight.tight * theme.typography.fontSize.base,
-          },
-          disabled && { color: theme.colors.neutral[400] }
-        ]} numberOfLines={1}>
+        <Text
+          style={[
+            styles.title,
+            {
+              fontSize: theme.typography.fontSize.base,
+              fontWeight: theme.typography.fontWeight.medium,
+              color: theme.colors.text,
+              lineHeight: theme.typography.lineHeight.tight * theme.typography.fontSize.base,
+            },
+            disabled && { color: theme.colors.neutral[400] },
+          ]}
+          numberOfLines={1}
+        >
           {title}
         </Text>
 
         {subtitle && (
-          <Text style={[
-            styles.subtitle,
-            {
-              fontSize: theme.typography.fontSize.sm,
-              color: theme.colors.neutral[600],
-              marginTop: theme.spacing[1],
-              lineHeight: theme.typography.lineHeight.tight * theme.typography.fontSize.sm,
-            },
-            disabled && { color: theme.colors.neutral[300] }
-          ]} numberOfLines={1}>
+          <Text
+            style={[
+              styles.subtitle,
+              {
+                fontSize: theme.typography.fontSize.sm,
+                color: theme.colors.neutral[600],
+                marginTop: theme.spacing[1],
+                lineHeight: theme.typography.lineHeight.tight * theme.typography.fontSize.sm,
+              },
+              disabled && { color: theme.colors.neutral[300] },
+            ]}
+            numberOfLines={1}
+          >
             {subtitle}
           </Text>
         )}
@@ -124,7 +130,7 @@ export const ListItem: React.FC<ListItemProps> = ({
                 marginTop: theme.spacing[1],
                 lineHeight: theme.typography.lineHeight.normal * theme.typography.fontSize.sm,
               },
-              disabled && { color: theme.colors.neutral[300] }
+              disabled && { color: theme.colors.neutral[300] },
             ]}
             numberOfLines={2}
           >
@@ -162,33 +168,43 @@ export const ListHeader: React.FC<ListHeaderProps> = ({ title, subtitle, rightCo
   const { theme } = useTheme();
 
   return (
-    <View style={[
-      styles.listHeader,
-      {
-        paddingHorizontal: theme.spacing[4],
-        paddingVertical: theme.spacing[4],
-        backgroundColor: theme.colors.neutral[50],
-      },
-      style
-    ]}>
+    <View
+      style={[
+        styles.listHeader,
+        {
+          paddingHorizontal: theme.spacing[4],
+          paddingVertical: theme.spacing[4],
+          backgroundColor: theme.colors.neutral[50],
+        },
+        style,
+      ]}
+    >
       <View style={styles.headerMainContent}>
-        <Text style={[
-          styles.headerTitle,
-          {
-            fontSize: theme.typography.fontSize.lg,
-            fontWeight: theme.typography.fontWeight.semibold,
-            color: theme.colors.text,
-          }
-        ]}>{title}</Text>
-        {subtitle && (
-          <Text style={[
-            styles.headerSubtitle,
+        <Text
+          style={[
+            styles.headerTitle,
             {
-              fontSize: theme.typography.fontSize.sm,
-              color: theme.colors.neutral[600],
-              marginTop: theme.spacing[1],
-            }
-          ]}>{subtitle}</Text>
+              fontSize: theme.typography.fontSize.lg,
+              fontWeight: theme.typography.fontWeight.semibold,
+              color: theme.colors.text,
+            },
+          ]}
+        >
+          {title}
+        </Text>
+        {subtitle && (
+          <Text
+            style={[
+              styles.headerSubtitle,
+              {
+                fontSize: theme.typography.fontSize.sm,
+                color: theme.colors.neutral[600],
+                marginTop: theme.spacing[1],
+              },
+            ]}
+          >
+            {subtitle}
+          </Text>
         )}
       </View>
       {rightContent && (
@@ -214,30 +230,40 @@ export const ListSection: React.FC<ListSectionProps> = ({ children, header, foot
   return (
     <View style={[styles.listSection, { marginVertical: theme.spacing[2] }, style]}>
       {header && (
-        <Text style={[
-          styles.sectionHeader,
-          {
-            fontSize: theme.typography.fontSize.sm,
-            fontWeight: theme.typography.fontWeight.semibold,
-            color: theme.colors.neutral[600],
-            paddingHorizontal: theme.spacing[4],
-            paddingVertical: theme.spacing[2],
-            backgroundColor: theme.colors.neutral[50],
-          }
-        ]}>{header}</Text>
+        <Text
+          style={[
+            styles.sectionHeader,
+            {
+              fontSize: theme.typography.fontSize.sm,
+              fontWeight: theme.typography.fontWeight.semibold,
+              color: theme.colors.neutral[600],
+              paddingHorizontal: theme.spacing[4],
+              paddingVertical: theme.spacing[2],
+              backgroundColor: theme.colors.neutral[50],
+            },
+          ]}
+        >
+          {header}
+        </Text>
       )}
-      <View style={[styles.sectionContent, { backgroundColor: theme.colors.white }]}>{children}</View>
+      <View style={[styles.sectionContent, { backgroundColor: theme.colors.white }]}>
+        {children}
+      </View>
       {footer && (
-        <Text style={[
-          styles.sectionFooter,
-          {
-            fontSize: theme.typography.fontSize.xs,
-            color: theme.colors.neutral[500],
-            paddingHorizontal: theme.spacing[4],
-            paddingVertical: theme.spacing[2],
-            backgroundColor: theme.colors.neutral[50],
-          }
-        ]}>{footer}</Text>
+        <Text
+          style={[
+            styles.sectionFooter,
+            {
+              fontSize: theme.typography.fontSize.xs,
+              color: theme.colors.neutral[500],
+              paddingHorizontal: theme.spacing[4],
+              paddingVertical: theme.spacing[2],
+              backgroundColor: theme.colors.neutral[50],
+            },
+          ]}
+        >
+          {footer}
+        </Text>
       )}
     </View>
   );
@@ -287,13 +313,15 @@ const List: React.FC<ListProps> = ({
       <React.Fragment key={index}>
         {child}
         {showDividers && !isLastChild && (
-          <View style={[
-            styles.divider,
-            {
-              backgroundColor: theme.colors.neutral[100],
-              marginLeft: theme.spacing[4] + 32 + theme.spacing[3], // Align with main content
-            }
-          ]} />
+          <View
+            style={[
+              styles.divider,
+              {
+                backgroundColor: theme.colors.neutral[100],
+                marginLeft: theme.spacing[4] + 32 + theme.spacing[3], // Align with main content
+              },
+            ]}
+          />
         )}
       </React.Fragment>
     );

@@ -438,7 +438,7 @@ const QRCodePaymentScreen: React.FC = () => {
             <Icon name="close" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>QR Code Payment</Text>
-          <View style={{ width: 24 }} />
+          <View style={styles.style1} />
         </View>
 
         {/* Content */}
