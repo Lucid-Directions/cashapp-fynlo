@@ -340,9 +340,15 @@ def validate_production_settings(s: Settings):
                 )
 
         if s.SUMUP_API_KEY:
+            # DEBUG: Log the actual value
+            logger.error(f"SUMUP_ENVIRONMENT actual value: '{s.SUMUP_ENVIRONMENT}'")
+            logger.error(f"SUMUP_ENVIRONMENT repr: {repr(s.SUMUP_ENVIRONMENT)}")
+            logger.error(f"SUMUP_ENVIRONMENT type: {type(s.SUMUP_ENVIRONMENT)}")
+            logger.error(f"Length: {len(s.SUMUP_ENVIRONMENT) if s.SUMUP_ENVIRONMENT else 'None'}")
+            
             if s.SUMUP_ENVIRONMENT not in ["production", "sandbox"]:
                 errors.append(
-                    "SumUp environment must be 'production' or 'sandbox' in deployment."
+                    f"SumUp environment must be 'production' or 'sandbox' in deployment. Got: {repr(s.SUMUP_ENVIRONMENT)}"
                 )
             elif any(
                 placeholder in s.SUMUP_API_KEY
