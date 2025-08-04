@@ -327,40 +327,45 @@ def validate_production_settings(s: Settings):
         if s.STRIPE_SECRET_KEY:
             if "sk_test_" in s.STRIPE_SECRET_KEY:
                 errors.append(
-                    "Stripe secret key appears to be a test key. Use live keys in production."
+                    "Stripe secret key appears to be a test key. "
+                    "Use live keys in production."
                 )
             elif any(
                 placeholder in s.STRIPE_SECRET_KEY
                 for placeholder in ["your-stripe", "placeholder", "development"]
             ):
                 errors.append(
-                    "Stripe secret key appears to be a placeholder. Set a real Stripe key for production."
+                    "Stripe secret key appears to be a placeholder. "
+                    "Set a real Stripe key for production."
                 )
 
         if s.SUMUP_API_KEY:
-            if s.SUMUP_ENVIRONMENT != "production":
+            if s.SUMUP_ENVIRONMENT not in ["production", "sandbox"]:
                 errors.append(
-                    "SumUp environment must be 'production' in production deployment."
+                    "SumUp environment must be 'production' or 'sandbox' in deployment."
                 )
             elif any(
                 placeholder in s.SUMUP_API_KEY
                 for placeholder in ["your-sumup", "placeholder", "sandbox"]
             ):
                 errors.append(
-                    "SumUp API key appears to be a placeholder. Set a real SumUp key for production."
+                    "SumUp API key appears to be a placeholder. "
+                    "Set a real SumUp key for production."
                 )
 
         # Supabase validation
         if s.SUPABASE_URL and "your-project-id" in s.SUPABASE_URL:
             errors.append(
-                "Supabase URL appears to be a placeholder. Set your real Supabase project URL."
+                "Supabase URL appears to be a placeholder. "
+                "Set your real Supabase project URL."
             )
         if (
             s.SUPABASE_SERVICE_ROLE_KEY
             and "your-supabase" in s.SUPABASE_SERVICE_ROLE_KEY
         ):
             errors.append(
-                "Supabase service role key appears to be a placeholder. Set your real Supabase key."
+                "Supabase service role key appears to be a placeholder. "
+                "Set your real Supabase key."
             )
 
         # Platform owner emails validation
@@ -371,7 +376,8 @@ def validate_production_settings(s: Settings):
                 or "your-email@example.com" in owner_emails
             ):
                 warnings.append(
-                    "Platform owner emails contain default/placeholder values. Update with real admin emails."
+                    "Platform owner emails contain default/placeholder values. "
+                    "Update with real admin emails."
                 )
 
         # Log warnings
@@ -393,7 +399,8 @@ def validate_production_settings(s: Settings):
             logger.error(error_message)
             logger.error("=" * 80 + "\n")
             raise ValueError(
-                f"Application startup aborted due to insecure production configuration: {'; '.join(errors)}"
+                f"Application startup aborted due to insecure production "
+                f"configuration: {'; '.join(errors)}"
             )
 
 
