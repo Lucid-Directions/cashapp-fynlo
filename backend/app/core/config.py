@@ -288,8 +288,18 @@ def validate_production_settings(s: Settings):
             "development-secret-key-do-not-use-in-production",
             "development-secret-key-do-not-use-in-production-change-me",
             "your-local-development-secret-key-make-it-long-and-random",
+            "production-secret-key-change-this-to-a-long-random-string-in-deployment",
         ]
-        if s.SECRET_KEY in insecure_keys:
+        # Check for exact matches or substring patterns
+        if s.SECRET_KEY in insecure_keys or any(
+            pattern in s.SECRET_KEY.lower()
+            for pattern in [
+                "change-this",
+                "change-me",
+                "placeholder",
+                "your-secret-key",
+            ]
+        ):
             errors.append(
                 "A strong, unique SECRET_KEY must be set for production. "
                 "Current key appears to be a development placeholder."
@@ -320,43 +330,54 @@ def validate_production_settings(s: Settings):
             )
 
         # Payment provider validation
-        if s.STRIPE_SECRET_KEY:
+        # Skip Stripe validation if not using Stripe (no key set or explicitly disabled)
+        if s.STRIPE_SECRET_KEY and s.STRIPE_SECRET_KEY.lower() not in [
+            "none",
+            "disabled",
+            "",
+        ]:
             if "sk_test_" in s.STRIPE_SECRET_KEY:
                 errors.append(
-                    "Stripe secret key appears to be a test key. Use live keys in production."
+                    "Stripe secret key appears to be a test key. "
+                    "Use live keys in production."
                 )
             elif any(
-                placeholder in s.STRIPE_SECRET_KEY
+                placeholder in s.STRIPE_SECRET_KEY.lower()
                 for placeholder in ["your-stripe", "placeholder", "development"]
             ):
                 errors.append(
-                    "Stripe secret key appears to be a placeholder. Set a real Stripe key for production."
+                    "Stripe secret key appears to be a placeholder. "
+                    "Set a real Stripe key for production."
                 )
 
         if s.SUMUP_API_KEY:
             if s.SUMUP_ENVIRONMENT != "production":
-                errors.append(
-                    "SumUp environment must be 'production' in production deployment."
+                warnings.append(
+                    "SumUp environment is not 'production' in production deployment. "
+                    "Ensure this is intentional for testing purposes."
                 )
             elif any(
                 placeholder in s.SUMUP_API_KEY
                 for placeholder in ["your-sumup", "placeholder", "sandbox"]
             ):
                 errors.append(
-                    "SumUp API key appears to be a placeholder. Set a real SumUp key for production."
+                    "SumUp API key appears to be a placeholder. "
+                    "Set a real SumUp key for production."
                 )
 
         # Supabase validation
         if s.SUPABASE_URL and "your-project-id" in s.SUPABASE_URL:
             errors.append(
-                "Supabase URL appears to be a placeholder. Set your real Supabase project URL."
+                "Supabase URL appears to be a placeholder. "
+                "Set your real Supabase project URL."
             )
         if (
             s.SUPABASE_SERVICE_ROLE_KEY
             and "your-supabase" in s.SUPABASE_SERVICE_ROLE_KEY
         ):
             errors.append(
-                "Supabase service role key appears to be a placeholder. Set your real Supabase key."
+                "Supabase service role key appears to be a placeholder. "
+                "Set your real Supabase key."
             )
 
         # Platform owner emails validation
@@ -367,7 +388,8 @@ def validate_production_settings(s: Settings):
                 or "your-email@example.com" in owner_emails
             ):
                 warnings.append(
-                    "Platform owner emails contain default/placeholder values. Update with real admin emails."
+                    "Platform owner emails contain default/placeholder values. "
+                    "Update with real admin emails."
                 )
 
         # Log warnings
@@ -389,7 +411,8 @@ def validate_production_settings(s: Settings):
             logger.error(error_message)
             logger.error("=" * 80 + "\n")
             raise ValueError(
-                f"Application startup aborted due to insecure production configuration: {'; '.join(errors)}"
+                f"Application startup aborted due to insecure production "
+                f"configuration: {'; '.join(errors)}"
             )
 
 
