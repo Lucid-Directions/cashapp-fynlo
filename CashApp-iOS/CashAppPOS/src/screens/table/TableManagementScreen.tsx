@@ -12,8 +12,8 @@ import {
   TextInput,
   Dimensions,
   PanGestureHandler,
-  State,
-} from 'react-native';
+  State } from
+'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -86,112 +86,112 @@ const TableManagementScreen: React.FC = () => {
     canvasWidth: screenWidth * 1.5,
     canvasHeight: screenHeight * 1.2,
     gridSize: 30,
-    zoom: 1,
+    zoom: 1
   });
 
   // Sample data
   const sampleSections: Section[] = [
-    { id: 'main', name: 'Main Dining', color: theme.colors.primary, tables: [] },
-    { id: 'patio', name: 'Patio', color: theme.colors.secondary, tables: [] },
-    { id: 'bar', name: 'Bar Area', color: theme.colors.warning, tables: [] },
-    { id: 'private', name: 'Private Room', color: theme.colors.danger, tables: [] },
-  ];
+  { id: 'main', name: 'Main Dining', color: theme.colors.primary, tables: [] },
+  { id: 'patio', name: 'Patio', color: theme.colors.secondary, tables: [] },
+  { id: 'bar', name: 'Bar Area', color: theme.colors.warning, tables: [] },
+  { id: 'private', name: 'Private Room', color: theme.colors.danger, tables: [] }];
+
 
   const sampleTables: Table[] = [
+  {
+    id: 'table1',
+    name: 'T1',
+    seats: 4,
+    status: 'occupied',
+    position: { x: 50, y: 100 },
+    shape: 'round',
+    section: 'main',
+    server: 'Sarah M.',
+    width: 60,
+    height: 60,
+    rotation: 0,
+    currentOrder: {
+      id: 'order1',
+      customerName: 'Johnson Family',
+      amount: 45.5,
+      timeSeated: new Date(Date.now() - 45 * 60 * 1000) // 45 minutes ago
+    }
+  },
+  {
+    id: 'table2',
+    name: 'T2',
+    seats: 2,
+    status: 'available',
+    position: { x: 200, y: 100 },
+    shape: 'square',
+    section: 'main',
+    width: 50,
+    height: 50,
+    rotation: 0
+  },
+  {
+    id: 'table3',
+    name: 'T3',
+    seats: 6,
+    status: 'reserved',
+    position: { x: 350, y: 100 },
+    shape: 'rectangle',
+    section: 'main',
+    width: 90,
+    height: 60,
+    rotation: 0,
+    reservations: [
     {
-      id: 'table1',
-      name: 'T1',
-      seats: 4,
-      status: 'occupied',
-      position: { x: 50, y: 100 },
-      shape: 'round',
-      section: 'main',
-      server: 'Sarah M.',
-      width: 60,
-      height: 60,
-      rotation: 0,
-      currentOrder: {
-        id: 'order1',
-        customerName: 'Johnson Family',
-        amount: 45.5,
-        timeSeated: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
-      },
-    },
-    {
-      id: 'table2',
-      name: 'T2',
-      seats: 2,
-      status: 'available',
-      position: { x: 200, y: 100 },
-      shape: 'square',
-      section: 'main',
-      width: 50,
-      height: 50,
-      rotation: 0,
-    },
-    {
-      id: 'table3',
-      name: 'T3',
-      seats: 6,
-      status: 'reserved',
-      position: { x: 350, y: 100 },
-      shape: 'rectangle',
-      section: 'main',
-      width: 90,
-      height: 60,
-      rotation: 0,
-      reservations: [
-        {
-          time: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes from now
-          customerName: 'Smith Party',
-          partySize: 6,
-        },
-      ],
-    },
-    {
-      id: 'table4',
-      name: 'T4',
-      seats: 8,
-      status: 'occupied',
-      position: { x: 50, y: 250 },
-      shape: 'rectangle',
-      section: 'main',
-      server: 'Mike R.',
-      width: 120,
-      height: 60,
-      rotation: 0,
-      currentOrder: {
-        id: 'order2',
-        customerName: 'Corporate Lunch',
-        amount: 120.75,
-        timeSeated: new Date(Date.now() - 20 * 60 * 1000), // 20 minutes ago
-      },
-    },
-    {
-      id: 'table5',
-      name: 'P1',
-      seats: 4,
-      status: 'cleaning',
-      position: { x: 100, y: 400 },
-      shape: 'round',
-      section: 'patio',
-      width: 60,
-      height: 60,
-      rotation: 0,
-    },
-    {
-      id: 'table6',
-      name: 'B1',
-      seats: 2,
-      status: 'available',
-      position: { x: 300, y: 450 },
-      shape: 'square',
-      section: 'bar',
-      width: 50,
-      height: 50,
-      rotation: 0,
-    },
-  ];
+      time: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes from now
+      customerName: 'Smith Party',
+      partySize: 6
+    }]
+
+  },
+  {
+    id: 'table4',
+    name: 'T4',
+    seats: 8,
+    status: 'occupied',
+    position: { x: 50, y: 250 },
+    shape: 'rectangle',
+    section: 'main',
+    server: 'Mike R.',
+    width: 120,
+    height: 60,
+    rotation: 0,
+    currentOrder: {
+      id: 'order2',
+      customerName: 'Corporate Lunch',
+      amount: 120.75,
+      timeSeated: new Date(Date.now() - 20 * 60 * 1000) // 20 minutes ago
+    }
+  },
+  {
+    id: 'table5',
+    name: 'P1',
+    seats: 4,
+    status: 'cleaning',
+    position: { x: 100, y: 400 },
+    shape: 'round',
+    section: 'patio',
+    width: 60,
+    height: 60,
+    rotation: 0
+  },
+  {
+    id: 'table6',
+    name: 'B1',
+    seats: 2,
+    status: 'available',
+    position: { x: 300, y: 450 },
+    shape: 'square',
+    section: 'bar',
+    width: 50,
+    height: 50,
+    rotation: 0
+  }];
+
 
   useEffect(() => {
     setTables(sampleTables);
@@ -243,27 +243,27 @@ const TableManagementScreen: React.FC = () => {
 
   const updateTableStatus = (tableId: string, newStatus: Table['status']) => {
     setTables((prev) =>
-      prev.map((table) =>
-        table.id === tableId
-          ? {
-              ...table,
-              status: newStatus,
-              currentOrder: newStatus === 'available' ? undefined : table.currentOrder,
-            }
-          : table
-      )
+    prev.map((table) =>
+    table.id === tableId ?
+    {
+      ...table,
+      status: newStatus,
+      currentOrder: newStatus === 'available' ? undefined : table.currentOrder
+    } :
+    table
+    )
     );
   };
 
   const _assignServer = (tableId: string, serverName: string) => {
     setTables((prev) =>
-      prev.map((table) => (table.id === tableId ? { ...table, server: serverName } : table))
+    prev.map((table) => table.id === tableId ? { ...table, server: serverName } : table)
     );
   };
 
   const moveTable = (tableId: string, newPosition: TablePosition) => {
     setTables((prev) =>
-      prev.map((table) => (table.id === tableId ? { ...table, position: newPosition } : table))
+    prev.map((table) => table.id === tableId ? { ...table, position: newPosition } : table)
     );
 
     // In a real app, save to backend
@@ -285,7 +285,7 @@ const TableManagementScreen: React.FC = () => {
 
       const newPosition = {
         x: Math.max(0, Math.min(snappedX, maxX)),
-        y: Math.max(0, Math.min(snappedY, maxY)),
+        y: Math.max(0, Math.min(snappedY, maxY))
       };
 
       moveTable(tableId, newPosition);
@@ -301,9 +301,9 @@ const TableManagementScreen: React.FC = () => {
         position: table.position,
         width: table.width,
         height: table.height,
-        rotation: table.rotation,
+        rotation: table.rotation
       })),
-      layout,
+      layout
     };
 
     logger.info('Saving layout:', layoutData);
@@ -323,7 +323,7 @@ const TableManagementScreen: React.FC = () => {
       section: tableData.section || 'main',
       width: tableData.width || 60,
       height: tableData.height || 60,
-      rotation: tableData.rotation || 0,
+      rotation: tableData.rotation || 0
     };
 
     setTables((prev) => [...prev, newTable]);
@@ -345,9 +345,9 @@ const TableManagementScreen: React.FC = () => {
     }
 
     Alert.alert('Merge Tables', `Merge ${tablesToMerge.length} tables into one?`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Merge', onPress: () => performTableMerge(tablesToMerge) },
-    ]);
+    { text: 'Cancel', style: 'cancel' },
+    { text: 'Merge', onPress: () => performTableMerge(tablesToMerge) }]
+    );
   };
 
   const performTableMerge = (tablesToMerge: Table[]) => {
@@ -361,7 +361,7 @@ const TableManagementScreen: React.FC = () => {
       seats: totalSeats,
       status: 'reserved', // Mark as reserved during merge
       width: Math.max(...tablesToMerge.map((t) => t.width || 60)) + 20,
-      height: Math.max(...tablesToMerge.map((t) => t.height || 60)) + 10,
+      height: Math.max(...tablesToMerge.map((t) => t.height || 60)) + 10
     };
 
     // Remove old tables and add merged table
@@ -373,16 +373,16 @@ const TableManagementScreen: React.FC = () => {
 
   const deleteTable = (tableId: string) => {
     Alert.alert('Delete Table', 'Are you sure you want to delete this table?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => {
-          setTables((prev) => prev.filter((table) => table.id !== tableId));
-          setShowTableModal(false);
-        },
-      },
-    ]);
+    { text: 'Cancel', style: 'cancel' },
+    {
+      text: 'Delete',
+      style: 'destructive',
+      onPress: () => {
+        setTables((prev) => prev.filter((table) => table.id !== tableId));
+        setShowTableModal(false);
+      }
+    }]
+    );
   };
 
   const getFilteredTables = () => {
@@ -392,7 +392,7 @@ const TableManagementScreen: React.FC = () => {
     return tables.filter((table) => table.section === selectedSection);
   };
 
-  const TableComponent = ({ table }: { table: Table }) => {
+  const TableComponent = ({ table }: {table: Table;}) => {
     const dimensions = getTableDimensions(table);
     const statusColor = getTableStatusColor(table.status);
     const sectionColor = getSectionColor(table.section);
@@ -403,48 +403,48 @@ const TableManagementScreen: React.FC = () => {
       const { translationX, translationY } = event.nativeEvent;
       const newPosition = {
         x: table.position.x + translationX,
-        y: table.position.y + translationY,
+        y: table.position.y + translationY
       };
 
       handleTableDrag(table.id, newPosition);
     };
 
-    const tableContent = (
-      <View
-        style={[
-          styles.table,
-          {
-            left: table.position.x,
-            top: table.position.y,
-            width: dimensions.width,
-            height: dimensions.height,
-            backgroundColor: statusColor,
-            borderColor: sectionColor,
-            borderRadius: table.shape === 'round' ? dimensions.width / 2 : 8,
-            transform: [{ rotate: `${table.rotation || 0}deg` }],
-            opacity: editMode && draggedTable?.id === table.id ? 0.7 : 1,
-          },
-        ]}
-      >
+    const tableContent =
+    <View
+      style={[
+      styles.table,
+      {
+        left: table.position.x,
+        top: table.position.y,
+        width: dimensions.width,
+        height: dimensions.height,
+        backgroundColor: statusColor,
+        borderColor: sectionColor,
+        borderRadius: table.shape === 'round' ? dimensions.width / 2 : 8,
+        transform: [{ rotate: `${table.rotation || 0}deg` }],
+        opacity: editMode && draggedTable?.id === table.id ? 0.7 : 1
+      }]
+      }>
+
         <Text style={[styles.tableName, { color: theme.colors.white }]}>{table.name}</Text>
         <Text style={[styles.tableSeats, { color: theme.colors.white }]}>{table.seats}</Text>
-        {table.currentOrder && (
-          <View style={[styles.orderIndicator, { backgroundColor: theme.colors.warning }]}>
+        {table.currentOrder &&
+      <View style={[styles.orderIndicator, { backgroundColor: theme.colors.warning }]}>
             <Icon name="restaurant" size={12} color={theme.colors.white} />
           </View>
-        )}
-        {table.reservations && table.reservations.length > 0 && (
-          <View style={[styles.reservationIndicator, { backgroundColor: theme.colors.secondary }]}>
+      }
+        {table.reservations && table.reservations.length > 0 &&
+      <View style={[styles.reservationIndicator, { backgroundColor: theme.colors.secondary }]}>
             <Icon name="schedule" size={12} color={theme.colors.white} />
           </View>
-        )}
-        {editMode && (
-          <View style={[styles.editIndicator, { backgroundColor: theme.colors.primary }]}>
+      }
+        {editMode &&
+      <View style={[styles.editIndicator, { backgroundColor: theme.colors.primary }]}>
             <Icon name="drag-indicator" size={16} color={theme.colors.white} />
           </View>
-        )}
-      </View>
-    );
+      }
+      </View>;
+
 
     if (editMode) {
       return (
@@ -456,11 +456,11 @@ const TableManagementScreen: React.FC = () => {
             } else if (event.nativeEvent.state === State.END) {
               setDraggedTable(null);
             }
-          }}
-        >
+          }}>
+
           {tableContent}
-        </PanGestureHandler>
-      );
+        </PanGestureHandler>);
+
     }
 
     return (
@@ -468,11 +468,11 @@ const TableManagementScreen: React.FC = () => {
         onPress={() => {
           setSelectedTable(table);
           setShowTableModal(true);
-        }}
-      >
+        }}>
+
         {tableContent}
-      </TouchableOpacity>
-    );
+      </TouchableOpacity>);
+
   };
 
   return (
@@ -484,16 +484,16 @@ const TableManagementScreen: React.FC = () => {
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.colors.white }]}>Dining Room</Text>
         <View style={styles.headerActions}>
-          {editMode && (
-            <TouchableOpacity style={styles.headerButton} onPress={saveLayout}>
+          {editMode &&
+          <TouchableOpacity style={styles.headerButton} onPress={saveLayout}>
               <Icon name="save" size={24} color={theme.colors.white} />
             </TouchableOpacity>
-          )}
-          {editMode && (
-            <TouchableOpacity style={styles.headerButton} onPress={mergeSelectedTables}>
+          }
+          {editMode &&
+          <TouchableOpacity style={styles.headerButton} onPress={mergeSelectedTables}>
               <Icon name="merge-type" size={24} color={theme.colors.white} />
             </TouchableOpacity>
-          )}
+          }
           <TouchableOpacity style={styles.headerButton} onPress={() => setEditMode(!editMode)}>
             <Icon name={editMode ? 'check' : 'edit'} size={24} color={theme.colors.white} />
           </TouchableOpacity>
@@ -506,51 +506,51 @@ const TableManagementScreen: React.FC = () => {
       {/* Section Filter */}
       <View
         style={[
-          styles.sectionFilter,
-          { backgroundColor: theme.colors.white, borderBottomColor: theme.colors.border },
-        ]}
-      >
+        styles.sectionFilter,
+        { backgroundColor: theme.colors.white, borderBottomColor: theme.colors.border }]
+        }>
+
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <TouchableOpacity
             style={[
-              styles.sectionButton,
-              { borderColor: theme.colors.primary, backgroundColor: theme.colors.white },
-              selectedSection === 'all' && { backgroundColor: theme.colors.primary },
-            ]}
-            onPress={() => setSelectedSection('all')}
-          >
+            styles.sectionButton,
+            { borderColor: theme.colors.primary, backgroundColor: theme.colors.white },
+            selectedSection === 'all' && { backgroundColor: theme.colors.primary }]
+            }
+            onPress={() => setSelectedSection('all')}>
+
             <Text
               style={[
-                styles.sectionButtonText,
-                { color: theme.colors.primary },
-                selectedSection === 'all' && { color: theme.colors.white },
-              ]}
-            >
+              styles.sectionButtonText,
+              { color: theme.colors.primary },
+              selectedSection === 'all' && { color: theme.colors.white }]
+              }>
+
               All Sections
             </Text>
           </TouchableOpacity>
 
-          {sections.map((section) => (
-            <TouchableOpacity
-              key={section.id}
-              style={[
-                styles.sectionButton,
-                { borderColor: section.color, backgroundColor: theme.colors.white },
-                selectedSection === section.id && { backgroundColor: section.color },
-              ]}
-              onPress={() => setSelectedSection(section.id)}
-            >
+          {sections.map((section) =>
+          <TouchableOpacity
+            key={section.id}
+            style={[
+            styles.sectionButton,
+            { borderColor: section.color, backgroundColor: theme.colors.white },
+            selectedSection === section.id && { backgroundColor: section.color }]
+            }
+            onPress={() => setSelectedSection(section.id)}>
+
               <Text
-                style={[
-                  styles.sectionButtonText,
-                  { color: section.color },
-                  selectedSection === section.id && { color: theme.colors.white },
-                ]}
-              >
+              style={[
+              styles.sectionButtonText,
+              { color: section.color },
+              selectedSection === section.id && { color: theme.colors.white }]
+              }>
+
                 {section.name}
               </Text>
             </TouchableOpacity>
-          ))}
+          )}
         </ScrollView>
       </View>
 
@@ -563,74 +563,74 @@ const TableManagementScreen: React.FC = () => {
         scrollEnabled={!editMode}
         pinchGestureEnabled={true}
         maximumZoomScale={2}
-        minimumZoomScale={0.5}
-      >
+        minimumZoomScale={0.5}>
+
         {/* Background Grid */}
         <View style={styles.gridBackground}>
-          {[...Array(20)].map((_, i) => (
-            <View
-              key={`h-${i}`}
-              style={[
-                styles.gridLine,
-                { top: i * layout.gridSize, backgroundColor: theme.colors.lightGray },
-              ]}
-            />
-          ))}
-          {[...Array(15)].map((_, i) => (
-            <View
-              key={`v-${i}`}
-              style={[
-                styles.gridLineVertical,
-                { left: i * layout.gridSize, backgroundColor: theme.colors.lightGray },
-              ]}
-            />
-          ))}
+          {[...Array(20)].map((_, i) =>
+          <View
+            key={`h-${i}`}
+            style={[
+            styles.gridLine,
+            { top: i * layout.gridSize, backgroundColor: theme.colors.lightGray }]
+            } />
+
+          )}
+          {[...Array(15)].map((_, i) =>
+          <View
+            key={`v-${i}`}
+            style={[
+            styles.gridLineVertical,
+            { left: i * layout.gridSize, backgroundColor: theme.colors.lightGray }]
+            } />
+
+          )}
         </View>
 
         {/* Tables */}
-        {getFilteredTables().map((table) => (
-          <TableComponent key={table.id} table={table} />
-        ))}
+        {getFilteredTables().map((table) =>
+        <TableComponent key={table.id} table={table} />
+        )}
 
         {/* Legend */}
         <View
           style={[
-            styles.legend,
-            { backgroundColor: theme.colors.white, borderColor: theme.colors.border },
-          ]}
-        >
+          styles.legend,
+          { backgroundColor: theme.colors.white, borderColor: theme.colors.border }]
+          }>
+
           <Text style={[styles.legendTitle, { color: theme.colors.text }]}>Status Legend</Text>
           <View style={styles.legendItems}>
             {[
-              { status: 'available', label: 'Available' },
-              { status: 'occupied', label: 'Occupied' },
-              { status: 'reserved', label: 'Reserved' },
-              { status: 'cleaning', label: 'Cleaning' },
-              { status: 'out_of_order', label: 'Out of Order' },
-            ].map((item) => (
-              <View key={item.status} style={styles.legendItem}>
+            { status: 'available', label: 'Available' },
+            { status: 'occupied', label: 'Occupied' },
+            { status: 'reserved', label: 'Reserved' },
+            { status: 'cleaning', label: 'Cleaning' },
+            { status: 'out_of_order', label: 'Out of Order' }].
+            map((item) =>
+            <View key={item.status} style={styles.legendItem}>
                 <View
-                  style={[
-                    styles.legendColor,
-                    { backgroundColor: getTableStatusColor(item.status) },
-                  ]}
-                />
+                style={[
+                styles.legendColor,
+                { backgroundColor: getTableStatusColor(item.status) }]
+                } />
+
                 <Text style={[styles.legendLabel, { color: theme.colors.text }]}>{item.label}</Text>
               </View>
-            ))}
+            )}
           </View>
-          {editMode && (
-            <View style={styles.dragInstructionContainer}>
+          {editMode &&
+          <View style={styles.dragInstructionContainer}>
               <Text
-                style={[
-                  styles.legendLabel,
-                  { color: theme.colors.textSecondary, fontStyle: 'italic' },
-                ]}
-              >
+              style={[
+              styles.legendLabel,
+              { color: theme.colors.textSecondary, fontStyle: 'italic' }]
+              }>
+
                 Drag tables to move • Pinch to zoom
               </Text>
             </View>
-          )}
+          }
         </View>
       </ScrollView>
 
@@ -639,12 +639,12 @@ const TableManagementScreen: React.FC = () => {
         visible={showTableModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowTableModal(false)}
-      >
+        onRequestClose={() => setShowTableModal(false)}>
+
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            {selectedTable && (
-              <>
+            {selectedTable &&
+            <>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>Table {selectedTable.name} Details</Text>
                   <TouchableOpacity onPress={() => setShowTableModal(false)}>
@@ -659,17 +659,17 @@ const TableManagementScreen: React.FC = () => {
                     <Text style={styles.infoText}>Section: {selectedTable.section}</Text>
                     <Text style={styles.infoText}>Shape: {selectedTable.shape}</Text>
                     <Text
-                      style={[
-                        styles.infoText,
-                        { color: getTableStatusColor(selectedTable.status) },
-                      ]}
-                    >
+                    style={[
+                    styles.infoText,
+                    { color: getTableStatusColor(selectedTable.status) }]
+                    }>
+
                       Status: {selectedTable.status.replace('_', ' ').toUpperCase()}
                     </Text>
                   </View>
 
-                  {selectedTable.currentOrder && (
-                    <View style={styles.tableInfoSection}>
+                  {selectedTable.currentOrder &&
+                <View style={styles.tableInfoSection}>
                       <Text style={styles.sectionTitle}>Current Order</Text>
                       <Text style={styles.infoText}>
                         Customer: {selectedTable.currentOrder.customerName}
@@ -680,72 +680,72 @@ const TableManagementScreen: React.FC = () => {
                       <Text style={styles.infoText}>
                         Seated: {selectedTable.currentOrder.timeSeated.toLocaleTimeString()}
                       </Text>
-                      {selectedTable.server && (
-                        <Text style={styles.infoText}>Server: {selectedTable.server}</Text>
-                      )}
+                      {selectedTable.server &&
+                  <Text style={styles.infoText}>Server: {selectedTable.server}</Text>
+                  }
                     </View>
-                  )}
+                }
 
-                  {selectedTable.reservations && selectedTable.reservations.length > 0 && (
-                    <View style={styles.tableInfoSection}>
+                  {selectedTable.reservations && selectedTable.reservations.length > 0 &&
+                <View style={styles.tableInfoSection}>
                       <Text style={styles.sectionTitle}>Upcoming Reservations</Text>
-                      {selectedTable.reservations.map((reservation, index) => (
-                        <View key={index} style={styles.reservationItem}>
+                      {selectedTable.reservations.map((reservation, index) =>
+                  <View key={index} style={styles.reservationItem}>
                           <Text style={styles.infoText}>
                             {reservation.time.toLocaleTimeString()} - {reservation.customerName}
                           </Text>
                           <Text style={styles.infoSubtext}>Party of {reservation.partySize}</Text>
                         </View>
-                      ))}
-                    </View>
                   )}
+                    </View>
+                }
 
                   <View style={styles.statusActions}>
                     <Text style={styles.sectionTitle}>Quick Actions</Text>
                     <View style={styles.actionButtons}>
                       {['available', 'occupied', 'reserved', 'cleaning', 'out_of_order'].map(
-                        (status) => (
-                          <TouchableOpacity
-                            key={status}
-                            style={[
-                              styles.statusButton,
-                              { backgroundColor: getTableStatusColor(status) },
-                              selectedTable.status === status && styles.statusButtonActive,
-                            ]}
-                            onPress={() =>
-                              updateTableStatus(selectedTable.id, status as Table['status'])
-                            }
-                          >
+                      (status) =>
+                      <TouchableOpacity
+                        key={status}
+                        style={[
+                        styles.statusButton,
+                        { backgroundColor: getTableStatusColor(status) },
+                        selectedTable.status === status && styles.statusButtonActive]
+                        }
+                        onPress={() =>
+                        updateTableStatus(selectedTable.id, status as Table['status'])
+                        }>
+
                             <Text style={styles.statusButtonText}>{status.replace('_', ' ')}</Text>
                           </TouchableOpacity>
-                        )
-                      )}
+
+                    )}
                     </View>
                   </View>
                 </ScrollView>
 
                 <View style={styles.modalActions}>
                   <TouchableOpacity
-                    style={[styles.modalButton, styles.deleteButton]}
-                    onPress={() => deleteTable(selectedTable.id)}
-                  >
+                  style={[styles.modalButton, styles.deleteButton]}
+                  onPress={() => deleteTable(selectedTable.id)}>
+
                     <Icon name="delete" size={20} color={Colors.white} />
                     <Text style={styles.modalButtonText}>Delete Table</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[styles.modalButton, styles.editButton]}
-                    onPress={() => {
-                      // Navigate to edit table details
-                      Alert.alert('Edit Table', 'Table editing would open here');
-                    }}
-                  >
+                  style={[styles.modalButton, styles.editButton]}
+                  onPress={() => {
+                    // Navigate to edit table details
+                    Alert.alert('Edit Table', 'Table editing would open here');
+                  }}>
+
                     <Icon name="edit" size={20} color={Colors.white} />
                     <Text style={styles.modalButtonText}>Edit Details</Text>
                   </TouchableOpacity>
                 </View>
               </>
-            )}
+            }
           </View>
         </View>
       </Modal>
@@ -755,8 +755,8 @@ const TableManagementScreen: React.FC = () => {
         visible={showAddTableModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowAddTableModal(false)}
-      >
+        onRequestClose={() => setShowAddTableModal(false)}>
+
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
@@ -775,36 +775,36 @@ const TableManagementScreen: React.FC = () => {
                 style={styles.textInput}
                 placeholder="4"
                 keyboardType="numeric"
-                defaultValue="4"
-              />
+                defaultValue="4" />
+
 
               <Text style={styles.inputLabel}>Table Shape</Text>
               <View style={styles.shapeSelector}>
-                {['round', 'square', 'rectangle'].map((shape) => (
-                  <TouchableOpacity key={shape} style={styles.shapeOption}>
+                {['round', 'square', 'rectangle'].map((shape) =>
+                <TouchableOpacity key={shape} style={styles.shapeOption}>
                     <Text style={styles.shapeOptionText}>{shape}</Text>
                   </TouchableOpacity>
-                ))}
+                )}
               </View>
 
               <Text style={styles.inputLabel}>Section</Text>
               <View style={styles.sectionSelector}>
-                {sections.map((section) => (
-                  <TouchableOpacity
-                    key={section.id}
-                    style={[styles.sectionOption, { borderColor: section.color }]}
-                  >
+                {sections.map((section) =>
+                <TouchableOpacity
+                  key={section.id}
+                  style={[styles.sectionOption, { borderColor: section.color }]}>
+
                     <Text style={styles.sectionOptionText}>{section.name}</Text>
                   </TouchableOpacity>
-                ))}
+                )}
               </View>
             </View>
 
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setShowAddTableModal(false)}
-              >
+                onPress={() => setShowAddTableModal(false)}>
+
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
 
@@ -816,23 +816,23 @@ const TableManagementScreen: React.FC = () => {
                     seats: 4,
                     shape: 'round',
                     section: 'main',
-                    position: { x: 100, y: 100 },
+                    position: { x: 100, y: 100 }
                   });
-                }}
-              >
+                }}>
+
                 <Text style={styles.saveButtonText}>Add Table</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
-    </View>
-  );
+    </View>);
+
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1
   },
   header: {
     flexDirection: 'row',
@@ -840,73 +840,73 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    paddingTop: 48,
+    paddingTop: 48
   },
   backButton: {
-    padding: 8,
+    padding: 8
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     flex: 1,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   headerActions: {
-    flexDirection: 'row',
+    flexDirection: 'row'
   },
   headerButton: {
     padding: 8,
-    marginLeft: 8,
+    marginLeft: 8
   },
   sectionFilter: {
     paddingVertical: 12,
-    borderBottomWidth: 1,
+    borderBottomWidth: 1
   },
   sectionButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginHorizontal: 4,
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 1
   },
-  sectionButtonActive: {
-    // Dynamic styling applied inline
-  },
+
+
+
   sectionButtonText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500'
   },
-  sectionButtonTextActive: {
-    // Dynamic styling applied inline
-  },
+
+
+
   floorPlan: {
-    flex: 1,
+    flex: 1
   },
   floorPlanContent: {
     width: screenWidth * 1.5,
     height: screenHeight * 1.2,
-    position: 'relative',
+    position: 'relative'
   },
   gridBackground: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    bottom: 0,
+    bottom: 0
   },
   gridLine: {
     position: 'absolute',
     left: 0,
     right: 0,
     height: 1,
-    opacity: 0.3,
+    opacity: 0.3
   },
   gridLineVertical: {
     position: 'absolute',
     top: 0,
     bottom: 0,
     width: 1,
-    opacity: 0.3,
+    opacity: 0.3
   },
   table: {
     position: 'absolute',
@@ -917,15 +917,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 3
   },
   tableName: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   tableSeats: {
     fontSize: 12,
-    opacity: 0.9,
+    opacity: 0.9
   },
   orderIndicator: {
     position: 'absolute',
@@ -935,7 +935,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   reservationIndicator: {
     position: 'absolute',
@@ -945,7 +945,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   editIndicator: {
     position: 'absolute',
@@ -955,7 +955,7 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   legend: {
     position: 'absolute',
@@ -968,106 +968,106 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 3
   },
   legendTitle: {
     fontSize: 14,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 8
   },
   legendItems: {
-    gap: 4,
+    gap: 4
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 8
   },
   legendColor: {
     width: 16,
     height: 16,
-    borderRadius: 8,
+    borderRadius: 8
   },
   legendLabel: {
-    fontSize: 12,
+    fontSize: 12
   },
   dragInstructionContainer: {
-    marginTop: 8,
+    marginTop: 8
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   modalContent: {
     borderRadius: 12,
     width: '90%',
-    maxHeight: '80%',
+    maxHeight: '80%'
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    borderBottomWidth: 1,
+    borderBottomWidth: 1
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   modalBody: {
     padding: 16,
-    maxHeight: 400,
+    maxHeight: 400
   },
   tableInfoSection: {
-    marginBottom: 20,
+    marginBottom: 20
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: 8
   },
   infoText: {
     fontSize: 14,
-    marginBottom: 4,
+    marginBottom: 4
   },
   infoSubtext: {
-    fontSize: 12,
+    fontSize: 12
   },
   reservationItem: {
     marginBottom: 8,
     paddingBottom: 8,
-    borderBottomWidth: 1,
+    borderBottomWidth: 1
   },
   statusActions: {
-    marginTop: 16,
+    marginTop: 16
   },
   actionButtons: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 8
   },
   statusButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
     minWidth: 80,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   statusButtonActive: {
-    borderWidth: 2,
+    borderWidth: 2
   },
   statusButtonText: {
     fontSize: 12,
     fontWeight: '500',
-    textTransform: 'capitalize',
+    textTransform: 'capitalize'
   },
   modalActions: {
     flexDirection: 'row',
     padding: 16,
     borderTopWidth: 1,
-    gap: 12,
+    gap: 12
   },
   modalButton: {
     flex: 1,
@@ -1076,34 +1076,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 12,
     borderRadius: 8,
-    gap: 8,
+    gap: 8
   },
   deleteButton: {
+
     // Dynamic styling applied inline
-  },
-  editButton: {
+  }, editButton: {
+
     // Dynamic styling applied inline
-  },
-  modalButtonText: {
+  }, modalButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600'
   },
   inputLabel: {
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 8,
-    marginTop: 16,
+    marginTop: 16
   },
   textInput: {
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    fontSize: 16,
+    fontSize: 16
   },
   shapeSelector: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 8
   },
   shapeOption: {
     flex: 1,
@@ -1111,42 +1111,42 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 8,
     borderWidth: 1,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   shapeOptionText: {
     fontSize: 14,
     fontWeight: '500',
-    textTransform: 'capitalize',
+    textTransform: 'capitalize'
   },
   sectionSelector: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 8
   },
   sectionOption: {
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 16,
-    borderWidth: 1,
+    borderWidth: 1
   },
   sectionOptionText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500'
   },
   cancelButton: {
-    borderWidth: 1,
+    borderWidth: 1
   },
   cancelButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600'
   },
   saveButton: {
+
     // Dynamic styling applied inline
-  },
-  saveButtonText: {
+  }, saveButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-  },
+    fontWeight: '600'
+  }
 });
 
 export default TableManagementScreen;

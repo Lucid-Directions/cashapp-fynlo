@@ -239,7 +239,7 @@ export const Row: React.FC<RowProps> = ({
     return (
       <React.Fragment key={index}>
         {child}
-        {!isLast && <View style={styles.style1} />}
+        {!isLast && <View style={{ width: spacingValue }} />}
       </React.Fragment>
     );
   });

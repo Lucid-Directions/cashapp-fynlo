@@ -125,17 +125,19 @@ const createDynamicStyles = (_theme: Theme, columns: number, spacing: number) =>
 
   return StyleSheet.create({
     grid: {
-      // Base grid container
+      width: '100%',
     },
     row: {
       flexDirection: 'row',
-      alignItems: 'stretch',
+      flexWrap: 'wrap',
+      marginHorizontal: -halfSpacing,
     },
     rowWithMargin: {
       marginBottom: spacing,
     },
     item: {
       width: itemWidth,
+      paddingHorizontal: halfSpacing,
     },
     itemWithLeftPadding: {
       paddingLeft: halfSpacing,

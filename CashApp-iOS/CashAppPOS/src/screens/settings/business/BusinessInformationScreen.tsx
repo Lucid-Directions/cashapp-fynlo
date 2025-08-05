@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+  Platform } from
+'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -33,7 +33,7 @@ const Colors = {
   darkGray: '#666666',
   text: '#333333',
   lightText: '#666666',
-  border: '#DDDDDD',
+  border: '#DDDDDD'
 };
 
 interface FormField {
@@ -68,7 +68,7 @@ const BusinessInformationScreen: React.FC = () => {
         address: config.address?.street || prev.address,
         city: config.address?.city || prev.city,
         postalCode: config.address?.zipCode || prev.postalCode,
-        country: config.address?.country || prev.country,
+        country: config.address?.country || prev.country
       }));
     }
   }, [config]);
@@ -107,95 +107,95 @@ const BusinessInformationScreen: React.FC = () => {
   };
 
   const formFields: FormField[] = [
-    {
-      id: 'companyName',
-      label: 'Company Name *',
-      placeholder: 'Enter your company name',
-      value: formData.companyName,
-      autoCapitalize: 'words',
-      required: true,
-      validation: (value) => (value.trim() ? null : 'Company name is required'),
-    },
-    {
-      id: 'address',
-      label: 'Address *',
-      placeholder: 'Enter your business address',
-      value: formData.address,
-      autoCapitalize: 'words',
-      required: true,
-      validation: (value) => (value.trim() ? null : 'Address is required'),
-    },
-    {
-      id: 'city',
-      label: 'City *',
-      placeholder: 'Enter your city',
-      value: formData.city,
-      autoCapitalize: 'words',
-      required: true,
-      validation: (value) => (value.trim() ? null : 'City is required'),
-    },
-    {
-      id: 'postalCode',
-      label: 'Postal Code *',
-      placeholder: 'Enter your postal code',
-      value: formData.postalCode,
-      autoCapitalize: 'characters',
-      required: true,
-      validation: (value) => (value.trim() ? null : 'Postal code is required'),
-    },
-    {
-      id: 'country',
-      label: 'Country *',
-      placeholder: 'Enter your country',
-      value: formData.country,
-      autoCapitalize: 'words',
-      required: true,
-      validation: (value) => (value.trim() ? null : 'Country is required'),
-    },
-    {
-      id: 'phone',
-      label: 'Phone Number *',
-      placeholder: '+44 20 7123 4567',
-      value: formData.phone,
-      keyboardType: 'phone-pad',
-      required: true,
-      validation: validatePhone,
-    },
-    {
-      id: 'email',
-      label: 'Email Address *',
-      placeholder: 'info@yourcompany.co.uk',
-      value: formData.email,
-      keyboardType: 'email-address',
-      autoCapitalize: 'none',
-      required: true,
-      validation: validateEmail,
-    },
-    {
-      id: 'website',
-      label: 'Website',
-      placeholder: 'www.yourcompany.co.uk',
-      value: formData.website,
-      keyboardType: 'url',
-      autoCapitalize: 'none',
-      validation: validateUrl,
-    },
-    {
-      id: 'vatNumber',
-      label: 'VAT Number',
-      placeholder: 'GB123456789',
-      value: formData.vatNumber,
-      autoCapitalize: 'characters',
-      validation: validateVatNumber,
-    },
-    {
-      id: 'companyNumber',
-      label: 'Company Number',
-      placeholder: '12345678',
-      value: formData.companyNumber,
-      validation: validateCompanyNumber,
-    },
-  ];
+  {
+    id: 'companyName',
+    label: 'Company Name *',
+    placeholder: 'Enter your company name',
+    value: formData.companyName,
+    autoCapitalize: 'words',
+    required: true,
+    validation: (value) => value.trim() ? null : 'Company name is required'
+  },
+  {
+    id: 'address',
+    label: 'Address *',
+    placeholder: 'Enter your business address',
+    value: formData.address,
+    autoCapitalize: 'words',
+    required: true,
+    validation: (value) => value.trim() ? null : 'Address is required'
+  },
+  {
+    id: 'city',
+    label: 'City *',
+    placeholder: 'Enter your city',
+    value: formData.city,
+    autoCapitalize: 'words',
+    required: true,
+    validation: (value) => value.trim() ? null : 'City is required'
+  },
+  {
+    id: 'postalCode',
+    label: 'Postal Code *',
+    placeholder: 'Enter your postal code',
+    value: formData.postalCode,
+    autoCapitalize: 'characters',
+    required: true,
+    validation: (value) => value.trim() ? null : 'Postal code is required'
+  },
+  {
+    id: 'country',
+    label: 'Country *',
+    placeholder: 'Enter your country',
+    value: formData.country,
+    autoCapitalize: 'words',
+    required: true,
+    validation: (value) => value.trim() ? null : 'Country is required'
+  },
+  {
+    id: 'phone',
+    label: 'Phone Number *',
+    placeholder: '+44 20 7123 4567',
+    value: formData.phone,
+    keyboardType: 'phone-pad',
+    required: true,
+    validation: validatePhone
+  },
+  {
+    id: 'email',
+    label: 'Email Address *',
+    placeholder: 'info@yourcompany.co.uk',
+    value: formData.email,
+    keyboardType: 'email-address',
+    autoCapitalize: 'none',
+    required: true,
+    validation: validateEmail
+  },
+  {
+    id: 'website',
+    label: 'Website',
+    placeholder: 'www.yourcompany.co.uk',
+    value: formData.website,
+    keyboardType: 'url',
+    autoCapitalize: 'none',
+    validation: validateUrl
+  },
+  {
+    id: 'vatNumber',
+    label: 'VAT Number',
+    placeholder: 'GB123456789',
+    value: formData.vatNumber,
+    autoCapitalize: 'characters',
+    validation: validateVatNumber
+  },
+  {
+    id: 'companyNumber',
+    label: 'Company Number',
+    placeholder: '12345678',
+    value: formData.companyNumber,
+    validation: validateCompanyNumber
+  }];
+
 
   const handleFieldChange = (fieldId: string, value: string) => {
     setFormData((prev) => ({ ...prev, [fieldId]: value }));
@@ -226,8 +226,8 @@ const BusinessInformationScreen: React.FC = () => {
   const handleSave = async () => {
     if (!validateForm()) {
       Alert.alert('Validation Error', 'Please correct the errors in the form before saving.', [
-        { text: 'OK' },
-      ]);
+      { text: 'OK' }]
+      );
       return;
     }
 
@@ -246,8 +246,8 @@ const BusinessInformationScreen: React.FC = () => {
           city: formData.city,
           state: '', // Not in current form
           zipCode: formData.postalCode,
-          country: formData.country,
-        },
+          country: formData.country
+        }
       });
 
       // Mark restaurant info setup step as completed
@@ -261,69 +261,69 @@ const BusinessInformationScreen: React.FC = () => {
       );
     } catch (_error) {
       Alert.alert('Error', 'Failed to save business information. Please try again.', [
-        { text: 'OK' },
-      ]);
+      { text: 'OK' }]
+      );
     }
   };
 
   const handleReset = () => {
     Alert.alert('Reset Changes', 'Are you sure you want to discard all unsaved changes?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Reset',
-        style: 'destructive',
-        onPress: () => {
-          setFormData(businessInfo);
-          setErrors({});
-          setHasChanges(false);
-        },
-      },
-    ]);
+    { text: 'Cancel', style: 'cancel' },
+    {
+      text: 'Reset',
+      style: 'destructive',
+      onPress: () => {
+        setFormData(businessInfo);
+        setErrors({});
+        setHasChanges(false);
+      }
+    }]
+    );
   };
 
-  const renderFormField = (field: FormField) => (
-    <View key={field.id} style={styles.fieldContainer}>
+  const renderFormField = (field: FormField) =>
+  <View key={field.id} style={styles.fieldContainer}>
       <SimpleTextInput
-        label={field.label}
-        value={field.value}
-        onValueChange={(value) => handleFieldChange(field.id, value)}
-        placeholder={field.placeholder}
-        keyboardType={field.keyboardType || 'default'}
-        autoCapitalize={field.autoCapitalize || 'sentences'}
-        autoCorrect={false}
-        style={[styles.textInput, errors[field.id] && styles.textInputError]}
-        clearButtonMode="while-editing"
-      />
-      {errors[field.id] && (
-        <View style={styles.errorContainer}>
+      label={field.label}
+      value={field.value}
+      onValueChange={(value) => handleFieldChange(field.id, value)}
+      placeholder={field.placeholder}
+      keyboardType={field.keyboardType || 'default'}
+      autoCapitalize={field.autoCapitalize || 'sentences'}
+      autoCorrect={false}
+      style={[styles.textInput, errors[field.id] && styles.textInputError]}
+      clearButtonMode="while-editing" />
+
+      {errors[field.id] &&
+    <View style={styles.errorContainer}>
           <Icon name="error-outline" size={16} color={Colors.danger} />
           <Text style={styles.errorText}>{errors[field.id]}</Text>
         </View>
-      )}
-    </View>
-  );
+    }
+    </View>;
+
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+
       <SettingsHeader
         title="Business Information"
         subtitle="Company details and contact information"
         rightAction={{
           icon: 'save',
           onPress: handleSave,
-          color: hasChanges ? Colors.white : 'rgba(255, 255, 255, 0.5)',
-        }}
-      />
+          color: hasChanges ? Colors.white : 'rgba(255, 255, 255, 0.5)'
+        }} />
+
 
       <ScrollView
         ref={scrollViewRef}
         style={styles.content}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
+        keyboardShouldPersistTaps="handled">
+
         <SettingsSection title="Company Details" subtitle="Basic information about your business">
           <View style={styles.formContainer}>{formFields.slice(0, 5).map(renderFormField)}</View>
         </SettingsSection>
@@ -341,18 +341,18 @@ const BusinessInformationScreen: React.FC = () => {
           <TouchableOpacity
             style={[styles.button, styles.saveButton]}
             onPress={handleSave}
-            disabled={!hasChanges || isLoading}
-          >
+            disabled={!hasChanges || isLoading}>
+
             <Icon name="save" size={20} color={Colors.white} />
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
 
-          {hasChanges && (
-            <TouchableOpacity style={[styles.button, styles.resetButton]} onPress={handleReset}>
+          {hasChanges &&
+          <TouchableOpacity style={[styles.button, styles.resetButton]} onPress={handleReset}>
               <Icon name="refresh" size={20} color={Colors.danger} />
               <Text style={styles.resetButtonText}>Reset</Text>
             </TouchableOpacity>
-          )}
+          }
         </View>
 
         {/* Help Text */}
@@ -364,30 +364,30 @@ const BusinessInformationScreen: React.FC = () => {
           </Text>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
-  );
+    </KeyboardAvoidingView>);
+
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.background
   },
   content: {
-    flex: 1,
+    flex: 1
   },
   formContainer: {
-    padding: 16,
+    padding: 16
   },
   fieldContainer: {
-    marginBottom: 20,
+    marginBottom: 20
   },
-  fieldLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: Colors.text,
-    marginBottom: 8,
-  },
+
+
+
+
+
+
   textInput: {
     borderWidth: 1,
     borderColor: Colors.border,
@@ -396,24 +396,24 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: Colors.text,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.white
   },
   textInputError: {
-    borderColor: Colors.danger,
+    borderColor: Colors.danger
   },
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
+    marginTop: 4
   },
   errorText: {
     fontSize: 14,
     color: Colors.danger,
-    marginLeft: 4,
+    marginLeft: 4
   },
   actionButtons: {
     padding: 16,
-    gap: 12,
+    gap: 12
   },
   button: {
     flexDirection: 'row',
@@ -421,25 +421,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 16,
     borderRadius: 12,
-    gap: 8,
+    gap: 8
   },
   saveButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primary
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.white,
+    color: Colors.white
   },
   resetButton: {
     backgroundColor: Colors.white,
     borderWidth: 1,
-    borderColor: Colors.danger,
+    borderColor: Colors.danger
   },
   resetButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.danger,
+    color: Colors.danger
   },
   helpContainer: {
     flexDirection: 'row',
@@ -448,15 +448,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 166, 81, 0.05)',
     marginHorizontal: 16,
     marginBottom: 32,
-    borderRadius: 8,
+    borderRadius: 8
   },
   helpText: {
     fontSize: 14,
     color: Colors.mediumGray,
     marginLeft: 8,
     flex: 1,
-    lineHeight: 20,
-  },
+    lineHeight: 20
+  }
 });
 
 export default BusinessInformationScreen;
