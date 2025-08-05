@@ -29,6 +29,8 @@ export enum WebSocketEvent {
   AUTHENTICATE = 'AUTHENTICATE',
   AUTHENTICATED = 'AUTHENTICATED',
   AUTH_ERROR = 'AUTH_ERROR',
+  REAUTH = 'REAUTH',
+  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
 
   // Heartbeat events
   PING = 'PING',

@@ -60,6 +60,7 @@ export class EnhancedWebSocketService {
     );
 
     this.setupNetworkMonitoring();
+    this.setupTokenRefreshListener();
   }
 
   private setupNetworkMonitoring(): void {
@@ -221,6 +222,11 @@ export class EnhancedWebSocketService {
         logger.error('❌ WebSocket auth error:', message.data);
         this.handleAuthError(message);
         break;
+      
+      case WebSocketEvent.TOKEN_EXPIRED:
+        logger.warn('⚠️ WebSocket token expiring:', message.data);
+        this.handleTokenExpired(message);
+        break;
 
       default:
         // Business event, emit to listeners
@@ -259,6 +265,64 @@ export class EnhancedWebSocketService {
         this.emit(WebSocketEvent.AUTH_ERROR, message.data);
         this.setState('DISCONNECTED');
       });
+  }
+  
+  private setupTokenRefreshListener(): void {
+    // Listen for token refresh events from tokenManager
+    tokenManager.on('token:refreshed', async (newToken: string) => {
+      if (this.state === 'CONNECTED' && this.ws?.readyState === WebSocket.OPEN) {
+        logger.info('🔄 Token refreshed, re-authenticating WebSocket...');
+        await this.reauthenticate(newToken);
+      }
+    });
+  }
+  
+  private async handleTokenExpired(message: WebSocketMessage): Promise<void> {
+    const secondsUntilExpiry = message.data?.seconds_until_expiry || 0;
+    logger.warn(`⚠️ Token expiring in ${secondsUntilExpiry} seconds`);
+    
+    // Refresh token proactively
+    try {
+      const newToken = await tokenManager.forceRefresh();
+      if (newToken && this.state === 'CONNECTED') {
+        await this.reauthenticate(newToken);
+      }
+    } catch (error) {
+      logger.error('❌ Failed to refresh token:', error);
+      this.handleDisconnect(4005, 'Token refresh failed');
+    }
+  }
+  
+  private async reauthenticate(newToken: string): Promise<void> {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      logger.warn('⚠️ Cannot re-authenticate, WebSocket not connected');
+      return;
+    }
+    
+    try {
+      const userInfo = await AsyncStorage.getItem('userInfo');
+      if (!userInfo) return;
+      
+      const user = JSON.parse(userInfo);
+      
+      // Send re-authentication message
+      const reauthMessage: WebSocketMessage = {
+        id: this.generateMessageId(),
+        type: WebSocketEvent.REAUTH,
+        data: {
+          token: newToken,
+          user_id: user.id,
+          restaurant_id: user.restaurant_id || 'onboarding',
+        },
+        restaurant_id: user.restaurant_id || 'onboarding',
+        timestamp: new Date().toISOString(),
+      };
+      
+      this.ws.send(JSON.stringify(reauthMessage));
+      logger.info('✅ Re-authentication message sent');
+    } catch (error) {
+      logger.error('❌ Re-authentication failed:', error);
+    }
   }
 
   private startHeartbeat(): void {
