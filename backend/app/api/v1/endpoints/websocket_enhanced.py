@@ -12,7 +12,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from fastapi.websockets import WebSocketState
 from sqlalchemy.orm import Session
 
-from app.core.auth import verify_websocket_token
+from app.core.auth import verify_websocket_token, check_token_expiry
 from app.core.database import get_db
 from app.schemas.websocket import WebSocketMessage, WebSocketEventType
 from app.services.sync_service import sync_service
@@ -40,6 +40,8 @@ class ConnectionInfo:
         self.last_ping = datetime.utcnow()
         self.authenticated = False
         self.missed_pongs = 0
+        self.token = None  # Store token for expiry checking
+        self.token_expiry_warning_sent = False  # Track if warning has been sent
 
 
 class EnhancedWebSocketManager:
@@ -157,6 +159,11 @@ class EnhancedWebSocketManager:
             )
 
             logger.info(f"WebSocket authenticated: {connection_id} for user {user_id}")
+            
+            # Store token for expiry checking
+            conn_info.token = token
+            conn_info.token_expiry_warning_sent = False  # Ensure flag is initialized
+            
             return conn_info
 
         except Exception as e:
@@ -164,6 +171,38 @@ class EnhancedWebSocketManager:
             await self.send_error(
                 websocket, WebSocketEventType.AUTH_ERROR, "Authentication failed"
             )
+            return None
+    
+    async def reauthenticate(
+        self, connection_id: str, new_token: str, db: Session
+    ) -> Optional[ConnectionInfo]:
+        """Re-authenticate existing WebSocket connection with new token"""
+        conn_info = self.connection_map.get(connection_id)
+        if not conn_info:
+            logger.error(f"Connection not found for re-authentication: {connection_id}")
+            return None
+        
+        try:
+            # Verify new token
+            user = await verify_websocket_token(
+                new_token, conn_info.user_id, db
+            )
+            
+            if not user:
+                logger.warning(f"Re-authentication failed for {connection_id}")
+                return None
+            
+            # Update connection info
+            conn_info.token = new_token
+            conn_info.last_ping = datetime.utcnow()
+            # Reset warning flag after refresh
+            conn_info.token_expiry_warning_sent = False
+            
+            logger.info(f"WebSocket re-authenticated: {connection_id}")
+            return conn_info
+            
+        except Exception as e:
+            logger.error(f"Re-authentication error: {e}")
             return None
 
     def _check_connection_limits(self, restaurant_id: str, user_id: str) -> bool:
@@ -248,6 +287,41 @@ class EnhancedWebSocketManager:
         except Exception as e:
             logger.error(f"Failed to send heartbeat to {connection_id}: {e}")
             return False
+    
+    async def check_token_expiry_for_connection(self, connection_id: str) -> bool:
+        """Check if connection's token is expiring soon"""
+        conn_info = self.connection_map.get(connection_id)
+        if not conn_info or not conn_info.token:
+            return False
+        
+        # Check token expiry
+        seconds_until_expiry = check_token_expiry(conn_info.token)
+        if seconds_until_expiry is None:
+            return False
+        
+        # Notify if token expires in less than 5 minutes and we haven't already warned
+        if seconds_until_expiry < 300 and not conn_info.token_expiry_warning_sent:
+            try:
+                await self.send_message(
+                    conn_info.websocket,
+                    WebSocketEventType.TOKEN_EXPIRED,
+                    {
+                        "seconds_until_expiry": seconds_until_expiry,
+                        "message": "Token expiring soon, please refresh"
+                    },
+                    conn_info.restaurant_id,
+                )
+                # Mark warning as sent to prevent duplicates
+                conn_info.token_expiry_warning_sent = True
+                return True
+            except Exception as e:
+                logger.error(f"Failed to send token expiry notice: {e}")
+        
+        # Reset warning flag if token is no longer expiring (e.g., after refresh)
+        elif seconds_until_expiry >= 300 and conn_info.token_expiry_warning_sent:
+            conn_info.token_expiry_warning_sent = False
+        
+        return False
 
     async def broadcast_to_restaurant(
         self,
@@ -357,7 +431,7 @@ class EnhancedWebSocketManager:
                         datetime.utcnow() - conn_info.last_ping
                     ).total_seconds()
 
-                    # If client hasn't sent ping in 2x heartbeat interval, send server ping
+                    # If client hasn't sent ping in 2x interval, send server ping
                     if time_since_last_ping > (self.heartbeat_interval * 2):
                         # Send server-initiated ping
                         success = await self.send_heartbeat(conn_id)
@@ -367,12 +441,16 @@ class EnhancedWebSocketManager:
 
                             if conn_info.missed_pongs >= self.max_missed_pongs:
                                 logger.warning(
-                                    f"Connection {conn_id} missed {self.max_missed_pongs} pongs, disconnecting"
+                                    f"Connection {conn_id} missed "
+                                    f"{self.max_missed_pongs} pongs, disconnecting"
                                 )
                                 await self.disconnect(conn_id)
                     else:
                         # Client is actively pinging, reset missed pongs
                         conn_info.missed_pongs = 0
+                    
+                    # Check token expiry for active connections
+                    await self.check_token_expiry_for_connection(conn_id)
 
                 # Cleanup rate limiter buckets every 20 cycles (5 minutes)
                 if cleanup_counter % 20 == 0:
@@ -497,6 +575,35 @@ async def websocket_endpoint(
                     await manager.handle_ping(connection_id, websocket)
                 elif message_type == WebSocketEventType.PONG:
                     await manager.handle_pong(connection_id)
+                elif message_type == WebSocketEventType.REAUTH:
+                    # Handle re-authentication without disconnection
+                    reauth_data = message.get("data", {})
+                    new_token = reauth_data.get("token")
+                    if new_token:
+                        # Re-authenticate the connection
+                        reauth_info = await manager.reauthenticate(
+                            connection_id, new_token, db
+                        )
+                        if reauth_info:
+                            await manager.send_message(
+                                websocket,
+                                WebSocketEventType.AUTHENTICATED,
+                                {"message": "Re-authentication successful"},
+                                restaurant_id,
+                            )
+                        else:
+                            await manager.send_message(
+                                websocket,
+                                WebSocketEventType.AUTH_ERROR,
+                                {"message": "Re-authentication failed"},
+                                restaurant_id,
+                            )
+                    else:
+                        await manager.send_error(
+                            websocket,
+                            WebSocketEventType.AUTH_ERROR,
+                            "Missing token for re-authentication",
+                        )
                 else:
                     # Process business messages
                     await process_message(connection_id, message, db)

@@ -17,6 +17,8 @@ class WebSocketEventType(str, Enum):
     AUTHENTICATE = "authenticate"
     AUTHENTICATED = "authenticated"
     AUTH_ERROR = "auth_error"
+    REAUTH = "reauth"  # Re-authentication without disconnection
+    TOKEN_EXPIRED = "token_expired"  # Token has expired
 
     # System
     PING = "ping"
