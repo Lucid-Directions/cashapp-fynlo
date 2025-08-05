@@ -9,8 +9,8 @@ import {
   Alert,
   Switch,
   _TextInput,
-  Image } from
-'react-native';
+  Image,
+} from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -37,7 +37,7 @@ const UserProfileScreen: React.FC = () => {
         role: 'employee',
         avatar: null,
         phone: '',
-        lastLogin: null
+        lastLogin: null,
       };
     }
     return {
@@ -48,7 +48,7 @@ const UserProfileScreen: React.FC = () => {
       role: user.role || 'employee',
       photo: user.photo || null,
       phone: user.phone || '',
-      lastLogin: user.lastLogin || null
+      lastLogin: user.lastLogin || null,
     };
   }, [user]);
 
@@ -56,7 +56,7 @@ const UserProfileScreen: React.FC = () => {
     firstName: safeUser.firstName,
     lastName: safeUser.lastName,
     email: safeUser.email,
-    phone: safeUser.phone
+    phone: safeUser.phone,
   });
 
   // Update form data when user changes
@@ -66,7 +66,7 @@ const UserProfileScreen: React.FC = () => {
         firstName: safeUser.firstName,
         lastName: safeUser.lastName,
         email: safeUser.email,
-        phone: safeUser.phone
+        phone: safeUser.phone,
       });
     }
   }, [user, safeUser]);
@@ -92,22 +92,22 @@ const UserProfileScreen: React.FC = () => {
 
   const handleLogout = () => {
     Alert.alert('Confirm Logout', 'Are you sure you want to logout?', [
-    { text: 'Cancel', style: 'cancel' },
-    {
-      text: 'Logout',
-      style: 'destructive',
-      onPress: async () => {
-        try {
-          await signOut();
-          // Use goBack instead of reset to avoid navigation errors
-          navigation.goBack();
-        } catch (error) {
-          logger.error('Logout error:', error);
-          Alert.alert('Error', 'Failed to logout. Please try again.');
-        }
-      }
-    }]
-    );
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await signOut();
+            // Use goBack instead of reset to avoid navigation errors
+            navigation.goBack();
+          } catch (error) {
+            logger.error('Logout error:', error);
+            Alert.alert('Error', 'Failed to logout. Please try again.');
+          }
+        },
+      },
+    ]);
   };
 
   // Show loading or error state if user is not available
@@ -115,8 +115,8 @@ const UserProfileScreen: React.FC = () => {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text style={styles.errorText}>Loading user profile...</Text>
-      </View>);
-
+      </View>
+    );
   }
 
   // Settings
@@ -127,7 +127,7 @@ const UserProfileScreen: React.FC = () => {
     autoLogout: true,
     biometricLogin: true,
     showTips: true,
-    shareAnalytics: false
+    shareAnalytics: false,
   });
 
   const handleChangePassword = () => {
@@ -140,38 +140,38 @@ const UserProfileScreen: React.FC = () => {
 
   const handleChangePIN = () => {
     Alert.alert('Change PIN', 'Please enter your new 4-digit PIN:', [
-    { text: 'Cancel', style: 'cancel' },
-    {
-      text: 'Save',
-      onPress: () => {
-        Alert.alert('Success', 'PIN updated successfully!');
-      }
-    }]
-    );
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Save',
+        onPress: () => {
+          Alert.alert('Success', 'PIN updated successfully!');
+        },
+      },
+    ]);
   };
 
   const handlePhotoChange = () => {
     Alert.alert('Change Photo', 'Choose an option:', [
-    { text: 'Cancel', style: 'cancel' },
-    {
-      text: 'Take Photo',
-      onPress: () => {
-        Alert.alert('Info', 'Camera would open here');
-      }
-    },
-    {
-      text: 'Choose from Gallery',
-      onPress: () => {
-        Alert.alert('Info', 'Photo gallery would open here');
-      }
-    }]
-    );
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Take Photo',
+        onPress: () => {
+          Alert.alert('Info', 'Camera would open here');
+        },
+      },
+      {
+        text: 'Choose from Gallery',
+        onPress: () => {
+          Alert.alert('Info', 'Photo gallery would open here');
+        },
+      },
+    ]);
   };
 
   const toggleSetting = (setting: keyof typeof profileSettings) => {
     setProfileSettings((prev) => ({
       ...prev,
-      [setting]: !prev[setting]
+      [setting]: !prev[setting],
     }));
   };
 
@@ -217,13 +217,13 @@ const UserProfileScreen: React.FC = () => {
         <View style={styles.section}>
           <View style={styles.profileHeader}>
             <TouchableOpacity style={styles.photoContainer} onPress={handlePhotoChange}>
-              {user.photo ?
-              <Image source={{ uri: user.photo }} style={styles.profilePhoto} /> :
-
-              <View style={styles.defaultPhoto}>
+              {user.photo ? (
+                <Image source={{ uri: user.photo }} style={styles.profilePhoto} />
+              ) : (
+                <View style={styles.defaultPhoto}>
                   <Icon name="person" size={48} color={theme.colors.mediumGray} />
                 </View>
-              }
+              )}
             </TouchableOpacity>
 
             <View style={styles.profileInfo}>
@@ -234,24 +234,24 @@ const UserProfileScreen: React.FC = () => {
                 <Icon
                   name={getRoleIcon(user.role || 'employee')}
                   size={20}
-                  color={theme.colors.primary} />
-
+                  color={theme.colors.primary}
+                />
                 <Text style={styles.roleText}>{getRoleDisplayName(user.role || 'employee')}</Text>
               </View>
               <Text style={styles.employeeId}>ID: {user.employeeId || 'N/A'}</Text>
               <Text style={styles.joinDate}>
                 Started:{' '}
-                {user.startDate && !isNaN(new Date(user.startDate).getTime()) ?
-                new Date(user.startDate).toLocaleDateString() :
-                'N/A'}
+                {user.startDate && !isNaN(new Date(user.startDate).getTime())
+                  ? new Date(user.startDate).toLocaleDateString()
+                  : 'N/A'}
               </Text>
               <Text style={styles.lastLogin}>
                 Last login:{' '}
-                {user.lastLogin && !isNaN(new Date(user.lastLogin).getTime()) ?
-                `${new Date(user.lastLogin).toLocaleDateString()} at ${new Date(
-                  user.lastLogin
-                ).toLocaleTimeString()}` :
-                'Never'}
+                {user.lastLogin && !isNaN(new Date(user.lastLogin).getTime())
+                  ? `${new Date(user.lastLogin).toLocaleDateString()} at ${new Date(
+                      user.lastLogin
+                    ).toLocaleTimeString()}`
+                  : 'Never'}
               </Text>
             </View>
           </View>
@@ -323,8 +323,8 @@ const UserProfileScreen: React.FC = () => {
                 value={profileSettings.biometricLogin}
                 onValueChange={() => toggleSetting('biometricLogin')}
                 trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
-                thumbColor={theme.colors.white} />
-
+                thumbColor={theme.colors.white}
+              />
             </View>
 
             <View style={styles.settingRow}>
@@ -339,8 +339,8 @@ const UserProfileScreen: React.FC = () => {
                 value={profileSettings.twoFactorAuth}
                 onValueChange={() => toggleSetting('twoFactorAuth')}
                 trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
-                thumbColor={theme.colors.white} />
-
+                thumbColor={theme.colors.white}
+              />
             </View>
 
             <View style={styles.settingRow}>
@@ -357,8 +357,8 @@ const UserProfileScreen: React.FC = () => {
                 value={profileSettings.autoLogout}
                 onValueChange={() => toggleSetting('autoLogout')}
                 trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
-                thumbColor={theme.colors.white} />
-
+                thumbColor={theme.colors.white}
+              />
             </View>
           </View>
         </View>
@@ -379,8 +379,8 @@ const UserProfileScreen: React.FC = () => {
                 value={profileSettings.emailNotifications}
                 onValueChange={() => toggleSetting('emailNotifications')}
                 trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
-                thumbColor={theme.colors.white} />
-
+                thumbColor={theme.colors.white}
+              />
             </View>
 
             <View style={styles.settingRow}>
@@ -395,8 +395,8 @@ const UserProfileScreen: React.FC = () => {
                 value={profileSettings.smsNotifications}
                 onValueChange={() => toggleSetting('smsNotifications')}
                 trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
-                thumbColor={theme.colors.white} />
-
+                thumbColor={theme.colors.white}
+              />
             </View>
           </View>
         </View>
@@ -417,8 +417,8 @@ const UserProfileScreen: React.FC = () => {
                 value={profileSettings.showTips}
                 onValueChange={() => toggleSetting('showTips')}
                 trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
-                thumbColor={theme.colors.white} />
-
+                thumbColor={theme.colors.white}
+              />
             </View>
 
             <View style={styles.settingRow}>
@@ -435,8 +435,8 @@ const UserProfileScreen: React.FC = () => {
                 value={profileSettings.shareAnalytics}
                 onValueChange={() => toggleSetting('shareAnalytics')}
                 trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
-                thumbColor={theme.colors.white} />
-
+                thumbColor={theme.colors.white}
+              />
             </View>
           </View>
         </View>
@@ -448,9 +448,9 @@ const UserProfileScreen: React.FC = () => {
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() =>
-              Alert.alert('Info', 'Export data functionality would be implemented here')
-              }>
-
+                Alert.alert('Info', 'Export data functionality would be implemented here')
+              }
+            >
               <Icon name="file-download" size={24} color={theme.colors.secondary} />
               <Text style={styles.actionButtonText}>Export My Data</Text>
               <Icon name="chevron-right" size={24} color={theme.colors.lightText} />
@@ -467,22 +467,22 @@ const UserProfileScreen: React.FC = () => {
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() =>
-              Alert.alert(
-                'Delete Account',
-                'This action cannot be undone. All your data will be permanently deleted.',
-                [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Delete',
-                  style: 'destructive',
-                  onPress: () => {
-                    Alert.alert('Info', 'Account deletion would be handled here');
-                  }
-                }]
-
-              )
-              }>
-
+                Alert.alert(
+                  'Delete Account',
+                  'This action cannot be undone. All your data will be permanently deleted.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Delete',
+                      style: 'destructive',
+                      onPress: () => {
+                        Alert.alert('Info', 'Account deletion would be handled here');
+                      },
+                    },
+                  ]
+                )
+              }
+            >
               <Icon name="delete-forever" size={24} color={theme.colors.danger} />
               <Text style={[styles.actionButtonText, { color: theme.colors.danger }]}>
                 Delete Account
@@ -492,274 +492,274 @@ const UserProfileScreen: React.FC = () => {
           </View>
         </View>
       </ScrollView>
-    </View>);
-
+    </View>
+  );
 };
 
-const styles = StyleSheet.create({});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+const createStyles = (theme: unknown) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      backgroundColor: theme.colors.primary,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      paddingTop: 48,
+    },
+    backButton: {
+      padding: 8,
+    },
+    headerTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: theme.colors.white,
+    },
+    editButton: {
+      padding: 8,
+    },
+    content: {
+      flex: 1,
+    },
+    section: {
+      backgroundColor: theme.colors.white,
+      marginVertical: 8,
+      paddingVertical: 16,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.colors.text,
+      paddingHorizontal: 16,
+      marginBottom: 16,
+    },
+    profileHeader: {
+      flexDirection: 'row',
+      paddingHorizontal: 16,
+      alignItems: 'center',
+    },
+    photoContainer: {
+      position: 'relative',
+      marginRight: 16,
+    },
+    profilePhoto: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+    },
+    defaultPhoto: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: theme.colors.lightGray,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    photoEditOverlay: {
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: theme.colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 2,
+      borderColor: theme.colors.white,
+    },
+    profileInfo: {
+      flex: 1,
+    },
+    profileName: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: theme.colors.text,
+      marginBottom: 8,
+    },
+    roleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 4,
+      gap: 8,
+    },
+    roleText: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: theme.colors.primary,
+    },
+    employeeId: {
+      fontSize: 14,
+      color: theme.colors.lightText,
+      marginBottom: 4,
+    },
+    joinDate: {
+      fontSize: 14,
+      color: theme.colors.lightText,
+      marginBottom: 2,
+    },
+    lastLogin: {
+      fontSize: 12,
+      color: theme.colors.mediumGray,
+    },
+    infoCard: {
+      paddingHorizontal: 16,
+    },
+    infoRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.lightGray,
+    },
+    infoLabel: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: theme.colors.text,
+      flex: 1,
+    },
+    infoValue: {
+      fontSize: 16,
+      color: theme.colors.darkGray,
+      flex: 2,
+      textAlign: 'right',
+    },
+    textInput: {
+      flex: 2,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      fontSize: 16,
+      color: theme.colors.text,
+      backgroundColor: theme.colors.white,
+      textAlign: 'right',
+    },
+    editActions: {
+      flexDirection: 'row',
+      paddingHorizontal: 16,
+      paddingTop: 16,
+      gap: 12,
+    },
+    cancelButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 12,
+      backgroundColor: theme.colors.white,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.mediumGray,
+      gap: 8,
+    },
+    cancelButtonText: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: theme.colors.mediumGray,
+    },
+    saveButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 12,
+      backgroundColor: theme.colors.primary,
+      borderRadius: 8,
+      gap: 8,
+    },
+    saveButtonText: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: theme.colors.white,
+    },
+    settingsCard: {
+      paddingHorizontal: 16,
+    },
+    settingRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.lightGray,
+    },
+    settingInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+      marginRight: 16,
+    },
+    settingTextInfo: {
+      marginLeft: 12,
+      flex: 1,
+    },
+    settingLabel: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: theme.colors.text,
+      marginBottom: 4,
+    },
+    settingDescription: {
+      fontSize: 14,
+      color: theme.colors.lightText,
+    },
+    securityItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.lightGray,
+    },
+    securityItemLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    securityItemInfo: {
+      marginLeft: 12,
+      flex: 1,
+    },
+    securityItemTitle: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: theme.colors.text,
+      marginBottom: 4,
+    },
+    securityItemDescription: {
+      fontSize: 14,
+      color: theme.colors.lightText,
+    },
+    actionCard: {
+      paddingHorizontal: 16,
+    },
+    actionButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.lightGray,
+    },
+    actionButtonText: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: theme.colors.text,
+      marginLeft: 12,
+      flex: 1,
+    },
+    errorText: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: theme.colors.danger,
+      textAlign: 'center',
+    },
+  });
 
 export default UserProfileScreen;
