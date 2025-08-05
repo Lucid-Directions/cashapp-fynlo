@@ -5,45 +5,51 @@ from app.core.config import settings
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app):
+        super().__init__(app)
+        # Pre-compute policies for performance
+        self._prod_csp = self.get_production_csp()
+        self._dev_csp = self.get_development_csp()
+        self._permissions = self.get_permissions_policy()
+        self._prod_headers = {
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY",
+            "X-XSS-Protection": "1; mode=block",
+            # Removed preload for DigitalOcean compatibility
+            "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+            "Referrer-Policy": "strict-origin-when-cross-origin",
+            "Content-Security-Policy": self._prod_csp,
+            "Permissions-Policy": self._permissions
+        }
+        self._dev_headers = {
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY",
+            "X-XSS-Protection": "1; mode=block",
+            "Strict-Transport-Security": "max-age=31536000",
+            "Referrer-Policy": "no-referrer-when-downgrade",
+            "Content-Security-Policy": self._dev_csp,
+            "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
+        }
+    
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        # Fast path for health checks - critical for DigitalOcean
+        if request.url.path in ["/health", "/api/health", "/"]:
+            return await call_next(request)
+            
         response = await call_next(request)
-
-        # Common headers for all environments
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
-        response.headers["X-XSS-Protection"] = (
-            "1; mode=block"  # Deprecated but still good for older browsers
-        )
-
+        
+        # Use pre-computed headers for performance
         if settings.ENVIRONMENT == "production":
-            # Production specific headers
-            response.headers["Strict-Transport-Security"] = (
-                "max-age=31536000; includeSubDomains; preload"
-            )
-            response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-            # CSP needs careful configuration, will be more complex
-            response.headers["Content-Security-Policy"] = self.get_production_csp()
-            response.headers["Permissions-Policy"] = self.get_permissions_policy()
+            response.headers.update(self._prod_headers)
         else:
-            # Development/staging specific headers (more permissive)
-            response.headers["Strict-Transport-Security"] = (
-                "max-age=31536000; includeSubDomains"  # Can be less strict if not preloading
-            )
-            response.headers["Referrer-Policy"] = (
-                "no-referrer-when-downgrade"  # More permissive
-            )
-            response.headers["Content-Security-Policy"] = self.get_development_csp()
-            response.headers["Permissions-Policy"] = (
-                "camera=(), microphone=(), geolocation=()"  # Example, adjust as needed
-            )
+            response.headers.update(self._dev_headers)
 
         return response
 
     def get_production_csp(self):
         # Base policy: restrict to self, allow necessary scripts and styles
-        # This needs to be carefully configured based on actual needs, especially for payment providers
-        # and WebSocket connections.
-        # Example: default-src 'self'; script-src 'self' https://js.stripe.com; style-src 'self' 'unsafe-inline'; ...
+        # This needs to be carefully configured based on actual needs,
+        # especially for payment providers and WebSocket connections.
         # For WebSockets: connect-src 'self' wss://yourdomain.com;
 
         # Start with a restrictive policy
@@ -67,7 +73,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "font-src": ["'self'", "https://fonts.gstatic.com"],  # Google Fonts
             "connect-src": [
                 "'self'",
-                # "wss://" + settings.DOMAIN if hasattr(settings, 'DOMAIN') and settings.DOMAIN else "", # WebSocket - Re-evaluate how to best set this
+                # WebSocket - Re-evaluate how to best set this
+                # "wss://" + settings.DOMAIN if hasattr(settings, 'DOMAIN')
                 "https://api.stripe.com",
                 "https://errors.stripe.com",
             ],  # Allow self, WebSocket, Stripe API
@@ -80,12 +87,12 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "base-uri": ["'self'"],
             "form-action": ["'self'"],  # Restrict where forms can submit
             "frame-ancestors": ["'none'"],  # Equivalent to X-Frame-Options: DENY
-            # "report-uri": ["/api/v1/csp-reports"], # Endpoint to report violations (optional) - needs an endpoint
+            # "report-uri": ["/api/v1/csp-reports"], # Optional endpoint
         }
 
-        # CSP directives for connect-src might need to be adjusted based on settings.DOMAIN availability
-        # For now, WebSocket connections to a different domain than 'self' might be blocked in production.
-        # Consider adding settings.DOMAIN or making CSP more dynamically configurable.
+        # CSP directives for connect-src might need to be adjusted based on
+        # settings.DOMAIN availability. For now, WebSocket connections to a
+        # different domain than 'self' might be blocked in production.
 
         return "; ".join(
             [
@@ -148,7 +155,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "magnetometer=()",
             "microphone=()",
             "midi=()",
-            "payment=()",  # Example: "payment=(self \"https://stripe.com\")" if Stripe handles payments in an iframe
+            # payment=(self "https://stripe.com") if Stripe in iframe
+            "payment=()",
             "picture-in-picture=()",
             "speaker=()",
             "sync-xhr=(self)",

@@ -301,3 +301,26 @@ Next Steps:
 ```
 
 Remember: Tests are the safety net for production. Write tests first, code second!
+
+## Lessons Learned
+
+### React Native Style Warnings (Issue #519) - 2025-08-05
+**Problem**: 1000+ ESLint warnings for React Native styles, automation scripts caused issues
+
+**Key Findings**:
+1. **False Positives**: 93% of warnings (487/523) were false positives from `react-native/no-unused-styles`
+2. **Root Cause**: ESLint rule cannot track styles through custom hooks like `useThemedStyles`
+3. **Automation Risks**: Bulk fixing scripts can break UI if not carefully implemented
+4. **Solution**: Disable incompatible rules rather than forcing code changes
+
+**Recommendations**:
+- Always investigate root cause before bulk fixes
+- Run automation scripts in dry-run mode first
+- Consider disabling outdated ESLint rules
+- Focus on fixing genuine issues (inline styles)
+- Document why rules are disabled
+
+**Testing Impact**:
+- Visual regression tests would have caught the UI breaks
+- Unit tests don't cover style application
+- Consider snapshot tests for styled components

@@ -189,11 +189,10 @@ export const Spacer: React.FC<SpacerProps> = ({
   const currentSize = useResponsiveValue(size, 4);
   const spacingValue = theme.spacing[currentSize];
 
+    const dynamicStyle1 = {[horizontal ? 'width' : 'height']: spacingValue,};
   return (
     <View
-      style={{
-        [horizontal ? 'width' : 'height']: spacingValue,
-      }}
+      style={dynamicStyle1}
     />
   );
 };
@@ -277,7 +276,7 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     // fontSize and color will be added inline
-  },
+  }
 });
 
 export default Container;

@@ -26,18 +26,20 @@ from app.core.responses import APIResponseHelper
 from app.middleware.sql_injection_waf import SQLInjectionWAFMiddleware
 from app.core.auth import get_current_user
 from datetime import datetime
+from app.core.logging_filters import setup_logging_filters
+from app.middleware.version_middleware import APIVersionMiddleware
+from app.middleware.security_headers_middleware import SecurityHeadersMiddleware
+from app.middleware.rls_middleware import RLSMiddleware
+from app.core.mobile_middleware import MobileCompatibilityMiddleware
 
 # Configure logging
 # Logging level will be set by Uvicorn based on settings.LOG_LEVEL
-# logging.basicConfig(level=settings.LOG_LEVEL.upper()) # Not needed if uvicorn handles it
 logger = logging.getLogger(__name__)
 
 # Apply logging filters for production
-# This should be done after basic logging config but before the app starts handling requests.
-# Note: Uvicorn sets up its own handlers. This filter will apply to log records
-# processed by the application's loggers. For Uvicorn's access logs,
-# different configuration might be needed if they also contain sensitive data.
-from app.core.logging_filters import setup_logging_filters
+# This should be done after basic logging config but before the app starts
+# handling requests. Note: Uvicorn sets up its own handlers. This filter 
+# will apply to log records processed by the application's loggers.
 
 if settings.ENVIRONMENT == "production" or not settings.ERROR_DETAIL_ENABLED:
     # We call this early, but it depends on `settings` being initialized.
@@ -172,24 +174,24 @@ app.add_middleware(
     ),
 )
 
-# TEMPORARY: Disable complex middleware for deployment
+# Re-enabled optimized middleware with performance improvements
 # Add API version middleware for backward compatibility (FIRST in middleware stack)
-# app.add_middleware(APIVersionMiddleware)
+app.add_middleware(APIVersionMiddleware)
 
-# Add Security Headers Middleware (after CORS and Versioning, before others)
-# app.add_middleware(SecurityHeadersMiddleware)
+# Add Security Headers Middleware (after versioning for optimal performance)
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Add RLS middleware for session variable isolation
-from app.middleware.rls_middleware import RLSMiddleware
-
 app.add_middleware(RLSMiddleware)
 
 # Add SQL Injection WAF middleware for additional protection
 app.add_middleware(SQLInjectionWAFMiddleware, enabled=True, log_attacks=True)
 
-# Add mobile compatibility middleware
-# app.add_middleware(MobileCompatibilityMiddleware, enable_cors=True, enable_port_redirect=True)
-# app.add_middleware(MobileDataOptimizationMiddleware)
+# Add mobile compatibility middleware (without CORS to avoid duplication)
+app.add_middleware(
+    MobileCompatibilityMiddleware, enable_cors=False, enable_port_redirect=True
+)
+# Note: MobileDataOptimizationMiddleware not enabled due to async issues
 
 # Add SlowAPI middleware (for rate limiting)
 app.add_middleware(SlowAPIMiddleware)
@@ -232,8 +234,8 @@ async def root():
 async def health_check():
     """Ultra-fast health check for DigitalOcean deployment - NO EXTERNAL CHECKS"""
 
-    # CRITICAL FIX: Return immediately without any DB/Redis checks to avoid Error 524 timeouts
-    # This endpoint is called every 10 seconds by DigitalOcean - it MUST be instant
+    # CRITICAL FIX: Return immediately without any DB/Redis checks to avoid
+    # Error 524 timeouts. Called every 10s by DigitalOcean - MUST be instant
     return {
         "status": "healthy",
         "service": "fynlo-pos-backend",
@@ -275,8 +277,11 @@ def format_employee_response(employee):
 
     return {
         "id": employee.id,
-        "name": f"{getattr(employee, 'first_name', '')} {getattr(employee, 'last_name', '')}".strip()
-        or employee.email,
+        "name": (
+            f"{getattr(employee, 'first_name', '')} "
+            f"{getattr(employee, 'last_name', '')}".strip()
+            or employee.email
+        ),
         "email": employee.email,
         "role": employee.role,
         "hourlyRate": float(getattr(employee, "hourly_rate", 0) or 0),
@@ -312,7 +317,7 @@ async def get_employees(
         employees = (
             db.query(User)
             .filter(
-                User.restaurant_id == current_user.restaurant_id, User.is_active == True
+                User.restaurant_id == current_user.restaurant_id, User.is_active
             )
             .all()
         )

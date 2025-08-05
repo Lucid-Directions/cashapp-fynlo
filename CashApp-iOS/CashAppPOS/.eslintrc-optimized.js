@@ -23,7 +23,12 @@ module.exports = {
   },
   rules: {
     // React Native specific rules
-    'react-native/no-unused-styles': 'warn', // Changed to simple warn without config
+    'react-native/no-unused-styles': [
+      'warn', // Changed from 'error' to 'warn' - less disruptive
+      {
+        // This rule has limitations with modern patterns, so we treat it as a hint
+      }
+    ],
     'react-native/split-platform-components': 'warn',
     'react-native/no-inline-styles': 'error', // Keep this strict - genuine issue
     'react-native/no-raw-text': [

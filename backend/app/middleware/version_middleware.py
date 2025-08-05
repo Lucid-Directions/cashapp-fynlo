@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class APIVersionMiddleware:
     """
-    Middleware to handle API versioning and provide backward compatibility
+    Optimized middleware to handle API versioning and provide backward compatibility
 
     Features:
     - Automatic /api/ to /api/v1/ routing
@@ -24,31 +24,45 @@ class APIVersionMiddleware:
 
     def __init__(self, app):
         self.app = app
+        # Pre-compile regex patterns for performance
+        self._unversioned_re = re.compile(r"^/api/(?!v\d+/)(.+)$")
+        self._ws_patterns = [
+            (re.compile(r"^/ws/(.+)$"), r"/api/v1/websocket/ws/\1"),
+            (re.compile(r"^/websocket/(.+)$"), r"/api/v1/websocket/ws/\1"),
+        ]
+        # Path cache to avoid repeated regex matching
+        self._path_cache = {}
+        self._cache_max_size = 1000
 
     async def __call__(self, scope, receive, send):
-        if scope["type"] == "http":
-            # Handle HTTP requests
-            request = Request(scope, receive)
-            path = request.url.path
-
-            # Check if path needs version routing
-            rewritten_path = self.rewrite_api_path(path)
-
+        if scope["type"] in ["http", "websocket"]:
+            path = scope.get("path", "")
+            
+            # Skip health checks for performance
+            if path in ["/health", "/api/health", "/"]:
+                await self.app(scope, receive, send)
+                return
+            
+            # Check cache first
+            if path in self._path_cache:
+                rewritten_path = self._path_cache[path]
+            else:
+                # Fast path - already versioned
+                if "/api/v1/" in path:
+                    rewritten_path = path
+                else:
+                    if scope["type"] == "http":
+                        rewritten_path = self.rewrite_api_path(path)
+                    else:  # websocket
+                        rewritten_path = self.rewrite_websocket_path(path)
+                
+                # Cache result if cache not full
+                if len(self._path_cache) < self._cache_max_size:
+                    self._path_cache[path] = rewritten_path
+            
             if rewritten_path != path:
-                # Log the rewrite for debugging
-                logger.info(f"API version rewrite: {path} -> {rewritten_path}")
-
-                # Update the scope with new path
-                scope["path"] = rewritten_path
-                scope["raw_path"] = rewritten_path.encode()
-
-        elif scope["type"] == "websocket":
-            # Handle WebSocket connections
-            path = scope["path"]
-            rewritten_path = self.rewrite_websocket_path(path)
-
-            if rewritten_path != path:
-                logger.info(f"WebSocket path rewrite: {path} -> {rewritten_path}")
+                if API_VERSION_CONFIG["log_version_rewrites"]:
+                    logger.info(f"Path rewrite: {path} -> {rewritten_path}")
                 scope["path"] = rewritten_path
                 scope["raw_path"] = rewritten_path.encode()
 
@@ -64,17 +78,10 @@ class APIVersionMiddleware:
         /api/v1/products -> /api/v1/products (unchanged)
         /health -> /health (unchanged)
         """
-
-        # Pattern for unversioned API calls
-        unversioned_pattern = r"^/api/(?!v\d+/)(.+)$"
-        match = re.match(unversioned_pattern, path)
-
+        match = self._unversioned_re.match(path)
         if match:
-            # Extract the resource path
             resource_path = match.group(1)
-            # Add v1 version
             return f"/api/v1/{resource_path}"
-
         return path
 
     def rewrite_websocket_path(self, path: str) -> str:
@@ -85,17 +92,9 @@ class APIVersionMiddleware:
         /ws/{restaurant_id} -> /api/v1/websocket/ws/{restaurant_id}
         /websocket/{restaurant_id} -> /api/v1/websocket/ws/{restaurant_id}
         """
-
-        # Pattern for direct WebSocket paths
-        ws_patterns = [
-            (r"^/ws/(.+)$", r"/api/v1/websocket/ws/\1"),
-            (r"^/websocket/(.+)$", r"/api/v1/websocket/ws/\1"),
-        ]
-
-        for pattern, replacement in ws_patterns:
-            if re.match(pattern, path):
-                return re.sub(pattern, replacement, path)
-
+        for pattern, replacement in self._ws_patterns:
+            if pattern.match(path):
+                return pattern.sub(replacement, path)
         return path
 
     def extract_version_from_headers(self, request: Request) -> Optional[str]:
