@@ -399,26 +399,6 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
   );
 };
 
-// QR Wrapper component styles
-const qrWrapperStyles = StyleSheet.create({
-  errorContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 180,
-    height: 180,
-  },
-  errorText: {
-    color: Colors.danger,
-    fontSize: 12,
-    marginTop: 8,
-  },
-  unavailableText: {
-    color: Colors.lightText,
-    fontSize: 12,
-    marginTop: 8,
-  },
-});
-
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.white,

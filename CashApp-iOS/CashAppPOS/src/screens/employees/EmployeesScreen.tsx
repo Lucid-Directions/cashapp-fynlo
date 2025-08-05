@@ -722,6 +722,9 @@ const EmployeesScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  deleteText: {
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.background

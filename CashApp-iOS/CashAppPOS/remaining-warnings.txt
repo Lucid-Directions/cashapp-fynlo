@@ -1,0 +1,56 @@
+  250:7   warning  Inline style: { flexDirection: 'row', flexWrap: "wrap ? 'wrap' : 'nowrap'" }                                                                                                                                                                                 react-native/no-inline-styles
+  404:3   warning  Unused style detected: qrWrapperStyles.errorContainer                                                                  react-native/no-unused-styles
+  410:3   warning  Unused style detected: qrWrapperStyles.errorText                                                                       react-native/no-unused-styles
+  415:3   warning  Unused style detected: qrWrapperStyles.unavailableText                                                                 react-native/no-unused-styles
+  584:5   warning  Unused style detected: undefined.errorContainer                                                                        react-native/no-unused-styles
+  590:5   warning  Unused style detected: undefined.errorText                                                                             react-native/no-unused-styles
+  595:5   warning  Unused style detected: undefined.unavailableContainer                                                                  react-native/no-unused-styles
+  601:5   warning  Unused style detected: undefined.unavailableText                                                                       react-native/no-unused-styles
+  194:5  warning  Unused style detected: undefined.contentContainer  react-native/no-unused-styles
+  197:5  warning  Unused style detected: undefined.columnWrapper     react-native/no-unused-styles
+  119:5   warning  Unused style detected: undefined.container                                  react-native/no-unused-styles
+  123:5   warning  Unused style detected: undefined.track                                      react-native/no-unused-styles
+  127:5   warning  Unused style detected: undefined.thumb                                      react-native/no-unused-styles
+  179:46   warning  Inline style: { flex: 1, marginRight: 8 }                                                                                                                                              react-native/no-inline-styles
+  196:46   warning  Inline style: { flex: 1, marginLeft: 8 }                                                                                                                                               react-native/no-inline-styles
+}  react-native/no-inline-styles
+  307:48  warning  Inline style: { color: 'rgba(255, 255, 255, 0.8)' }                                                                                                                                                                                                                                                                                      react-native/no-inline-styles
+}  react-native/no-inline-styles
+  194:37  warning  Inline style: { color: "selectedSection === item.id ? '#fff' : '#2c3e50'" }                  react-native/no-inline-styles
+  56:5   warning  Unused style detected: undefined.menuCard                          react-native/no-unused-styles
+  57:5   warning  Unused style detected: undefined.menuCardDisabled                  react-native/no-unused-styles
+  58:5   warning  Unused style detected: undefined.menuCardContent                   react-native/no-unused-styles
+  59:5   warning  Unused style detected: undefined.menuItemEmoji                     react-native/no-unused-styles
+  60:5   warning  Unused style detected: undefined.menuItemName                      react-native/no-unused-styles
+  61:5   warning  Unused style detected: undefined.menuItemPrice                     react-native/no-unused-styles
+  62:5   warning  Unused style detected: undefined.quantityPillContainer             react-native/no-unused-styles
+   921:35  warning  Inline style: { marginBottom: 0 }                                                                                                                                                                         react-native/no-inline-styles
+   937:35  warning  Inline style: { marginBottom: 0 }                                                                                                                                                                         react-native/no-inline-styles
+}  react-native/no-inline-styles
+  310:42  warning  Inline style: { flex: 2 }                                        react-native/no-inline-styles
+  321:42  warning  Inline style: { flex: 1, marginLeft: 12 }                        react-native/no-inline-styles
+  335:42  warning  Inline style: { flex: 1 }                                        react-native/no-inline-styles
+  346:42  warning  Inline style: { flex: 1, marginLeft: 12 }                        react-native/no-inline-styles
+  293:49  warning  Inline style: { backgroundColor: '#000' }                                                                                 react-native/no-inline-styles
+  294:24  warning  Inline style: { color: '#fff' }                                                                                           react-native/no-inline-styles
+  305:49  warning  Inline style: { backgroundColor: '#4285F4' }                                                                              react-native/no-inline-styles
+  306:24  warning  Inline style: { color: '#fff' }                                                                                           react-native/no-inline-styles
+  301:45  warning  Inline style: { fontWeight: 'bold' }                                                                                                                                                         react-native/no-inline-styles
+  302:45  warning  Inline style: { fontWeight: 'bold' }                                                                                                                                                         react-native/no-inline-styles
+  315:45  warning  Inline style: { fontWeight: 'bold', fontSize: 16 }                                                                                                                                           react-native/no-inline-styles
+  319:17  warning  Inline style: { fontWeight: 'bold', fontSize: 16 }                                                                                                                                           react-native/no-inline-styles
+  428:46  warning  Inline style: { fontWeight: 'bold' }                                                                                                                                                         react-native/no-inline-styles
+  429:46  warning  Inline style: { fontWeight: 'bold' }                                                                                                                                                         react-native/no-inline-styles
+  305:51  warning  Inline style: { fontWeight: 'bold' }                                                                                  react-native/no-inline-styles
+}              react-native/no-inline-styles
+  330:13  warning  Inline style: { padding: 8, borderRadius: 4 }                                                                                                                                                                                                                                                                                                                          react-native/no-inline-styles
+  363:27  warning  Inline style: { padding: 16, borderRadius: 8 }                                                                                                                                                                                                                                                                                                                         react-native/no-inline-styles
+  364:29  warning  Inline style: { fontSize: 14 }                                                                                                                                                                                                                                                                                                                                         react-native/no-inline-styles
+  384:15  warning  Inline style: { borderRadius: 8 }                                                                                                                                                                                                                                                                                                                                      react-native/no-inline-styles
+}                                                                                                                                                                                                                                                            react-native/no-inline-styles
+  313:46  warning  Inline style: { flex: 2 }                                                           react-native/no-inline-styles
+  324:46  warning  Inline style: { flex: 1, marginLeft: 12 }                                           react-native/no-inline-styles
+  273:31  warning  Inline style: { flex: 1 }                                                                                                                                                                                                react-native/no-inline-styles
+  116:39  warning  Inline style: { justifyContent: 'center', alignItems: 'center' }                                                                                                                                                                                                                                                                                               react-native/no-inline-styles
+}                                                                                                                                                                                         react-native/no-inline-styles
+   627:15  warning  Inline style: { fontStyle: 'italic' }                                                                                                                                                                                                                                                                                                            react-native/no-inline-styles
