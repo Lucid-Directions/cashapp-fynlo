@@ -12,8 +12,8 @@ import {
   TextInput,
   Modal,
   Alert,
-  ActivityIndicator,
-} from 'react-native';
+  ActivityIndicator } from
+'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 import { CalendarClock } from 'lucide-react-native';
@@ -44,7 +44,7 @@ const EmployeesScreen: React.FC = () => {
     email: '',
     phone: '',
     role: 'Cashier',
-    hourlyRate: '12.00',
+    hourlyRate: '12.00'
   });
 
   useEffect(() => {
@@ -90,9 +90,9 @@ const EmployeesScreen: React.FC = () => {
     if (searchQuery) {
       filtered = filtered.filter(
         (employee) =>
-          employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          employee.role.toLowerCase().includes(searchQuery.toLowerCase())
+        employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.role.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -175,7 +175,7 @@ const EmployeesScreen: React.FC = () => {
         phone: newEmployee.phone.trim() || undefined,
         role: newEmployee.role.toLowerCase(), // API expects lowercase roles
         hourlyRate: parseFloat(newEmployee.hourlyRate) || 12.0,
-        startDate: new Date().toISOString(),
+        startDate: new Date().toISOString()
       });
 
       // Transform API response to match EmployeeData interface
@@ -184,11 +184,11 @@ const EmployeesScreen: React.FC = () => {
         name: `${createdEmployee.first_name} ${createdEmployee.last_name}`,
         email: createdEmployee.email,
         phone: createdEmployee.phone || `+44 ${Math.floor(Math.random() * 900000000) + 100000000}`,
-        role: (createdEmployee.role.charAt(0).toUpperCase() + createdEmployee.role.slice(1)) as
-          | 'Manager'
-          | 'Cashier'
-          | 'Server'
-          | 'Cook',
+        role: createdEmployee.role.charAt(0).toUpperCase() + createdEmployee.role.slice(1) as
+        'Manager' |
+        'Cashier' |
+        'Server' |
+        'Cook',
         hireDate: new Date(createdEmployee.start_date || createdEmployee.created_at),
         hourlyRate: createdEmployee.hourly_rate || 12.0,
         totalSales: 0,
@@ -197,7 +197,7 @@ const EmployeesScreen: React.FC = () => {
         punctualityScore: 90 + Math.random() * 8, // Initial score between 90-98
         scheduledHours: 160,
         actualHours: 160,
-        weeksSinceLastReview: 0,
+        weeksSinceLastReview: 0
       };
 
       // Add to local state
@@ -209,7 +209,7 @@ const EmployeesScreen: React.FC = () => {
         email: '',
         phone: '',
         role: 'Cashier',
-        hourlyRate: '12.00',
+        hourlyRate: '12.00'
       });
 
       // Show success message
@@ -237,7 +237,7 @@ const EmployeesScreen: React.FC = () => {
       email: '',
       phone: '',
       role: 'Cashier',
-      hourlyRate: '12.00',
+      hourlyRate: '12.00'
     });
     setShowAddModal(false);
   };
@@ -247,49 +247,49 @@ const EmployeesScreen: React.FC = () => {
       'Delete Employee',
       `Are you sure you want to remove ${employee.name} from your team?`,
       [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // Close modal first
-              setSelectedEmployee(null);
-              setIsLoading(true);
+      {
+        text: 'Cancel',
+        style: 'cancel'
+      },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            // Close modal first
+            setSelectedEmployee(null);
+            setIsLoading(true);
 
-              // Delete from backend
-              const dataService = DataService.getInstance();
-              await dataService.deleteEmployee(employee.id);
+            // Delete from backend
+            const dataService = DataService.getInstance();
+            await dataService.deleteEmployee(employee.id);
 
-              // Remove from local state
-              setEmployees(employees.filter((emp) => emp.id !== employee.id));
+            // Remove from local state
+            setEmployees(employees.filter((emp) => emp.id !== employee.id));
 
-              // Show success message
-              Alert.alert('Success', `${employee.name} has been removed from your team.`);
-            } catch (error: unknown) {
-              logger.error('Failed to delete employee:', error);
-              Alert.alert('Error', error.message || 'Failed to delete employee. Please try again.');
-              // Reopen modal on error
-              setSelectedEmployee(employee);
-            } finally {
-              setIsLoading(false);
-            }
-          },
-        },
-      ],
+            // Show success message
+            Alert.alert('Success', `${employee.name} has been removed from your team.`);
+          } catch (error: unknown) {
+            logger.error('Failed to delete employee:', error);
+            Alert.alert('Error', error.message || 'Failed to delete employee. Please try again.');
+            // Reopen modal on error
+            setSelectedEmployee(employee);
+          } finally {
+            setIsLoading(false);
+          }
+        }
+      }],
+
       { cancelable: true }
     );
   };
 
-  const renderEmployee = ({ item }: { item: EmployeeData }) => (
-    <TouchableOpacity
-      style={styles.employeeCard}
-      onPress={() => handleEmployeePress(item)}
-      activeOpacity={0.7}
-    >
+  const renderEmployee = ({ item }: {item: EmployeeData;}) =>
+  <TouchableOpacity
+    style={styles.employeeCard}
+    onPress={() => handleEmployeePress(item)}
+    activeOpacity={0.7}>
+
       <View style={styles.employeeHeader}>
         <View style={styles.employeeAvatar}>
           <Icon name="account-circle" size={50} color={Colors.primary} />
@@ -325,17 +325,17 @@ const EmployeesScreen: React.FC = () => {
           </Text>
         </View>
       </View>
-    </TouchableOpacity>
-  );
+    </TouchableOpacity>;
+
 
   const stats = {
     total: employees.length,
     active: employees.filter((e) => e.actualHours >= e.scheduledHours * 0.9).length,
     managers: employees.filter((e) => e.role === 'Manager').length,
     avgPerformance:
-      employees.length > 0
-        ? employees.reduce((sum, e) => sum + e.performanceScore, 0) / employees.length
-        : 0,
+    employees.length > 0 ?
+    employees.reduce((sum, e) => sum + e.performanceScore, 0) / employees.length :
+    0
   };
 
   if (isLoading) {
@@ -343,8 +343,8 @@ const EmployeesScreen: React.FC = () => {
       <SafeAreaView style={[styles.container, styles.centered]}>
         <ActivityIndicator size="large" color={Colors.primary} />
         <Text style={styles.loadingText}>Loading Employees...</Text>
-      </SafeAreaView>
-    );
+      </SafeAreaView>);
+
   }
 
   const renderEmptyListComponent = () => {
@@ -357,8 +357,8 @@ const EmployeesScreen: React.FC = () => {
           <TouchableOpacity onPress={loadEmployees} style={styles.retryButton}>
             <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
-        </View>
-      );
+        </View>);
+
     }
     return (
       <View style={styles.emptyState}>
@@ -367,8 +367,8 @@ const EmployeesScreen: React.FC = () => {
         <Text style={styles.emptyStateSubtext}>
           {searchQuery ? 'Try adjusting your search' : 'Add your first employee or pull to refresh'}
         </Text>
-      </View>
-    );
+      </View>);
+
   };
 
   return (
@@ -380,8 +380,8 @@ const EmployeesScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
-          activeOpacity={0.7}
-        >
+          activeOpacity={0.7}>
+
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
 
@@ -393,8 +393,8 @@ const EmployeesScreen: React.FC = () => {
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.scheduleButton}
-            onPress={() => navigation.navigate('EmployeeSchedule')}
-          >
+            onPress={() => navigation.navigate('EmployeeSchedule')}>
+
             <CalendarClock size={28} color={Colors.primary} />
             <Text style={styles.scheduleLabel}>Schedule</Text>
           </TouchableOpacity>
@@ -436,27 +436,27 @@ const EmployeesScreen: React.FC = () => {
             placeholder="Search employees..."
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor={Colors.darkGray}
-          />
+            placeholderTextColor={Colors.darkGray} />
+
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.roleFilters}>
-          {['all', 'Manager', 'Cashier', 'Server', 'Cook'].map((role) => (
-            <TouchableOpacity
-              key={role}
-              style={[styles.roleFilter, selectedRole === role && styles.roleFilterActive]}
-              onPress={() => setSelectedRole(role)}
-            >
+          {['all', 'Manager', 'Cashier', 'Server', 'Cook'].map((role) =>
+          <TouchableOpacity
+            key={role}
+            style={[styles.roleFilter, selectedRole === role && styles.roleFilterActive]}
+            onPress={() => setSelectedRole(role)}>
+
               <Text
-                style={[
-                  styles.roleFilterText,
-                  selectedRole === role && styles.roleFilterTextActive,
-                ]}
-              >
+              style={[
+              styles.roleFilterText,
+              selectedRole === role && styles.roleFilterTextActive]
+              }>
+
                 {role === 'all' ? 'All Roles' : role}
               </Text>
             </TouchableOpacity>
-          ))}
+          )}
         </ScrollView>
       </View>
 
@@ -477,8 +477,8 @@ const EmployeesScreen: React.FC = () => {
         visible={!!selectedEmployee}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setSelectedEmployee(null)}
-      >
+        onRequestClose={() => setSelectedEmployee(null)}>
+
         <View style={styles.modalOverlay}>
           <View style={styles.employeeModal}>
             <View style={styles.modalHeader}>
@@ -488,25 +488,25 @@ const EmployeesScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
 
-            {selectedEmployee && (
-              <ScrollView style={styles.modalContent}>
+            {selectedEmployee &&
+            <ScrollView style={styles.modalContent}>
                 <View style={styles.employeeProfile}>
                   <View style={styles.profileAvatar}>
                     <Icon name="account-circle" size={80} color={Colors.primary} />
                   </View>
                   <Text style={styles.profileName}>{selectedEmployee.name}</Text>
                   <View
-                    style={[
-                      styles.profileRole,
-                      { backgroundColor: `${getRoleColor(selectedEmployee.role)}20` },
-                    ]}
-                  >
+                  style={[
+                  styles.profileRole,
+                  { backgroundColor: `${getRoleColor(selectedEmployee.role)}20` }]
+                  }>
+
                     <Text
-                      style={[
-                        styles.profileRoleText,
-                        { color: getRoleColor(selectedEmployee.role) },
-                      ]}
-                    >
+                    style={[
+                    styles.profileRoleText,
+                    { color: getRoleColor(selectedEmployee.role) }]
+                    }>
+
                       {selectedEmployee.role}
                     </Text>
                   </View>
@@ -557,22 +557,22 @@ const EmployeesScreen: React.FC = () => {
                     </View>
                     <View style={styles.performanceCard}>
                       <Text
-                        style={[
-                          styles.performanceValue,
-                          { color: getPerformanceColor(selectedEmployee.performanceScore) },
-                        ]}
-                      >
+                      style={[
+                      styles.performanceValue,
+                      { color: getPerformanceColor(selectedEmployee.performanceScore) }]
+                      }>
+
                         {selectedEmployee.performanceScore.toFixed(1)}%
                       </Text>
                       <Text style={styles.performanceLabel}>Performance</Text>
                     </View>
                     <View style={styles.performanceCard}>
                       <Text
-                        style={[
-                          styles.performanceValue,
-                          { color: getPerformanceColor(selectedEmployee.punctualityScore) },
-                        ]}
-                      >
+                      style={[
+                      styles.performanceValue,
+                      { color: getPerformanceColor(selectedEmployee.punctualityScore) }]
+                      }>
+
                         {selectedEmployee.punctualityScore.toFixed(1)}%
                       </Text>
                       <Text style={styles.performanceLabel}>Punctuality</Text>
@@ -590,15 +590,15 @@ const EmployeesScreen: React.FC = () => {
                     <Text style={styles.actionButtonText}>Schedule</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.actionButton, styles.deleteButton]}
-                    onPress={() => handleDeleteEmployee(selectedEmployee)}
-                  >
+                  style={[styles.actionButton, styles.deleteButton]}
+                  onPress={() => handleDeleteEmployee(selectedEmployee)}>
+
                     <Icon name="delete" size={20} color={Colors.white} />
                     <Text style={styles.actionButtonText}>Delete</Text>
                   </TouchableOpacity>
                 </View>
               </ScrollView>
-            )}
+            }
           </View>
         </View>
       </Modal>
@@ -608,8 +608,8 @@ const EmployeesScreen: React.FC = () => {
         visible={showAddModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={handleCancelAdd}
-      >
+        onRequestClose={handleCancelAdd}>
+
         <View style={styles.modalOverlay}>
           <View style={styles.addEmployeeModal}>
             <View style={styles.modalHeader}>
@@ -627,8 +627,8 @@ const EmployeesScreen: React.FC = () => {
                   placeholder="Enter employee's full name"
                   value={newEmployee.name}
                   onChangeText={(text) => setNewEmployee({ ...newEmployee, name: text })}
-                  placeholderTextColor={Colors.darkGray}
-                />
+                  placeholderTextColor={Colors.darkGray} />
+
               </View>
 
               <View style={styles.formGroup}>
@@ -640,8 +640,8 @@ const EmployeesScreen: React.FC = () => {
                   onChangeText={(text) => setNewEmployee({ ...newEmployee, email: text })}
                   keyboardType="email-address"
                   autoCapitalize="none"
-                  placeholderTextColor={Colors.darkGray}
-                />
+                  placeholderTextColor={Colors.darkGray} />
+
               </View>
 
               <View style={styles.formGroup}>
@@ -652,32 +652,32 @@ const EmployeesScreen: React.FC = () => {
                   value={newEmployee.phone}
                   onChangeText={(text) => setNewEmployee({ ...newEmployee, phone: text })}
                   keyboardType="phone-pad"
-                  placeholderTextColor={Colors.darkGray}
-                />
+                  placeholderTextColor={Colors.darkGray} />
+
               </View>
 
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>Role</Text>
                 <View style={styles.roleSelector}>
-                  {['Manager', 'Cashier', 'Server', 'Cook'].map((role) => (
-                    <TouchableOpacity
-                      key={role}
-                      style={[
-                        styles.roleOption,
-                        newEmployee.role === role && styles.roleOptionSelected,
-                      ]}
-                      onPress={() => setNewEmployee({ ...newEmployee, role })}
-                    >
+                  {['Manager', 'Cashier', 'Server', 'Cook'].map((role) =>
+                  <TouchableOpacity
+                    key={role}
+                    style={[
+                    styles.roleOption,
+                    newEmployee.role === role && styles.roleOptionSelected]
+                    }
+                    onPress={() => setNewEmployee({ ...newEmployee, role })}>
+
                       <Text
-                        style={[
-                          styles.roleOptionText,
-                          newEmployee.role === role && styles.roleOptionTextSelected,
-                        ]}
-                      >
+                      style={[
+                      styles.roleOptionText,
+                      newEmployee.role === role && styles.roleOptionTextSelected]
+                      }>
+
                         {role}
                       </Text>
                     </TouchableOpacity>
-                  ))}
+                  )}
                 </View>
               </View>
 
@@ -693,22 +693,22 @@ const EmployeesScreen: React.FC = () => {
                     setNewEmployee({ ...newEmployee, hourlyRate: cleanText });
                   }}
                   keyboardType="decimal-pad"
-                  placeholderTextColor={Colors.darkGray}
-                />
+                  placeholderTextColor={Colors.darkGray} />
+
               </View>
 
               <View style={styles.formActions}>
                 <TouchableOpacity
                   style={[styles.formButton, styles.cancelButton]}
-                  onPress={handleCancelAdd}
-                >
+                  onPress={handleCancelAdd}>
+
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[styles.formButton, styles.addButton]}
-                  onPress={handleAddEmployee}
-                >
+                  onPress={handleAddEmployee}>
+
                   <Icon name="person-add" size={20} color={Colors.white} />
                   <Text style={styles.addButtonText}>Add Employee</Text>
                 </TouchableOpacity>
@@ -717,14 +717,14 @@ const EmployeesScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
-  );
+    </SafeAreaView>);
+
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.background
   },
   header: {
     backgroundColor: Colors.primary,
@@ -732,7 +732,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    height: 60,
+    height: 60
   },
   backButton: {
     padding: 12,
@@ -742,25 +742,25 @@ const styles = StyleSheet.create({
     minWidth: 44,
     minHeight: 44,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   headerCenter: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.white
   },
   headerSubtitle: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: 'rgba(255, 255, 255, 0.8)'
   },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 8
   },
   scheduleButton: {
     flexDirection: 'row',
@@ -770,24 +770,24 @@ const styles = StyleSheet.create({
     minHeight: 44, // Ensure min tap target height
     minWidth: 44, // Ensure min tap target width
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 8, // Slightly larger radius
+    borderRadius: 8 // Slightly larger radius
   },
   scheduleLabel: {
     marginLeft: 6,
     color: Colors.white, // Assuming theme.colors.action is white, adjust if needed
     // ...theme.typography.button, // This needs to be translated to React Native styles
     fontSize: 14, // Example, adjust as per theme.typography.button
-    fontWeight: '600', // Example, adjust as per theme.typography.button
+    fontWeight: '600' // Example, adjust as per theme.typography.button
   },
-  scheduleButtonText: {
-    color: Colors.white,
-    fontSize: 14,
-    fontWeight: '600', // Semibold
-    marginLeft: 8, // Space between icon and text
-    numberOfLines: 1, // Ensure text ellipsizes if too long
-  },
+
+
+
+
+
+
+
   addButton: {
-    padding: 8,
+    padding: 8
   },
   statsBar: {
     flexDirection: 'row',
@@ -796,27 +796,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
-    gap: 12,
+    gap: 12
   },
   statCard: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: Colors.primary
   },
   statLabel: {
     fontSize: 12,
     color: Colors.darkGray,
-    marginTop: 4,
+    marginTop: 4
   },
   searchSection: {
     backgroundColor: Colors.white,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.border
   },
   searchContainer: {
     flexDirection: 'row',
@@ -826,37 +826,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 12
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
     color: Colors.text,
-    marginLeft: 12,
+    marginLeft: 12
   },
   roleFilters: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 16
   },
   roleFilter: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 8,
     borderRadius: 20,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.background
   },
   roleFilterActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primary
   },
   roleFilterText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: Colors.text
   },
   roleFilterTextActive: {
-    color: Colors.white,
+    color: Colors.white
   },
   employeesList: {
-    padding: 16,
+    padding: 16
   },
   employeeCard: {
     backgroundColor: Colors.white,
@@ -867,84 +867,84 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 2
   },
   employeeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 12
   },
   employeeAvatar: {
-    marginRight: 12,
+    marginRight: 12
   },
   employeeInfo: {
-    flex: 1,
+    flex: 1
   },
   employeeName: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 4,
+    marginBottom: 4
   },
   roleBadge: {
     alignSelf: 'flex-start',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
-    marginBottom: 4,
+    marginBottom: 4
   },
   roleText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '600'
   },
   employeeEmail: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: Colors.darkGray
   },
   employeeStats: {
-    alignItems: 'flex-end',
+    alignItems: 'flex-end'
   },
   statItem: {
-    alignItems: 'center',
+    alignItems: 'center'
   },
   employeeMetrics: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: Colors.border
   },
   metricItem: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   metricText: {
     fontSize: 12,
     color: Colors.darkGray,
-    marginLeft: 4,
+    marginLeft: 4
   },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 100,
+    paddingVertical: 100
   },
   emptyStateText: {
     fontSize: 18,
     fontWeight: '500',
     color: Colors.text,
-    marginTop: 16,
+    marginTop: 16
   },
   emptyStateSubtext: {
     fontSize: 14,
     color: Colors.darkGray,
-    marginTop: 8,
+    marginTop: 8
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   employeeModal: {
     backgroundColor: Colors.white,
@@ -955,7 +955,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    elevation: 10,
+    elevation: 10
   },
   modalHeader: {
     flexDirection: 'row',
@@ -963,61 +963,61 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.border
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.text,
+    color: Colors.text
   },
   modalContent: {
-    padding: 20,
+    padding: 20
   },
   employeeProfile: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 24
   },
   profileAvatar: {
-    marginBottom: 12,
+    marginBottom: 12
   },
   profileName: {
     fontSize: 24,
     fontWeight: 'bold',
     color: Colors.text,
-    marginBottom: 8,
+    marginBottom: 8
   },
   profileRole: {
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 12
   },
   profileRoleText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600'
   },
   detailsSection: {
-    marginBottom: 24,
+    marginBottom: 24
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 12,
+    marginBottom: 12
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 8
   },
   detailText: {
     fontSize: 14,
     color: Colors.text,
-    marginLeft: 12,
+    marginLeft: 12
   },
   performanceGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 12
   },
   performanceCard: {
     flex: 1,
@@ -1025,23 +1025,23 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   performanceValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: Colors.primary
   },
   performanceLabel: {
     fontSize: 12,
     color: Colors.darkGray,
     marginTop: 4,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   actionButtons: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 24,
+    marginTop: 24
   },
   actionButton: {
     flex: 1,
@@ -1049,22 +1049,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 8
   },
   editButton: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: Colors.secondary
   },
   scheduleButton: {
-    backgroundColor: Colors.warning,
+    backgroundColor: Colors.warning
   },
   deleteButton: {
-    backgroundColor: Colors.danger,
+    backgroundColor: Colors.danger
   },
   actionButtonText: {
     color: Colors.white,
     fontSize: 14,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: 8
   },
   // Add Employee Modal Styles
   addEmployeeModal: {
@@ -1076,19 +1076,19 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    elevation: 10,
+    elevation: 10
   },
   addEmployeeForm: {
-    padding: 20,
+    padding: 20
   },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: 20
   },
   formLabel: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 8,
+    marginBottom: 8
   },
   formInput: {
     borderWidth: 1,
@@ -1098,12 +1098,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: Colors.text,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.white
   },
   roleSelector: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 8
   },
   roleOption: {
     paddingHorizontal: 16,
@@ -1111,25 +1111,25 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: Colors.border,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.background
   },
   roleOptionSelected: {
     backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    borderColor: Colors.primary
   },
   roleOptionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: Colors.text
   },
   roleOptionTextSelected: {
-    color: Colors.white,
+    color: Colors.white
   },
   formActions: {
     flexDirection: 'row',
     gap: 12,
     marginTop: 24,
-    paddingBottom: 20,
+    paddingBottom: 20
   },
   formButton: {
     flex: 1,
@@ -1137,38 +1137,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 8
   },
   cancelButton: {
     backgroundColor: Colors.background,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.border
   },
   addButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primary
   },
   cancelButtonText: {
     color: Colors.text,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600'
   },
   addButtonText: {
     color: Colors.white,
     fontSize: 16,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: 8
   },
   centered: {
     // Added
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   loadingText: {
     // Added
     marginTop: 10,
     fontSize: 16,
-    color: Colors.darkGray,
+    color: Colors.darkGray
   },
   retryButton: {
     // Added
@@ -1176,14 +1176,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: 8
   },
   retryButtonText: {
     // Added
     color: Colors.white,
     fontSize: 16,
-    fontWeight: '600',
-  },
+    fontWeight: '600'
+  }
 });
 
 export default EmployeesScreen;

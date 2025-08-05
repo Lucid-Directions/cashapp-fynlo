@@ -12,7 +12,7 @@ import {
   TextInput,
   Modal,
   Alert,
-  _ActivityIndicator, // Will be replaced by LoadingView
+  _ActivityIndicator // Will be replaced by LoadingView
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
@@ -29,7 +29,7 @@ import type { InventoryData, ReceiptItem as ScannedReceiptItem } from '../../typ
 
 // Mock ENV flag (would typically come from an env config file)
 const ENV = {
-  FEATURE_INVENTORY: true, // Set to true to enable the screen, false to show ComingSoon
+  FEATURE_INVENTORY: true // Set to true to enable the screen, false to show ComingSoon
 };
 
 // Clover POS Color Scheme
@@ -46,7 +46,7 @@ const Colors = {
   darkGray: '#666666',
   text: '#333333',
   lightText: '#666666',
-  border: '#DDDDDD',
+  border: '#DDDDDD'
 };
 
 const InventoryScreen: React.FC = () => {
@@ -70,7 +70,7 @@ const InventoryScreen: React.FC = () => {
     minimumStock: '',
     maximumStock: '',
     unitCost: '',
-    supplier: '',
+    supplier: ''
   });
   const [newItemFormData, setNewItemFormData] = useState({
     name: '',
@@ -79,7 +79,7 @@ const InventoryScreen: React.FC = () => {
     minimumStock: '5',
     maximumStock: '50',
     unitCost: '0.00',
-    supplier: '',
+    supplier: ''
   });
 
   useEffect(() => {
@@ -119,7 +119,7 @@ const InventoryScreen: React.FC = () => {
         unitCost: item.unitCost ?? item.unit_cost ?? 0,
         supplier: item.supplier || 'Unknown Supplier',
         lastRestocked: item.lastRestocked ? new Date(item.lastRestocked) : new Date(),
-        turnoverRate: item.turnoverRate ?? item.turnover_rate ?? 0,
+        turnoverRate: item.turnoverRate ?? item.turnover_rate ?? 0
       }));
 
       setInventory(mappedInventory);
@@ -154,7 +154,7 @@ const InventoryScreen: React.FC = () => {
         case 'optimal':
           filtered = filtered.filter(
             (item) =>
-              item.currentStock > item.minimumStock && item.currentStock <= item.maximumStock
+            item.currentStock > item.minimumStock && item.currentStock <= item.maximumStock
           );
           break;
       }
@@ -164,9 +164,9 @@ const InventoryScreen: React.FC = () => {
     if (searchQuery) {
       filtered = filtered.filter(
         (item) =>
-          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.supplier.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.category.toLowerCase().includes(searchQuery.toLowerCase())
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.supplier.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.category.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -252,9 +252,9 @@ const InventoryScreen: React.FC = () => {
   const getStockStatus = (item: InventoryData) => {
     if (item.currentStock === 0) return { status: 'Out of Stock', color: Colors.danger };
     if (item.currentStock <= item.minimumStock)
-      return { status: 'Low Stock', color: Colors.warning };
+    return { status: 'Low Stock', color: Colors.warning };
     if (item.currentStock > item.maximumStock)
-      return { status: 'Overstocked', color: Colors.secondary };
+    return { status: 'Overstocked', color: Colors.secondary };
     return { status: 'In Stock', color: Colors.success };
   };
 
@@ -262,7 +262,7 @@ const InventoryScreen: React.FC = () => {
     if (!item.maximumStock || item.maximumStock === 0) {
       return 0;
     }
-    return Math.min((item.currentStock / item.maximumStock) * 100, 100);
+    return Math.min(item.currentStock / item.maximumStock * 100, 100);
   };
 
   const formatLastRestocked = (date: Date) => {
@@ -286,7 +286,7 @@ const InventoryScreen: React.FC = () => {
         minimumStock: item.minimumStock.toString(),
         maximumStock: item.maximumStock.toString(),
         unitCost: item.unitCost ? item.unitCost.toFixed(2) : '0.00',
-        supplier: item.supplier,
+        supplier: item.supplier
       });
       setShowEditModal(true);
     }
@@ -318,18 +318,18 @@ const InventoryScreen: React.FC = () => {
 
     // Update the inventory item
     const updatedInventory = inventory.map((item) =>
-      item.itemId === selectedItem.itemId
-        ? {
-            ...item,
-            name: editFormData.name.trim(),
-            category: editFormData.category,
-            currentStock,
-            minimumStock,
-            maximumStock,
-            unitCost,
-            supplier: editFormData.supplier.trim(),
-          }
-        : item
+    item.itemId === selectedItem.itemId ?
+    {
+      ...item,
+      name: editFormData.name.trim(),
+      category: editFormData.category,
+      currentStock,
+      minimumStock,
+      maximumStock,
+      unitCost,
+      supplier: editFormData.supplier.trim()
+    } :
+    item
     );
 
     setInventory(updatedInventory);
@@ -381,7 +381,7 @@ const InventoryScreen: React.FC = () => {
       unitCost,
       supplier: newItemFormData.supplier.trim(),
       lastRestocked: new Date(),
-      turnoverRate: 0, // Initial value
+      turnoverRate: 0 // Initial value
     };
 
     // Add to inventory list
@@ -395,7 +395,7 @@ const InventoryScreen: React.FC = () => {
       minimumStock: '5',
       maximumStock: '50',
       unitCost: '0.00',
-      supplier: '',
+      supplier: ''
     });
 
     // Close modal
@@ -413,12 +413,12 @@ const InventoryScreen: React.FC = () => {
       minimumStock: '5',
       maximumStock: '50',
       unitCost: '0.00',
-      supplier: '',
+      supplier: ''
     });
     setShowAddItemModal(false);
   };
 
-  const renderInventoryItem = ({ item }: { item: InventoryData }) => {
+  const renderInventoryItem = ({ item }: {item: InventoryData;}) => {
     const stockStatus = getStockStatus(item);
     const stockPercentage = getStockPercentage(item);
 
@@ -426,8 +426,8 @@ const InventoryScreen: React.FC = () => {
       <TouchableOpacity
         style={styles.inventoryCard}
         onPress={() => setSelectedItem(item)}
-        activeOpacity={0.7}
-      >
+        activeOpacity={0.7}>
+
         <View style={styles.itemHeader}>
           <View style={styles.itemInfo}>
             <Text style={styles.itemName}>{item.name}</Text>
@@ -446,13 +446,13 @@ const InventoryScreen: React.FC = () => {
             <View style={styles.stockBar}>
               <View
                 style={[
-                  styles.stockProgress,
-                  {
-                    width: `${stockPercentage}%`,
-                    backgroundColor: stockStatus.color,
-                  },
-                ]}
-              />
+                styles.stockProgress,
+                {
+                  width: `${stockPercentage}%`,
+                  backgroundColor: stockStatus.color
+                }]
+                } />
+
             </View>
             <Text style={styles.stockText}>
               {item.currentStock} / {item.maximumStock} units
@@ -481,8 +481,8 @@ const InventoryScreen: React.FC = () => {
             <Text style={styles.metricText}>{formatLastRestocked(item.lastRestocked)}</Text>
           </View>
         </View>
-      </TouchableOpacity>
-    );
+      </TouchableOpacity>);
+
   };
 
   const categories = ['Vegetables', 'Meat', 'Dairy', 'Pantry', 'Spices', 'Beverages'];
@@ -491,9 +491,9 @@ const InventoryScreen: React.FC = () => {
     lowStock: inventory.filter((item) => item.currentStock <= item.minimumStock).length,
     outOfStock: inventory.filter((item) => item.currentStock === 0).length,
     totalValue:
-      inventory.length > 0
-        ? inventory.reduce((sum, item) => sum + item.currentStock * (item.unitCost || 0), 0)
-        : 0,
+    inventory.length > 0 ?
+    inventory.reduce((sum, item) => sum + item.currentStock * (item.unitCost || 0), 0) :
+    0
   };
 
   if (!ENV.FEATURE_INVENTORY) {
@@ -514,20 +514,20 @@ const InventoryScreen: React.FC = () => {
           <TouchableOpacity onPress={loadInventory} style={styles.retryButton}>
             <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
-        </View>
-      );
+        </View>);
+
     }
     return (
       <View style={styles.emptyState}>
         <Icon name="inventory" size={64} color={Colors.lightGray} />
         <Text style={styles.emptyStateText}>No items found</Text>
         <Text style={styles.emptyStateSubtext}>
-          {searchQuery
-            ? 'Try adjusting your search'
-            : 'Add your first inventory item or pull to refresh'}
+          {searchQuery ?
+          'Try adjusting your search' :
+          'Add your first inventory item or pull to refresh'}
         </Text>
-      </View>
-    );
+      </View>);
+
   };
 
   return (
@@ -539,8 +539,8 @@ const InventoryScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
-          activeOpacity={0.7}
-        >
+          activeOpacity={0.7}>
+
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
 
@@ -553,16 +553,16 @@ const InventoryScreen: React.FC = () => {
           <TouchableOpacity
             style={styles.scanButton}
             onPress={handleQRScan}
-            accessibilityLabel="Scan Receipt or Barcode"
-          >
+            accessibilityLabel="Scan Receipt or Barcode">
+
             <Icon name="camera" size={24} color={Colors.white} />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => setShowAddItemModal(true)}
-            accessibilityLabel="Add New Inventory Item"
-          >
+            accessibilityLabel="Add New Inventory Item">
+
             <Icon name="add" size={24} color={Colors.white} />
           </TouchableOpacity>
         </View>
@@ -599,32 +599,32 @@ const InventoryScreen: React.FC = () => {
             placeholder="Search inventory..."
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor={Colors.darkGray}
-          />
+            placeholderTextColor={Colors.darkGray} />
+
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterSection}>
           <View style={styles.filterGroup}>
             <Text style={styles.filterGroupTitle}>Category:</Text>
-            {['all', ...categories].map((category) => (
-              <TouchableOpacity
-                key={category}
-                style={[
-                  styles.filterButton,
-                  selectedCategory === category && styles.filterButtonActive,
-                ]}
-                onPress={() => setSelectedCategory(category)}
-              >
+            {['all', ...categories].map((category) =>
+            <TouchableOpacity
+              key={category}
+              style={[
+              styles.filterButton,
+              selectedCategory === category && styles.filterButtonActive]
+              }
+              onPress={() => setSelectedCategory(category)}>
+
                 <Text
-                  style={[
-                    styles.filterButtonText,
-                    selectedCategory === category && styles.filterButtonTextActive,
-                  ]}
-                >
+                style={[
+                styles.filterButtonText,
+                selectedCategory === category && styles.filterButtonTextActive]
+                }>
+
                   {category === 'all' ? 'All' : category}
                 </Text>
               </TouchableOpacity>
-            ))}
+            )}
           </View>
         </ScrollView>
 
@@ -632,29 +632,29 @@ const InventoryScreen: React.FC = () => {
           <View style={styles.filterGroup}>
             <Text style={styles.filterGroupTitle}>Status:</Text>
             {[
-              { key: 'all', label: 'All' },
-              { key: 'low', label: 'Low Stock' },
-              { key: 'out', label: 'Out of Stock' },
-              { key: 'optimal', label: 'In Stock' },
-            ].map((status) => (
-              <TouchableOpacity
-                key={status.key}
-                style={[
-                  styles.filterButton,
-                  selectedStatus === status.key && styles.filterButtonActive,
-                ]}
-                onPress={() => setSelectedStatus(status.key)}
-              >
+            { key: 'all', label: 'All' },
+            { key: 'low', label: 'Low Stock' },
+            { key: 'out', label: 'Out of Stock' },
+            { key: 'optimal', label: 'In Stock' }].
+            map((status) =>
+            <TouchableOpacity
+              key={status.key}
+              style={[
+              styles.filterButton,
+              selectedStatus === status.key && styles.filterButtonActive]
+              }
+              onPress={() => setSelectedStatus(status.key)}>
+
                 <Text
-                  style={[
-                    styles.filterButtonText,
-                    selectedStatus === status.key && styles.filterButtonTextActive,
-                  ]}
-                >
+                style={[
+                styles.filterButtonText,
+                selectedStatus === status.key && styles.filterButtonTextActive]
+                }>
+
                   {status.label}
                 </Text>
               </TouchableOpacity>
-            ))}
+            )}
           </View>
         </ScrollView>
       </View>
@@ -676,8 +676,8 @@ const InventoryScreen: React.FC = () => {
         visible={!!selectedItem && !showRestockModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setSelectedItem(null)}
-      >
+        onRequestClose={() => setSelectedItem(null)}>
+
         <View style={styles.modalOverlay}>
           <View style={styles.itemModal}>
             <View style={styles.modalHeader}>
@@ -687,23 +687,23 @@ const InventoryScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
 
-            {selectedItem && (
-              <ScrollView style={styles.modalContent}>
+            {selectedItem &&
+            <ScrollView style={styles.modalContent}>
                 <View style={styles.itemProfile}>
                   <Text style={styles.profileItemName}>{selectedItem.name}</Text>
                   <Text style={styles.profileCategory}>{selectedItem.category}</Text>
                   <View
-                    style={[
-                      styles.profileStatus,
-                      { backgroundColor: `${getStockStatus(selectedItem).color}20` },
-                    ]}
-                  >
+                  style={[
+                  styles.profileStatus,
+                  { backgroundColor: `${getStockStatus(selectedItem).color}20` }]
+                  }>
+
                     <Text
-                      style={[
-                        styles.profileStatusText,
-                        { color: getStockStatus(selectedItem).color },
-                      ]}
-                    >
+                    style={[
+                    styles.profileStatusText,
+                    { color: getStockStatus(selectedItem).color }]
+                    }>
+
                       {getStockStatus(selectedItem).status}
                     </Text>
                   </View>
@@ -753,22 +753,22 @@ const InventoryScreen: React.FC = () => {
 
                 <View style={styles.actionButtons}>
                   <TouchableOpacity
-                    style={[styles.actionButton, styles.restockActionButton]}
-                    onPress={() => handleRestock(selectedItem)}
-                  >
+                  style={[styles.actionButton, styles.restockActionButton]}
+                  onPress={() => handleRestock(selectedItem)}>
+
                     <Icon name="add" size={20} color={Colors.white} />
                     <Text style={styles.actionButtonText}>Restock</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.actionButton, styles.editActionButton]}
-                    onPress={() => handleEditItem(selectedItem)}
-                  >
+                  style={[styles.actionButton, styles.editActionButton]}
+                  onPress={() => handleEditItem(selectedItem)}>
+
                     <Icon name="edit" size={20} color={Colors.white} />
                     <Text style={styles.actionButtonText}>Edit</Text>
                   </TouchableOpacity>
                 </View>
               </ScrollView>
-            )}
+            }
           </View>
         </View>
       </Modal>
@@ -778,8 +778,8 @@ const InventoryScreen: React.FC = () => {
         visible={showRestockModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowRestockModal(false)}
-      >
+        onRequestClose={() => setShowRestockModal(false)}>
+
         <View style={styles.modalOverlay}>
           <View style={styles.restockModal}>
             <View style={styles.modalHeader}>
@@ -789,8 +789,8 @@ const InventoryScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
 
-            {selectedItem && (
-              <View style={styles.restockContent}>
+            {selectedItem &&
+            <View style={styles.restockContent}>
                 <Text style={styles.restockItemName}>{selectedItem.name}</Text>
                 <Text style={styles.restockCurrentStock}>
                   Current Stock: {selectedItem.currentStock} units
@@ -799,13 +799,13 @@ const InventoryScreen: React.FC = () => {
                 <View style={styles.restockInputSection}>
                   <Text style={styles.inputLabel}>Quantity to Add</Text>
                   <TextInput
-                    style={styles.quantityInput}
-                    placeholder="Enter quantity"
-                    keyboardType="numeric"
-                    defaultValue={(
-                      selectedItem.maximumStock - selectedItem.currentStock
-                    ).toString()}
-                  />
+                  style={styles.quantityInput}
+                  placeholder="Enter quantity"
+                  keyboardType="numeric"
+                  defaultValue={(
+                  selectedItem.maximumStock - selectedItem.currentStock).
+                  toString()} />
+
                 </View>
 
                 <View style={styles.restockSummary}>
@@ -826,17 +826,17 @@ const InventoryScreen: React.FC = () => {
                 </View>
 
                 <TouchableOpacity
-                  style={styles.confirmRestockButton}
-                  onPress={() => {
-                    Alert.alert('Success', 'Item restocked successfully!');
-                    setShowRestockModal(false);
-                    setSelectedItem(null);
-                  }}
-                >
+                style={styles.confirmRestockButton}
+                onPress={() => {
+                  Alert.alert('Success', 'Item restocked successfully!');
+                  setShowRestockModal(false);
+                  setSelectedItem(null);
+                }}>
+
                   <Text style={styles.confirmRestockText}>Confirm Restock</Text>
                 </TouchableOpacity>
               </View>
-            )}
+            }
           </View>
         </View>
       </Modal>
@@ -846,8 +846,8 @@ const InventoryScreen: React.FC = () => {
         visible={showEditModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowEditModal(false)}
-      >
+        onRequestClose={() => setShowEditModal(false)}>
+
         <View style={styles.modalOverlay}>
           <View style={styles.editModal}>
             <View style={styles.modalHeader}>
@@ -864,32 +864,32 @@ const InventoryScreen: React.FC = () => {
                   style={styles.formInput}
                   value={editFormData.name}
                   onChangeText={(text) => setEditFormData({ ...editFormData, name: text })}
-                  placeholder="Enter item name"
-                />
+                  placeholder="Enter item name" />
+
               </View>
 
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>Category</Text>
                 <View style={styles.categorySelector}>
-                  {['Vegetables', 'Meat', 'Dairy', 'Pantry', 'Spices', 'Beverages'].map((cat) => (
-                    <TouchableOpacity
-                      key={cat}
-                      style={[
-                        styles.categoryOption,
-                        editFormData.category === cat && styles.categoryOptionSelected,
-                      ]}
-                      onPress={() => setEditFormData({ ...editFormData, category: cat })}
-                    >
+                  {['Vegetables', 'Meat', 'Dairy', 'Pantry', 'Spices', 'Beverages'].map((cat) =>
+                  <TouchableOpacity
+                    key={cat}
+                    style={[
+                    styles.categoryOption,
+                    editFormData.category === cat && styles.categoryOptionSelected]
+                    }
+                    onPress={() => setEditFormData({ ...editFormData, category: cat })}>
+
                       <Text
-                        style={[
-                          styles.categoryOptionText,
-                          editFormData.category === cat && styles.categoryOptionTextSelected,
-                        ]}
-                      >
+                      style={[
+                      styles.categoryOptionText,
+                      editFormData.category === cat && styles.categoryOptionTextSelected]
+                      }>
+
                         {cat}
                       </Text>
                     </TouchableOpacity>
-                  ))}
+                  )}
                 </View>
               </View>
 
@@ -900,11 +900,11 @@ const InventoryScreen: React.FC = () => {
                     style={styles.formInput}
                     value={editFormData.currentStock}
                     onChangeText={(text) =>
-                      setEditFormData({ ...editFormData, currentStock: text })
+                    setEditFormData({ ...editFormData, currentStock: text })
                     }
                     placeholder="0"
-                    keyboardType="numeric"
-                  />
+                    keyboardType="numeric" />
+
                 </View>
 
                 <View style={[styles.formGroup, styles.halfWidth]}>
@@ -914,8 +914,8 @@ const InventoryScreen: React.FC = () => {
                     value={editFormData.unitCost}
                     onChangeText={(text) => setEditFormData({ ...editFormData, unitCost: text })}
                     placeholder="0.00"
-                    keyboardType="decimal-pad"
-                  />
+                    keyboardType="decimal-pad" />
+
                 </View>
               </View>
 
@@ -926,11 +926,11 @@ const InventoryScreen: React.FC = () => {
                     style={styles.formInput}
                     value={editFormData.minimumStock}
                     onChangeText={(text) =>
-                      setEditFormData({ ...editFormData, minimumStock: text })
+                    setEditFormData({ ...editFormData, minimumStock: text })
                     }
                     placeholder="0"
-                    keyboardType="numeric"
-                  />
+                    keyboardType="numeric" />
+
                 </View>
 
                 <View style={[styles.formGroup, styles.halfWidth]}>
@@ -939,11 +939,11 @@ const InventoryScreen: React.FC = () => {
                     style={styles.formInput}
                     value={editFormData.maximumStock}
                     onChangeText={(text) =>
-                      setEditFormData({ ...editFormData, maximumStock: text })
+                    setEditFormData({ ...editFormData, maximumStock: text })
                     }
                     placeholder="0"
-                    keyboardType="numeric"
-                  />
+                    keyboardType="numeric" />
+
                 </View>
               </View>
 
@@ -953,22 +953,22 @@ const InventoryScreen: React.FC = () => {
                   style={styles.formInput}
                   value={editFormData.supplier}
                   onChangeText={(text) => setEditFormData({ ...editFormData, supplier: text })}
-                  placeholder="Enter supplier name"
-                />
+                  placeholder="Enter supplier name" />
+
               </View>
 
               <View style={styles.formActions}>
                 <TouchableOpacity
                   style={[styles.formButton, styles.cancelButton]}
-                  onPress={() => setShowEditModal(false)}
-                >
+                  onPress={() => setShowEditModal(false)}>
+
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[styles.formButton, styles.saveButton]}
-                  onPress={handleSaveEdit}
-                >
+                  onPress={handleSaveEdit}>
+
                   <Icon name="save" size={20} color={Colors.white} />
                   <Text style={styles.saveButtonText}>Save Changes</Text>
                 </TouchableOpacity>
@@ -983,8 +983,8 @@ const InventoryScreen: React.FC = () => {
         visible={showAddItemModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={handleCancelAddItem}
-      >
+        onRequestClose={handleCancelAddItem}>
+
         <View style={styles.modalOverlay}>
           <View style={styles.addItemModal}>
             <View style={styles.modalHeader}>
@@ -1002,32 +1002,32 @@ const InventoryScreen: React.FC = () => {
                   value={newItemFormData.name}
                   onChangeText={(text) => setNewItemFormData({ ...newItemFormData, name: text })}
                   placeholder="Enter item name"
-                  placeholderTextColor={Colors.darkGray}
-                />
+                  placeholderTextColor={Colors.darkGray} />
+
               </View>
 
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>Category</Text>
                 <View style={styles.categorySelector}>
-                  {['Vegetables', 'Meat', 'Dairy', 'Pantry', 'Spices', 'Beverages'].map((cat) => (
-                    <TouchableOpacity
-                      key={cat}
-                      style={[
-                        styles.categoryOption,
-                        newItemFormData.category === cat && styles.categoryOptionSelected,
-                      ]}
-                      onPress={() => setNewItemFormData({ ...newItemFormData, category: cat })}
-                    >
+                  {['Vegetables', 'Meat', 'Dairy', 'Pantry', 'Spices', 'Beverages'].map((cat) =>
+                  <TouchableOpacity
+                    key={cat}
+                    style={[
+                    styles.categoryOption,
+                    newItemFormData.category === cat && styles.categoryOptionSelected]
+                    }
+                    onPress={() => setNewItemFormData({ ...newItemFormData, category: cat })}>
+
                       <Text
-                        style={[
-                          styles.categoryOptionText,
-                          newItemFormData.category === cat && styles.categoryOptionTextSelected,
-                        ]}
-                      >
+                      style={[
+                      styles.categoryOptionText,
+                      newItemFormData.category === cat && styles.categoryOptionTextSelected]
+                      }>
+
                         {cat}
                       </Text>
                     </TouchableOpacity>
-                  ))}
+                  )}
                 </View>
               </View>
 
@@ -1038,12 +1038,12 @@ const InventoryScreen: React.FC = () => {
                     style={styles.formInput}
                     value={newItemFormData.currentStock}
                     onChangeText={(text) =>
-                      setNewItemFormData({ ...newItemFormData, currentStock: text })
+                    setNewItemFormData({ ...newItemFormData, currentStock: text })
                     }
                     placeholder="0"
                     keyboardType="numeric"
-                    placeholderTextColor={Colors.darkGray}
-                  />
+                    placeholderTextColor={Colors.darkGray} />
+
                 </View>
 
                 <View style={[styles.formGroup, styles.halfWidth]}>
@@ -1052,12 +1052,12 @@ const InventoryScreen: React.FC = () => {
                     style={styles.formInput}
                     value={newItemFormData.unitCost}
                     onChangeText={(text) =>
-                      setNewItemFormData({ ...newItemFormData, unitCost: text })
+                    setNewItemFormData({ ...newItemFormData, unitCost: text })
                     }
                     placeholder="0.00"
                     keyboardType="decimal-pad"
-                    placeholderTextColor={Colors.darkGray}
-                  />
+                    placeholderTextColor={Colors.darkGray} />
+
                 </View>
               </View>
 
@@ -1068,12 +1068,12 @@ const InventoryScreen: React.FC = () => {
                     style={styles.formInput}
                     value={newItemFormData.minimumStock}
                     onChangeText={(text) =>
-                      setNewItemFormData({ ...newItemFormData, minimumStock: text })
+                    setNewItemFormData({ ...newItemFormData, minimumStock: text })
                     }
                     placeholder="5"
                     keyboardType="numeric"
-                    placeholderTextColor={Colors.darkGray}
-                  />
+                    placeholderTextColor={Colors.darkGray} />
+
                 </View>
 
                 <View style={[styles.formGroup, styles.halfWidth]}>
@@ -1082,12 +1082,12 @@ const InventoryScreen: React.FC = () => {
                     style={styles.formInput}
                     value={newItemFormData.maximumStock}
                     onChangeText={(text) =>
-                      setNewItemFormData({ ...newItemFormData, maximumStock: text })
+                    setNewItemFormData({ ...newItemFormData, maximumStock: text })
                     }
                     placeholder="50"
                     keyboardType="numeric"
-                    placeholderTextColor={Colors.darkGray}
-                  />
+                    placeholderTextColor={Colors.darkGray} />
+
                 </View>
               </View>
 
@@ -1097,25 +1097,25 @@ const InventoryScreen: React.FC = () => {
                   style={styles.formInput}
                   value={newItemFormData.supplier}
                   onChangeText={(text) =>
-                    setNewItemFormData({ ...newItemFormData, supplier: text })
+                  setNewItemFormData({ ...newItemFormData, supplier: text })
                   }
                   placeholder="Enter supplier name"
-                  placeholderTextColor={Colors.darkGray}
-                />
+                  placeholderTextColor={Colors.darkGray} />
+
               </View>
 
               <View style={styles.formActions}>
                 <TouchableOpacity
                   style={[styles.formButton, styles.cancelButton]}
-                  onPress={handleCancelAddItem}
-                >
+                  onPress={handleCancelAddItem}>
+
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[styles.formButton, styles.saveButton]}
-                  onPress={handleAddNewItem}
-                >
+                  onPress={handleAddNewItem}>
+
                   <Icon name="add" size={20} color={Colors.white} />
                   <Text style={styles.saveButtonText}>Add Item</Text>
                 </TouchableOpacity>
@@ -1129,16 +1129,16 @@ const InventoryScreen: React.FC = () => {
       <ReceiptScanModal
         visible={showReceiptScanModal}
         onClose={() => setShowReceiptScanModal(false)}
-        onSubmit={handleReceiptSubmit}
-      />
-    </SafeAreaView>
-  );
+        onSubmit={handleReceiptSubmit} />
+
+    </SafeAreaView>);
+
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.background
   },
   header: {
     backgroundColor: Colors.primary,
@@ -1146,7 +1146,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    height: 60,
+    height: 60
   },
   backButton: {
     padding: 12,
@@ -1156,35 +1156,35 @@ const styles = StyleSheet.create({
     minWidth: 44,
     minHeight: 44,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   headerCenter: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.white
   },
   headerSubtitle: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: 'rgba(255, 255, 255, 0.8)'
   },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 8
   },
   scanButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)'
   },
   addButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)'
   },
   statsBar: {
     flexDirection: 'row',
@@ -1193,27 +1193,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
-    gap: 12,
+    gap: 12
   },
   statCard: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: Colors.primary
   },
   statLabel: {
     fontSize: 12,
     color: Colors.darkGray,
-    marginTop: 4,
+    marginTop: 4
   },
   searchSection: {
     backgroundColor: Colors.white,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.border
   },
   searchContainer: {
     flexDirection: 'row',
@@ -1223,48 +1223,48 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 12
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
     color: Colors.text,
-    marginLeft: 12,
+    marginLeft: 12
   },
   filterSection: {
     paddingHorizontal: 16,
-    marginBottom: 8,
+    marginBottom: 8
   },
   filterGroup: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   filterGroupTitle: {
     fontSize: 14,
     fontWeight: '600',
     color: Colors.text,
-    marginRight: 12,
+    marginRight: 12
   },
   filterButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     marginRight: 8,
     borderRadius: 16,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.background
   },
   filterButtonActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primary
   },
   filterButtonText: {
     fontSize: 12,
     fontWeight: '500',
-    color: Colors.text,
+    color: Colors.text
   },
   filterButtonTextActive: {
-    color: Colors.white,
+    color: Colors.white
   },
   inventoryList: {
-    padding: 16,
+    padding: 16
   },
   inventoryCard: {
     backgroundColor: Colors.white,
@@ -1275,110 +1275,110 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 2
   },
   itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: 12
   },
   itemInfo: {
-    flex: 1,
+    flex: 1
   },
   itemName: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 4,
+    marginBottom: 4
   },
   itemCategory: {
     fontSize: 12,
     color: Colors.secondary,
-    marginBottom: 2,
+    marginBottom: 2
   },
   itemSupplier: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: Colors.darkGray
   },
   itemActions: {
-    flexDirection: 'row',
+    flexDirection: 'row'
   },
   restockButton: {
     backgroundColor: Colors.primary + '20',
     borderRadius: 20,
-    padding: 8,
+    padding: 8
   },
   stockInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 12
   },
   stockLevel: {
     flex: 1,
-    marginRight: 12,
+    marginRight: 12
   },
   stockBar: {
     height: 6,
     backgroundColor: Colors.lightGray,
     borderRadius: 3,
-    marginBottom: 4,
+    marginBottom: 4
   },
   stockProgress: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 3
   },
   stockText: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: Colors.darkGray
   },
   statusBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 12
   },
   statusText: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '600'
   },
   itemMetrics: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: Colors.border
   },
   metric: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   metricText: {
     fontSize: 12,
     color: Colors.darkGray,
-    marginLeft: 4,
+    marginLeft: 4
   },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 100,
+    paddingVertical: 100
   },
   emptyStateText: {
     fontSize: 18,
     fontWeight: '500',
     color: Colors.text,
-    marginTop: 16,
+    marginTop: 16
   },
   emptyStateSubtext: {
     fontSize: 14,
     color: Colors.darkGray,
-    marginTop: 8,
+    marginTop: 8
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   itemModal: {
     backgroundColor: Colors.white,
@@ -1389,7 +1389,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    elevation: 10,
+    elevation: 10
   },
   restockModal: {
     backgroundColor: Colors.white,
@@ -1400,7 +1400,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    elevation: 10,
+    elevation: 10
   },
   modalHeader: {
     flexDirection: 'row',
@@ -1408,53 +1408,53 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.border
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.text,
+    color: Colors.text
   },
   modalContent: {
-    padding: 20,
+    padding: 20
   },
   itemProfile: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 24
   },
   profileItemName: {
     fontSize: 24,
     fontWeight: 'bold',
     color: Colors.text,
-    marginBottom: 8,
+    marginBottom: 8
   },
   profileCategory: {
     fontSize: 16,
     color: Colors.secondary,
-    marginBottom: 8,
+    marginBottom: 8
   },
   profileStatus: {
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 12
   },
   profileStatusText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600'
   },
   stockDetails: {
-    marginBottom: 24,
+    marginBottom: 24
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 12,
+    marginBottom: 12
   },
   stockGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 12
   },
   stockCard: {
     flex: 1,
@@ -1462,35 +1462,35 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   stockCardValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: Colors.primary
   },
   stockCardLabel: {
     fontSize: 12,
     color: Colors.darkGray,
     marginTop: 4,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   supplierDetails: {
-    marginBottom: 24,
+    marginBottom: 24
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 8
   },
   detailText: {
     fontSize: 14,
     color: Colors.text,
-    marginLeft: 12,
+    marginLeft: 12
   },
   actionButtons: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 12
   },
   actionButton: {
     flex: 1,
@@ -1498,44 +1498,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 8
   },
   restockActionButton: {
-    backgroundColor: Colors.success,
+    backgroundColor: Colors.success
   },
   editActionButton: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: Colors.secondary
   },
   actionButtonText: {
     color: Colors.white,
     fontSize: 14,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: 8
   },
   restockContent: {
-    padding: 20,
+    padding: 20
   },
   restockItemName: {
     fontSize: 20,
     fontWeight: 'bold',
     color: Colors.text,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 8
   },
   restockCurrentStock: {
     fontSize: 14,
     color: Colors.darkGray,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 24
   },
   restockInputSection: {
-    marginBottom: 24,
+    marginBottom: 24
   },
   inputLabel: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 8,
+    marginBottom: 8
   },
   quantityInput: {
     borderWidth: 1,
@@ -1545,48 +1545,48 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: Colors.text,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   restockSummary: {
     backgroundColor: Colors.background,
     borderRadius: 12,
     padding: 16,
-    marginBottom: 24,
+    marginBottom: 24
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 8
   },
   totalRow: {
     marginTop: 8,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: Colors.border
   },
   summaryLabel: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: Colors.darkGray
   },
   summaryValue: {
     fontSize: 14,
-    color: Colors.text,
+    color: Colors.text
   },
   summaryTotal: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: Colors.primary
   },
   confirmRestockButton: {
     backgroundColor: Colors.success,
     borderRadius: 8,
     paddingVertical: 16,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   confirmRestockText: {
     color: Colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600'
   },
   // Edit Modal Styles
   editModal: {
@@ -1598,7 +1598,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    elevation: 10,
+    elevation: 10
   },
   // Add Item Modal Styles
   addItemModal: {
@@ -1610,24 +1610,24 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    elevation: 10,
+    elevation: 10
   },
   addItemContent: {
     padding: 20,
-    maxHeight: 600,
+    maxHeight: 600
   },
   editContent: {
     padding: 20,
-    maxHeight: 600,
+    maxHeight: 600
   },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: 20
   },
   formLabel: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 8,
+    marginBottom: 8
   },
   formInput: {
     borderWidth: 1,
@@ -1637,19 +1637,19 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: Colors.text,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.white
   },
   formRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 12
   },
   halfWidth: {
-    flex: 1,
+    flex: 1
   },
   categorySelector: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 8
   },
   categoryOption: {
     paddingHorizontal: 12,
@@ -1657,24 +1657,24 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: Colors.border,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.background
   },
   categoryOptionSelected: {
     backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    borderColor: Colors.primary
   },
   categoryOptionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: Colors.text
   },
   categoryOptionTextSelected: {
-    color: Colors.white,
+    color: Colors.white
   },
   formActions: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 24,
+    marginTop: 24
   },
   formButton: {
     flex: 1,
@@ -1682,48 +1682,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 8
   },
   cancelButton: {
     backgroundColor: Colors.background,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.border
   },
   saveButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primary
   },
   cancelButtonText: {
     color: Colors.text,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600'
   },
   saveButtonText: {
     color: Colors.white,
     fontSize: 16,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: 8
   },
-  // Styles for LoadingView and Error/Retry will be implicitly handled by LoadingView component
-  // but ensure emptyState styles are robust.
-  // Centered style for the LoadingView/ErrorView wrapper if not using Fullscreen component
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
+
+
+
+
+
+
+
   // Specific retry button style if not part of a generic ErrorDisplayComponent
   retryButton: {
     marginTop: 20,
     backgroundColor: Colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: 8
   },
   retryButtonText: {
     color: Colors.white,
     fontSize: 16,
-    fontWeight: '600',
-  },
+    fontWeight: '600'
+  }
 });
 
 export default InventoryScreen;

@@ -50,7 +50,7 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
   columns = { xs: 1, sm: 2, md: 3, lg: 4, xl: 5, xxl: 6 },
   spacing: spacingProp = { xs: 2, sm: 3, md: 4 },
   style,
-  testID,
+  testID
 }) => {
   const { theme } = useTheme();
   const currentColumns = useResponsiveColumns(columns, 1);
@@ -71,45 +71,45 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
 
   return (
     <View style={[dynamicStyles.grid, style]} testID={testID}>
-      {rows.map((row, rowIndex) => (
-        <View key={rowIndex} style={[dynamicStyles.row, dynamicStyles.rowWithMargin]}>
+      {rows.map((row, rowIndex) =>
+      <View key={rowIndex} style={[dynamicStyles.row, dynamicStyles.rowWithMargin]}>
           {row.map((child, itemIndex) => {
-            const isFirstItem = itemIndex === 0;
-            const isLastItem = itemIndex === row.length - 1;
+          const isFirstItem = itemIndex === 0;
+          const isLastItem = itemIndex === row.length - 1;
 
-            return (
-              <View
-                key={itemIndex}
-                style={[
-                  dynamicStyles.item,
-                  !isFirstItem && dynamicStyles.itemWithLeftPadding,
-                  !isLastItem && dynamicStyles.itemWithRightPadding,
-                ]}
-              >
+          return (
+            <View
+              key={itemIndex}
+              style={[
+              dynamicStyles.item,
+              !isFirstItem && dynamicStyles.itemWithLeftPadding,
+              !isLastItem && dynamicStyles.itemWithRightPadding]
+              }>
+
                 {child}
-              </View>
-            );
-          })}
+              </View>);
+
+        })}
           {/* Fill empty columns in the last row */}
           {row.length < currentColumns &&
-            Array.from({ length: currentColumns - row.length }).map((_, emptyIndex) => {
-              const isLastEmpty = emptyIndex === currentColumns - row.length - 1;
+        Array.from({ length: currentColumns - row.length }).map((_, emptyIndex) => {
+          const isLastEmpty = emptyIndex === currentColumns - row.length - 1;
 
-              return (
-                <View
-                  key={`empty-${emptyIndex}`}
-                  style={[
-                    dynamicStyles.item,
-                    dynamicStyles.itemWithLeftPadding,
-                    !isLastEmpty && dynamicStyles.itemWithRightPadding,
-                  ]}
-                />
-              );
-            })}
+          return (
+            <View
+              key={`empty-${emptyIndex}`}
+              style={[
+              dynamicStyles.item,
+              dynamicStyles.itemWithLeftPadding,
+              !isLastEmpty && dynamicStyles.itemWithRightPadding]
+              } />);
+
+
+        })}
         </View>
-      ))}
-    </View>
-  );
+      )}
+    </View>);
+
 };
 
 // Grid Item Component with span support
@@ -124,25 +124,25 @@ const createDynamicStyles = (_theme: Theme, columns: number, spacing: number) =>
   const halfSpacing = spacing / 2;
 
   return StyleSheet.create({
-    grid: {
-      // Base grid container
-    },
-    row: {
-      flexDirection: 'row',
-      alignItems: 'stretch',
-    },
-    rowWithMargin: {
-      marginBottom: spacing,
-    },
-    item: {
-      width: itemWidth,
-    },
-    itemWithLeftPadding: {
-      paddingLeft: halfSpacing,
-    },
-    itemWithRightPadding: {
-      paddingRight: halfSpacing,
-    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   });
 };
 

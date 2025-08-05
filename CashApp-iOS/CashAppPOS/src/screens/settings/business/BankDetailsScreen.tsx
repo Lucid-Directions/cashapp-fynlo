@@ -10,8 +10,8 @@ import {
   ScrollView,
   Alert,
   KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+  Platform } from
+'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -45,7 +45,7 @@ const BankDetailsScreen: React.FC = () => {
     swiftCode: '',
     accountType: 'business',
     currency: 'GBP',
-    primaryAccount: true,
+    primaryAccount: true
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -83,7 +83,7 @@ const BankDetailsScreen: React.FC = () => {
           swiftCode: 'LOYDGB2L',
           accountType: 'business',
           currency: 'GBP',
-          primaryAccount: true,
+          primaryAccount: true
         });
       }, 1000);
     });
@@ -92,11 +92,11 @@ const BankDetailsScreen: React.FC = () => {
   const handleSave = async () => {
     // Validate required fields
     if (
-      !bankDetails.accountHolderName.trim() ||
-      !bankDetails.bankName.trim() ||
-      !bankDetails.accountNumber.trim() ||
-      !bankDetails.sortCode.trim()
-    ) {
+    !bankDetails.accountHolderName.trim() ||
+    !bankDetails.bankName.trim() ||
+    !bankDetails.accountNumber.trim() ||
+    !bankDetails.sortCode.trim())
+    {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
@@ -122,9 +122,9 @@ const BankDetailsScreen: React.FC = () => {
 
       Alert.alert(
         'Success',
-        hasExistingDetails
-          ? 'Bank details updated successfully'
-          : 'Bank details saved successfully',
+        hasExistingDetails ?
+        'Bank details updated successfully' :
+        'Bank details saved successfully',
         [{ text: 'OK', onPress: () => navigation.goBack() }]
       );
     } catch (error) {
@@ -190,13 +190,13 @@ const BankDetailsScreen: React.FC = () => {
 
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
+          keyboardShouldPersistTaps="handled">
+
           {/* Security Notice */}
           <View style={styles.securityNotice}>
             <Icon name="security" size={24} color={Colors.secondary} />
@@ -230,8 +230,8 @@ const BankDetailsScreen: React.FC = () => {
               value={bankDetails.bankName}
               onValueChange={(text) => setBankDetails({ ...bankDetails, bankName: text })}
               autoCapitalize="words"
-              placeholderTextColor={Colors.darkGray}
-            />
+              placeholderTextColor={Colors.darkGray} />
+
           </View>
 
           {/* Account Number */}
@@ -243,8 +243,8 @@ const BankDetailsScreen: React.FC = () => {
               onValueChange={handleAccountNumberChange}
               keyboardType="number-pad"
               maxLength={8}
-              placeholderTextColor={Colors.darkGray}
-            />
+              placeholderTextColor={Colors.darkGray} />
+
           </View>
 
           {/* Sort Code */}
@@ -256,8 +256,8 @@ const BankDetailsScreen: React.FC = () => {
               onValueChange={handleSortCodeChange}
               keyboardType="number-pad"
               maxLength={8}
-              placeholderTextColor={Colors.darkGray}
-            />
+              placeholderTextColor={Colors.darkGray} />
+
           </View>
 
           {/* IBAN (Optional) */}
@@ -268,8 +268,8 @@ const BankDetailsScreen: React.FC = () => {
               value={bankDetails.iban}
               onValueChange={(text) => setBankDetails({ ...bankDetails, iban: text.toUpperCase() })}
               autoCapitalize="characters"
-              placeholderTextColor={Colors.darkGray}
-            />
+              placeholderTextColor={Colors.darkGray} />
+
           </View>
 
           {/* SWIFT Code (Optional) */}
@@ -279,11 +279,11 @@ const BankDetailsScreen: React.FC = () => {
               placeholder="e.g., LOYDGB2L"
               value={bankDetails.swiftCode}
               onValueChange={(text) =>
-                setBankDetails({ ...bankDetails, swiftCode: text.toUpperCase() })
+              setBankDetails({ ...bankDetails, swiftCode: text.toUpperCase() })
               }
               autoCapitalize="characters"
-              placeholderTextColor={Colors.darkGray}
-            />
+              placeholderTextColor={Colors.darkGray} />
+
           </View>
 
           {/* Account Type */}
@@ -292,44 +292,44 @@ const BankDetailsScreen: React.FC = () => {
             <View style={styles.accountTypeSelector}>
               <TouchableOpacity
                 style={[
-                  styles.accountTypeOption,
-                  bankDetails.accountType === 'business' && styles.accountTypeOptionSelected,
-                ]}
-                onPress={() => setBankDetails({ ...bankDetails, accountType: 'business' })}
-              >
+                styles.accountTypeOption,
+                bankDetails.accountType === 'business' && styles.accountTypeOptionSelected]
+                }
+                onPress={() => setBankDetails({ ...bankDetails, accountType: 'business' })}>
+
                 <Icon
                   name="business"
                   size={20}
-                  color={bankDetails.accountType === 'business' ? Colors.white : Colors.primary}
-                />
+                  color={bankDetails.accountType === 'business' ? Colors.white : Colors.primary} />
+
                 <Text
                   style={[
-                    styles.accountTypeText,
-                    bankDetails.accountType === 'business' && styles.accountTypeTextSelected,
-                  ]}
-                >
+                  styles.accountTypeText,
+                  bankDetails.accountType === 'business' && styles.accountTypeTextSelected]
+                  }>
+
                   Business Account
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[
-                  styles.accountTypeOption,
-                  bankDetails.accountType === 'personal' && styles.accountTypeOptionSelected,
-                ]}
-                onPress={() => setBankDetails({ ...bankDetails, accountType: 'personal' })}
-              >
+                styles.accountTypeOption,
+                bankDetails.accountType === 'personal' && styles.accountTypeOptionSelected]
+                }
+                onPress={() => setBankDetails({ ...bankDetails, accountType: 'personal' })}>
+
                 <Icon
                   name="person"
                   size={20}
-                  color={bankDetails.accountType === 'personal' ? Colors.white : Colors.primary}
-                />
+                  color={bankDetails.accountType === 'personal' ? Colors.white : Colors.primary} />
+
                 <Text
                   style={[
-                    styles.accountTypeText,
-                    bankDetails.accountType === 'personal' && styles.accountTypeTextSelected,
-                  ]}
-                >
+                  styles.accountTypeText,
+                  bankDetails.accountType === 'personal' && styles.accountTypeTextSelected]
+                  }>
+
                   Personal Account
                 </Text>
               </TouchableOpacity>
@@ -359,14 +359,14 @@ const BankDetailsScreen: React.FC = () => {
           <View style={styles.footerPadding} />
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
-  );
+    </SafeAreaView>);
+
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.background
   },
   header: {
     backgroundColor: Colors.primary,
@@ -374,40 +374,40 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    height: 70,
+    height: 70
   },
   backButton: {
-    padding: 8,
+    padding: 8
   },
   headerCenter: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.white
   },
   headerSubtitle: {
     fontSize: 12,
     color: 'rgba(255, 255, 255, 0.8)',
-    marginTop: 2,
+    marginTop: 2
   },
   saveButton: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 8
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.white,
+    color: Colors.white
   },
   keyboardView: {
-    flex: 1,
+    flex: 1
   },
   scrollView: {
     flex: 1,
-    padding: 16,
+    padding: 16
   },
   securityNotice: {
     backgroundColor: Colors.white,
@@ -420,45 +420,45 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 2
   },
   securityContent: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 12
   },
   securityTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 4,
+    marginBottom: 4
   },
   securityText: {
     fontSize: 14,
     color: Colors.darkGray,
-    lineHeight: 20,
+    lineHeight: 20
   },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: 20
   },
   formLabel: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 8,
+    marginBottom: 8
   },
-  formInput: {
-    backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: Colors.text,
-  },
+
+
+
+
+
+
+
+
+
+
   accountTypeSelector: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 12
   },
   accountTypeOption: {
     flex: 1,
@@ -470,19 +470,19 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
     borderRadius: 8,
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 16
   },
   accountTypeOptionSelected: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primary
   },
   accountTypeText: {
     fontSize: 14,
     fontWeight: '600',
     color: Colors.primary,
-    marginLeft: 8,
+    marginLeft: 8
   },
   accountTypeTextSelected: {
-    color: Colors.white,
+    color: Colors.white
   },
   infoSection: {
     backgroundColor: Colors.white,
@@ -493,28 +493,28 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 2
   },
   infoTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 12,
+    marginBottom: 12
   },
   infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 8
   },
   infoText: {
     fontSize: 14,
     color: Colors.darkGray,
     marginLeft: 12,
-    flex: 1,
+    flex: 1
   },
   footerPadding: {
-    height: 40,
-  },
+    height: 40
+  }
 });
 
 export default BankDetailsScreen;

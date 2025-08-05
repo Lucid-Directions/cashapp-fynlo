@@ -43,7 +43,7 @@ const Container: React.FC<ContainerProps> = ({
   padding = { xs: 4, sm: 4, md: 6, lg: 8 },
   centered = true,
   style,
-  testID,
+  testID
 }) => {
   const { theme } = useTheme();
   const { width: screenWidth, isPhone, isTablet } = useResponsive();
@@ -68,21 +68,21 @@ const Container: React.FC<ContainerProps> = ({
   const containerMaxWidth = getMaxWidth();
 
   const containerStyle: ViewStyle = [
-    styles.container,
-    {
-      paddingHorizontal: theme.spacing[currentPadding],
-      maxWidth: containerMaxWidth,
-      width: variant === 'fluid' ? '100%' : undefined,
-      alignSelf: centered ? 'center' : undefined,
-    },
-    style,
-  ].filter(Boolean) as ViewStyle;
+  styles.container,
+  {
+    paddingHorizontal: theme.spacing[currentPadding],
+    maxWidth: containerMaxWidth,
+    width: variant === 'fluid' ? '100%' : undefined,
+    alignSelf: centered ? 'center' : undefined
+  },
+  style].
+  filter(Boolean) as ViewStyle;
 
   return (
     <View style={containerStyle} testID={testID}>
       {children}
-    </View>
-  );
+    </View>);
+
 };
 
 // Section Container Component
@@ -108,7 +108,7 @@ export const Section: React.FC<SectionProps> = ({
   subtitle,
   padding = { xs: 4, sm: 6, md: 8 },
   background = 'transparent',
-  style,
+  style
 }) => {
   const { theme } = useTheme();
   const currentPadding = useResponsiveValue(padding, 4);
@@ -127,7 +127,7 @@ export const Section: React.FC<SectionProps> = ({
   // Theme-based dynamic styles for section header
   const sectionHeaderStyle = {
     ...styles.sectionHeader,
-    marginBottom: theme.spacing[6],
+    marginBottom: theme.spacing[6]
   };
 
   const sectionTitleStyle = {
@@ -135,37 +135,37 @@ export const Section: React.FC<SectionProps> = ({
     fontSize: theme.typography.fontSize['2xl'],
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text,
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[2]
   };
 
   const sectionSubtitleStyle = {
     ...styles.sectionSubtitle,
     fontSize: theme.typography.fontSize.lg,
-    color: theme.colors.neutral[600],
+    color: theme.colors.neutral[600]
   };
 
   return (
     <View
       style={[
-        styles.section,
-        {
-          backgroundColor: getBackgroundColor(),
-          paddingVertical: theme.spacing[currentPadding],
-        },
-        style,
-      ]}
-    >
+      styles.section,
+      {
+        backgroundColor: getBackgroundColor(),
+        paddingVertical: theme.spacing[currentPadding]
+      },
+      style]
+      }>
+
       <Container>
-        {(title || subtitle) && (
-          <View style={sectionHeaderStyle}>
+        {(title || subtitle) &&
+        <View style={sectionHeaderStyle}>
             {title && <Text style={sectionTitleStyle}>{title}</Text>}
             {subtitle && <Text style={sectionSubtitleStyle}>{subtitle}</Text>}
           </View>
-        )}
+        }
         {children}
       </Container>
-    </View>
-  );
+    </View>);
+
 };
 
 // Spacer Component for responsive spacing
@@ -183,7 +183,7 @@ export interface SpacerProps {
 
 export const Spacer: React.FC<SpacerProps> = ({
   size = { xs: 4, sm: 6, md: 8 },
-  horizontal = false,
+  horizontal = false
 }) => {
   const { theme } = useTheme();
   const currentSize = useResponsiveValue(size, 4);
@@ -191,11 +191,11 @@ export const Spacer: React.FC<SpacerProps> = ({
 
   return (
     <View
-      style={{
-        [horizontal ? 'width' : 'height']: spacingValue,
-      }}
-    />
-  );
+      style={styles.style1} />);
+
+
+
+
 };
 
 // Row Component for horizontal layouts
@@ -211,12 +211,12 @@ export interface RowProps {
   };
   align?: 'flex-start' | 'center' | 'flex-end' | 'stretch';
   justify?:
-    | 'flex-start'
-    | 'center'
-    | 'flex-end'
-    | 'space-between'
-    | 'space-around'
-    | 'space-evenly';
+  'flex-start' |
+  'center' |
+  'flex-end' |
+  'space-between' |
+  'space-around' |
+  'space-evenly';
   wrap?: boolean;
   style?: ViewStyle;
 }
@@ -227,7 +227,7 @@ export const Row: React.FC<RowProps> = ({
   align = 'center',
   justify = 'flex-start',
   wrap = false,
-  style,
+  style
 }) => {
   const { theme } = useTheme();
   const currentSpacing = useResponsiveValue(spacingProp, 3);
@@ -240,44 +240,44 @@ export const Row: React.FC<RowProps> = ({
       <React.Fragment key={index}>
         {child}
         {!isLast && <View style={styles.style1} />}
-      </React.Fragment>
-    );
+      </React.Fragment>);
+
   });
 
   return (
     <View
       style={[
-        {
-          flexDirection: 'row',
-          alignItems: align,
-          justifyContent: justify,
-          flexWrap: wrap ? 'wrap' : 'nowrap',
-        },
-        style,
-      ]}
-    >
+      {
+        flexDirection: 'row',
+        alignItems: align,
+        justifyContent: justify,
+        flexWrap: wrap ? 'wrap' : 'nowrap'
+      },
+      style]
+      }>
+
       {childrenWithSpacing}
-    </View>
-  );
+    </View>);
+
 };
 
 // Static styles - no theme dependencies
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    width: '100%'
   },
   section: {
-    width: '100%',
+    width: '100%'
   },
   sectionHeader: {
+
     // marginBottom will be added inline with theme.spacing[6]
-  },
-  sectionTitle: {
+  }, sectionTitle: {
+
     // fontSize, fontWeight, color, marginBottom will be added inline
-  },
-  sectionSubtitle: {
+  }, sectionSubtitle: {
+
     // fontSize and color will be added inline
-  },
-});
+  }, style1: { [horizontal ? 'width' : 'height']: spacingValue } });
 
 export default Container;

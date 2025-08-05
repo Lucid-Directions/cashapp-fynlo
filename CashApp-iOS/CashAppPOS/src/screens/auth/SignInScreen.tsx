@@ -11,8 +11,8 @@ import {
   ScrollView,
   ActivityIndicator,
   Switch,
-  _Image,
-} from 'react-native';
+  _Image } from
+'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -35,7 +35,7 @@ const Colors = {
   darkGray: '#666666',
   text: '#333333',
   lightText: '#666666',
-  border: '#DDDDDD',
+  border: '#DDDDDD'
 };
 
 interface SignInScreenProps {
@@ -50,10 +50,10 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
   const [rememberMe, setRememberMe] = useState(true);
   const [_showPassword, _setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{email?: string;password?: string;}>({});
 
   const validateForm = () => {
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors: {email?: string;password?: string;} = {};
 
     if (!email.trim()) {
       newErrors.email = 'Email is required';
@@ -114,13 +114,13 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
         );
       } else {
         Alert.alert('Email Not Found', 'No account found with this email address.', [
-          { text: 'OK' },
-        ]);
+        { text: 'OK' }]
+        );
       }
     } catch (_error) {
       Alert.alert('Error', 'Unable to send password reset email. Please try again.', [
-        { text: 'OK' },
-      ]);
+      { text: 'OK' }]
+      );
     } finally {
       setIsLoading(false);
     }
@@ -130,45 +130,45 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
     Alert.alert(
       'Quick Sign In',
       'Select an account to sign in:\n\n' +
-        '🏢 Platform Owner (Full Control):\n' +
-        'See all restaurants, platform analytics, and settings\n\n' +
-        '🍴 Restaurant Owner:\n' +
-        'Manage your restaurant\n' +
-        'Full restaurant control and analytics\n\n' +
-        '👩‍💼 Restaurant Manager (Sarah):\n' +
-        'Day-to-day operations and staff management\n\n' +
-        '🎯 Demo Account:\n' +
-        'General manager access for testing',
+      '🏢 Platform Owner (Full Control):\n' +
+      'See all restaurants, platform analytics, and settings\n\n' +
+      '🍴 Restaurant Owner:\n' +
+      'Manage your restaurant\n' +
+      'Full restaurant control and analytics\n\n' +
+      '👩‍💼 Restaurant Manager (Sarah):\n' +
+      'Day-to-day operations and staff management\n\n' +
+      '🎯 Demo Account:\n' +
+      'General manager access for testing',
       [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Platform Owner',
-          onPress: () => {
-            setEmail('owner@fynlopos.com');
-            setPassword('platformowner123');
-          },
-        },
-        {
-          text: 'Restaurant Owner',
-          onPress: () => {
-            setEmail('carlos@casaestrella.co.uk');
-            setPassword('password123');
-          },
-        },
-      ]
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Platform Owner',
+        onPress: () => {
+          setEmail('owner@fynlopos.com');
+          setPassword('platformowner123');
+        }
+      },
+      {
+        text: 'Restaurant Owner',
+        onPress: () => {
+          setEmail('carlos@casaestrella.co.uk');
+          setPassword('password123');
+        }
+      }]
+
     );
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
+
         {/* Header */}
         <View style={styles.header}>
           <Logo size="large" showText={false} />
@@ -193,8 +193,8 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
-              autoComplete="email"
-            />
+              autoComplete="email" />
+
             {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
           </View>
 
@@ -209,8 +209,8 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
               }}
               placeholder="Enter your password"
               secureTextEntry={true} // Fixed prop name
-              autoComplete="password"
-            />
+              autoComplete="password" />
+
             {/* Note: Password visibility toggle icon is removed */}
             {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
           </View>
@@ -219,15 +219,15 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           <View style={styles.optionsRow}>
             <TouchableOpacity
               style={styles.rememberMeContainer}
-              onPress={() => setRememberMe(!rememberMe)}
-            >
+              onPress={() => setRememberMe(!rememberMe)}>
+
               <Switch
                 value={rememberMe}
                 onValueChange={setRememberMe}
                 trackColor={{ false: Colors.lightGray, true: Colors.primary }}
                 thumbColor={Colors.white}
-                style={styles.switch}
-              />
+                style={styles.switch} />
+
               <Text style={styles.rememberMeText}>Remember me</Text>
             </TouchableOpacity>
 
@@ -240,29 +240,29 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           <TouchableOpacity
             style={[styles.signInButton, isLoading && styles.signInButtonDisabled]}
             onPress={handleSignIn}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color={Colors.white} />
-            ) : (
-              <>
+            disabled={isLoading}>
+
+            {isLoading ?
+            <ActivityIndicator size="small" color={Colors.white} /> :
+
+            <>
                 <Icon name="login" size={20} color={Colors.white} />
                 <Text style={styles.signInButtonText}>Sign In</Text>
               </>
-            )}
+            }
           </TouchableOpacity>
 
           {/* Quick Sign In Button */}
-          {isFeatureEnabled('QUICK_SIGNIN_ENABLED') && (
-            <TouchableOpacity
-              style={styles.demoButton}
-              onPress={showDemoCredentials}
-              disabled={isLoading}
-            >
+          {isFeatureEnabled('QUICK_SIGNIN_ENABLED') &&
+          <TouchableOpacity
+            style={styles.demoButton}
+            onPress={showDemoCredentials}
+            disabled={isLoading}>
+
               <Icon name="flash-on" size={20} color={Colors.secondary} />
               <Text style={styles.demoButtonText}>Quick Sign In</Text>
             </TouchableOpacity>
-          )}
+          }
 
           {/* Divider */}
           <View style={styles.divider}>
@@ -309,30 +309,30 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
-  );
+    </KeyboardAvoidingView>);
+
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.background
   },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
     paddingTop: 60,
-    paddingBottom: 32,
+    paddingBottom: 32
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 40
   },
   subtitle: {
     fontSize: 16,
     color: Colors.lightText,
     textAlign: 'center',
-    marginTop: 16,
+    marginTop: 16
   },
   formContainer: {
     backgroundColor: Colors.white,
@@ -343,76 +343,76 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 4
   },
   formTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: Colors.text,
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   formSubtitle: {
     fontSize: 16,
     color: Colors.lightText,
     marginBottom: 32,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 20
   },
-  inputLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.background,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    gap: 12,
-  },
-  inputError: {
-    borderColor: Colors.danger,
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 16,
-    color: Colors.text,
-  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   errorText: {
     fontSize: 14,
     color: Colors.danger,
-    marginTop: 4,
+    marginTop: 4
   },
   optionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 24
   },
   rememberMeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 8
   },
   switch: {
-    transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }],
+    transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }]
   },
   rememberMeText: {
     fontSize: 14,
-    color: Colors.text,
+    color: Colors.text
   },
   forgotPasswordText: {
     fontSize: 14,
     color: Colors.secondary,
-    fontWeight: '500',
+    fontWeight: '500'
   },
   signInButton: {
     backgroundColor: Colors.primary,
@@ -422,15 +422,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginBottom: 16,
+    marginBottom: 16
   },
   signInButtonDisabled: {
-    opacity: 0.7,
+    opacity: 0.7
   },
   signInButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.white
   },
   demoButton: {
     backgroundColor: Colors.white,
@@ -442,41 +442,41 @@ const styles = StyleSheet.create({
     gap: 8,
     borderWidth: 1,
     borderColor: Colors.secondary,
-    marginBottom: 24,
+    marginBottom: 24
   },
   demoButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.secondary,
+    color: Colors.secondary
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 24,
-    gap: 16,
+    gap: 16
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.border
   },
   dividerText: {
     fontSize: 14,
-    color: Colors.mediumGray,
+    color: Colors.mediumGray
   },
   signUpContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   signUpText: {
     fontSize: 16,
-    color: Colors.lightText,
+    color: Colors.lightText
   },
   signUpLinkText: {
     fontSize: 16,
     color: Colors.primary,
-    fontWeight: '500',
+    fontWeight: '500'
   },
   featuresContainer: {
     backgroundColor: Colors.white,
@@ -486,34 +486,34 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 4
   },
   featuresTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: Colors.text,
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
-    gap: 16,
+    gap: 16
   },
   featureText: {
-    flex: 1,
+    flex: 1
   },
   featureName: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 4,
+    marginBottom: 4
   },
   featureDescription: {
     fontSize: 14,
-    color: Colors.lightText,
-  },
+    color: Colors.lightText
+  }
 });
 
 export default SignInScreen;

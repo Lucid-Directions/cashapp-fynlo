@@ -15,8 +15,8 @@ import {
   _Switch,
   _TextInput,
   Text,
-  TouchableOpacity,
-} from 'react-native';
+  TouchableOpacity } from
+'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -80,7 +80,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
           category: config.category,
           description: config.description,
           can_override: config.can_override,
-          override_id: config.override_id,
+          override_id: config.override_id
         };
       });
 
@@ -104,7 +104,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
         source: 'platform',
         category: 'business',
         description: 'Maximum discount percentage allowed',
-        can_override: true,
+        can_override: true
       },
       'payment.markup.qr_code': {
         key: 'payment.markup.qr_code',
@@ -113,7 +113,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
         category: 'payment_fees',
         description: 'QR Code payment markup',
         can_override: true,
-        override_id: 'override-123',
+        override_id: 'override-123'
       },
       'ui.theme.primary_color': {
         key: 'ui.theme.primary_color',
@@ -121,7 +121,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
         source: 'platform',
         category: 'ui',
         description: 'Primary brand color',
-        can_override: true,
+        can_override: true
       },
       'security.max_login_attempts': {
         key: 'security.max_login_attempts',
@@ -129,7 +129,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
         source: 'platform',
         category: 'security',
         description: 'Maximum login attempts before lockout',
-        can_override: false,
+        can_override: false
       },
       'payment.fees.stripe': {
         key: 'payment.fees.stripe',
@@ -137,8 +137,8 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
         source: 'platform',
         category: 'payment_fees',
         description: 'Stripe payment processing fee',
-        can_override: false,
-      },
+        can_override: false
+      }
     };
 
     setEffectiveSettings(mockSettings);
@@ -173,9 +173,9 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
       if (success) {
         Alert.alert(
           'Override Request Submitted',
-          requiresApproval
-            ? 'Your override request has been submitted for platform approval.'
-            : 'Setting override has been applied successfully.'
+          requiresApproval ?
+          'Your override request has been submitted for platform approval.' :
+          'Setting override has been applied successfully.'
         );
 
         // Reload settings to show updated values
@@ -205,43 +205,43 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
       'Request Setting Override',
       `Current value: ${JSON.stringify(setting.value)}\n\nEnter new value:`,
       [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Submit Request',
-          onPress: (newValueString) => {
-            if (!newValueString) return;
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Submit Request',
+        onPress: (newValueString) => {
+          if (!newValueString) return;
 
+          try {
+            // Parse the new value (this is simplified - real implementation would have proper type handling)
+            let newValue;
             try {
-              // Parse the new value (this is simplified - real implementation would have proper type handling)
-              let newValue;
-              try {
-                newValue = JSON.parse(newValueString);
-              } catch {
-                // If not valid JSON, treat as string
-                newValue = newValueString;
-              }
-
-              Alert.prompt(
-                'Reason for Override',
-                'Please provide a reason for this override request:',
-                [
-                  { text: 'Cancel', style: 'cancel' },
-                  {
-                    text: 'Submit',
-                    onPress: (reason) => {
-                      if (reason && reason.trim().length > 0) {
-                        requestOverride(setting, newValue, reason.trim());
-                      }
-                    },
-                  },
-                ]
-              );
-            } catch (_error) {
-              Alert.alert('Error', 'Invalid value format');
+              newValue = JSON.parse(newValueString);
+            } catch {
+              // If not valid JSON, treat as string
+              newValue = newValueString;
             }
-          },
-        },
-      ]
+
+            Alert.prompt(
+              'Reason for Override',
+              'Please provide a reason for this override request:',
+              [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Submit',
+                onPress: (reason) => {
+                  if (reason && reason.trim().length > 0) {
+                    requestOverride(setting, newValue, reason.trim());
+                  }
+                }
+              }]
+
+            );
+          } catch (_error) {
+            Alert.alert('Error', 'Invalid value format');
+          }
+        }
+      }]
+
     );
   };
 
@@ -259,36 +259,36 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
   };
 
   const getCategoryInfo = (category: string) => {
-    const categoryInfo: Record<string, { title: string; icon: string; color: string }> = {
+    const categoryInfo: Record<string, {title: string;icon: string;color: string;}> = {
       payment_fees: {
         title: 'Payment Processing',
         icon: 'payment',
-        color: theme.colors.primary,
+        color: theme.colors.primary
       },
       business: {
         title: 'Business Rules',
         icon: 'business',
-        color: '#3498DB',
+        color: '#3498DB'
       },
       ui: {
         title: 'UI Customization',
         icon: 'palette',
-        color: '#9B59B6',
+        color: '#9B59B6'
       },
       security: {
         title: 'Security Settings',
         icon: 'security',
-        color: '#E74C3C',
-      },
+        color: '#E74C3C'
+      }
     };
 
     return (
       categoryInfo[category] || {
         title: category.charAt(0).toUpperCase() + category.slice(1),
         icon: 'settings',
-        color: theme.colors.textLight,
-      }
-    );
+        color: theme.colors.textLight
+      });
+
   };
 
   if (loading) {
@@ -298,8 +298,8 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
           <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={styles.loadingText}>Loading platform settings...</Text>
         </View>
-      </SafeAreaView>
-    );
+      </SafeAreaView>);
+
   }
 
   const categorizedSettings = getSettingsByCategory();
@@ -315,25 +315,25 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
 
       <ScrollView
         style={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        {error && (
-          <View style={[styles.errorCard, { backgroundColor: theme.colors.surface }]}>
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+
+        {error &&
+        <View style={[styles.errorCard, { backgroundColor: theme.colors.surface }]}>
             <View style={styles.errorContent}>
               <Icon name="error" size={24} color={theme.colors.error} />
               <Text style={styles.errorText}>{error}</Text>
             </View>
             <TouchableOpacity
-              onPress={loadEffectiveSettings}
-              style={[
-                styles.retryButton,
-                { backgroundColor: theme.colors.primary, padding: 8, borderRadius: 4 },
-              ]}
-            >
+            onPress={loadEffectiveSettings}
+            style={[
+            styles.retryButton,
+            { backgroundColor: theme.colors.primary, padding: 8, borderRadius: 4 }]
+            }>
+
               <Text style={styles.retryButtonText}>Retry</Text>
             </TouchableOpacity>
           </View>
-        )}
+        }
 
         <View style={[styles.infoCard, { backgroundColor: theme.colors.surface }]}>
           <View style={styles.infoHeader}>
@@ -357,8 +357,8 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
         </View>
 
         {/* Special section for payment fees */}
-        {categorizedSettings.payment_fees && (
-          <View style={styles.categorySection}>
+        {categorizedSettings.payment_fees &&
+        <View style={styles.categorySection}>
             <Text style={styles.sectionTitle}>Payment Processing Fees</Text>
             <View style={[{ backgroundColor: theme.colors.surface, padding: 16, borderRadius: 8 }]}>
               <Text style={[{ color: theme.colors.text, fontSize: 14 }]}>
@@ -366,7 +366,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
               </Text>
             </View>
           </View>
-        )}
+        }
 
         {/* Other categories */}
         {Object.entries(categorizedSettings).map(([category, settings]) => {
@@ -380,14 +380,14 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
             <View
               key={category}
               style={[
-                styles.categoryCard,
-                { backgroundColor: theme.colors.surface, borderRadius: 8 },
-              ]}
-            >
+              styles.categoryCard,
+              { backgroundColor: theme.colors.surface, borderRadius: 8 }]
+              }>
+
               <TouchableOpacity
                 style={styles.categoryHeader}
-                onPress={() => toggleCategoryExpansion(category)}
-              >
+                onPress={() => toggleCategoryExpansion(category)}>
+
                 <View style={styles.categoryTitleContainer}>
                   <Icon name={categoryInfo.icon} size={24} color={categoryInfo.color} />
                   <View style={styles.categoryTextContainer}>
@@ -401,14 +401,14 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
                 <Icon
                   name={isExpanded ? 'expand-less' : 'expand-more'}
                   size={24}
-                  color={theme.colors.textLight}
-                />
+                  color={theme.colors.textLight} />
+
               </TouchableOpacity>
 
-              {isExpanded && (
-                <View style={styles.settingsContainer}>
-                  {settings.map((setting) => (
-                    <View key={setting.key} style={styles.settingItem}>
+              {isExpanded &&
+              <View style={styles.settingsContainer}>
+                  {settings.map((setting) =>
+                <View key={setting.key} style={styles.settingItem}>
                       <View style={styles.settingHeader}>
                         <View style={styles.settingInfo}>
                           <Text style={styles.settingName}>
@@ -418,292 +418,292 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
                         </View>
                         <View style={styles.settingStatus}>
                           <View
-                            style={[
-                              styles.sourceIndicator,
-                              {
-                                backgroundColor:
-                                  setting.source === 'restaurant'
-                                    ? theme.colors.warning
-                                    : theme.colors.primary,
-                              },
-                            ]}
-                          />
+                        style={[
+                        styles.sourceIndicator,
+                        {
+                          backgroundColor:
+                          setting.source === 'restaurant' ?
+                          theme.colors.warning :
+                          theme.colors.primary
+                        }]
+                        } />
+
                         </View>
                       </View>
 
                       <View style={styles.settingValue}>
                         <Text style={styles.valueText}>
-                          {typeof setting.value === 'object'
-                            ? JSON.stringify(setting.value)
-                            : setting.value.toString()}
+                          {typeof setting.value === 'object' ?
+                      JSON.stringify(setting.value) :
+                      setting.value.toString()}
                         </Text>
                         <Text style={styles.sourceText}>
-                          {setting.source === 'restaurant'
-                            ? 'Restaurant Override'
-                            : 'Platform Default'}
+                          {setting.source === 'restaurant' ?
+                      'Restaurant Override' :
+                      'Platform Default'}
                         </Text>
                       </View>
 
-                      {setting.can_override && (
-                        <View style={styles.actionContainer}>
+                      {setting.can_override &&
+                  <View style={styles.actionContainer}>
                           <TouchableOpacity
-                            onPress={() => showOverrideDialog(setting)}
-                            style={[
-                              {
-                                backgroundColor:
-                                  setting.source === 'restaurant'
-                                    ? theme.colors.border
-                                    : theme.colors.primary,
-                                padding: 8,
-                                borderRadius: 4,
-                                borderWidth: setting.source === 'restaurant' ? 1 : 0,
-                                borderColor: theme.colors.primary,
-                              },
-                            ]}
-                          >
+                      onPress={() => showOverrideDialog(setting)}
+                      style={[
+                      {
+                        backgroundColor:
+                        setting.source === 'restaurant' ?
+                        theme.colors.border :
+                        theme.colors.primary,
+                        padding: 8,
+                        borderRadius: 4,
+                        borderWidth: setting.source === 'restaurant' ? 1 : 0,
+                        borderColor: theme.colors.primary
+                      }]
+                      }>
+
                             <Text
-                              style={[
-                                styles.overrideButtonText,
-                                {
-                                  color:
-                                    setting.source === 'restaurant'
-                                      ? theme.colors.primary
-                                      : theme.colors.white,
-                                },
-                              ]}
-                            >
-                              {setting.source === 'restaurant'
-                                ? 'Modify Override'
-                                : 'Request Override'}
+                        style={[
+                        styles.overrideButtonText,
+                        {
+                          color:
+                          setting.source === 'restaurant' ?
+                          theme.colors.primary :
+                          theme.colors.white
+                        }]
+                        }>
+
+                              {setting.source === 'restaurant' ?
+                        'Modify Override' :
+                        'Request Override'}
                             </Text>
                           </TouchableOpacity>
                         </View>
-                      )}
+                  }
 
-                      {!setting.can_override && (
-                        <View style={styles.lockedContainer}>
+                      {!setting.can_override &&
+                  <View style={styles.lockedContainer}>
                           <Icon name="lock" size={16} color={theme.colors.textLight} />
                           <Text style={styles.lockedText}>Platform controlled</Text>
                         </View>
-                      )}
+                  }
                     </View>
-                  ))}
+                )}
                 </View>
-              )}
-            </View>
-          );
+              }
+            </View>);
+
         })}
 
         <View style={styles.bottomPadding} />
       </ScrollView>
-    </SafeAreaView>
-  );
+    </SafeAreaView>);
+
 };
 
-const createStyles = (theme: unknown) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      backgroundColor: theme.colors.surface,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    backButton: {
-      marginRight: 12,
-    },
-    title: {
-      fontSize: 20,
-      fontWeight: '600',
-      color: theme.colors.text,
-    },
-    content: {
-      flex: 1,
-      paddingHorizontal: 16,
-    },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-    },
-    loadingText: {
-      marginTop: 12,
-      fontSize: 16,
-      color: theme.colors.textLight,
-    },
-    errorCard: {
-      marginTop: 16,
-      padding: 16,
-    },
-    errorContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    errorText: {
-      marginLeft: 8,
-      fontSize: 16,
-      color: theme.colors.error,
-      flex: 1,
-    },
-    retryButton: {
-      alignSelf: 'flex-start',
-    },
-    retryButtonText: {
-      color: theme.colors.white,
-    },
-    overrideButtonText: {
-      fontSize: 12,
-    },
-    infoCard: {
-      marginTop: 16,
-      padding: 16,
-    },
-    infoHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 8,
-    },
-    infoTitle: {
-      marginLeft: 8,
-      fontSize: 16,
-      fontWeight: '600',
-      color: theme.colors.text,
-    },
-    infoText: {
-      fontSize: 14,
-      color: theme.colors.textLight,
-      lineHeight: 20,
-      marginBottom: 12,
-    },
-    statusIndicators: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-    },
-    statusItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    statusDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      marginRight: 4,
-    },
-    statusText: {
-      fontSize: 12,
-      color: theme.colors.textLight,
-    },
-    categorySection: {
-      marginTop: 16,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: theme.colors.text,
-      marginBottom: 12,
-    },
-    categoryCard: {
-      marginTop: 16,
-      overflow: 'hidden',
-    },
-    categoryHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: 16,
-    },
-    categoryTitleContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-    },
-    categoryTextContainer: {
-      marginLeft: 12,
-    },
-    categoryTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: theme.colors.text,
-    },
-    categorySubtitle: {
-      fontSize: 12,
-      color: theme.colors.textLight,
-      marginTop: 2,
-    },
-    settingsContainer: {
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.border,
-    },
-    settingItem: {
-      padding: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    settingHeader: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      justifyContent: 'space-between',
-      marginBottom: 8,
-    },
-    settingInfo: {
-      flex: 1,
-    },
-    settingName: {
-      fontSize: 14,
-      fontWeight: '500',
-      color: theme.colors.text,
-      textTransform: 'capitalize',
-      marginBottom: 2,
-    },
-    settingDescription: {
-      fontSize: 12,
-      color: theme.colors.textLight,
-    },
-    settingStatus: {
-      alignItems: 'flex-end',
-    },
-    sourceIndicator: {
-      width: 12,
-      height: 12,
-      borderRadius: 6,
-    },
-    settingValue: {
-      marginBottom: 8,
-    },
-    valueText: {
-      fontSize: 14,
-      color: theme.colors.text,
-      fontFamily: 'monospace',
-      marginBottom: 2,
-    },
-    sourceText: {
-      fontSize: 12,
-      color: theme.colors.textLight,
-    },
-    actionContainer: {
-      alignItems: 'flex-start',
-    },
-    lockedContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    lockedText: {
-      marginLeft: 4,
-      fontSize: 12,
-      color: theme.colors.textLight,
-      fontStyle: 'italic',
-    },
-    bottomPadding: {
-      height: 24,
-    },
-  });
+const styles = StyleSheet.create({});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export default RestaurantPlatformOverridesScreen;
