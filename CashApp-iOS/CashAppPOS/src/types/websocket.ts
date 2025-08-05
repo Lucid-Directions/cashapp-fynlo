@@ -20,27 +20,27 @@ export interface WebSocketConfig {
 
 export enum WebSocketEvent {
   // Connection events
-  CONNECT = 'CONNECT',
-  DISCONNECT = 'DISCONNECT',
-  ERROR = 'ERROR',
-  RECONNECTING = 'RECONNECTING',
+  CONNECT = 'connect',
+  DISCONNECT = 'disconnect',
+  ERROR = 'error',
+  RECONNECTING = 'reconnecting',
 
   // Authentication events
-  AUTHENTICATE = 'AUTHENTICATE',
-  AUTHENTICATED = 'AUTHENTICATED',
-  AUTH_ERROR = 'AUTH_ERROR',
-  REAUTH = 'REAUTH',
-  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
+  AUTHENTICATE = 'authenticate',
+  AUTHENTICATED = 'authenticated',
+  AUTH_ERROR = 'auth_error',
+  REAUTH = 'reauth',
+  TOKEN_EXPIRED = 'token_expired',
 
   // Heartbeat events
-  PING = 'PING',
-  PONG = 'PONG',
+  PING = 'ping',
+  PONG = 'pong',
 
   // Business events
-  ORDER_CREATED = 'ORDER_CREATED',
-  ORDER_UPDATED = 'ORDER_UPDATED',
-  ORDER_STATUS_CHANGED = 'ORDER_STATUS_CHANGED',
-  INVENTORY_UPDATED = 'INVENTORY_UPDATED',
-  MENU_UPDATED = 'MENU_UPDATED',
-  SYSTEM_NOTIFICATION = 'SYSTEM_NOTIFICATION',
+  ORDER_CREATED = 'order.created',
+  ORDER_UPDATED = 'order.updated',
+  ORDER_STATUS_CHANGED = 'order.status_changed',
+  INVENTORY_UPDATED = 'inventory.updated',
+  MENU_UPDATED = 'menu.updated',
+  SYSTEM_NOTIFICATION = 'system.notification',
 }

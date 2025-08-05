@@ -438,6 +438,9 @@ class EnhancedWebSocketManager:
                     else:
                         # Client is actively pinging, reset missed pongs
                         conn_info.missed_pongs = 0
+                    
+                    # Check token expiry for active connections
+                    await self.check_token_expiry_for_connection(conn_id)
 
                 # Cleanup rate limiter buckets every 20 cycles (5 minutes)
                 if cleanup_counter % 20 == 0:
@@ -581,7 +584,7 @@ async def websocket_endpoint(
                         else:
                             await manager.send_message(
                                 websocket,
-                                WebSocketEventType.TOKEN_EXPIRED,
+                                WebSocketEventType.AUTH_ERROR,
                                 {"message": "Re-authentication failed"},
                                 restaurant_id,
                             )
