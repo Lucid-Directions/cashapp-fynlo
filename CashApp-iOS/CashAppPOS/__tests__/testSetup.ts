@@ -1,8 +1,58 @@
 import 'react-native-gesture-handler/jestSetup';
-import asyncStorageMock from '@react-native-async-storage/async-storage/jest/async-storage-mock';
 
 // Mock AsyncStorage
-jest.mock('@react-native-async-storage/async-storage', () => asyncStorageMock);
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+);
+
+// Mock Supabase
+jest.mock('../src/lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn(() => Promise.resolve({ data: { session: null }, error: null })),
+      onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
+      signIn: jest.fn(),
+      signOut: jest.fn(),
+    },
+    from: jest.fn(() => ({
+      select: jest.fn(() => ({ data: [], error: null })),
+      insert: jest.fn(() => ({ data: null, error: null })),
+      update: jest.fn(() => ({ data: null, error: null })),
+      delete: jest.fn(() => ({ data: null, error: null })),
+    })),
+  },
+}));
+
+// Mock Theme system
+jest.mock('../src/design-system/theme', () => ({
+  theme: {
+    colors: {
+      primary: '#000',
+      secondary: '#666',
+      background: '#fff',
+      text: '#000',
+    },
+    spacing: {
+      small: 8,
+      medium: 16,
+      large: 24,
+    },
+  },
+}));
+
+// Mock react-native-safe-area-context with more complete implementation
+jest.mock('react-native-safe-area-context', () => {
+  const inset = { top: 0, right: 0, bottom: 0, left: 0 };
+  return {
+    SafeAreaProvider: ({ children }: any) => children,
+    SafeAreaView: ({ children }: any) => children,
+    useSafeAreaInsets: () => inset,
+    initialWindowMetrics: {
+      insets: inset,
+      frame: { x: 0, y: 0, width: 0, height: 0 },
+    },
+  };
+});
 
 // Mock react-native-vector-icons
 jest.mock('react-native-vector-icons/MaterialIcons', () => 'MockedIcon');
@@ -195,6 +245,17 @@ beforeEach(() => {
     originalWarn.call(console, ...args);
   };
 });
+
+
+// Mock crypto.getRandomValues
+global.crypto = {
+  getRandomValues: (arr: any) => {
+    for (let i = 0; i < arr.length; i++) {
+      arr[i] = Math.floor(Math.random() * 256);
+    }
+    return arr;
+  },
+} as any;
 
 afterEach(() => {
   console.error = originalError;

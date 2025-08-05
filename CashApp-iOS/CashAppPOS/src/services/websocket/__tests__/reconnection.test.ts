@@ -42,7 +42,7 @@ class MockWebSocket {
   }
 
   send(data: string) {
-    if (this.readyState \!== MockWebSocket.OPEN) {
+    if (this.readyState !== MockWebSocket.OPEN) {
       throw new Error('WebSocket is not open');
     }
   }
@@ -94,7 +94,7 @@ class WebSocketReconnectionManager {
   }
 
   private setupEventHandlers() {
-    if (\!this.ws) return;
+    if (!this.ws) return;
 
     this.ws.onopen = () => {
       this.backoff.reset();
@@ -119,11 +119,11 @@ class WebSocketReconnectionManager {
       const wasOnline = this.isOnline;
       this.isOnline = state.isConnected ?? false;
 
-      if (\!wasOnline && this.isOnline) {
+      if (!wasOnline && this.isOnline) {
         // Network came back online
         this.cancelReconnect();
         this.connect();
-      } else if (wasOnline && \!this.isOnline) {
+      } else if (wasOnline && !this.isOnline) {
         // Network went offline
         this.updateStatus('offline');
         this.disconnect();
@@ -132,7 +132,7 @@ class WebSocketReconnectionManager {
   }
 
   private scheduleReconnect() {
-    if (\!this.isOnline) {
+    if (!this.isOnline) {
       this.updateStatus('offline');
       return;
     }
@@ -400,7 +400,7 @@ describe('WebSocket Reconnection Manager', () => {
       
       // Should not have any reconnecting status after going offline
       const reconnectingAfterOffline = statusUpdates.filter(
-        (s, i) => s.status === 'reconnecting' && i > statusUpdates.indexOf(offlineStatus\!)
+        (s, i) => s.status === 'reconnecting' && i > statusUpdates.indexOf(offlineStatus!)
       );
       expect(reconnectingAfterOffline.length).toBe(0);
     });
