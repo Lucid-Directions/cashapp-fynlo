@@ -57,7 +57,7 @@ export const useWebSocketStatus = () => {
         ...prev,
         status: newStatus,
         lastConnectedTime: newStatus === 'connected' ? new Date() : prev.lastConnectedTime,
-        lastDisconnectedTime: newStatus === 'disconnected' && prev.status \!== 'disconnected' 
+        lastDisconnectedTime: newStatus === 'disconnected' && prev.status !== 'disconnected' 
           ? new Date() 
           : prev.lastDisconnectedTime,
       };

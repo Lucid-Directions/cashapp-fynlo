@@ -68,7 +68,7 @@ const WebSocketStatus: React.FC<WebSocketStatusProps> = ({
 
   // Format time elapsed
   const formatTimeElapsed = (date: Date | null) => {
-    if (\!date) return null;
+    if (!date) return null;
     
     const elapsed = Date.now() - date.getTime();
     const seconds = Math.floor(elapsed / 1000);
@@ -87,7 +87,7 @@ const WebSocketStatus: React.FC<WebSocketStatusProps> = ({
       <TouchableOpacity
         style={[styles.compactContainer, { borderColor: statusDisplay.color }, style]}
         onPress={canManualReconnect ? manualReconnect : undefined}
-        disabled={\!canManualReconnect}
+        disabled={!canManualReconnect}
         activeOpacity={canManualReconnect ? 0.7 : 1}
       >
         {status === 'connecting' || status === 'reconnecting' ? (
@@ -98,7 +98,7 @@ const WebSocketStatus: React.FC<WebSocketStatusProps> = ({
         <Text style={[styles.compactText, { color: statusDisplay.color }]}>
           {statusDisplay.shortText}
         </Text>
-        {nextRetryTime \!== null && (
+        {nextRetryTime !== null && (
           <Text style={[styles.countdownText, { color: statusDisplay.color }]}>
             ({nextRetryTime}s)
           </Text>
@@ -129,7 +129,7 @@ const WebSocketStatus: React.FC<WebSocketStatusProps> = ({
           </View>
         </View>
         
-        {nextRetryTime \!== null && (
+        {nextRetryTime !== null && (
           <View style={styles.countdownContainer}>
             <Icon name="schedule" size={16} color={Colors.textSecondary} />
             <Text style={styles.countdownText}>
@@ -141,7 +141,7 @@ const WebSocketStatus: React.FC<WebSocketStatusProps> = ({
 
       {showDetails && (
         <View style={styles.details}>
-          {lastConnectedTime && status \!== 'connected' && (
+          {lastConnectedTime && status !== 'connected' && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Last connected:</Text>
               <Text style={styles.detailValue}>

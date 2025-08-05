@@ -1,23 +1,23 @@
-export default {
+// Mock for @react-native-community/netinfo
+module.exports = {
   addEventListener: jest.fn(() => jest.fn()),
   fetch: jest.fn(() =>
     Promise.resolve({
-      type: 'wifi',
       isConnected: true,
       isInternetReachable: true,
+      type: 'wifi',
       details: {
         isConnectionExpensive: false,
-        cellularGeneration: null,
       },
     })
   ),
-  useNetInfo: jest.fn(() => ({
-    type: 'wifi',
+  useNetInfo: () => ({
     isConnected: true,
     isInternetReachable: true,
+    type: 'wifi',
     details: {
       isConnectionExpensive: false,
-      cellularGeneration: null,
     },
-  })),
+  }),
 };
+EOF < /dev/null
