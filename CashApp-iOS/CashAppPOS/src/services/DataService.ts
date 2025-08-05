@@ -268,30 +268,34 @@ class DataService {
       await this.testAPIEndpoint('/api/v1/menu/items');
     }
 
-    // Check feature flags before making API calls
-    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
-      try {
-        const menuItems = await this.db.getMenuItems();
-        if (menuItems && menuItems.length > 0) {
-          // Apply compatibility transformation if needed
-          if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
-            logger.info('🔄 Applying menu compatibility transformation');
-            return BackendCompatibilityService.transformMenuItems(menuItems);
-          }
-          return menuItems;
+    try {
+      // Always attempt to get menu items - DatabaseService has fallback logic
+      const menuItems = await this.db.getMenuItems();
+      
+      // Only apply transformation if we have real API data
+      if (this.featureFlags.USE_REAL_API && this.isBackendAvailable && menuItems && menuItems.length > 0) {
+        if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
+          logger.info('🔄 Applying menu compatibility transformation');
+          return BackendCompatibilityService.transformMenuItems(menuItems);
         }
-        // Always return array to satisfy return type
-        return menuItems || [];
-      } catch (error) {
-        logger.error('Failed to fetch menu items:', error);
-        // Return empty array on error - the UI should show appropriate message
-        return [];
       }
+      
+      // Always return array to satisfy return type
+      return menuItems || [];
+    } catch (error) {
+      logger.error('Failed to fetch menu items:', error);
+      // When error occurs, still try to get fallback data
+      if (!this.featureFlags.USE_REAL_API || !this.isBackendAvailable) {
+        logger.info('Attempting to load fallback menu data');
+        try {
+          const fallbackItems = await this.db.getMenuItems();
+          return fallbackItems || [];
+        } catch (fallbackError) {
+          logger.error('Failed to load fallback menu data:', fallbackError);
+        }
+      }
+      return [];
     }
-    
-    // When USE_REAL_API is false or backend unavailable, return empty array
-    logger.info('Real API disabled or backend unavailable, returning empty menu');
-    return [];
   }
 
   async getMenuCategories(): Promise<any[]> {
@@ -300,22 +304,25 @@ class DataService {
       await this.testAPIEndpoint('/api/v1/menu/categories');
     }
 
-    // Check feature flags before making API calls
-    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
-      try {
-        const categories = await this.db.getMenuCategories();
-        // Always return array to satisfy return type
-        return categories || [];
-      } catch (error) {
-        logger.error('Failed to fetch menu categories:', error);
-        // Return empty array on error - the UI should show appropriate message
-        return [];
+    try {
+      // Always attempt to get categories - DatabaseService has fallback logic
+      const categories = await this.db.getMenuCategories();
+      // Always return array to satisfy return type
+      return categories || [];
+    } catch (error) {
+      logger.error('Failed to fetch menu categories:', error);
+      // When error occurs, still try to get fallback data
+      if (!this.featureFlags.USE_REAL_API || !this.isBackendAvailable) {
+        logger.info('Attempting to load fallback category data');
+        try {
+          const fallbackCategories = await this.db.getMenuCategories();
+          return fallbackCategories || [];
+        } catch (fallbackError) {
+          logger.error('Failed to load fallback category data:', fallbackError);
+        }
       }
+      return [];
     }
-    
-    // When USE_REAL_API is false or backend unavailable, return empty array
-    logger.info('Real API disabled or backend unavailable, returning empty categories');
-    return [];
   }
 
   // Category CRUD operations

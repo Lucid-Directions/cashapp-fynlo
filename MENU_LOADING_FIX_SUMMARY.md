@@ -5,15 +5,16 @@ The menu was showing as empty on the POS screen with "No menu items available" m
 
 ## Root Cause
 1. **Backend Issues**: The `/api/v1/public/menu/items` endpoint was returning errors due to database connectivity issues
-2. **DataService Double Call Bug**: The DataService was calling `this.db.getMenuItems()` twice when API failed - once in the try block and once as fallback, preventing proper fallback logic from working
-3. **No Local Fallback**: When both API calls failed, no local fallback data was being used
+2. **DataService Logic Issue**: The DataService wasn't properly utilizing DatabaseService's built-in fallback mechanism
+3. **No Graceful Degradation**: When the API failed, the system wasn't falling back to local menu data
 
 ## Solution Implemented
 
-### 1. Fixed DataService Fallback Logic
-- Removed the double API call in `getMenuItems()` and `getMenuCategories()`
-- Now properly delegates to DatabaseService which has built-in fallback to Chucho menu data
-- Simplified error handling to return empty arrays on failure
+### 1. Fixed DataService to Always Use DatabaseService
+- Now always calls `this.db.getMenuItems()` and `this.db.getMenuCategories()`
+- DatabaseService handles the API call and automatically falls back to Chucho menu data when API fails
+- Transformation logic only applied when real API data is available
+- Proper error handling ensures fallback data is attempted even on errors
 
 ### 2. DatabaseService Already Has Proper Fallback
 - `getChuchoMenuData()` returns hardcoded menu items when API fails
