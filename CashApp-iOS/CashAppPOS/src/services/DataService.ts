@@ -268,24 +268,30 @@ class DataService {
       await this.testAPIEndpoint('/api/v1/menu/items');
     }
 
-    // Always try to get menu items - DatabaseService handles fallback logic
-    try {
-      const menuItems = await this.db.getMenuItems();
-      if (menuItems && menuItems.length > 0) {
-        // Apply compatibility transformation if needed
-        if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
-          logger.info('🔄 Applying menu compatibility transformation');
-          return BackendCompatibilityService.transformMenuItems(menuItems);
+    // Check feature flags before making API calls
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        const menuItems = await this.db.getMenuItems();
+        if (menuItems && menuItems.length > 0) {
+          // Apply compatibility transformation if needed
+          if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
+            logger.info('🔄 Applying menu compatibility transformation');
+            return BackendCompatibilityService.transformMenuItems(menuItems);
+          }
+          return menuItems;
         }
-        return menuItems;
+        // Always return array to satisfy return type
+        return menuItems || [];
+      } catch (error) {
+        logger.error('Failed to fetch menu items:', error);
+        // Return empty array on error - the UI should show appropriate message
+        return [];
       }
-      // If we got empty array, still return it - DatabaseService handles the fallback
-      return menuItems;
-    } catch (error) {
-      logger.error('Failed to fetch menu items:', error);
-      // Return empty array on error - the UI should show appropriate message
-      return [];
     }
+    
+    // When USE_REAL_API is false or backend unavailable, return empty array
+    logger.info('Real API disabled or backend unavailable, returning empty menu');
+    return [];
   }
 
   async getMenuCategories(): Promise<any[]> {
@@ -294,15 +300,22 @@ class DataService {
       await this.testAPIEndpoint('/api/v1/menu/categories');
     }
 
-    // Always try to get categories - DatabaseService handles fallback logic
-    try {
-      const categories = await this.db.getMenuCategories();
-      return categories || [];
-    } catch (error) {
-      logger.error('Failed to fetch menu categories:', error);
-      // Return empty array on error - the UI should show appropriate message
-      return [];
+    // Check feature flags before making API calls
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        const categories = await this.db.getMenuCategories();
+        // Always return array to satisfy return type
+        return categories || [];
+      } catch (error) {
+        logger.error('Failed to fetch menu categories:', error);
+        // Return empty array on error - the UI should show appropriate message
+        return [];
+      }
     }
+    
+    // When USE_REAL_API is false or backend unavailable, return empty array
+    logger.info('Real API disabled or backend unavailable, returning empty categories');
+    return [];
   }
 
   // Category CRUD operations
