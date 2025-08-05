@@ -268,22 +268,24 @@ class DataService {
       await this.testAPIEndpoint('/api/v1/menu/items');
     }
 
-    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
-      try {
-        const menuItems = await this.db.getMenuItems();
-        if (menuItems && menuItems.length > 0) {
-          // Apply compatibility transformation if needed
-          if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
-            logger.info('🔄 Applying menu compatibility transformation');
-            return BackendCompatibilityService.transformMenuItems(menuItems);
-          }
-          return menuItems;
+    // Always try to get menu items - DatabaseService handles fallback logic
+    try {
+      const menuItems = await this.db.getMenuItems();
+      if (menuItems && menuItems.length > 0) {
+        // Apply compatibility transformation if needed
+        if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
+          logger.info('🔄 Applying menu compatibility transformation');
+          return BackendCompatibilityService.transformMenuItems(menuItems);
         }
-      } catch (_error) {
-        logger.info('Failed to fetch menu items from API, using mock data');
+        return menuItems;
       }
+      // If we got empty array, still return it - DatabaseService handles the fallback
+      return menuItems;
+    } catch (error) {
+      logger.error('Failed to fetch menu items:', error);
+      // Return empty array on error - the UI should show appropriate message
+      return [];
     }
-    return this.db.getMenuItems();
   }
 
   async getMenuCategories(): Promise<any[]> {
@@ -292,17 +294,15 @@ class DataService {
       await this.testAPIEndpoint('/api/v1/menu/categories');
     }
 
-    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
-      try {
-        const categories = await this.db.getMenuCategories();
-        if (categories && categories.length > 0) {
-          return categories;
-        }
-      } catch (_error) {
-        logger.info('Failed to fetch menu categories from API, using mock data');
-      }
+    // Always try to get categories - DatabaseService handles fallback logic
+    try {
+      const categories = await this.db.getMenuCategories();
+      return categories || [];
+    } catch (error) {
+      logger.error('Failed to fetch menu categories:', error);
+      // Return empty array on error - the UI should show appropriate message
+      return [];
     }
-    return this.db.getMenuCategories();
   }
 
   // Category CRUD operations
