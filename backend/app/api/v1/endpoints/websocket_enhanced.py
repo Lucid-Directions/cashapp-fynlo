@@ -41,6 +41,7 @@ class ConnectionInfo:
         self.authenticated = False
         self.missed_pongs = 0
         self.token = None  # Store token for expiry checking
+        self.token_expiry_warning_sent = False  # Track if warning has been sent
 
 
 class EnhancedWebSocketManager:
@@ -161,6 +162,7 @@ class EnhancedWebSocketManager:
             
             # Store token for expiry checking
             conn_info.token = token
+            conn_info.token_expiry_warning_sent = False  # Ensure flag is initialized
             
             return conn_info
 
@@ -193,6 +195,8 @@ class EnhancedWebSocketManager:
             # Update connection info
             conn_info.token = new_token
             conn_info.last_ping = datetime.utcnow()
+            # Reset warning flag after refresh
+            conn_info.token_expiry_warning_sent = False
             
             logger.info(f"WebSocket re-authenticated: {connection_id}")
             return conn_info
@@ -295,8 +299,8 @@ class EnhancedWebSocketManager:
         if seconds_until_expiry is None:
             return False
         
-        # Notify if token expires in less than 5 minutes
-        if seconds_until_expiry < 300:  # 5 minutes
+        # Notify if token expires in less than 5 minutes and we haven't already warned
+        if seconds_until_expiry < 300 and not conn_info.token_expiry_warning_sent:
             try:
                 await self.send_message(
                     conn_info.websocket,
@@ -307,9 +311,15 @@ class EnhancedWebSocketManager:
                     },
                     conn_info.restaurant_id,
                 )
+                # Mark warning as sent to prevent duplicates
+                conn_info.token_expiry_warning_sent = True
                 return True
             except Exception as e:
                 logger.error(f"Failed to send token expiry notice: {e}")
+        
+        # Reset warning flag if token is no longer expiring (e.g., after refresh)
+        elif seconds_until_expiry >= 300 and conn_info.token_expiry_warning_sent:
+            conn_info.token_expiry_warning_sent = False
         
         return False
 
