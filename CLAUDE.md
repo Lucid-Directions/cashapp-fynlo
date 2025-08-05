@@ -21,6 +21,46 @@ pip install pre-commit && pre-commit install
 4. **Wait for all checks to pass before merging, i merge all PR after my review**
 5. **Plan the work To be distributed amongst the agents.Then use multiple agents in parallel.Make sure the work is distributed to the specialized agents**
 
+## 📋 React Native Style Warnings Resolution (Issue #519)
+**Resolution implemented on 2025-08-05**
+
+### What We Discovered
+- 93% of style warnings (487/523) were **false positives** from `react-native/no-unused-styles`
+- ESLint cannot track styles through our `useThemedStyles` custom hook pattern
+- Only 36 genuine inline style warnings remain
+
+### Solution Implemented
+1. **Changed ESLint rule to 'warn'** instead of disabling completely
+2. **Added eslint-disable comments** to 8 files using `useThemedStyles` pattern
+3. **Created monthly cleanup script** at `scripts/monthly-style-cleanup.sh`
+4. **Kept `no-inline-styles` as error** to catch genuine issues
+
+### Files with ESLint Disable Comments
+These files use `useThemedStyles(createStyles)` pattern:
+- `src/screens/main/POSScreen.tsx`
+- `src/screens/more/MoreScreen.tsx`
+- `src/screens/orders/OrdersScreen.tsx`
+- `src/screens/settings/user/UserProfileScreen.tsx`
+- `src/screens/settings/app/MenuManagementScreen.tsx`
+- `src/screens/payment/ServiceChargeSelectionScreen.tsx`
+- `src/screens/main/ProfileScreen.tsx`
+- `src/screens/settings/RestaurantPlatformOverridesScreen.tsx`
+
+### Monthly Maintenance
+Run monthly to catch genuine unused styles:
+```bash
+./scripts/monthly-style-cleanup.sh
+```
+
+### Why This Approach?
+- **Balanced**: Keeps the benefits of linting without false positives
+- **Maintainable**: Clear documentation and process for future developers
+- **Performance**: Prevents style bloat while allowing modern patterns
+- **Developer Experience**: No more disruption from false warnings
+
+### Key Lesson
+ESLint rules designed for older React Native patterns may not work with modern hooks and custom theming systems. Always investigate bulk warnings before attempting automated fixes.
+
 ## 🛠️ Quick Reference
 
 ### Python Quality (MANDATORY before commits)
