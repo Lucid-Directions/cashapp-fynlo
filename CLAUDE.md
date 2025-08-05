@@ -1,6 +1,7 @@
 # CLAUDE.md - Fynlo POS Development Guide
 
-## 🚨 CRITICAL: Pre-Commit Hooks Are Active!
+## 🚨 CRITICAL: Pre-Commit Hooks Are Active
+
 **Pre-commit hooks automatically run on EVERY commit** to prevent syntax errors and maintain code quality. If a commit fails, fix the issues and try again.
 
 ```bash
@@ -15,6 +16,7 @@ pip install pre-commit && pre-commit install
 ```
 
 ## 🚨 PR WORKFLOW - MANDATORY
+
 1. **Always create feature branch**: `git checkout -b fix/descriptive-name`
 2. **Create detailed PR with What/Why/Testing sections**
 3. **Fix Cursor bot findings within same PR** (never create new PR for fixes unless the task is too big)
@@ -22,21 +24,26 @@ pip install pre-commit && pre-commit install
 5. **Plan the work To be distributed amongst the agents.Then use multiple agents in parallel.Make sure the work is distributed to the specialized agents**
 
 ## 📋 React Native Style Warnings Resolution (Issue #519)
+
 **Resolution implemented on 2025-08-05**
 
 ### What We Discovered
+
 - 93% of style warnings (487/523) were **false positives** from `react-native/no-unused-styles`
 - ESLint cannot track styles through our `useThemedStyles` custom hook pattern
 - Only 36 genuine inline style warnings remain
 
 ### Solution Implemented
+
 1. **Changed ESLint rule to 'warn'** instead of disabling completely
 2. **Added eslint-disable comments** to 8 files using `useThemedStyles` pattern
 3. **Created monthly cleanup script** at `scripts/monthly-style-cleanup.sh`
 4. **Kept `no-inline-styles` as error** to catch genuine issues
 
 ### Files with ESLint Disable Comments
+
 These files use `useThemedStyles(createStyles)` pattern:
+
 - `src/screens/main/POSScreen.tsx`
 - `src/screens/more/MoreScreen.tsx`
 - `src/screens/orders/OrdersScreen.tsx`
@@ -47,23 +54,28 @@ These files use `useThemedStyles(createStyles)` pattern:
 - `src/screens/settings/RestaurantPlatformOverridesScreen.tsx`
 
 ### Monthly Maintenance
+
 Run monthly to catch genuine unused styles:
+
 ```bash
 ./scripts/monthly-style-cleanup.sh
 ```
 
 ### Why This Approach?
+
 - **Balanced**: Keeps the benefits of linting without false positives
 - **Maintainable**: Clear documentation and process for future developers
 - **Performance**: Prevents style bloat while allowing modern patterns
 - **Developer Experience**: No more disruption from false warnings
 
 ### Key Lesson
+
 ESLint rules designed for older React Native patterns may not work with modern hooks and custom theming systems. Always investigate bulk warnings before attempting automated fixes.
 
 ## 🛠️ Quick Reference
 
 ### Python Quality (MANDATORY before commits)
+
 ```bash
 # Quick syntax check after edits
 cd backend && python3 -m py_compile path/to/file.py
@@ -76,12 +88,14 @@ python3 scripts/python-quality-check.py --backend-path backend
 ```
 
 ### Available Quality Tools (from PR #459 extraction)
+
 - `scripts/python-quality-check.py` - Runs 6 tools (Ruff, Black, MyPy, Flake8, Bandit, Pylint)
 - `scripts/pr459_fixer.py` - Fixes common Python patterns
 - `scripts/batch-resolve-conflicts.py` - Resolves merge conflicts
 - Pre-commit hooks in `.pre-commit-config.yaml`
 
 ### iOS Bundle Fix
+
 ```bash
 cd CashApp-iOS/CashAppPOS
 npx metro build index.js --platform ios --dev false --out ios/main.jsbundle
@@ -97,6 +111,7 @@ cp ios/main.jsbundle ios/CashAppPOS/main.jsbundle
 **Multi-tenant**: Platform → Restaurants → Users
 
 ### Key Patterns
+
 ```python
 # API Responses
 from app.core.response_helper import APIResponseHelper
@@ -110,6 +125,7 @@ price = Column(DECIMAL(10, 2), nullable=False)
 ```
 
 ## 🔒 Security Checklist
+
 - **Auth**: Role validation, restaurant isolation
 - **Input**: Sanitize `< > " ' ( ) ; & + \` | \ *`
 - **API**: Rate limiting, CORS, use APIResponseHelper
@@ -118,13 +134,16 @@ price = Column(DECIMAL(10, 2), nullable=False)
 ## 📚 Key Context
 
 ### PR #459 Success Story
+
 **Problem**: Massive 424-file PR with 48K+ changes became unmergeable
 **Solution**: Strategic decomposition into focused PRs:
+
 - PR #468, #472, #473, #467, #514-516: Code improvements ✅
 - PR #518: Automation tools (pre-commit, quality scripts) ✅
 **Result**: 100% objectives achieved, zero production risk
 
 ### Critical Rules
+
 - **NO ASSUMPTIONS**: Always verify code exists before using
 - **GitHub Issues**: Check assignment before working (arnaud/Ryan collaboration)
 - **Test Coverage**: Backend 80% pytest, Frontend Jest + RTL
@@ -132,16 +151,19 @@ price = Column(DECIMAL(10, 2), nullable=False)
 ## 🛠️ Available Tools
 
 ### MCP Servers
+
 - File System, Sequential Thinking, Memory Bank
 - Playwright/Puppeteer, SemGrep, Ref, Tree-sitter
 
 ### CLI Tools
+
 - `pieces` - Context persistence
 - `gh` - GitHub management
 - `doctl` - DigitalOcean
 - `trivy` - Security scanning
 
 ### Specialized Agents (in parallel via Task tool)
+
 - fynlo-test-runner, fynlo-bundle-deployer
 - fynlo-security-auditor, fynlo-api-optimizer
 - planning-agent, development-agent, testing-agent
@@ -165,6 +187,7 @@ pieces create -n "fix-name"
 ```
 
 ## 📝 Remember
+
 - Pre-commit hooks catch errors automatically
 - Use FynloException, not HTTPException
 - Always DECIMAL for money, never float

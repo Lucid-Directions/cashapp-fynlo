@@ -5,6 +5,7 @@
 **CURRENT STATUS: 🟢 95% READY - PHASE 2 COMPLETE, PHASE 3 STARTING**
 
 ### 🏗️ Current Monorepo Structure
+
 ```
 cashapp-fynlo/
 ├── backend/           # FastAPI backend (DigitalOcean deployment)
@@ -22,14 +23,16 @@ cashapp-fynlo/
 ```
 
 ### 🎯 Master Implementation Plan Created
+
 - **✅ Comprehensive 12-Day Plan**: Architecture-first approach to fix critical issues
 - **✅ 7 Detailed Implementation Guides**: Phase-by-phase instructions with code
 - **✅ Clean Code Focus**: Complete removal of duplicates and dead code
 - **✅ Production Monitoring**: Full observability and deployment procedures
 
 ### 📊 Current Status Overview
+
 - **UI/UX**: 100% Complete ✅
-- **Backend Infrastructure**: 100% Ready ✅ 
+- **Backend Infrastructure**: 100% Ready ✅
 - **Security Framework**: 95% Fixed ✅
 - **Real-time Stability**: 95% ✅ (WebSocket with heartbeat implemented)
 - **Performance**: 90% ✅ (API optimizations, caching, indexes done)
@@ -42,41 +45,49 @@ cashapp-fynlo/
 **Claude Code has 7 FREE MCP servers installed for enhanced capabilities:**
 
 ### 1. Desktop Commander (`mcp__desktop-commander__`)
+
 - **Use for**: File system operations, terminal commands, system interactions
 - **Examples**: "List all files in project", "Run npm install", "Create new folders"
 - **When to use**: Any file/folder operations or command execution needs
 
 ### 2. Sequential Thinking (`mcp__sequential-thinking__`)
+
 - **Use for**: Breaking down complex problems into logical steps
 - **Examples**: "Plan architecture for new feature", "Break down implementation steps"
 - **When to use**: Complex tasks requiring systematic planning
 
-### 3. File System (`mcp__filesystem__`) 
+### 3. File System (`mcp__filesystem__`)
+
 - **Use for**: Direct file read/write in current project (project-scoped)
 - **Examples**: "Read package.json", "Create new component file"
 - **When to use**: Project-specific file operations (prefer over Desktop Commander for project files)
 
 ### 4. Memory Bank (`mcp__memory-bank__`)
+
 - **Use for**: Storing context across conversations
 - **Examples**: "Remember project structure", "Store coding preferences"
 - **When to use**: Long-term context retention needs
 
 ### 5. Playwright (`mcp__playwright__`)
+
 - **Use for**: Browser automation, web testing, screenshots
 - **Examples**: "Take screenshot of webpage", "Fill out web forms", "Test UI flows"
 - **When to use**: Browser-based testing or automation
 
 ### 6. Puppeteer (`mcp__puppeteer__`)
+
 - **Use for**: Web scraping, PDF generation, browser automation
 - **Examples**: "Scrape website data", "Generate PDF from webpage"  
 - **When to use**: Data extraction or document generation from web
 
 ### 7. Semgrep (`mcp__semgrep__`)
+
 - **Use for**: Code security analysis, vulnerability scanning
 - **Examples**: "Scan for security issues", "Check code quality"
 - **When to use**: Security audits, code quality checks
 
 ### 8. DigitalOcean (`mcp__digitalocean-mcp-local__`)
+
 - **Use for**: Infrastructure management, monitoring, deployment
 - **Examples**: "Check backend service status", "View API logs", "Restart services", "Deploy changes"
 - **When to use**: Infrastructure debugging, deployment, monitoring production services
@@ -85,21 +96,22 @@ cashapp-fynlo/
 **Note**: These tools are automatically available. Use `/mcp` command to see current status.
 
 ### ✅ Critical Issues RESOLVED
+
 1. **WebSocket Stability** ✅ FIXED
    - Heartbeat mechanism implemented (15-second intervals)
    - Exponential backoff reconnection logic active
    - Authentication with proper timeout handling
-   
+
 2. **API Performance** ✅ OPTIMIZED
    - Response times reduced to < 500ms
    - N+1 queries eliminated with eager loading
    - Redis caching strategy implemented
-   
+
 3. **Token Management** (HIGH)
    - Race conditions
    - No synchronization
    - Multiple refresh attempts
-   
+
 4. **Architecture Fragmentation** (HIGH)
    - Three separate codebases
    - No shared types
@@ -108,32 +120,38 @@ cashapp-fynlo/
 ### 🛡️ Security Fixes Implemented
 
 #### 1. **Restaurant Access Control** (CRITICAL)
+
 - Fixed bypass vulnerability in orders endpoint
 - Users can no longer access other restaurants' data
 - Platform owners have proper elevated access
 - Created `verify_order_access()` helper for consistency
 
 #### 2. **WebSocket Security** (CRITICAL)
+
 - Removed dangerous user_id fallback lookup
 - Fixed undefined variable references
 - Proper token validation without bypass options
 
 #### 3. **Redis Resilience** (HIGH)
+
 - Added null checks throughout codebase
 - Graceful degradation when Redis unavailable
 - Proper error logging without crashes
 
 #### 4. **Input Validation** (MEDIUM)
+
 - Expanded dangerous character filtering
 - Added SQL keyword blocking (SELECT, INSERT, etc.)
 - Case-insensitive pattern matching
 
 #### 5. **Production Security** (MEDIUM)
+
 - Removed all `print()` statements exposing errors
 - Stack traces only in development environment
 - Secure logging with appropriate levels
 
 #### 6. **Platform Owner Security** (MEDIUM)
+
 - Removed automatic role assignment by email
 - Created secure admin endpoints with verification
 - HMAC-based token verification
@@ -145,22 +163,25 @@ cashapp-fynlo/
 **Approach**: Architecture-First with Clean Code Focus
 
 #### Phase 0: Minimal Architecture (Days 1-2) ✅ COMPLETED
+
 - ✅ Create shared types package (@fynlo/shared)
 - ✅ Define API contracts between systems
 - ✅ Remove ALL duplicate type definitions
 - ✅ Set foundation for sustainable fixes
 
 #### Phase 1: Critical Fixes (Days 3-5) ✅ COMPLETED
+
 - ✅ Implement WebSocket heartbeat & reconnection
 - ✅ Fix token refresh with mutex synchronization
 - ✅ Optimize API with caching & eager loading
 - ✅ Create database indexes for performance
 
 #### Phase 2: Platform Integration (Days 6-9) 🟡 IN PROGRESS
+
 - ✅ Integrate web-platform into monorepo structure
 - ✅ Fix backend issues (Redis, imports, WebSocket)
 - ✅ Organize all documentation
-- ✅ Deploy platform dashboard to Vercel (https://fynlo.co.uk)
+- ✅ Deploy platform dashboard to Vercel (<https://fynlo.co.uk>)
 - ✅ Configure custom domain and environment variables
 - ✅ Fix TypeScript/Vite build issues
 - 🔄 Integrate platform dashboard with shared types
@@ -169,6 +190,7 @@ cashapp-fynlo/
 - ⏳ Create real-time monitoring dashboards
 
 #### Phase 3: Monitoring & Deployment (Days 10-12) ⏳ PENDING
+
 - Set up comprehensive monitoring
 - Implement health checks
 - Create deployment scripts
@@ -215,20 +237,23 @@ cashapp-fynlo/
 ### 🌐 Current Deployments
 
 #### Platform Dashboard (Vercel)
-- **URL**: https://fynlo.co.uk
+
+- **URL**: <https://fynlo.co.uk>
 - **Status**: ✅ LIVE
 - **Environment Variables**: Configured
 - **Build**: Vite + React + TypeScript
 - **Authentication**: Supabase integration
 
-#### Backend API (DigitalOcean) 
-- **URL**: https://fynlopos-9eg2c.ondigitalocean.app
+#### Backend API (DigitalOcean)
+
+- **URL**: <https://fynlopos-9eg2c.ondigitalocean.app>
 - **Status**: ✅ Running
 - **Database**: PostgreSQL
 - **Cache**: Redis
 - **WebSocket**: Active
 
 #### Mobile App (iOS)
+
 - **Status**: Development mode
 - **Bundle**: Pre-built for stability
 - **Backend**: Connected to DigitalOcean API
@@ -236,6 +261,7 @@ cashapp-fynlo/
 ### 🎯 Key Solutions
 
 #### WebSocket Stability
+
 ```typescript
 // 15-second heartbeat mechanism
 private startHeartbeat(): void {
@@ -248,6 +274,7 @@ private startHeartbeat(): void {
 ```
 
 #### Token Synchronization
+
 ```typescript
 // Mutex pattern to prevent race conditions
 private refreshMutex = new Mutex();
@@ -260,6 +287,7 @@ async refreshToken(): Promise<boolean> {
 ```
 
 #### API Performance
+
 ```python
 # Eager loading with caching
 @cache_manager.cached("menu", ttl=300)
@@ -271,6 +299,7 @@ async def get_menu_optimized(restaurant_id: str):
 ```
 
 ### 🎯 Infrastructure Status
+
 - **Backend**: DigitalOcean App Platform ✅
 - **Database**: PostgreSQL (Managed) ✅
 - **Cache**: Valkey (Redis fork) ✅
@@ -281,6 +310,7 @@ async def get_menu_optimized(restaurant_id: str):
 ### 📈 Recent Accomplishments (January 2025)
 
 **Today's Major Updates**:
+
 1. ✅ Integrated web-platform into monorepo (247 files)
 2. ✅ Fixed all PR #278 backend bugs
 3. ✅ Organized 249 documentation files into structured folders
@@ -288,6 +318,7 @@ async def get_menu_optimized(restaurant_id: str):
 5. ✅ Established proper monorepo structure for deployments
 
 **Phase Completion Status**:
+
 - Phase 0 (Architecture): 100% ✅
 - Phase 1 (Critical Fixes): 100% ✅
 - Phase 2 (Platform Integration): 40% 🟡
@@ -296,6 +327,7 @@ async def get_menu_optimized(restaurant_id: str):
 ### 📈 Previous Work Completed
 
 **Historical Phases**:
+
 1. ✅ Remove Platform Owner & Fix Authentication
 2. ✅ Fix Backend API Responses
 3. ✅ Fix POS Screen UI Issues
@@ -309,24 +341,28 @@ async def get_menu_optimized(restaurant_id: str):
 ### 🚨 Implementation Priorities (12-Day Plan)
 
 **Day 1-2**: Phase 0 - Architecture Setup
+
 - Create @fynlo/shared package
 - Define all TypeScript interfaces
 - Remove duplicate types from all systems
 - Set up build process
 
 **Day 3-5**: Phase 1 - Critical Fixes
+
 - Fix WebSocket with heartbeat mechanism
 - Implement token synchronization
 - Optimize API performance
 - Add Redis caching
 
 **Day 6-9**: Phase 2 - Platform Integration
+
 - Migrate platform dashboard to shared types
 - Implement role-based access
 - Create bidirectional sync
 - Add monitoring dashboards
 
 **Day 10-12**: Phase 3 - Production Ready
+
 - Add health check endpoints
 - Set up metrics collection
 - Create deployment scripts
@@ -335,6 +371,7 @@ async def get_menu_optimized(restaurant_id: str):
 ### 🔧 Technical Debt Reduction
 
 **Before Implementation**:
+
 - ~50,000 lines of code
 - 200+ duplicate type definitions
 - 15 mock data files
@@ -342,6 +379,7 @@ async def get_menu_optimized(restaurant_id: str):
 - 10% dead code
 
 **After Implementation Target**:
+
 - ~35,000 lines (30% reduction)
 - 0 duplicate types
 - 0 mock data files
@@ -377,7 +415,9 @@ async def get_menu_optimized(restaurant_id: str):
 ### 🚨 Critical Information for Development
 
 #### Bundle Deployment Fix (Most Common Issue)
+
 When changes don't appear in the iOS app:
+
 ```bash
 cd cashapp-fynlo/CashApp-iOS/CashAppPOS
 npx metro build index.js --platform ios --dev false --out ios/main.jsbundle
@@ -386,12 +426,14 @@ cp ios/main.jsbundle ios/CashAppPOS/main.jsbundle
 ```
 
 #### Next Steps (Phase 2 - Days 6-9)
+
 1. **Day 6**: Integrate shared types into web-platform
 2. **Day 7**: Implement role-based access control
 3. **Day 8**: Create bidirectional sync service
 4. **Day 9**: Add real-time monitoring dashboards
 
 #### Critical Paths
+
 - **Backend API**: `backend/app/` - FastAPI application
 - **Platform Dashboard**: `web-platform/` - Next.js dashboard
 - **Mobile App**: `CashApp-iOS/CashAppPOS/` - React Native

@@ -42,6 +42,9 @@ export class EnhancedWebSocketService {
   // Refresh timer
   private refreshTimer: NodeJS.Timeout | null = null;
 
+  // Token refresh listener
+  private tokenRefreshListener: ((newToken: string) => Promise<void>) | null = null;
+
   constructor(config: Partial<WebSocketConfig> = {}) {
     this.config = {
       heartbeatInterval: 15000, // 15 seconds
@@ -268,13 +271,27 @@ export class EnhancedWebSocketService {
   }
   
   private setupTokenRefreshListener(): void {
-    // Listen for token refresh events from tokenManager
-    tokenManager.on('token:refreshed', async (newToken: string) => {
+    // Check if tokenManager exists and has event emitter interface
+    if (!tokenManager || typeof tokenManager.on !== 'function') {
+      logger.warn('⚠️ TokenManager does not support event listeners');
+      return;
+    }
+
+    // Remove existing listener if any
+    if (this.tokenRefreshListener && typeof tokenManager.off === 'function') {
+      tokenManager.off('token:refreshed', this.tokenRefreshListener);
+    }
+
+    // Create and store the listener
+    this.tokenRefreshListener = async (newToken: string) => {
       if (this.state === 'CONNECTED' && this.ws?.readyState === WebSocket.OPEN) {
         logger.info('🔄 Token refreshed, re-authenticating WebSocket...');
         await this.reauthenticate(newToken);
       }
-    });
+    };
+
+    // Listen for token refresh events from tokenManager
+    tokenManager.on('token:refreshed', this.tokenRefreshListener);
   }
   
   private async handleTokenExpired(message: WebSocketMessage): Promise<void> {
@@ -481,6 +498,12 @@ export class EnhancedWebSocketService {
     if (this.networkUnsubscribe) {
       this.networkUnsubscribe();
       this.networkUnsubscribe = null;
+    }
+
+    // Remove token refresh listener
+    if (this.tokenRefreshListener && tokenManager && typeof tokenManager.off === 'function') {
+      tokenManager.off('token:refreshed', this.tokenRefreshListener);
+      this.tokenRefreshListener = null;
     }
 
     // Reset exponential backoff when disconnecting
