@@ -5,21 +5,22 @@
 
 echo "🚀 Setting up REAL test environment with EXISTING users..."
 
-# Export Supabase credentials (from CLAUDE.md context)
-export SUPABASE_URL="https://muukvrmagzsiqpbkmjhl.supabase.co"
-export SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11dWt2cm1hZ3pzaXFwYmttamhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAxMDkwNzIsImV4cCI6MjA0NTY4NTA3Mn0.YXHqM7BV9u8K5REdpVjNKgJTvPELZ5WXCLyGx_gnxNw"
+# Export Supabase credentials (from backend/.env.production)
+# NOTE: These are set from environment or backend config - DO NOT hardcode production keys here!
+export SUPABASE_URL="${SUPABASE_URL:-https://eweggzpvuqczrrrwszyy.supabase.co}"
+export SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-[SET_FROM_ENV]}"
 
-# Use REAL existing users (already registered on fynlo.co.uk)
-# Option 1: Restaurant Manager (Arnaud)
-export TEST_USER_EMAIL="arnaud@luciddirections.co.uk"
-# export TEST_USER_PASSWORD="[actual password needed]"
+# Use REAL existing users (Arnaud's accounts from Supabase)
+# Default: Restaurant Manager account
+export TEST_USER_EMAIL="${TEST_USER_EMAIL:-arnaud@luciddirections.co.uk}"
+export TEST_USER_PASSWORD="${TEST_USER_PASSWORD:-}"  # Must be set via environment
 
-# Option 2: Platform Owner (Admin)
-# export TEST_USER_EMAIL="admin@fynlo.com"
-# export TEST_USER_PASSWORD="[actual password needed]"
+# Platform Owner account (for admin tests)
+export PLATFORM_OWNER_EMAIL="${PLATFORM_OWNER_EMAIL:-sleepyarno@gmail.com}"
+export PLATFORM_OWNER_PASSWORD="${PLATFORM_OWNER_PASSWORD:-}"  # Must be set via environment
 
 # Restaurant ID for the restaurant manager's restaurant
-export TEST_RESTAURANT_ID="arnaud-restaurant-001"
+export TEST_RESTAURANT_ID="${TEST_RESTAURANT_ID:-459da6bc-3472-4de6-8f0c-793373f1a7b0}"  # Arnaud's restaurant user ID from Supabase
 
 # Backend configuration
 export API_BASE_URL="https://fynlopos-9eg2c.ondigitalocean.app"

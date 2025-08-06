@@ -10,20 +10,20 @@
  */
 
 export const TEST_CONFIG = {
-  // Supabase Authentication (REAL)
+  // Supabase Authentication (REAL - Production)
   SUPABASE: {
-    URL: process.env.SUPABASE_URL || 'https://muukvrmagzsiqpbkmjhl.supabase.co',
-    ANON_KEY: process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11dWt2cm1hZ3pzaXFwYmttamhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAxMDkwNzIsImV4cCI6MjA0NTY4NTA3Mn0.YXHqM7BV9u8K5REdpVjNKgJTvPELZ5WXCLyGx_gnxNw',
-    // Use REAL existing users (already registered on fynlo.co.uk)
+    URL: process.env.SUPABASE_URL || 'https://eweggzpvuqczrrrwszyy.supabase.co',
+    ANON_KEY: process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3ZWdnenB2dXFjenJycndzenl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3ODIyMTcsImV4cCI6MjA2NjM1ODIxN30.CRjEJ4w9xsIWB_PAMV_RfZox6yVMSnVT1b4QrA9SC0s',
+    // Use REAL existing users (Arnaud's accounts)
     TEST_USER: {
-      // Restaurant Manager account
+      // Restaurant Manager account (Arnaud)
       email: process.env.TEST_USER_EMAIL || 'arnaud@luciddirections.co.uk',
-      password: process.env.TEST_USER_PASSWORD || '', // Need actual password
+      password: process.env.TEST_USER_PASSWORD || '', // Set via environment
     },
-    // Alternative: Platform Owner account
+    // Platform Owner account (Arnaud)
     PLATFORM_OWNER: {
-      email: 'admin@fynlo.com',
-      password: process.env.PLATFORM_OWNER_PASSWORD || '', // Need actual password
+      email: 'sleepyarno@gmail.com',
+      password: process.env.PLATFORM_OWNER_PASSWORD || '', // Set via environment
     },
   },
   
