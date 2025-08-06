@@ -12,12 +12,18 @@
 export const TEST_CONFIG = {
   // Supabase Authentication (REAL)
   SUPABASE: {
-    URL: process.env.SUPABASE_URL || 'https://your-project.supabase.co',
-    ANON_KEY: process.env.SUPABASE_ANON_KEY || 'your-anon-key',
-    // Test user should be created on the website first
+    URL: process.env.SUPABASE_URL || 'https://muukvrmagzsiqpbkmjhl.supabase.co',
+    ANON_KEY: process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11dWt2cm1hZ3pzaXFwYmttamhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAxMDkwNzIsImV4cCI6MjA0NTY4NTA3Mn0.YXHqM7BV9u8K5REdpVjNKgJTvPELZ5WXCLyGx_gnxNw',
+    // Use REAL existing users (already registered on fynlo.co.uk)
     TEST_USER: {
-      email: 'test@fynlo.co.uk',
-      password: process.env.TEST_USER_PASSWORD || 'TestPassword123!',
+      // Restaurant Manager account
+      email: process.env.TEST_USER_EMAIL || 'arnaud@luciddirections.co.uk',
+      password: process.env.TEST_USER_PASSWORD || '', // Need actual password
+    },
+    // Alternative: Platform Owner account
+    PLATFORM_OWNER: {
+      email: 'admin@fynlo.com',
+      password: process.env.PLATFORM_OWNER_PASSWORD || '', // Need actual password
     },
   },
   

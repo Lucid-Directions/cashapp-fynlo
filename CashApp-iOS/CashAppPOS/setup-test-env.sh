@@ -3,16 +3,23 @@
 # Setup test environment for REAL infrastructure testing
 # This sets up the required environment variables for Supabase and backend
 
-echo "🚀 Setting up REAL test environment..."
+echo "🚀 Setting up REAL test environment with EXISTING users..."
 
 # Export Supabase credentials (from CLAUDE.md context)
 export SUPABASE_URL="https://muukvrmagzsiqpbkmjhl.supabase.co"
 export SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11dWt2cm1hZ3pzaXFwYmttamhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAxMDkwNzIsImV4cCI6MjA0NTY4NTA3Mn0.YXHqM7BV9u8K5REdpVjNKgJTvPELZ5WXCLyGx_gnxNw"
 
-# Test user credentials (you need to create this user on fynlo.co.uk)
-export TEST_USER_EMAIL="test@fynlo.co.uk"
-export TEST_USER_PASSWORD="TestPassword123!"
-export TEST_RESTAURANT_ID="test-restaurant-001"
+# Use REAL existing users (already registered on fynlo.co.uk)
+# Option 1: Restaurant Manager (Arnaud)
+export TEST_USER_EMAIL="arnaud@luciddirections.co.uk"
+# export TEST_USER_PASSWORD="[actual password needed]"
+
+# Option 2: Platform Owner (Admin)
+# export TEST_USER_EMAIL="admin@fynlo.com"
+# export TEST_USER_PASSWORD="[actual password needed]"
+
+# Restaurant ID for the restaurant manager's restaurant
+export TEST_RESTAURANT_ID="arnaud-restaurant-001"
 
 # Backend configuration
 export API_BASE_URL="https://fynlopos-9eg2c.ondigitalocean.app"
