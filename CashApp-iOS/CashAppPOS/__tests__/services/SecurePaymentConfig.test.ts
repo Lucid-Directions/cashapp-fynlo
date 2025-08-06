@@ -122,7 +122,7 @@ describe('SecurePaymentConfig', () => {
 
     it('should prevent concurrent loading', async () => {
       // Arrange
-      (AsyncStorage.getItem as jest.Mock).mockResolvedValue('token');
+      SecurePaymentConfig.clearCache();      (AsyncStorage.getItem as jest.Mock).mockResolvedValue('token');
       (fetch as jest.Mock).mockImplementation(
         () =>
           new Promise((resolve) =>

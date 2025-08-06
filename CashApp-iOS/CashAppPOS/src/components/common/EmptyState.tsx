@@ -2,7 +2,7 @@ import React from 'react';
 
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-import { useTheme } from '../../context/ThemeProvider';
+import { useTheme } from '../../design-system/ThemeProvider';
 
 interface EmptyStateProps {
   icon?: string;

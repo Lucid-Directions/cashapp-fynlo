@@ -1,7 +1,7 @@
 import { Alert, Platform } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { logger } from './logger';
 export interface ErrorInfo {
   id: string;
   message: string;
@@ -433,10 +433,10 @@ class ErrorHandler {
     if (!paymentData) return null;
 
     // Remove sensitive payment information
-    const sanitized = { ...paymentData };
-    delete sanitized.cardNumber;
-    delete sanitized.cvv;
-    delete sanitized.pin;
+    const sanitized = { ...(paymentData as any) };
+    delete (sanitized as any).cardNumber;
+    delete (sanitized as any).cvv;
+    delete (sanitized as any).pin;
 
     return sanitized;
   }

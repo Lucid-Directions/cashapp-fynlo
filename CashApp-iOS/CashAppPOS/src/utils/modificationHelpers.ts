@@ -7,22 +7,20 @@ import { CartItemModification, EnhancedOrderItem } from '../types/cart';
 
 /**
  * Format modification price for display
- * Shows + for increases, - for decreases (but shows negative as positive for removals)
+ * Shows + for positive prices (charges), - for negative prices (discounts)
  */
 export function formatModificationPrice(price: number): string {
   if (price === 0) return '';
   
-  // For negative prices, show without minus sign (as requested by tests)
-  if (price < 0) {
-    const roundedPrice = Math.round(Math.abs(price) * 100) / 100;
-    return `$${roundedPrice.toFixed(2)}`;
-  }
+  // Round to avoid floating point issues
+  const roundedPrice = Math.round(Math.abs(price) * 100) / 100;
   
-  // For positive prices, show with plus sign, but round to avoid floating point issues
-  const roundedPrice = Math.floor(price * 100) / 100;
-  return `+$${roundedPrice.toFixed(2)}`;
+  if (price > 0) {
+    return `+$${roundedPrice.toFixed(2)}`;
+  } else {
+    return `-$${roundedPrice.toFixed(2)}`;
+  }
 }
-
 /**
  * Calculate total modification price for selected modifications
  */
@@ -336,3 +334,4 @@ export function validateModifications(modifications: any[]): boolean {
            (!mod.quantity || typeof mod.quantity === 'number');
   });
 }
+

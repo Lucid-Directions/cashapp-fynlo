@@ -14,7 +14,16 @@ jest.mock('../../store/cartStoreAdapter');
 jest.mock('../../store/useSettingsStore');
 jest.mock('../../utils/logger');
 
-// Mock the stores
+
+// Mock cart store with required methods
+const mockCartStore = {
+  getRestaurantName: jest.fn(() => 'Test Restaurant'),
+  setSplitBillGroups: jest.fn(),
+};
+
+jest.mock('../../store/cartStoreAdapter', () => ({
+  useCartStore: jest.fn(() => mockCartStore),
+}));// Mock the stores
 const mockSettingsStore = {
   taxConfiguration: { enabled: true, rate: 10 },
   serviceChargeConfig: { enabled: true, rate: 15 },

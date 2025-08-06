@@ -1,3 +1,5 @@
+// Unmock this store for unit testing
+jest.unmock("../useAppStore");
 /**
  * Unit Tests for App Store (Zustand)
  * Testing state management, actions, and computed values

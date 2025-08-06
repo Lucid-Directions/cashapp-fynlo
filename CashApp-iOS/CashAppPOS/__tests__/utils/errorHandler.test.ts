@@ -9,7 +9,15 @@ jest.mock('@react-native-async-storage/async-storage');
 jest.mock('react-native/Libraries/Alert/Alert', () => ({
   alert: jest.fn(),
 }));
-
+// Mock logger
+jest.mock('../../src/utils/logger', () => ({
+  logger: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
 describe('ErrorHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();

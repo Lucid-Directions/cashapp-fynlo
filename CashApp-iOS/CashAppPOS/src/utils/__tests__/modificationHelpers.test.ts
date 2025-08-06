@@ -113,8 +113,8 @@ describe('modificationHelpers', () => {
       expect(formatModificationPrice(1.5)).toBe('+$1.50');
     });
 
-    it('formats negative prices without plus sign', () => {
-      expect(formatModificationPrice(-0.5)).toBe('$0.50');
+    it('formats negative prices with minus sign', () => {
+      expect(formatModificationPrice(-0.5)).toBe('-$0.50');
     });
 
     it('returns empty string for zero', () => {
@@ -122,7 +122,7 @@ describe('modificationHelpers', () => {
     });
 
     it('formats to two decimal places', () => {
-      expect(formatModificationPrice(1.555)).toBe('+$1.55');
+      expect(formatModificationPrice(1.555)).toBe('+$1.56');
     });
   });
 

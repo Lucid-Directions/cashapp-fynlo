@@ -35,7 +35,24 @@ jest.mock('../../../services/DatabaseService', () => ({
 // Mock Alert
 jest.spyOn(Alert, 'alert');
 
-// Mock useAppStore
+// Mock useAuthStore
+const mockAuthStore = {
+  user: null,
+  isAuthenticated: false,
+  isLoading: false,
+  signIn: jest.fn().mockResolvedValue(true),
+  signOut: jest.fn(),
+  refreshUser: jest.fn(),
+};
+
+jest.mock('../../../store/useAuthStore', () => ({
+  useAuthStore: (selector: any) => {
+    if (selector) {
+      return selector(mockAuthStore);
+    }
+    return mockAuthStore;
+  },
+}));// Mock useAppStore
 const mockStore = {
   setUser: jest.fn(),
   setSession: jest.fn(),
@@ -69,11 +86,11 @@ describe('LoginScreen', () => {
     it('should render all essential elements', () => {
       const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
 
-      expect(getByText('Fynlo')).toBeTruthy();
-      expect(getByText('Point of Sale')).toBeTruthy();
+      expect(getByText('fynlo')).toBeTruthy();
+      expect(getByText('Professional Point of Sale System')).toBeTruthy();
       expect(getByText('Welcome Back')).toBeTruthy();
       expect(getByText('Sign in to continue')).toBeTruthy();
-      expect(getByPlaceholderText('Username')).toBeTruthy();
+      expect(getByPlaceholderText('Email')).toBeTruthy();
       expect(getByPlaceholderText('Password')).toBeTruthy();
       expect(getByText('Sign In')).toBeTruthy();
       expect(getByText('Forgot Password?')).toBeTruthy();
@@ -90,14 +107,14 @@ describe('LoginScreen', () => {
     it('should render footer information', () => {
       const { getByText } = customRender(<LoginScreen />);
 
-      expect(getByText('Fynlo POS • Powered by CashApp')).toBeTruthy();
+      expect(getByText('Fynlo POS System • Secure Payment Processing')).toBeTruthy();
     });
   });
 
   describe('Form Interactions', () => {
     it('should update username input', () => {
       const { getByPlaceholderText } = customRender(<LoginScreen />);
-      const usernameInput = getByPlaceholderText('Username');
+      const usernameInput = getByPlaceholderText('Email');
 
       fireEvent.changeText(usernameInput, 'test@example.com');
 
@@ -165,7 +182,7 @@ describe('LoginScreen', () => {
 
     it('should show error for empty password', async () => {
       const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
-      const usernameInput = getByPlaceholderText('Username');
+      const usernameInput = getByPlaceholderText('Email');
       const loginButton = getByText('Sign In');
 
       fireEvent.changeText(usernameInput, 'test@example.com');
@@ -183,7 +200,7 @@ describe('LoginScreen', () => {
       mockDatabaseService.login.mockResolvedValue(true);
 
       const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
-      const usernameInput = getByPlaceholderText('Username');
+      const usernameInput = getByPlaceholderText('Email');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
@@ -202,7 +219,7 @@ describe('LoginScreen', () => {
       mockDatabaseService.login.mockResolvedValue(false);
 
       const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
-      const usernameInput = getByPlaceholderText('Username');
+      const usernameInput = getByPlaceholderText('Email');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
@@ -219,7 +236,7 @@ describe('LoginScreen', () => {
       mockDatabaseService.login.mockRejectedValue(new Error('Network error'));
 
       const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
-      const usernameInput = getByPlaceholderText('Username');
+      const usernameInput = getByPlaceholderText('Email');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
@@ -241,7 +258,7 @@ describe('LoginScreen', () => {
       );
 
       const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
-      const usernameInput = getByPlaceholderText('Username');
+      const usernameInput = getByPlaceholderText('Email');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
@@ -263,7 +280,7 @@ describe('LoginScreen', () => {
       );
 
       const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
-      const usernameInput = getByPlaceholderText('Username');
+      const usernameInput = getByPlaceholderText('Email');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
@@ -295,7 +312,7 @@ describe('LoginScreen', () => {
     it('should have proper accessibility labels', () => {
       const { getByPlaceholderText, getByText } = customRender(<LoginScreen />);
 
-      const usernameInput = getByPlaceholderText('Username');
+      const usernameInput = getByPlaceholderText('Email');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
@@ -306,7 +323,7 @@ describe('LoginScreen', () => {
 
     it('should support keyboard navigation', () => {
       const { getByPlaceholderText } = customRender(<LoginScreen />);
-      const usernameInput = getByPlaceholderText('Username');
+      const usernameInput = getByPlaceholderText('Email');
       const passwordInput = getByPlaceholderText('Password');
 
       expect(usernameInput.props.returnKeyType).toBe('next');
@@ -319,7 +336,7 @@ describe('LoginScreen', () => {
       mockDatabaseService.login.mockResolvedValue(true);
 
       const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
-      const usernameInput = getByPlaceholderText('Username');
+      const usernameInput = getByPlaceholderText('Email');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
@@ -336,7 +353,7 @@ describe('LoginScreen', () => {
       mockDatabaseService.login.mockResolvedValue(true);
 
       const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
-      const usernameInput = getByPlaceholderText('Username');
+      const usernameInput = getByPlaceholderText('Email');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
@@ -355,7 +372,7 @@ describe('LoginScreen', () => {
       mockDatabaseService.login.mockResolvedValue(true);
 
       const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
-      const usernameInput = getByPlaceholderText('Username');
+      const usernameInput = getByPlaceholderText('Email');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 

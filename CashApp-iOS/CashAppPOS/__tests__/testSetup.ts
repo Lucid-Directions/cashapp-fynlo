@@ -74,6 +74,46 @@ jest.mock('@react-native-community/netinfo', () => ({
   addEventListener: jest.fn(() => jest.fn()),
 }));
 
+// Mock Theme Provider
+jest.mock('../src/design-system/ThemeProvider', () => ({
+  ThemeProvider: ({ children }: any) => children,
+  useTheme: () => ({
+    colors: {
+      primary: '#007AFF',
+      secondary: '#5856D6',
+      background: '#F2F2F7',
+      surface: '#FFFFFF',
+      text: '#000000',
+      error: '#FF3B30',
+      success: '#34C759',
+      warning: '#FF9500',
+      border: '#C6C6C8',
+      disabled: '#8E8E93',
+      placeholder: '#8E8E93',
+    },
+    spacing: {
+      xs: 4,
+      sm: 8,
+      md: 16,
+      lg: 24,
+      xl: 32,
+    },
+    borderRadius: {
+      sm: 4,
+      md: 8,
+      lg: 12,
+      xl: 16,
+    },
+    typography: {
+      h1: { fontSize: 32, fontWeight: 'bold' },
+      h2: { fontSize: 24, fontWeight: 'bold' },
+      h3: { fontSize: 20, fontWeight: 'semibold' },
+      body: { fontSize: 16, fontWeight: 'normal' },
+      caption: { fontSize: 14, fontWeight: 'normal' },
+    },
+  }),
+}));
+
 // Global mocks for testing environment
 global.mockAsyncStorage = {
   getItem: jest.fn(),
@@ -143,20 +183,60 @@ global.Event = class Event {
   }
 } as any;
 
-// Suppress console logs during tests
-const originalError = console.error;
-const originalWarn = console.warn;
+// Mock SumUp React Native SDK
+jest.mock('sumup-react-native-alpha', () => ({
+  SumUpProvider: ({ children }: any) => children,
+  useSumUp: () => ({
+    initSumUp: jest.fn(() => Promise.resolve()),
+    login: jest.fn(() => Promise.resolve()),
+    checkout: jest.fn(() => Promise.resolve({ success: true })),
+    isLoggedIn: jest.fn(() => Promise.resolve(false)),
+  }),
+}));
 
-beforeEach(() => {
-  console.error = jest.fn();
-  console.warn = jest.fn();
-});
+// Mock react-dom for SumUp dependency
+jest.mock('react-dom', () => ({}), { virtual: true });
 
-afterEach(() => {
-  console.error = originalError;
-  console.warn = originalWarn;
-  jest.clearAllMocks();
-});
+// Mock mobx-react for SumUp dependency  
+jest.mock('mobx-react', () => ({
+  observer: (component: any) => component,
+  inject: () => (component: any) => component,
+}));
+
+// Mock mobx-react-lite for SumUp dependency
+jest.mock('mobx-react-lite', () => ({
+  observer: (component: any) => component,
+  useObserver: (fn: any) => fn(),
+}));
+
+// Import centralized mocks
+import { mockAppStore, mockUIStore, mockSettingsStore, mockAuthStore } from '../__mocks__/storeMocks';
+
+// Mock store hooks with centralized versions
+jest.mock('../src/store/useAppStore', () => ({
+  __esModule: true,
+  default: jest.fn(() => mockAppStore),
+  useAppStore: jest.fn(() => mockAppStore),
+}));
+
+jest.mock('../src/store/useUIStore', () => ({
+  __esModule: true,
+  default: jest.fn(() => mockUIStore),
+  useUIStore: jest.fn(() => mockUIStore),
+}));
+
+jest.mock('../src/store/useSettingsStore', () => ({
+  __esModule: true,
+  default: jest.fn(() => mockSettingsStore),
+  useSettingsStore: jest.fn(() => mockSettingsStore),
+}));
+
+jest.mock('../src/store/useAuthStore', () => ({
+  __esModule: true,
+  default: jest.fn(() => mockAuthStore),
+  useAuthStore: jest.fn(() => mockAuthStore),
+}));
+
 
 // Ensure all globals are defined
 if (typeof global.logger === 'undefined') {
@@ -168,6 +248,7 @@ if (typeof global.logger === 'undefined') {
   };
 }
 
+// Mock global theme - fallback for components that don't use ThemeProvider
 if (typeof global.theme === 'undefined') {
   global.theme = {
     colors: {
@@ -205,149 +286,3 @@ if (typeof global.theme === 'undefined') {
     },
   };
 }
-
-// Additional Dimensions mock is handled above in the main React Native mock
-
-// Mock SumUp React Native SDK
-jest.mock('sumup-react-native-alpha', () => ({
-  SumUpProvider: ({ children }: any) => children,
-  useSumUp: () => ({
-    initSumUp: jest.fn(() => Promise.resolve()),
-    login: jest.fn(() => Promise.resolve()),
-    checkout: jest.fn(() => Promise.resolve({ success: true })),
-    isLoggedIn: jest.fn(() => Promise.resolve(false)),
-  }),
-}));
-
-// Mock react-dom for SumUp dependency
-jest.mock('react-dom', () => ({}), { virtual: true });
-
-// Mock mobx-react for SumUp dependency  
-jest.mock('mobx-react', () => ({
-  observer: (component: any) => component,
-  inject: () => (component: any) => component,
-}));
-
-// Mock mobx-react-lite for SumUp dependency
-jest.mock('mobx-react-lite', () => ({
-  observer: (component: any) => component,
-  useObserver: (fn: any) => fn(),
-}));
-
-// Mock store hooks
-jest.mock('../src/store/useAppStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
-    cart: [],
-    menuItems: [],
-    user: null,
-    session: null,
-    currentOrder: null,
-    serviceChargePercentage: 10,
-    addTransactionFee: false,
-    isOnline: true,
-    isLoading: false,
-    error: null,
-    addToCart: jest.fn(),
-    removeFromCart: jest.fn(),
-    updateCartItem: jest.fn(),
-    clearCart: jest.fn(),
-    cleanCart: jest.fn(),
-    setCurrentOrder: jest.fn(),
-    setUser: jest.fn(),
-    logout: jest.fn(),
-    setSession: jest.fn(),
-    setOnlineStatus: jest.fn(),
-    setLoading: jest.fn(),
-    setError: jest.fn(),
-    cartTotal: jest.fn(() => 0),
-    cartItemCount: jest.fn(() => 0),
-    calculateServiceCharge: jest.fn(() => 0),
-    calculateTransactionFee: jest.fn(() => 0),
-    serviceChargeIncluded: false,
-    transactionFeeIncluded: false,
-    enableServiceCharge: jest.fn(),
-    enableTransactionFee: jest.fn(),
-  })),
-  useAppStore: jest.fn(() => ({
-    cart: [],
-    menuItems: [],
-    user: null,
-    session: null,
-    currentOrder: null,
-    serviceChargePercentage: 10,
-    addTransactionFee: false,
-    isOnline: true,
-    isLoading: false,
-    error: null,
-    addToCart: jest.fn(),
-    removeFromCart: jest.fn(),
-    updateCartItem: jest.fn(),
-    clearCart: jest.fn(),
-    cleanCart: jest.fn(),
-    setCurrentOrder: jest.fn(),
-    setUser: jest.fn(),
-    logout: jest.fn(),
-    setSession: jest.fn(),
-    setOnlineStatus: jest.fn(),
-    setLoading: jest.fn(),
-    setError: jest.fn(),
-    cartTotal: jest.fn(() => 0),
-    cartItemCount: jest.fn(() => 0),
-    calculateServiceCharge: jest.fn(() => 0),
-    calculateTransactionFee: jest.fn(() => 0),
-    serviceChargeIncluded: false,
-    transactionFeeIncluded: false,
-    enableServiceCharge: jest.fn(),
-    enableTransactionFee: jest.fn(),
-  })),
-}));
-
-jest.mock('../src/store/useUIStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
-    selectedCategory: 'All',
-    showPaymentModal: false,
-    showOfflineIndicator: false,
-    theme: 'light',
-    setSelectedCategory: jest.fn(),
-    setShowPaymentModal: jest.fn(),
-    setShowOfflineIndicator: jest.fn(),
-    setTheme: jest.fn(),
-    toggleTheme: jest.fn(),
-  })),
-}));
-
-jest.mock('../src/store/useSettingsStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
-    settings: {},
-    updateSettings: jest.fn(),
-    getSettings: jest.fn(() => ({})),
-  })),
-}));
-
-
-// Import centralized mocks
-import { mockAppStore, mockUIStore, mockSettingsStore, mockAuthStore } from '../__mocks__/storeMocks';
-
-// Override store mocks with centralized versions
-jest.mock('../src/store/useAppStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => mockAppStore),
-}));
-
-jest.mock('../src/store/useUIStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => mockUIStore),
-}));
-
-jest.mock('../src/store/useSettingsStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => mockSettingsStore),
-}));
-
-jest.mock('../src/store/useAuthStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => mockAuthStore),
-}));
