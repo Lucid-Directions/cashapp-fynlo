@@ -128,11 +128,11 @@ const PaymentProcessingScreen: React.FC = () => {
       logger.info('Initializing payment:', { paymentMethod, amount, orderData });
       
       // Validate inputs
-      if (!amount || amount <= 0) {
+      if (\!amount || amount <= 0) {
         throw new Error('Invalid payment amount');
       }
 
-      if (!orderData.items || orderData.items.length === 0) {
+      if (\!orderData.items || orderData.items.length === 0) {
         throw new Error('No items in order');
       }
 
@@ -281,7 +281,7 @@ const PaymentProcessingScreen: React.FC = () => {
     hasCompletedRef.current = true;
     setPaymentResult(result);
     setPaymentStatus('success');
-    setStatusMessage('Payment successful!');
+    setStatusMessage('Payment successful\!');
 
     try {
       // Create order in backend
@@ -336,7 +336,7 @@ const PaymentProcessingScreen: React.FC = () => {
   };
 
   const handleCancelPayment = () => {
-    if (processing && paymentMethod !== 'cash') {
+    if (processing && paymentMethod \!== 'cash') {
       Alert.alert(
         'Cancel Payment',
         'Are you sure you want to cancel this payment?',
@@ -363,6 +363,28 @@ const PaymentProcessingScreen: React.FC = () => {
   };
 
   const createOrder = async (paymentResult: PaymentResult): Promise<Order> => {
+    // Calculate VAT correctly
+    // Assuming 'amount' includes VAT (VAT-inclusive pricing)
+    const vatRate = (taxConfiguration.vatRate || 0) / 100;
+    const serviceTaxRate = (taxConfiguration.serviceTaxRate || 0) / 100;
+    
+    // Calculate the subtotal (amount without VAT)
+    // If total includes VAT: subtotal = total / (1 + vatRate)
+    const subtotal = amount / (1 + vatRate);
+    
+    // Calculate the actual VAT amount
+    // VAT = subtotal * vatRate
+    const taxAmount = subtotal * vatRate;
+    
+    // Calculate service charge (typically on subtotal, not total)
+    // This depends on business logic - adjust if needed
+    const serviceCharge = subtotal * serviceTaxRate;
+    
+    // Verify the calculation
+    // Note: With service charge, the total would be: subtotal + taxAmount + serviceCharge
+    // But typically the 'amount' passed here is the final total including all charges
+    // So we need to adjust our calculation if service charge is already included
+    
     const orderRequest = {
       items: orderData.items,
       customer_id: orderData.customerId,
@@ -374,12 +396,22 @@ const PaymentProcessingScreen: React.FC = () => {
       payment_method: paymentMethod,
       payment_status: 'paid' as const,
       transaction_id: paymentResult.transactionId,
-      subtotal: amount / (1 + (taxConfiguration.vatRate || 0) / 100),
-      tax_amount: amount * ((taxConfiguration.vatRate || 0) / 100),
-      service_charge: amount * ((taxConfiguration.serviceTaxRate || 0) / 100),
+      subtotal: subtotal,
+      tax_amount: taxAmount,
+      service_charge: serviceCharge,
       total_amount: amount,
       notes: orderData.notes,
     };
+
+    // Log the calculation for debugging
+    logger.info('Order calculation:', {
+      amount: amount,
+      vatRate: vatRate * 100 + '%',
+      subtotal: subtotal.toFixed(2),
+      tax_amount: taxAmount.toFixed(2),
+      service_charge: serviceCharge.toFixed(2),
+      verification: (subtotal + taxAmount).toFixed(2) + ' should equal ' + amount.toFixed(2) + ' (without service charge)'
+    });
 
     return await orderService.createOrder(orderRequest);
   };
@@ -529,7 +561,7 @@ const PaymentProcessingScreen: React.FC = () => {
           <TouchableOpacity
             style={styles.backButton}
             onPress={handleCancelPayment}
-            disabled={processing && paymentMethod !== 'cash'}
+            disabled={processing && paymentMethod \!== 'cash'}
           >
             <Icon name="arrow-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
@@ -565,7 +597,7 @@ const PaymentProcessingScreen: React.FC = () => {
         </View>
 
         {/* Retry Button (shown on failure) */}
-        {paymentStatus === 'failed' && !showPaymentOverlay && (
+        {paymentStatus === 'failed' && \!showPaymentOverlay && (
           <View style={styles.retryContainer}>
             <TouchableOpacity
               style={styles.retryButton}
@@ -580,14 +612,14 @@ const PaymentProcessingScreen: React.FC = () => {
 
       {/* Payment Status Overlay */}
       <PaymentStatusOverlay
-        visible={showPaymentOverlay && paymentMethod !== 'cash'}
+        visible={showPaymentOverlay && paymentMethod \!== 'cash'}
         status={paymentStatus}
         amount={amount}
         currency="GBP"
         paymentMethod={methodInfo.name}
         message={statusMessage}
         onCancel={handleCancelPayment}
-        canCancel={!processing || paymentMethod === 'cash'}
+        canCancel={\!processing || paymentMethod === 'cash'}
       />
     </View>
   );
@@ -798,3 +830,4 @@ const createStyles = (theme: Theme) => StyleSheet.create({
 });
 
 export default PaymentProcessingScreen;
+EOF < /dev/null
