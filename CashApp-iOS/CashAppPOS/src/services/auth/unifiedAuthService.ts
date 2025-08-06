@@ -7,6 +7,7 @@
  */
 
 import { AUTH_CONFIG } from '../../config/auth.config';
+import { logger } from '../../utils/logger';
 
 import { mockAuthService } from './mockAuth';
 import { authService as supabaseAuthService } from './supabaseAuth';

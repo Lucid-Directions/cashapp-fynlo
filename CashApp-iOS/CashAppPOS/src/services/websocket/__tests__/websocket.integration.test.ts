@@ -3,7 +3,7 @@
  */
 
 import TEST_CONFIG from '../../../__tests__/config/test.config';
-import WebSocketService from '../WebSocketService';
+import WebSocketService from '../EnhancedWebSocketService';
 
 describe('WebSocket Integration - REAL Server', () => {
   let wsService: WebSocketService;

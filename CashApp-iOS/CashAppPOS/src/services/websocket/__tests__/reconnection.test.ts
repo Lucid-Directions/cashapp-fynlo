@@ -39,7 +39,7 @@ describe('WebSocket Reconnection (Real Server)', () => {
   });
 
   it('should connect to real WebSocket server', (done) => {
-    if (\!authToken) {
+    if (!authToken) {
       console.log('⏭️ Skipping WebSocket test - no auth token');
       done();
       return;

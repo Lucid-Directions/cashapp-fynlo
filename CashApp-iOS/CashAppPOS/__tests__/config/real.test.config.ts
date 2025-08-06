@@ -5,8 +5,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Load test environment variables
-require('dotenv').config({ path: '.env.test' });
+// Test environment variables are already loaded via testSetup
 
 export const TEST_CONFIG = {
   // Real Supabase Instance

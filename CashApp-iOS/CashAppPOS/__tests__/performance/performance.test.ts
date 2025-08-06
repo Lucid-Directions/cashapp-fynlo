@@ -11,14 +11,14 @@ import {
 } from '../../src/test-utils/mockHelpers';
 
 // Create mock instances
-const performanceUtils = createMockPerformanceUtils();
-const TestingUtils = createMockTestingUtils();
-const dataPrefetcher = createMockDataPrefetcher();
+const mockPerformanceUtils = createMockPerformanceUtils();
+const mockTestingUtils = createMockTestingUtils();
+const mockDataPrefetcher = createMockDataPrefetcher();
 
 // Mock the modules
-jest.mock('../../src/utils/performance', () => performanceUtils);
-jest.mock('../../src/utils/TestingUtils', () => ({ TestingUtils }));
-jest.mock('../../src/services/DataPrefetcher', () => ({ dataPrefetcher }));
+jest.mock('../../src/utils/performance', () => mockPerformanceUtils);
+jest.mock('../../src/utils/TestingUtils', () => ({ TestingUtils: mockTestingUtils }));
+jest.mock('../../src/services/DataPrefetcher', () => ({ dataPrefetcher: mockDataPrefetcher }));
 
 describe.skip('Performance Tests', () => {
   beforeEach(() => {

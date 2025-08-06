@@ -5,6 +5,16 @@ import { logger } from '../../src/utils/logger';
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage');
 
+// Mock logger
+jest.mock('../../src/utils/logger', () => ({
+  logger: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
 // Mock Alert
 jest.mock('react-native/Libraries/Alert/Alert', () => ({
   alert: jest.fn(),
@@ -15,11 +25,6 @@ describe('ErrorHandler', () => {
     jest.clearAllMocks();
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
     (AsyncStorage.setItem as jest.Mock).mockResolvedValue(undefined);
-    // Clear logger mocks
-    (logger.error as jest.Mock).mockClear();
-    (logger.warn as jest.Mock).mockClear();
-    (logger.info as jest.Mock).mockClear();
-    (logger.debug as jest.Mock).mockClear();
   });
 
   describe('handleError', () => {

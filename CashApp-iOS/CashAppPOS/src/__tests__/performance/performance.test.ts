@@ -21,7 +21,7 @@ describe('Performance Tests (Real Operations)', () => {
       for (let i = 0; i < 100; i++) {
         operations.push(() => {
           // Simulate cart operation
-          const item = { id: i, name: \`Item \${i}\`, price: 10.99 };
+          const item = { id: i, name: `Item ${i}`, price: 10.99 };
           return item;
         });
       }
@@ -50,7 +50,7 @@ describe('Performance Tests (Real Operations)', () => {
       // Create large dataset simulation
       const largeDataset = Array.from({ length: 1000 }, (_, i) => ({
         id: i + 1,
-        name: \`Item \${i + 1}\`,
+        name: `Item ${i + 1}`,
         price: Math.random() * 50,
         category: i % 5 === 0 ? 'Main' : 'Other',
       }));
@@ -60,7 +60,7 @@ describe('Performance Tests (Real Operations)', () => {
       // Process large dataset
       const processedData = largeDataset.map(item => ({
         ...item,
-        displayPrice: \`£\${item.price.toFixed(2)}\`,
+        displayPrice: `£${item.price.toFixed(2)}`,
         searchText: item.name.toLowerCase(),
       }));
 
@@ -83,7 +83,7 @@ describe('Performance Tests (Real Operations)', () => {
       // Set up large dataset with multiple categories
       const largeDataset = Array.from({ length: 1000 }, (_, i) => ({
         id: i + 1,
-        name: \`Item \${i + 1}\`,
+        name: `Item ${i + 1}`,
         price: Math.random() * 50,
         category: i % 5 === 0 ? 'Main' : 'Other',
       }));
@@ -115,8 +115,8 @@ describe('Performance Tests (Real Operations)', () => {
       // Create large searchable dataset
       const searchData = Array.from({ length: 1000 }, (_, i) => ({
         id: i + 1,
-        name: \`Item \${i + 1}\`,
-        description: \`Description for item \${i + 1}\`,
+        name: `Item ${i + 1}`,
+        description: `Description for item ${i + 1}`,
         tags: ['food', 'menu', i % 10 === 0 ? 'special' : 'regular'],
       }));
 
