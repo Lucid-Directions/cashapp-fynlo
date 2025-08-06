@@ -18,12 +18,12 @@ export const TEST_CONFIG = {
     TEST_USER: {
       // Restaurant Manager account (Arnaud)
       email: process.env.TEST_USER_EMAIL || 'arnaud@luciddirections.co.uk',
-      password: process.env.TEST_USER_PASSWORD || '', // Set via environment
+      password: process.env.TEST_USER_PASSWORD || 'Thursday_1',
     },
     // Platform Owner account (Arnaud)
     PLATFORM_OWNER: {
       email: 'sleepyarno@gmail.com',
-      password: process.env.PLATFORM_OWNER_PASSWORD || '', // Set via environment
+      password: process.env.PLATFORM_OWNER_PASSWORD || 'Thursday_1',
     },
   },
   

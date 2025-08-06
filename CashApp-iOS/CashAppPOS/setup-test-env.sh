@@ -8,16 +8,16 @@ echo "🚀 Setting up REAL test environment with EXISTING users..."
 # Export Supabase credentials (from backend/.env.production)
 # NOTE: These are set from environment or backend config - DO NOT hardcode production keys here!
 export SUPABASE_URL="${SUPABASE_URL:-https://eweggzpvuqczrrrwszyy.supabase.co}"
-export SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-[SET_FROM_ENV]}"
+export SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3ZWdnenB2dXFjenJycndzenl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3ODIyMTcsImV4cCI6MjA2NjM1ODIxN30.CRjEJ4w9xsIWB_PAMV_RfZox6yVMSnVT1b4QrA9SC0s}"
 
 # Use REAL existing users (Arnaud's accounts from Supabase)
 # Default: Restaurant Manager account
 export TEST_USER_EMAIL="${TEST_USER_EMAIL:-arnaud@luciddirections.co.uk}"
-export TEST_USER_PASSWORD="${TEST_USER_PASSWORD:-}"  # Must be set via environment
+export TEST_USER_PASSWORD="${TEST_USER_PASSWORD:-Thursday_1}"
 
 # Platform Owner account (for admin tests)
 export PLATFORM_OWNER_EMAIL="${PLATFORM_OWNER_EMAIL:-sleepyarno@gmail.com}"
-export PLATFORM_OWNER_PASSWORD="${PLATFORM_OWNER_PASSWORD:-}"  # Must be set via environment
+export PLATFORM_OWNER_PASSWORD="${PLATFORM_OWNER_PASSWORD:-Thursday_1}"
 
 # Restaurant ID for the restaurant manager's restaurant
 export TEST_RESTAURANT_ID="${TEST_RESTAURANT_ID:-459da6bc-3472-4de6-8f0c-793373f1a7b0}"  # Arnaud's restaurant user ID from Supabase
