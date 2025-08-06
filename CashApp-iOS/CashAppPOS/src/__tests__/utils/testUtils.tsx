@@ -1,17 +1,37 @@
-// // @ts-nocheck
+// @ts-nocheck
 /**
  * Test Utilities for Fynlo POS
  * Provides common testing helpers, wrappers, and utilities
  */
 
 import type { ReactElement } from 'react';
-// TODO: Unused import - import React from 'react';
+import React from 'react';
 
 import { NavigationContainer } from '@react-navigation/native';
-import { render } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import type { RenderOptions } from '@testing-library/react-native';
+
+// Mock theme for testing
+export const useTestTheme = () => ({
+  colors: {
+    primary: '#FF6B35', // Fynlo Orange
+    secondary: '#666',
+    background: '#fff',
+    text: '#000',
+    border: '#E5E5E5',
+    white: '#fff',
+    danger: {
+      500: '#FF3B30'
+    }
+  },
+  spacing: {
+    small: 8,
+    medium: 16,
+    large: 24,
+  },
+});
 
 // Custom render function with providers
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
@@ -219,7 +239,7 @@ export const createMockFetch = (responses: unknown[] = []) => {
     callCount++;
 
     return Promise.resolve({
-      ok: response.ok !== false,
+      ok: response.ok \!== false,
       status: response.status || 200,
       json: () => Promise.resolve(response.data || response),
       text: () => Promise.resolve(JSON.stringify(response.data || response)),
@@ -231,3 +251,4 @@ export const createMockFetch = (responses: unknown[] = []) => {
 export * from '@testing-library/react-native';
 
 export { customRenderWithStores } from './testProviders';
+EOF < /dev/null

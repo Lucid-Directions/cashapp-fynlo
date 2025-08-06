@@ -4,51 +4,70 @@
  */
 
 import React from 'react';
-
 import { Alert } from 'react-native';
-
-import { fireEvent, waitFor } from '@testing-library/react-native';
-
-import {
-  render,
-  createMockNavigation,
-  createMockAppStore,
-} from '../../../__tests__/utils/testUtils';
-import DatabaseService from '../../../services/DatabaseService';
+import { fireEvent, waitFor, render } from '@testing-library/react-native';
 import LoginScreen from '../LoginScreen';
 
 // Mock navigation
-const mockNavigation = createMockNavigation();
+const mockNavigation = {
+  navigate: jest.fn(),
+  goBack: jest.fn(),
+  dispatch: jest.fn(),
+};
+
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useNavigation: () => mockNavigation,
 }));
 
 // Mock DatabaseService
-jest.mock('../../../services/DatabaseService');
-const mockDatabaseService = DatabaseService as jest.Mocked<typeof DatabaseService>;
+const mockDatabaseService = {
+  login: jest.fn(),
+};
+
+jest.mock('../../../services/DatabaseService', () => ({
+  __esModule: true,
+  default: {
+    getInstance: () => mockDatabaseService,
+  },
+}));
 
 // Mock Alert
 jest.spyOn(Alert, 'alert');
 
-// Mock Zustand store
-const mockStore = createMockAppStore();
+// Mock useAppStore
+const mockStore = {
+  setUser: jest.fn(),
+  setSession: jest.fn(),
+  setLoading: jest.fn(),
+  user: null,
+  session: null,
+  isLoading: false,
+};
+
 jest.mock('../../../store/useAppStore', () => ({
   __esModule: true,
-  default: jest.fn(() => mockStore),
+  default: () => mockStore,
 }));
+
+// Wrapper for tests with providers
+const TestWrapper = ({ children }: { children: React.ReactNode }) => {
+  return <>{children}</>;
+};
+
+const customRender = (ui: React.ReactElement) => {
+  return render(ui, { wrapper: TestWrapper });
+};
 
 describe('LoginScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockDatabaseService.getInstance.mockReturnValue({
-      login: jest.fn(),
-    } as any);
+    mockDatabaseService.login.mockClear();
   });
 
   describe('Rendering', () => {
     it('should render all essential elements', () => {
-      const { getByText, getByPlaceholderText } = render(<LoginScreen />);
+      const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
 
       expect(getByText('Fynlo')).toBeTruthy();
       expect(getByText('Point of Sale')).toBeTruthy();
@@ -61,7 +80,7 @@ describe('LoginScreen', () => {
     });
 
     it('should render demo credentials section', () => {
-      const { getByText } = render(<LoginScreen />);
+      const { getByText } = customRender(<LoginScreen />);
 
       expect(getByText('Demo Credentials:')).toBeTruthy();
       expect(getByText('Username: demo')).toBeTruthy();
@@ -69,7 +88,7 @@ describe('LoginScreen', () => {
     });
 
     it('should render footer information', () => {
-      const { getByText } = render(<LoginScreen />);
+      const { getByText } = customRender(<LoginScreen />);
 
       expect(getByText('Fynlo POS • Powered by CashApp')).toBeTruthy();
     });
@@ -77,7 +96,7 @@ describe('LoginScreen', () => {
 
   describe('Form Interactions', () => {
     it('should update username input', () => {
-      const { getByPlaceholderText } = render(<LoginScreen />);
+      const { getByPlaceholderText } = customRender(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
 
       fireEvent.changeText(usernameInput, 'test@example.com');
@@ -86,7 +105,7 @@ describe('LoginScreen', () => {
     });
 
     it('should update password input', () => {
-      const { getByPlaceholderText } = render(<LoginScreen />);
+      const { getByPlaceholderText } = customRender(<LoginScreen />);
       const passwordInput = getByPlaceholderText('Password');
 
       fireEvent.changeText(passwordInput, 'password123');
@@ -95,7 +114,7 @@ describe('LoginScreen', () => {
     });
 
     it('should toggle password visibility', () => {
-      const { getByPlaceholderText, getByTestId } = render(<LoginScreen />);
+      const { getByPlaceholderText, getByTestId } = customRender(<LoginScreen />);
       const passwordInput = getByPlaceholderText('Password');
 
       // Initially password should be hidden
@@ -115,7 +134,7 @@ describe('LoginScreen', () => {
 
   describe('Login Functionality', () => {
     it('should show error for empty credentials', async () => {
-      const { getByText } = render(<LoginScreen />);
+      const { getByText } = customRender(<LoginScreen />);
       const loginButton = getByText('Sign In');
 
       fireEvent.press(loginButton);
@@ -129,7 +148,7 @@ describe('LoginScreen', () => {
     });
 
     it('should show error for empty username', async () => {
-      const { getByText, getByPlaceholderText } = render(<LoginScreen />);
+      const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
@@ -145,7 +164,7 @@ describe('LoginScreen', () => {
     });
 
     it('should show error for empty password', async () => {
-      const { getByText, getByPlaceholderText } = render(<LoginScreen />);
+      const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
       const loginButton = getByText('Sign In');
 
@@ -161,12 +180,9 @@ describe('LoginScreen', () => {
     });
 
     it('should attempt login with valid credentials', async () => {
-      const mockLogin = jest.fn().mockResolvedValue(true);
-      mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
-      } as any);
+      mockDatabaseService.login.mockResolvedValue(true);
 
-      const { getByText, getByPlaceholderText } = render(<LoginScreen />);
+      const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
@@ -176,19 +192,16 @@ describe('LoginScreen', () => {
       fireEvent.press(loginButton);
 
       await waitFor(() => {
-        expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
+        expect(mockDatabaseService.login).toHaveBeenCalledWith('test@example.com', 'password123');
         expect(mockStore.setUser).toHaveBeenCalled();
         expect(mockStore.setSession).toHaveBeenCalled();
       });
     });
 
     it('should handle login failure', async () => {
-      const mockLogin = jest.fn().mockResolvedValue(false);
-      mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
-      } as any);
+      mockDatabaseService.login.mockResolvedValue(false);
 
-      const { getByText, getByPlaceholderText } = render(<LoginScreen />);
+      const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
@@ -203,12 +216,9 @@ describe('LoginScreen', () => {
     });
 
     it('should handle login error', async () => {
-      const mockLogin = jest.fn().mockRejectedValue(new Error('Network error'));
-      mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
-      } as any);
+      mockDatabaseService.login.mockRejectedValue(new Error('Network error'));
 
-      const { getByText, getByPlaceholderText } = render(<LoginScreen />);
+      const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
@@ -226,14 +236,11 @@ describe('LoginScreen', () => {
     });
 
     it('should show loading state during login', async () => {
-      const mockLogin = jest
-        .fn()
-        .mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve(true), 100)));
-      mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
-      } as any);
+      mockDatabaseService.login.mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve(true), 100))
+      );
 
-      const { getByText, getByPlaceholderText } = render(<LoginScreen />);
+      const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
@@ -251,14 +258,11 @@ describe('LoginScreen', () => {
     });
 
     it('should disable button during loading', async () => {
-      const mockLogin = jest
-        .fn()
-        .mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve(true), 100)));
-      mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
-      } as any);
+      mockDatabaseService.login.mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve(true), 100))
+      );
 
-      const { getByText, getByPlaceholderText } = render(<LoginScreen />);
+      const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
@@ -278,7 +282,7 @@ describe('LoginScreen', () => {
 
   describe('Navigation', () => {
     it('should navigate to forgot password screen', () => {
-      const { getByText } = render(<LoginScreen />);
+      const { getByText } = customRender(<LoginScreen />);
       const forgotPasswordButton = getByText('Forgot Password?');
 
       fireEvent.press(forgotPasswordButton);
@@ -289,7 +293,7 @@ describe('LoginScreen', () => {
 
   describe('Accessibility', () => {
     it('should have proper accessibility labels', () => {
-      const { getByPlaceholderText, getByText } = render(<LoginScreen />);
+      const { getByPlaceholderText, getByText } = customRender(<LoginScreen />);
 
       const usernameInput = getByPlaceholderText('Username');
       const passwordInput = getByPlaceholderText('Password');
@@ -301,7 +305,7 @@ describe('LoginScreen', () => {
     });
 
     it('should support keyboard navigation', () => {
-      const { getByPlaceholderText } = render(<LoginScreen />);
+      const { getByPlaceholderText } = customRender(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
       const passwordInput = getByPlaceholderText('Password');
 
@@ -312,12 +316,9 @@ describe('LoginScreen', () => {
 
   describe('Form Validation', () => {
     it('should trim whitespace from username', async () => {
-      const mockLogin = jest.fn().mockResolvedValue(true);
-      mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
-      } as any);
+      mockDatabaseService.login.mockResolvedValue(true);
 
-      const { getByText, getByPlaceholderText } = render(<LoginScreen />);
+      const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
@@ -327,39 +328,33 @@ describe('LoginScreen', () => {
       fireEvent.press(loginButton);
 
       await waitFor(() => {
-        expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
+        expect(mockDatabaseService.login).toHaveBeenCalledWith('test@example.com', 'password123');
       });
     });
 
     it('should handle special characters in credentials', async () => {
-      const mockLogin = jest.fn().mockResolvedValue(true);
-      mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
-      } as any);
+      mockDatabaseService.login.mockResolvedValue(true);
 
-      const { getByText, getByPlaceholderText } = render(<LoginScreen />);
+      const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
       fireEvent.changeText(usernameInput, 'test+user@example.com');
-      fireEvent.changeText(passwordInput, 'P@ssw0rd!123');
+      fireEvent.changeText(passwordInput, 'P@ssw0rd\!123');
       fireEvent.press(loginButton);
 
       await waitFor(() => {
-        expect(mockLogin).toHaveBeenCalledWith('test+user@example.com', 'P@ssw0rd!123');
+        expect(mockDatabaseService.login).toHaveBeenCalledWith('test+user@example.com', 'P@ssw0rd\!123');
       });
     });
   });
 
   describe('Store Integration', () => {
     it('should call setLoading during login process', async () => {
-      const mockLogin = jest.fn().mockResolvedValue(true);
-      mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
-      } as any);
+      mockDatabaseService.login.mockResolvedValue(true);
 
-      const { getByText, getByPlaceholderText } = render(<LoginScreen />);
+      const { getByText, getByPlaceholderText } = customRender(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
@@ -375,3 +370,4 @@ describe('LoginScreen', () => {
     });
   });
 });
+EOF < /dev/null

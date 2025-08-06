@@ -25,11 +25,14 @@ export interface CartItemModification {
 export interface EnhancedOrderItem {
   // Core fields - matching shared/src/types/orders.ts structure
   id: string; // Fixed from number to string to match shared types
-  productId: string;
+  productId?: string;
   name: string;
   price: number; // Base price before modifications
   quantity: number;
   emoji?: string;
+  category?: string;
+  available?: boolean;
+  description?: string;
 
   // Category info for kitchen display
   categoryId?: string;
@@ -40,13 +43,13 @@ export interface EnhancedOrderItem {
   specialInstructions?: string;
 
   // Pricing breakdown
-  originalPrice: number; // Base price
-  modificationPrice: number; // Sum of all modification prices
-  totalPrice: number; // (originalPrice + modificationPrice) * quantity
+  originalPrice?: number; // Base price
+  modificationPrice?: number; // Sum of all modification prices
+  totalPrice?: number; // (originalPrice + modificationPrice) * quantity
 
   // Metadata
-  addedAt: string; // ISO timestamp
-  lastModified: string; // ISO timestamp
+  addedAt?: string; // ISO timestamp
+  lastModified?: string; // ISO timestamp
   addedBy?: string; // Staff member ID who added the item
   modifiedBy?: string; // Staff member ID who last modified
 
@@ -77,41 +80,38 @@ export interface CartTemplate {
 }
 
 /**
+ * Split method types for bill division
+ */
+export type SplitMethod = 'even' | 'equal' | 'item' | 'custom';
+
+/**
+ * Individual item in a split bill group
+ */
+export interface SplitBillItem {
+  id: string;
+  originalItemId: string;
+  name: string;
+  price: number;
+  originalQuantity: number;
+  splitQuantity: number;
+  splitCount?: number; // Number of groups this item is split across
+  modifications?: CartItemModification[];
+  modificationPrice?: number;
+  emoji?: string;
+}
+
+/**
  * Split bill group for dividing orders
  */
 export interface SplitBillGroup {
   id: string;
-  name: string; // e.g., "Table 1", "John", "Split 1"
-  color: string; // Hex color for visual identification
-  emoji?: string; // Alternative visual identifier
-
-  // Items assigned to this group
-  itemIds: string[]; // Array of EnhancedOrderItem IDs
-
-  // Financial breakdown
-  subtotal: number;
-  serviceCharge: number;
-  serviceChargePercentage: number;
-  tax: number;
-  taxPercentage: number;
-  discount?: number;
-  discountPercentage?: number;
-  total: number;
-
-  // Payment info
-  paymentMethod?: 'cash' | 'card' | 'apple_pay' | 'tap_to_pay' | 'custom';
-  paymentStatus: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
-  paymentDetails?: {
-    transactionId?: string;
-    processedAt?: string;
-    processor?: string;
-    last4?: string; // Last 4 digits of card
-  };
-
-  // Metadata
-  createdAt: string;
-  paidAt?: string;
-  paidBy?: string; // Staff member who processed payment
+  name: string;
+  color: string;
+  items: SplitBillItem[];
+  customAmount: number;
+  tipPercent: number;
+  includeServiceCharge: boolean;
+  includeTax: boolean;
 }
 
 /**
@@ -247,3 +247,4 @@ export interface CartMigrationResult {
     modified: number;
   };
 }
+EOF < /dev/null

@@ -66,7 +66,7 @@ export class SplitBillService {
 
     items.forEach((item, itemIndex) => {
       const groupIndex = itemIndex % groups.length;
-      const splitItem = this.createSplitItem(item, 1, groups.length);
+      const splitItem = this.createSplitItem(item, item.quantity, 1);
       updatedGroups[groupIndex].items.push(splitItem);
     });
 
@@ -83,11 +83,14 @@ export class SplitBillService {
   ): SplitBillGroup[] {
     if (groups.length === 0) return [];
 
-    const amountPerGroup = totalAmount / groups.length;
+    // Use integer arithmetic for precise currency handling
+    const totalCents = Math.round(totalAmount * 100);
+    const centsPerGroup = Math.floor(totalCents / groups.length);
+    const remainderCents = totalCents % groups.length;
 
-    return groups.map((group) => ({
+    return groups.map((group, index) => ({
       ...group,
-      customAmount: amountPerGroup,
+      customAmount: (centsPerGroup + (index < remainderCents ? 1 : 0)) / 100,
       items: [], // Clear items for custom amount split
     }));
   }
@@ -100,13 +103,25 @@ export class SplitBillService {
     groupIds: string[],
     groups: SplitBillGroup[]
   ): SplitBillGroup[] {
-    const splitQuantity = item.quantity / groupIds.length;
+    // Distribute whole units as much as possible
+    const quantityPerGroup = Math.floor(item.quantity / groupIds.length);
+    const remainder = item.quantity % groupIds.length;
+    
+    let remainderDistributed = 0;
+    
+    const getSplitQuantity = () => {
+      const baseQuantity = quantityPerGroup;
+      const hasExtra = remainderDistributed < remainder;
+      if (hasExtra) remainderDistributed++;
+      return baseQuantity + (hasExtra ? 1 : 0);
+    };
 
     return groups.map((group) => {
       if (!groupIds.includes(group.id)) {
         return group;
       }
 
+      const splitQuantity = getSplitQuantity();
       const splitItem = this.createSplitItem(item, splitQuantity, groupIds.length);
 
       // Check if item already exists in group
@@ -236,11 +251,10 @@ export class SplitBillService {
           }).value
         : 0;
 
-      // Calculate tip
-      const tipBase = subtotal + tax + serviceCharge;
+      // Calculate tip (based on subtotal only)
       const tip =
         group.tipPercent > 0
-          ? calculatePercentageFee(tipBase, group.tipPercent, {
+          ? calculatePercentageFee(subtotal, group.tipPercent, {
               operation: 'split_bill_tip',
               screenName: 'SplitBillService',
             }).value
@@ -270,7 +284,13 @@ export class SplitBillService {
     groups: SplitBillGroup[],
     cartItems: EnhancedOrderItem[],
     cartTotal: number
-  ): SplitBillCalculation {
+  ): {
+    isValid: boolean;
+    isFullySplit: boolean;
+    errors: string[];
+    remainingAmount: number;
+    unassignedItems?: EnhancedOrderItem[];
+  } {
     const errors: string[] = [];
 
     try {
@@ -313,12 +333,15 @@ export class SplitBillService {
 
       const remainingAmount = Math.max(0, cartTotal - totalAssigned);
 
+      const isValid = errors.length === 0;
+      const isFullySplit = unassignedItems.length === 0 && errors.length === 0;
+
       return {
-        groups,
-        totalAmount: cartTotal,
-        remainingAmount,
-        isFullySplit: remainingAmount < 0.01, // Allow for rounding errors
+        isValid,
+        isFullySplit,
         errors,
+        remainingAmount,
+        unassignedItems,
       };
     } catch (error) {
       logger.error('Split bill validation error:', error);
@@ -329,11 +352,10 @@ export class SplitBillService {
       });
 
       return {
-        groups,
-        totalAmount: cartTotal,
-        remainingAmount: cartTotal,
+        isValid: false,
         isFullySplit: false,
         errors: ['Validation error occurred'],
+        remainingAmount: cartTotal,
       };
     }
   }
@@ -426,7 +448,7 @@ export class SplitBillService {
   exportSplitBill(groups: SplitBillGroup[], totals: GroupTotal[], restaurantName: string): string {
     const lines: string[] = [];
 
-    lines.push(`Split Bill - ${restaurantName}`);
+    lines.push(`${restaurantName} - Split Bill Summary`);
     lines.push(`Date: ${new Date().toLocaleDateString()}`);
     lines.push('='.repeat(40));
     lines.push('');
@@ -456,3 +478,4 @@ export class SplitBillService {
     return lines.join('\n');
   }
 }
+

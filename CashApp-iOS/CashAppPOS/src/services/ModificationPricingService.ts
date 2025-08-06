@@ -272,16 +272,12 @@ export class ModificationPricingService {
    */
   resetToDefaults(modifications: CartItemModification[]): CartItemModification[] {
     return modifications.map((mod) => {
-      // Find the default option in the same category
-      const categoryMods = modifications.filter((m) => m.category === mod.category);
-      const defaultMod = categoryMods.find((m) => {
-        const option = this.findModificationOption(m.id);
-        return option?.default === true;
-      });
-
+      // Find the default option for this modification type
+      const isDefault = this.isDefaultModification(mod.id);
+      
       return {
         ...mod,
-        selected: defaultMod?.id === mod.id,
+        selected: isDefault,
         quantity: mod.quantity !== undefined ? 1 : undefined,
       };
     });
@@ -322,5 +318,10 @@ export class ModificationPricingService {
       if (option) return option;
     }
     return null;
+  }
+
+  private isDefaultModification(modificationId: string): boolean {
+    const option = this.findModificationOption(modificationId);
+    return option?.default === true;
   }
 }

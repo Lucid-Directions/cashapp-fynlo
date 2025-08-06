@@ -20,7 +20,7 @@ export function formatGroupSummary(group: SplitBillGroup, total: GroupTotal): st
     parts.push('custom amount');
   }
 
-  if (total.tip > 0) {
+  if (group.tipPercent > 0) {
     parts.push(`${group.tipPercent}% tip`);
   }
 
@@ -147,7 +147,7 @@ export function generateGroupShareMessage(
     lines.push(`Service: £${total.serviceCharge.toFixed(2)}`);
   }
 
-  if (total.tip > 0) {
+  if (group.tipPercent > 0) {
     lines.push(`Tip: £${total.tip.toFixed(2)}`);
   }
 

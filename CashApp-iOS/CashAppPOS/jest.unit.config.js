@@ -2,6 +2,9 @@ module.exports = {
   preset: 'react-native',
   testEnvironment: 'node',
   setupFilesAfterEnv: ['<rootDir>/__tests__/testSetup.ts'],
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
+  },
   transformIgnorePatterns: [
     'node_modules/(?!(jest-)?@?react-native|@react-native(-community)?|@react-navigation|react-navigation|@react-native-firebase|react-native-svg|react-native-reanimated|react-native-gesture-handler|react-native-screens|react-native-safe-area-context|@react-native-async-storage|react-native-vector-icons|react-native-get-random-values|react-native-netinfo|@shopify/react-native-skia|react-native-device-info|react-native-linear-gradient)',
   ],

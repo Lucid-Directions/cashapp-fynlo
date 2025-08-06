@@ -5,7 +5,7 @@
  */
 
 import type { ErrorInfo, ReactNode } from 'react';
-// TODO: Unused import - import React, { Component } from 'react';
+import React, { Component } from 'react';
 
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 

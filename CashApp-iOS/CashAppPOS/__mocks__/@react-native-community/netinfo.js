@@ -1,3 +1,4 @@
+Object.defineProperty(exports, "__esModule", { value: true });
 // Mock for @react-native-community/netinfo
 module.exports = {
   addEventListener: jest.fn(() => jest.fn()),

@@ -65,11 +65,12 @@ export const validatePrice = (
       };
     }
 
-    // Check for negative values
-    if (numValue < 0) {
+    // Allow negative prices for modifications (discounts)
+    // Only reject extremely negative values (< -100)
+    if (numValue < -100) {
       const errorTrackingService = ErrorTrackingService.getInstance();
       errorTrackingService.trackPricingError(
-        new Error(`Negative price detected: ${numValue}`),
+        new Error(`Extremely negative price detected: ${numValue}`),
         { originalValue: value },
         context
       );
@@ -77,7 +78,7 @@ export const validatePrice = (
       return {
         isValid: false,
         value: 0,
-        error: `Negative price not allowed: ${numValue}`,
+        error: `Price too negative: ${numValue}`,
       };
     }
 

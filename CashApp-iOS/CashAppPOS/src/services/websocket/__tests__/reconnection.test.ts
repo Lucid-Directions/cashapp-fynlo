@@ -3,7 +3,7 @@
  * Tests network state awareness, connection history, and UI status updates
  */
 
-import { ExponentialBackoff } from '@fynlo/shared/utils/exponentialBackoff';
+import { ExponentialBackoff } from '@fynlo/shared/src/utils/exponentialBackoff';
 import NetInfo from '@react-native-community/netinfo';
 
 // Mock NetInfo
@@ -556,4 +556,3 @@ describe('WebSocket Reconnection Manager', () => {
     });
   });
 });
-EOF < /dev/null

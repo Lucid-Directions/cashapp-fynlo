@@ -1,3 +1,4 @@
+Object.defineProperty(exports, "__esModule", { value: true });
 export default {
   getItem: jest.fn(() => Promise.resolve(null)),
   setItem: jest.fn(() => Promise.resolve()),

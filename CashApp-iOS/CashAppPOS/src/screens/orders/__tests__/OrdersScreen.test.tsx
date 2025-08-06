@@ -1,12 +1,14 @@
+/**
+ * OrdersScreen Component Tests
+ * Testing order list display, filtering, and error handling
+ */
+
 import React from 'react';
-
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import OrdersScreen from '../OrdersScreen';
+import { ThemeProvider } from '../../../design-system/ThemeProvider';
 
-import { ThemeProvider, defaultTheme } from '../../../design-system/ThemeProvider'; // Adjust path
-import DataService from '../../../services/DataService'; // Adjust path
-import OrdersScreen from '../OrdersScreen'; // Adjust path as necessary
-
-// Mock react-navigation
+// Mock navigation
 jest.mock('@react-navigation/native', () => {
   const actualNav = jest.requireActual('@react-navigation/native');
   return {
@@ -22,8 +24,32 @@ jest.mock('@react-navigation/native', () => {
 });
 
 // Mock DataService
-jest.mock('../../../services/DataService');
+const mockDataService = {
+  getOrders: jest.fn(),
+};
 
+jest.mock('../../../services/DataService', () => ({
+  __esModule: true,
+  default: {
+    getInstance: () => mockDataService,
+  },
+}));
+
+// Mock theme
+const mockTheme = {
+  colors: {
+    background: '#FFFFFF',
+    text: '#000000',
+    primary: '#007AFF',
+  }
+};
+
+jest.mock('../../../design-system/ThemeProvider', () => ({
+  ThemeProvider: ({ children }: any) => children,
+  useTheme: () => ({ theme: mockTheme }),
+}));
+
+// Test data
 const mockOrders = [
   {
     id: 'order1',
@@ -58,15 +84,15 @@ const mockOrders = [
 ];
 
 const AllProviders = ({ children }: { children: React.ReactNode }) => (
-  <ThemeProvider theme={defaultTheme}>{children}</ThemeProvider>
+  <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
 );
 
 describe('OrdersScreen', () => {
   beforeEach(() => {
     // Reset mocks before each test
-    (DataService.getInstance as jest.Mock).mockReturnValue({
-      getOrders: jest.fn().mockResolvedValue([]), // Default to empty
-    });
+    jest.clearAllMocks();
+    mockDataService.getOrders.mockClear();
+    mockDataService.getOrders.mockResolvedValue([]); // Default to empty
   });
 
   it('renders loading state initially', () => {
@@ -75,11 +101,11 @@ describe('OrdersScreen', () => {
   });
 
   it('fetches and displays orders with customer names', async () => {
-    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(mockOrders);
+    mockDataService.getOrders.mockResolvedValue(mockOrders);
 
     const { findByText, getByText } = render(<OrdersScreen />, { wrapper: AllProviders });
 
-    await waitFor(() => expect(DataService.getInstance().getOrders).toHaveBeenCalledWith('today'));
+    await waitFor(() => expect(mockDataService.getOrders).toHaveBeenCalledWith('today'));
 
     // Check for customer names
     expect(await findByText('Alice Wonderland')).toBeTruthy();
@@ -93,7 +119,7 @@ describe('OrdersScreen', () => {
   });
 
   it('displays "Walk-in Customer" when customer name is not available', async () => {
-    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue([mockOrders[1]]); // Only the order without customer
+    mockDataService.getOrders.mockResolvedValue([mockOrders[1]]); // Only the order without customer
 
     const { findByText } = render(<OrdersScreen />, { wrapper: AllProviders });
 
@@ -101,13 +127,13 @@ describe('OrdersScreen', () => {
   });
 
   it('filters orders by search query (customer name)', async () => {
-    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(mockOrders);
+    mockDataService.getOrders.mockResolvedValue(mockOrders);
 
     const { getByPlaceholderText, findByText, queryByText } = render(<OrdersScreen />, {
       wrapper: AllProviders,
     });
 
-    await waitFor(() => expect(DataService.getInstance().getOrders).toHaveBeenCalled());
+    await waitFor(() => expect(mockDataService.getOrders).toHaveBeenCalled());
 
     const searchInput = getByPlaceholderText('Search orders, customers, or staff...');
     fireEvent.changeText(searchInput, 'Alice');
@@ -118,13 +144,13 @@ describe('OrdersScreen', () => {
   });
 
   it('filters orders by search query (customer email)', async () => {
-    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(mockOrders);
+    mockDataService.getOrders.mockResolvedValue(mockOrders);
 
     const { getByPlaceholderText, findByText, queryByText } = render(<OrdersScreen />, {
       wrapper: AllProviders,
     });
 
-    await waitFor(() => expect(DataService.getInstance().getOrders).toHaveBeenCalled());
+    await waitFor(() => expect(mockDataService.getOrders).toHaveBeenCalled());
 
     const searchInput = getByPlaceholderText('Search orders, customers, or staff...');
     fireEvent.changeText(searchInput, 'alice@example.com');
@@ -134,7 +160,7 @@ describe('OrdersScreen', () => {
   });
 
   it('shows an error message if fetching orders fails', async () => {
-    (DataService.getInstance().getOrders as jest.Mock).mockRejectedValue(
+    mockDataService.getOrders.mockRejectedValue(
       new Error('Network Error')
     );
 
@@ -145,10 +171,11 @@ describe('OrdersScreen', () => {
   });
 
   it('shows "No orders found" when there are no orders', async () => {
-    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue([]);
+    mockDataService.getOrders.mockResolvedValue([]);
 
     const { findByText } = render(<OrdersScreen />, { wrapper: AllProviders });
 
     expect(await findByText('No orders found')).toBeTruthy();
   });
 });
+EOF < /dev/null

@@ -25,7 +25,7 @@ describe('ModificationPricingService', () => {
     it('returns coffee modifications for coffee category', () => {
       const mods = service.getAvailableModifications('coffee');
 
-      expect(mods).toHaveLength(expect.any(Number));
+      expect(mods.length).toBeGreaterThan(0);
 
       // Should include size options
       const sizeOptions = mods.filter((m) => m.type === 'size');
@@ -80,7 +80,7 @@ describe('ModificationPricingService', () => {
   describe('calculateModificationPrice', () => {
     it('calculates price for selected modifications', () => {
       const modifications: CartItemModification[] = [
-        { id: '1', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
+        { id: 'size-small', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
         {
           id: '2',
           type: 'addition',
@@ -106,7 +106,7 @@ describe('ModificationPricingService', () => {
 
     it('returns 0 for no selected modifications', () => {
       const modifications: CartItemModification[] = [
-        { id: '1', type: 'size', category: 'Size', name: 'Medium', price: 0.0, selected: false },
+        { id: 'size-small', type: 'size', category: 'Size', name: 'Medium', price: 0.0, selected: false },
         {
           id: '2',
           type: 'addition',
@@ -123,7 +123,7 @@ describe('ModificationPricingService', () => {
 
     it('handles negative prices for removals', () => {
       const modifications: CartItemModification[] = [
-        { id: '1', type: 'size', category: 'Size', name: 'Small', price: -0.5, selected: true },
+        { id: 'size-small', type: 'size', category: 'Size', name: 'Small', price: -0.5, selected: true },
         {
           id: '2',
           type: 'removal',
@@ -142,7 +142,7 @@ describe('ModificationPricingService', () => {
   describe('validateModifications', () => {
     it('validates single size selection', () => {
       const modifications: CartItemModification[] = [
-        { id: '1', type: 'size', category: 'Size', name: 'Small', price: -0.5, selected: true },
+        { id: 'size-small', type: 'size', category: 'Size', name: 'Small', price: -0.5, selected: true },
         { id: '2', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
       ];
 
@@ -153,7 +153,7 @@ describe('ModificationPricingService', () => {
 
     it('validates single temperature selection', () => {
       const modifications: CartItemModification[] = [
-        { id: '1', type: 'temperature', category: 'Temp', name: 'Hot', price: 0, selected: true },
+        { id: 'add-extra-shot', type: 'temperature', category: 'Temp', name: 'Hot', price: 0, selected: true },
         { id: '2', type: 'temperature', category: 'Temp', name: 'Iced', price: 0, selected: true },
       ];
 
@@ -165,7 +165,7 @@ describe('ModificationPricingService', () => {
     it('validates single milk selection', () => {
       const modifications: CartItemModification[] = [
         {
-          id: '1',
+          id: 'add-extra-shot',
           type: 'addition',
           category: 'Milk Options',
           name: 'Whole Milk',
@@ -190,7 +190,7 @@ describe('ModificationPricingService', () => {
     it('validates quantity limits', () => {
       const modifications: CartItemModification[] = [
         {
-          id: '1',
+          id: 'add-extra-shot',
           type: 'addition',
           category: 'Add-ons',
           name: 'Extra Shot',
@@ -207,7 +207,7 @@ describe('ModificationPricingService', () => {
 
     it('passes validation for valid modifications', () => {
       const modifications: CartItemModification[] = [
-        { id: '1', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
+        { id: 'size-small', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
         { id: '2', type: 'temperature', category: 'Temp', name: 'Hot', price: 0, selected: true },
         {
           id: '3',
@@ -247,7 +247,7 @@ describe('ModificationPricingService', () => {
 
     it('applies modifications and recalculates prices', () => {
       const modifications: CartItemModification[] = [
-        { id: '1', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
+        { id: 'size-small', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
         {
           id: '2',
           type: 'addition',
@@ -270,7 +270,7 @@ describe('ModificationPricingService', () => {
   describe('getModificationSummary', () => {
     it('generates human-readable summary', () => {
       const modifications: CartItemModification[] = [
-        { id: '1', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
+        { id: 'size-small', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
         { id: '2', type: 'temperature', category: 'Temp', name: 'Iced', price: 0, selected: true },
         {
           id: '3',
@@ -298,7 +298,7 @@ describe('ModificationPricingService', () => {
   describe('getPriceImpactSummary', () => {
     it('shows positive price impact', () => {
       const modifications: CartItemModification[] = [
-        { id: '1', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
+        { id: 'size-small', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: true },
       ];
 
       const summary = service.getPriceImpactSummary(modifications);
@@ -307,7 +307,7 @@ describe('ModificationPricingService', () => {
 
     it('shows negative price impact', () => {
       const modifications: CartItemModification[] = [
-        { id: '1', type: 'size', category: 'Size', name: 'Small', price: -0.5, selected: true },
+        { id: 'size-small', type: 'size', category: 'Size', name: 'Small', price: -0.5, selected: true },
       ];
 
       const summary = service.getPriceImpactSummary(modifications);
@@ -316,7 +316,7 @@ describe('ModificationPricingService', () => {
 
     it('shows no price change', () => {
       const modifications: CartItemModification[] = [
-        { id: '1', type: 'temperature', category: 'Temp', name: 'Iced', price: 0, selected: true },
+        { id: 'add-extra-shot', type: 'temperature', category: 'Temp', name: 'Iced', price: 0, selected: true },
       ];
 
       const summary = service.getPriceImpactSummary(modifications);
@@ -327,9 +327,9 @@ describe('ModificationPricingService', () => {
   describe('resetToDefaults', () => {
     it('resets modifications to default selections', () => {
       const modifications: CartItemModification[] = [
-        { id: '1', type: 'size', category: 'Size', name: 'Small', price: -0.5, selected: true },
-        { id: '2', type: 'size', category: 'Size', name: 'Medium', price: 0.0, selected: false },
-        { id: '3', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: false },
+        { id: 'size-small', type: 'size', category: 'Size', name: 'Small', price: -0.5, selected: true },
+        { id: 'size-medium', type: 'size', category: 'Size', name: 'Medium', price: 0.0, selected: false },
+        { id: 'size-large', type: 'size', category: 'Size', name: 'Large', price: 0.5, selected: false },
       ];
 
       const reset = service.resetToDefaults(modifications);
@@ -345,7 +345,7 @@ describe('ModificationPricingService', () => {
     it('resets quantities to 1', () => {
       const modifications: CartItemModification[] = [
         {
-          id: '1',
+          id: 'add-extra-shot',
           type: 'addition',
           category: 'Add-ons',
           name: 'Extra Shot',
