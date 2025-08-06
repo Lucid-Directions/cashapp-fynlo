@@ -1,0 +1,596 @@
+import React, { useState, useCallback, useMemo } from 'react';
+import type { TextStyle, ViewStyle } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+  Modal,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import {
+  ICON_SIZES,
+  MODAL_DIMENSIONS,
+  LINE_HEIGHT,
+  OPACITY,
+  BORDER_WIDTH,
+} from '../../design-system/constants';
+import { colors, typography, spacing, shadows } from '../../design-system/theme';
+import { logger } from '../../utils/logger';
+
+// Payment error types enum
+export enum PaymentErrorType {
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  CARD_DECLINED = 'CARD_DECLINED',
+  INSUFFICIENT_FUNDS = 'INSUFFICIENT_FUNDS',
+  TIMEOUT = 'TIMEOUT',
+  DEVICE_ERROR = 'DEVICE_ERROR',
+  CANCELLED = 'CANCELLED',
+  UNKNOWN = 'UNKNOWN',
+}
+
+// Recovery action types
+export enum RecoveryAction {
+  RETRY_SAME = 'RETRY_SAME',
+  TRY_DIFFERENT = 'TRY_DIFFERENT',
+  PROCESS_OFFLINE = 'PROCESS_OFFLINE',
+  CONTACT_SUPPORT = 'CONTACT_SUPPORT',
+  CANCEL_TRANSACTION = 'CANCEL_TRANSACTION',
+}
+
+// Detailed type for error details
+interface ErrorDetails {
+  [key: string]: string | number | boolean | null | undefined;
+}
+
+// Payment error details interface
+export interface PaymentError {
+  type: PaymentErrorType;
+  message?: string;
+  code?: string;
+  details?: ErrorDetails;
+  timestamp: Date;
+  retryCount?: number;
+  paymentMethod?: string;
+  amount?: number;
+}
+
+// Recovery options interface
+interface RecoveryOption {
+  action: RecoveryAction;
+  label: string;
+  description: string;
+  icon: string;
+  color: string;
+  available: boolean;
+}
+
+// Component props
+interface PaymentErrorRecoveryProps {
+  error: PaymentError;
+  onRetry: (action: RecoveryAction) => Promise<void>;
+  onDismiss: () => void;
+  maxRetries?: number;
+  allowOfflineMode?: boolean;
+  supportContactInfo?: {
+    phone?: string;
+    email?: string;
+  };
+  visible?: boolean;
+}
+
+const PaymentErrorRecovery: React.FC<PaymentErrorRecoveryProps> = ({
+  error,
+  onRetry,
+  onDismiss,
+  maxRetries = 3,
+  allowOfflineMode = false,
+  supportContactInfo,
+  visible = true,
+}) => {
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [selectedAction, setSelectedAction] = useState<RecoveryAction | null>(null);
+
+  // Memoize formatAmount function
+  const formatAmount = useCallback((amount: number) => {
+    return `£${amount.toFixed(2)}`;
+  }, []);
+
+  // Get error-specific messaging
+  const getErrorDetails = useCallback(
+    (errorType: PaymentErrorType, errorMessage?: string) => {
+      switch (errorType) {
+        case PaymentErrorType.NETWORK_ERROR:
+          return {
+            title: 'Connection Issue',
+            message: 'Unable to connect to payment service. Please check your internet connection.',
+            icon: 'wifi-off',
+            color: colors.warning[600],
+          };
+        case PaymentErrorType.CARD_DECLINED:
+          return {
+            title: 'Payment Declined',
+            message:
+              'The card was declined. Please try a different payment method or contact your bank.',
+            icon: 'credit-card-off',
+            color: colors.danger[600],
+          };
+        case PaymentErrorType.INSUFFICIENT_FUNDS:
+          return {
+            title: 'Insufficient Funds',
+            message: 'The payment could not be processed due to insufficient funds.',
+            icon: 'account-balance-wallet',
+            color: colors.danger[600],
+          };
+        case PaymentErrorType.TIMEOUT:
+          return {
+            title: 'Payment Timeout',
+            message: 'The payment request timed out. Please try again.',
+            icon: 'timer-off',
+            color: colors.warning[600],
+          };
+        case PaymentErrorType.DEVICE_ERROR:
+          return {
+            title: 'Device Error',
+            message:
+              'There was an issue with the card reader. Please check the device and try again.',
+            icon: 'devices-other',
+            color: colors.danger[600],
+          };
+        case PaymentErrorType.CANCELLED:
+          return {
+            title: 'Payment Cancelled',
+            message: 'The payment was cancelled by the user.',
+            icon: 'cancel',
+            color: colors.neutral[600],
+          };
+        default:
+          return {
+            title: 'Payment Error',
+            message: errorMessage || 'An unexpected error occurred. Please try again.',
+            icon: 'error-outline',
+            color: colors.danger[600],
+          };
+      }
+    },
+    [] // No dependencies needed as colors are imported constants
+  );
+
+  // Get available recovery options based on error type
+  const recoveryOptions = useMemo((): RecoveryOption[] => {
+    const options: RecoveryOption[] = [];
+    const canRetry = !error.retryCount || error.retryCount < maxRetries;
+
+    switch (error.type) {
+      case PaymentErrorType.NETWORK_ERROR:
+        if (canRetry) {
+          options.push({
+            action: RecoveryAction.RETRY_SAME,
+            label: 'Retry Payment',
+            description: 'Try the payment again',
+            icon: 'refresh',
+            color: colors.primary[500],
+            available: true,
+          });
+        }
+        if (allowOfflineMode) {
+          options.push({
+            action: RecoveryAction.PROCESS_OFFLINE,
+            label: 'Process Offline',
+            description: 'Save for later processing',
+            icon: 'cloud-off',
+            color: colors.secondary[500],
+            available: true,
+          });
+        }
+        break;
+
+      case PaymentErrorType.CARD_DECLINED:
+      case PaymentErrorType.INSUFFICIENT_FUNDS:
+        options.push({
+          action: RecoveryAction.TRY_DIFFERENT,
+          label: 'Different Payment',
+          description: 'Use another payment method',
+          icon: 'payment',
+          color: colors.primary[500],
+          available: true,
+        });
+        break;
+
+      case PaymentErrorType.TIMEOUT:
+      case PaymentErrorType.DEVICE_ERROR:
+        if (canRetry) {
+          options.push({
+            action: RecoveryAction.RETRY_SAME,
+            label: 'Try Again',
+            description: 'Retry with same payment method',
+            icon: 'refresh',
+            color: colors.primary[500],
+            available: true,
+          });
+        }
+        options.push({
+          action: RecoveryAction.TRY_DIFFERENT,
+          label: 'Different Method',
+          description: 'Try another payment option',
+          icon: 'swap-horiz',
+          color: colors.secondary[500],
+          available: true,
+        });
+        break;
+
+      case PaymentErrorType.CANCELLED:
+        options.push({
+          action: RecoveryAction.RETRY_SAME,
+          label: 'Try Again',
+          description: 'Process the payment again',
+          icon: 'refresh',
+          color: colors.primary[500],
+          available: true,
+        });
+        break;
+
+      default:
+        if (canRetry) {
+          options.push({
+            action: RecoveryAction.RETRY_SAME,
+            label: 'Retry Payment',
+            description: 'Try processing again',
+            icon: 'refresh',
+            color: colors.primary[500],
+            available: true,
+          });
+        }
+        options.push({
+          action: RecoveryAction.TRY_DIFFERENT,
+          label: 'Different Method',
+          description: 'Use alternative payment',
+          icon: 'payment',
+          color: colors.secondary[500],
+          available: true,
+        });
+    }
+
+    // Always add support and cancel options
+    if (supportContactInfo?.phone || supportContactInfo?.email) {
+      options.push({
+        action: RecoveryAction.CONTACT_SUPPORT,
+        label: 'Contact Support',
+        description: 'Get help from our team',
+        icon: 'support-agent',
+        color: colors.info[500],
+        available: true,
+      });
+    }
+
+    options.push({
+      action: RecoveryAction.CANCEL_TRANSACTION,
+      label: 'Cancel',
+      description: 'Cancel this transaction',
+      icon: 'close',
+      color: colors.neutral[600],
+      available: true,
+    });
+
+    return options;
+  }, [error.type, error.retryCount, maxRetries, allowOfflineMode, supportContactInfo]);
+
+  // Handle recovery action
+  const handleRecoveryAction = useCallback(
+    async (action: RecoveryAction) => {
+      // Log the recovery attempt (without sensitive data)
+      logger.info('Payment recovery attempted', {
+        errorType: error.type,
+        recoveryAction: action,
+        timestamp: new Date().toISOString(),
+        retryCount: error.retryCount || 0,
+      });
+
+      if (action === RecoveryAction.CONTACT_SUPPORT) {
+        // Show support contact options
+        const message = [];
+        if (supportContactInfo?.phone) {
+          message.push(`Phone: ${supportContactInfo.phone}`);
+        }
+        if (supportContactInfo?.email) {
+          message.push(`Email: ${supportContactInfo.email}`);
+        }
+
+        Alert.alert('Contact Support', message.join('\n'), [{ text: 'OK' }]);
+        return;
+      }
+
+      if (action === RecoveryAction.CANCEL_TRANSACTION) {
+        onDismiss();
+        return;
+      }
+
+      // Handle retry actions
+      setIsRetrying(true);
+      setSelectedAction(action);
+
+      try {
+        await onRetry(action);
+
+        // Log successful recovery
+        logger.info('Payment recovery successful', {
+          errorType: error.type,
+          recoveryAction: action,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (retryError) {
+        // Log failed recovery attempt
+        logger.error('Payment recovery failed', {
+          errorType: error.type,
+          recoveryAction: action,
+          retryError: retryError instanceof Error ? retryError.message : 'Unknown error',
+          timestamp: new Date().toISOString(),
+        });
+
+        Alert.alert(
+          'Recovery Failed',
+          'Unable to process the recovery action. Please try a different option.',
+          [{ text: 'OK' }]
+        );
+      } finally {
+        setIsRetrying(false);
+        setSelectedAction(null);
+      }
+    },
+    [error, onRetry, onDismiss, supportContactInfo]
+  );
+
+  // Memoize error details to prevent recalculation
+  const errorDetails = useMemo(
+    () => getErrorDetails(error.type, error.message),
+    [error.type, error.message, getErrorDetails]
+  );
+
+  // Memoize formatted amount
+  const formattedAmount = useMemo(
+    () => (error.amount ? formatAmount(error.amount) : null),
+    [error.amount, formatAmount]
+  );
+
+  if (!visible) {
+    return null;
+  }
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onDismiss}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+          >
+            {/* Error Header */}
+            <View style={styles.errorHeader}>
+              <Icon name={errorDetails.icon} size={ICON_SIZES.xl} color={errorDetails.color} />
+              <Text style={[styles.errorTitle, { color: errorDetails.color }]}>
+                {errorDetails.title}
+              </Text>
+              <Text style={styles.errorMessage}>{errorDetails.message}</Text>
+
+              {/* Error metadata */}
+              {(error.code || error.paymentMethod) && (
+                <View style={styles.errorMetadata}>
+                  {error.code && <Text style={styles.errorCode}>Error Code: {error.code}</Text>}
+                  {error.paymentMethod && (
+                    <Text style={styles.paymentMethod}>Payment Method: {error.paymentMethod}</Text>
+                  )}
+                  {error.amount && <Text style={styles.amount}>Amount: {formattedAmount}</Text>}
+                </View>
+              )}
+
+              {/* Retry count indicator */}
+              {error.retryCount && error.retryCount > 0 && (
+                <Text style={styles.retryCount}>
+                  Attempt {error.retryCount} of {maxRetries}
+                </Text>
+              )}
+            </View>
+
+            {/* Recovery Options */}
+            <View style={styles.recoverySection}>
+              <Text style={styles.recoverySectionTitle}>Recovery Options</Text>
+
+              {recoveryOptions.map((option) => (
+                <TouchableOpacity
+                  key={option.action}
+                  style={[
+                    styles.recoveryOption,
+                    !option.available && styles.recoveryOptionDisabled,
+                    selectedAction === option.action && styles.recoveryOptionSelected,
+                  ]}
+                  onPress={() => handleRecoveryAction(option.action)}
+                  disabled={!option.available || isRetrying}
+                >
+                  <View style={styles.recoveryOptionContent}>
+                    <Icon
+                      name={option.icon}
+                      size={ICON_SIZES.md}
+                      color={option.available ? option.color : colors.neutral[400]}
+                    />
+                    <View style={styles.recoveryOptionText}>
+                      <Text
+                        style={[
+                          styles.recoveryOptionLabel,
+                          !option.available && styles.recoveryOptionLabelDisabled,
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.recoveryOptionDescription,
+                          !option.available && styles.recoveryOptionDescriptionDisabled,
+                        ]}
+                      >
+                        {option.description}
+                      </Text>
+                    </View>
+                    {selectedAction === option.action && isRetrying && (
+                      <ActivityIndicator
+                        size="small"
+                        color={option.color}
+                        style={styles.recoveryOptionLoader}
+                      />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+interface Styles {
+  modalOverlay: ViewStyle;
+  modalContent: ViewStyle;
+  scrollContent: ViewStyle;
+  errorHeader: ViewStyle;
+  errorTitle: TextStyle;
+  errorMessage: TextStyle;
+  errorMetadata: ViewStyle;
+  errorCode: TextStyle;
+  paymentMethod: TextStyle;
+  amount: TextStyle;
+  retryCount: TextStyle;
+  recoverySection: ViewStyle;
+  recoverySectionTitle: TextStyle;
+  recoveryOption: ViewStyle;
+  recoveryOptionDisabled: ViewStyle;
+  recoveryOptionSelected: ViewStyle;
+  recoveryOptionContent: ViewStyle;
+  recoveryOptionText: ViewStyle;
+  recoveryOptionLabel: TextStyle;
+  recoveryOptionLabelDisabled: TextStyle;
+  recoveryOptionDescription: TextStyle;
+  recoveryOptionDescriptionDisabled: TextStyle;
+  recoveryOptionLoader: ViewStyle;
+}
+
+const styles = StyleSheet.create<Styles>({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: colors.neutral[0],
+    borderRadius: spacing.lg,
+    width: '90%',
+    maxWidth: MODAL_DIMENSIONS.large.width,
+    maxHeight: '80%',
+    ...shadows.lg,
+  },
+  scrollContent: {
+    padding: spacing.xl,
+  },
+  errorHeader: {
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+  },
+  errorTitle: {
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  errorMessage: {
+    fontSize: typography.sizes.md,
+    color: colors.neutral[600],
+    textAlign: 'center',
+    lineHeight: LINE_HEIGHT.normal,
+  },
+  errorMetadata: {
+    marginTop: spacing.md,
+    padding: spacing.md,
+    backgroundColor: colors.neutral[50],
+    borderRadius: spacing.sm,
+    width: '100%',
+  },
+  errorCode: {
+    fontSize: typography.sizes.sm,
+    color: colors.neutral[500],
+    marginBottom: spacing.xs,
+  },
+  paymentMethod: {
+    fontSize: typography.sizes.sm,
+    color: colors.neutral[500],
+    marginBottom: spacing.xs,
+  },
+  amount: {
+    fontSize: typography.sizes.sm,
+    color: colors.neutral[700],
+    fontWeight: typography.weights.semibold,
+  },
+  retryCount: {
+    marginTop: spacing.md,
+    fontSize: typography.sizes.sm,
+    color: colors.warning[600],
+    fontStyle: 'italic',
+  },
+  recoverySection: {
+    marginTop: spacing.lg,
+  },
+  recoverySectionTitle: {
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.semibold,
+    color: colors.neutral[800],
+    marginBottom: spacing.md,
+  },
+  recoveryOption: {
+    backgroundColor: colors.neutral[50],
+    borderRadius: spacing.md,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    borderWidth: BORDER_WIDTH.thin,
+    borderColor: colors.neutral[200],
+  },
+  recoveryOptionDisabled: {
+    opacity: OPACITY.disabled,
+  },
+  recoveryOptionSelected: {
+    backgroundColor: colors.primary[50],
+    borderColor: colors.primary[300],
+  },
+  recoveryOptionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  recoveryOptionText: {
+    flex: 1,
+    marginLeft: spacing.md,
+  },
+  recoveryOptionLabel: {
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.semibold,
+    color: colors.neutral[800],
+    marginBottom: spacing.xs,
+  },
+  recoveryOptionLabelDisabled: {
+    color: colors.neutral[400],
+  },
+  recoveryOptionDescription: {
+    fontSize: typography.sizes.sm,
+    color: colors.neutral[600],
+  },
+  recoveryOptionDescriptionDisabled: {
+    color: colors.neutral[400],
+  },
+  recoveryOptionLoader: {
+    marginLeft: spacing.md,
+  },
+});
+
+export default PaymentErrorRecovery;
