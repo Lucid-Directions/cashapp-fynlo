@@ -97,7 +97,7 @@ const PaymentErrorRecovery: React.FC<PaymentErrorRecoveryProps> = ({
 
   // Memoize formatAmount function
   const formatAmount = useCallback((amount: number) => {
-    return `£${(amount / 100).toFixed(2)}`;
+    return `£${amount.toFixed(2)}`;
   }, []);
 
   // Get error-specific messaging
