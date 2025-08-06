@@ -22,6 +22,7 @@ interface UseItemModificationsReturn {
   isValid: boolean;
   errors: string[];
   hasChanges: boolean;
+  specialInstructions: string;
 
   // Actions
   toggleModification: (modificationId: string) => void;
@@ -73,22 +74,35 @@ export function useItemModifications({
     [modifications, pricingService]
   );
 
+  // Track original state for comparison
+  const originalModifications = useMemo(() => {
+    if (item?.modifications && item.modifications.length > 0) {
+      return [...item.modifications];
+    }
+    // If no original modifications, use the defaults from pricing service
+    return pricingService.getAvailableModifications(item?.categoryName);
+  }, [item, pricingService]);
+
+  const originalSpecialInstructions = useMemo(() => {
+    return item?.specialInstructions || "";
+  }, [item]);
+
   // Check if modifications have changed from original
   const hasChanges = useMemo(() => {
     if (!item) return false;
 
     // Check special instructions
-    if (specialInstructions !== (item.specialInstructions || '')) {
+    if (specialInstructions !== originalSpecialInstructions) {
       return true;
     }
 
     // Check modifications
-    if (item.modifications.length !== modifications.length) {
+    if (originalModifications.length !== modifications.length) {
       return true;
     }
 
     // Compare each modification
-    return !item.modifications.every((origMod) => {
+    return !originalModifications.every((origMod) => {
       const currentMod = modifications.find((m) => m.id === origMod.id);
       return (
         currentMod &&
@@ -96,8 +110,7 @@ export function useItemModifications({
         currentMod.quantity === origMod.quantity
       );
     });
-  }, [item, modifications, specialInstructions]);
-
+  }, [originalModifications, originalSpecialInstructions, modifications, specialInstructions]);
   // Actions
 
   const toggleModification = useCallback((modificationId: string) => {
@@ -150,9 +163,9 @@ export function useItemModifications({
   }, []);
 
   const resetModifications = useCallback(() => {
-    if (item?.modifications) {
+    if (item?.modifications && item.modifications.length > 0) {
       setModifications([...item.modifications]);
-      setSpecialInstructions(item.specialInstructions || '');
+      setSpecialInstructions(item.specialInstructions || "");
     } else {
       const defaults = pricingService.resetToDefaults(modifications);
       setModifications(defaults);
@@ -173,9 +186,13 @@ export function useItemModifications({
         enhancedStore.setItemSpecialInstructions(item.id, specialInstructions);
       }
     } else {
-      // For old store, we need to update the entire item
-      // This is a limitation of the old store structure
-      console.warn('Modifications not supported in old cart store');
+      // For old store, use the adapted methods
+      if (store && store.modifyCartItem) {
+        store.modifyCartItem(item.id, modifications);
+      }
+      if (store && store.setItemSpecialInstructions) {
+        store.setItemSpecialInstructions(item.id, specialInstructions);
+      }
     }
   }, [
     item,
@@ -184,6 +201,7 @@ export function useItemModifications({
     validation.isValid,
     useEnhancedCart,
     enhancedStore,
+    store,
   ]);
 
   // Helpers
@@ -206,6 +224,7 @@ export function useItemModifications({
     isValid: validation.isValid,
     errors: validation.errors,
     hasChanges,
+    specialInstructions,
 
     // Actions
     toggleModification,

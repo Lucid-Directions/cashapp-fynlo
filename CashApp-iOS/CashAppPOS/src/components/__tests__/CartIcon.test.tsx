@@ -123,4 +123,3 @@ describe('CartIcon', () => {
     });
   });
 });
-EOF < /dev/null

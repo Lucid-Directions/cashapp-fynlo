@@ -370,4 +370,3 @@ describe('LoginScreen', () => {
     });
   });
 });
-EOF < /dev/null

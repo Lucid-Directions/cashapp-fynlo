@@ -239,7 +239,7 @@ export const createMockFetch = (responses: unknown[] = []) => {
     callCount++;
 
     return Promise.resolve({
-      ok: response.ok \!== false,
+      ok: response.ok !== false,
       status: response.status || 200,
       json: () => Promise.resolve(response.data || response),
       text: () => Promise.resolve(JSON.stringify(response.data || response)),
@@ -251,4 +251,3 @@ export const createMockFetch = (responses: unknown[] = []) => {
 export * from '@testing-library/react-native';
 
 export { customRenderWithStores } from './testProviders';
-EOF < /dev/null

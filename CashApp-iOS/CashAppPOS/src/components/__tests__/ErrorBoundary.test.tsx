@@ -93,4 +93,3 @@ describe('ErrorBoundary', () => {
     expect(getByText('Contact Support')).toBeTruthy();
   });
 });
-EOF < /dev/null

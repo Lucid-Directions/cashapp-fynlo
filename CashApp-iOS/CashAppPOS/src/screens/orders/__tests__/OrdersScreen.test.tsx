@@ -178,4 +178,3 @@ describe('OrdersScreen', () => {
     expect(await findByText('No orders found')).toBeTruthy();
   });
 });
-EOF < /dev/null

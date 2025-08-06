@@ -66,7 +66,7 @@ export class SplitBillService {
 
     items.forEach((item, itemIndex) => {
       const groupIndex = itemIndex % groups.length;
-      const splitItem = this.createSplitItem(item, item.quantity, 1);
+      const splitItem = this.createSplitItem(item, 1, groups.length);
       updatedGroups[groupIndex].items.push(splitItem);
     });
 

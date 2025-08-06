@@ -64,7 +64,7 @@ describe('DatabaseService', () => {
   });
 
   describe('Singleton Pattern', () => {
-    it('should return the same instance', () => {
+    it('should return the same instance', async () => {
       const instance1 = DatabaseService.getInstance();
       const instance2 = DatabaseService.getInstance();
 

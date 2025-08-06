@@ -1,0 +1,41 @@
+@@ -241,9 +244,9 @@
+     // Default network state
+     mockNetInfoState = { isConnected: true };
+     (NetInfo.fetch as jest.Mock).mockResolvedValue(mockNetInfoState);
+-    (NetInfo.addEventListener as jest.Mock).mockImplementation((callback) => {
+-      // Return unsubscribe function
+-      return () => {};
++    mockNetInfoEventListener.mockImplementation((callback) => {
++      // Store callback and return unsubscribe function
++      return mockNetInfoUnsubscribe;
+     });
+ 
+     manager = new WebSocketReconnectionManager('ws://localhost:8000', {
+@@ -380,7 +383,12 @@
+       });
+ 
+       // Simulate network going offline
+-      const networkCallback = (NetInfo.addEventListener as jest.Mock).mock.calls[0][0];
++      const networkCallback = mockNetInfoEventListener.mock.calls[0]?.[0];
++      if (\!networkCallback) {
++        // Trigger connect manually to setup listener
++        manager.connect();
++        expect(mockNetInfoEventListener).toHaveBeenCalled();
++      }
+       
+       manager.connect();
+       jest.advanceTimersByTime(150);
+@@ -413,7 +421,12 @@
+         statusUpdates.push(status);
+       });
+ 
+-      const networkCallback = (NetInfo.addEventListener as jest.Mock).mock.calls[0][0];
++      const networkCallback = mockNetInfoEventListener.mock.calls[0]?.[0];
++      if (\!networkCallback) {
++        // Trigger connect manually to setup listener
++        manager.connect();
++        expect(mockNetInfoEventListener).toHaveBeenCalled();
++      }
+ 
+       // Start offline
+       networkCallback({ isConnected: false });
