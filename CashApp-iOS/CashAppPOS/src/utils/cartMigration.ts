@@ -243,7 +243,7 @@ export function recalculateItemPricing(item: EnhancedOrderItem): EnhancedOrderIt
     ...item,
     modificationPrice,
     totalPrice,
-    lastModified: new Date(Date.now() + 1).toISOString(),
+    lastModified: new Date().toISOString(),
   };
 }
 
