@@ -62,7 +62,8 @@ describe('DatabaseService - Menu Loading Tests', () => {
 
       expect(items).toHaveLength(3);
       expect(items[0].price).toBe(10.99);
-      expect(typeof items[1].price).toBe('string'); // Note: Based on actual implementation
+      expect(typeof items[1].price).toBe('number'); // Price should always be converted to number
+      expect(items[1].price).toBe(25.50); // Verify the actual value
       expect(items[2].price).toBe(2.5);
     });
 
@@ -140,6 +141,8 @@ describe('DatabaseService - Menu Loading Tests', () => {
           { id: 2, name: 'Invalid Price', price: 'invalid', category: 'Food' },
           { id: 3, name: 'Null Price', price: null, category: 'Food' },
           { id: 4, name: 'Undefined Price', category: 'Food' },
+          { id: 5, name: 'Empty String', price: '', category: 'Food' },
+          { id: 6, name: 'NaN String', price: 'NaN', category: 'Food' },
         ],
       };
 
@@ -149,8 +152,13 @@ describe('DatabaseService - Menu Loading Tests', () => {
       const items = await service.getMenuItems();
 
       expect(items).toBeDefined();
-      expect(items[0].price).toBe(10.99);
-      // Invalid prices handling depends on implementation
+      expect(items).toHaveLength(6);
+      expect(items[0].price).toBe(10.99); // Valid number
+      expect(items[1].price).toBe(0);     // 'invalid' -> 0
+      expect(items[2].price).toBe(0);     // null -> 0
+      expect(items[3].price).toBe(0);     // undefined -> 0
+      expect(items[4].price).toBe(0);     // '' -> 0
+      expect(items[5].price).toBe(0);     // 'NaN' -> 0
     });
   });
 

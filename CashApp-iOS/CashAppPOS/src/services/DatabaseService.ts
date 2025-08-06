@@ -33,6 +33,22 @@ export interface Category {
   active: boolean;
 }
 
+// Interface for menu items from API
+export interface MenuItem {
+  id: string | number;
+  name: string;
+  price: string | number;
+  category?: string;
+  category_id?: string | number;
+  emoji?: string;
+  icon?: string;
+  image?: string;
+  available?: boolean;
+  description?: string;
+  dietary_info?: string[];
+  modifiers?: any[];
+}
+
 export interface Order {
   id?: number;
   name?: string;
@@ -467,7 +483,7 @@ class DatabaseService {
   }
 
   // Menu operations - Get menu items formatted for POS screen with caching
-  async getMenuItems(): Promise<any[]> {
+  async getMenuItems(): Promise<MenuItem[]> {
     // Check cache first
     const now = Date.now();
     if (this.menuCache.items && now - this.menuCache.itemsTimestamp < this.CACHE_DURATION) {
@@ -492,12 +508,23 @@ class DatabaseService {
 
       if (response.success && response.data && Array.isArray(response.data)) {
         // Fix type conversion: Backend sends price as string, we need number
-        const menuItems = response.data.map((item: any) => ({
-          ...item,
-          price: typeof item.price === 'string' ? parseFloat(item.price) : item.price,
-          id: String(item.id), // Ensure ID is string
-          available: item.available !== undefined ? item.available : true
-        }));
+        const menuItems = response.data.map((item: MenuItem) => {
+          // Safely convert price with NaN check
+          let price = 0;
+          if (typeof item.price === 'string') {
+            const parsed = parseFloat(item.price);
+            price = isNaN(parsed) ? 0 : parsed;
+          } else if (typeof item.price === 'number') {
+            price = item.price;
+          }
+          
+          return {
+            ...item,
+            price,
+            id: String(item.id), // Ensure ID is string
+            available: item.available !== undefined ? item.available : true
+          };
+        });
 
         // Apply compatibility transformation if needed
         if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
