@@ -199,10 +199,10 @@ global.flushPromises = () => new Promise(resolve => setImmediate(resolve));
 
 global.waitForAsync = async (fn: () => boolean, timeout: number = 30000) => {
   const start = Date.now();
-  while (\!fn() && Date.now() - start < timeout) {
+  while (!fn() && Date.now() - start < timeout) {
     await new Promise(resolve => setTimeout(resolve, 100));
   }
-  if (\!fn()) {
+  if (!fn()) {
     throw new Error(`Timeout waiting for condition after ${timeout}ms`);
   }
 };

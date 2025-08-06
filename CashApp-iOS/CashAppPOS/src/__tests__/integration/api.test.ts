@@ -131,7 +131,7 @@ describe('API Integration Tests (Real Backend)', () => {
 
   describe('Data Operations (if authenticated)', () => {
     it('should handle menu data requests', async () => {
-      if (\!authHeaders) {
+      if (!authHeaders) {
         console.log('⏭️ Skipping authenticated test - no auth headers');
         return;
       }
@@ -155,7 +155,7 @@ describe('API Integration Tests (Real Backend)', () => {
     }, 20000);
 
     it('should handle restaurant data', async () => {
-      if (\!authHeaders) {
+      if (!authHeaders) {
         console.log('⏭️ Skipping authenticated test - no auth headers');
         return;
       }
