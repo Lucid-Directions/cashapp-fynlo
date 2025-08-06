@@ -24,9 +24,10 @@ import { logger } from '../../utils/logger';
 import SecurePaymentConfig from '../../services/SecurePaymentConfig';
 
 import type { PaymentMethod } from '../../services/SecurePaymentConfig';
+import type { Theme } from '../../design-system/theme';
 
 // Helper function to create theme-aware text styles
-const createThemedStyles = (theme: any) =>
+const createThemedStyles = (theme: Theme) =>
   StyleSheet.create({
     textPrimary: { color: theme.colors.text },
     textSecondary: { color: theme.colors.textSecondary },

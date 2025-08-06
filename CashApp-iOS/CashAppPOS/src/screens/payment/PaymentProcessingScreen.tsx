@@ -315,10 +315,10 @@ const PaymentProcessingScreen: React.FC = () => {
     }
   };
 
-  const handlePaymentError = (error: any) => {
+  const handlePaymentError = (error: unknown) => {
     logger.error('Payment error:', error);
     
-    const errorMessage = error?.message || 'Payment failed';
+    const errorMessage = error instanceof Error ? error.message : 'Payment failed';
     setPaymentStatus('failed');
     setStatusMessage(errorMessage);
     setPaymentResult({
