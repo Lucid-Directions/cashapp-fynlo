@@ -47,19 +47,20 @@ jest.mock('@react-native-async-storage/async-storage', () => {
 // ===========================================
 // SUPABASE - REAL CLIENT, NO MOCKS!
 // ===========================================
-import { createClient } from '@supabase/supabase-js';
-import TEST_CONFIG from '../src/__tests__/config/test.config';
-
-// Create REAL Supabase client
-const realSupabaseClient = createClient(
-  process.env.SUPABASE_URL || TEST_CONFIG.SUPABASE.URL,
-  process.env.SUPABASE_ANON_KEY || TEST_CONFIG.SUPABASE.ANON_KEY
-);
-
-// Replace mock with REAL Supabase
-jest.mock('../src/lib/supabase', () => ({
-  supabase: realSupabaseClient,
-}));
+jest.mock('../src/lib/supabase', () => {
+  const { createClient } = require('@supabase/supabase-js');
+  const TEST_CONFIG = require('../src/__tests__/config/test.config').default;
+  
+  // Create REAL Supabase client inside the mock factory
+  const realSupabaseClient = createClient(
+    process.env.SUPABASE_URL || TEST_CONFIG.SUPABASE.URL,
+    process.env.SUPABASE_ANON_KEY || TEST_CONFIG.SUPABASE.ANON_KEY
+  );
+  
+  return {
+    supabase: realSupabaseClient,
+  };
+});
 
 // ===========================================
 // NAVIGATION - REAL NAVIGATION CONTEXT
@@ -187,9 +188,8 @@ global.waitForAsync = async (fn: () => boolean, timeout: number = 5000) => {
 // ===========================================
 // REAL API TEST HELPER
 // ===========================================
-import RealAPITestHelper from '../src/__tests__/helpers/realApiTestHelper';
-
-// Make helper available globally
+// Import helper and make it available globally
+const RealAPITestHelper = require('../src/__tests__/helpers/realApiTestHelper').default;
 global.RealAPITestHelper = RealAPITestHelper;
 
 // ===========================================
@@ -200,7 +200,7 @@ beforeAll(async () => {
   
   // Check if we have required environment variables
   const hasSupabaseConfig = !!(
-    process.env.SUPABASE_URL || TEST_CONFIG.SUPABASE.URL
+    process.env.SUPABASE_URL || 'https://eweggzpvuqczrrrwszyy.supabase.co'
   );
   
   if (!hasSupabaseConfig) {
@@ -209,11 +209,13 @@ beforeAll(async () => {
   
   // Test backend connectivity
   try {
-    const isHealthy = await RealAPITestHelper.checkBackendHealth();
-    if (isHealthy) {
-      console.log('✅ Backend is healthy and ready for testing');
-    } else {
-      console.warn('⚠️ Backend health check failed - tests may fail');
+    if (global.RealAPITestHelper && global.RealAPITestHelper.checkBackendHealth) {
+      const isHealthy = await global.RealAPITestHelper.checkBackendHealth();
+      if (isHealthy) {
+        console.log('✅ Backend is healthy and ready for testing');
+      } else {
+        console.warn('⚠️ Backend health check failed - tests may fail');
+      }
     }
   } catch (error) {
     console.warn('⚠️ Could not check backend health:', error);
@@ -222,7 +224,9 @@ beforeAll(async () => {
 
 afterAll(async () => {
   // Clean up any test data
-  await RealAPITestHelper.cleanup();
+  if (global.RealAPITestHelper && global.RealAPITestHelper.cleanup) {
+    await global.RealAPITestHelper.cleanup();
+  }
   console.log('👋 Test environment cleaned up');
 });
 
