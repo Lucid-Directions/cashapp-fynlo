@@ -8,4 +8,5 @@ export { default as QRPaymentErrorBoundary } from './QRPaymentErrorBoundary';
 export { default as SecurePaymentMethodSelector } from './SecurePaymentMethodSelector';
 export { default as SumUpPaymentComponent } from './SumUpPaymentComponent';
 export { default as SumUpTestComponent } from './SumUpTestComponent';
+export { default as PaymentErrorRecovery } from './PaymentErrorRecovery';
 EOF < /dev/null

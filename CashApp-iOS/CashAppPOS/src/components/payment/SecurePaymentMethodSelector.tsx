@@ -20,7 +20,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { useTheme } from '../../hooks/useTheme';
-import { logger } from '../../services/logger';
+import { logger } from '../../utils/logger';
 import SecurePaymentConfig from '../../services/SecurePaymentConfig';
 
 import type { PaymentMethod } from '../../services/SecurePaymentConfig';

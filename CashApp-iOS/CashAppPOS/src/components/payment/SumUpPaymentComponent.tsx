@@ -6,6 +6,8 @@ import {
   Alert,
   ActivityIndicator,
   TouchableOpacity,
+  TextStyle,
+  ViewStyle,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SumUpProvider, useSumUp } from 'sumup-react-native-alpha';
@@ -14,8 +16,37 @@ import type { InitPaymentSheetProps, InitPaymentSheetResult } from 'sumup-react-
 import { useTheme } from '../../design-system/ThemeProvider';
 import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
 import sumUpConfigService from '../../services/SumUpConfigService';
-import logger from '../../utils/logger';
+import { logger } from '../../utils/logger';
 import Modal from '../ui/Modal';
+
+// Type guard for error objects
+function isError(error: unknown): error is Error {
+  return error instanceof Error;
+}
+
+// Type guard for objects with message property
+function hasMessage(error: unknown): error is { message: string } {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as { message: unknown }).message === 'string'
+  );
+}
+
+// Safe error message extraction
+function getErrorMessage(error: unknown): string {
+  if (isError(error)) {
+    return error.message;
+  }
+  if (hasMessage(error)) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return 'An unknown error occurred';
+}
 
 // Helper function to ensure operations run on main thread
 const runOnMainThread = (callback: () => void) => {
@@ -176,12 +207,13 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
       runOnMainThread(() => {
         presentPayment();
       });
-    } catch (error: any) {
-      logger.error('❌ SumUp initialization error:', error);
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error);
+      logger.error('❌ SumUp initialization error:', errorMsg);
       setPaymentStatus('failed');
-      setErrorMessage(error?.message || 'Initialization failed');
+      setErrorMessage(errorMsg);
       runOnMainThread(() => {
-        onPaymentComplete(false, undefined, error?.message || 'Initialization failed');
+        onPaymentComplete(false, undefined, errorMsg);
       });
     }
   };
@@ -238,12 +270,13 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
           onPaymentCancel();
         });
       }
-    } catch (error: any) {
-      logger.error('❌ Payment presentation error:', error);
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error);
+      logger.error('❌ Payment presentation error:', errorMsg);
       setPaymentStatus('failed');
-      setErrorMessage(error?.message || 'Payment failed');
+      setErrorMessage(errorMsg);
       runOnMainThread(() => {
-        onPaymentComplete(false, undefined, error?.message || 'Payment failed');
+        onPaymentComplete(false, undefined, errorMsg);
       });
     }
   };
@@ -405,9 +438,10 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = (props) => {
         });
         setIsLoadingConfig(false);
         logger.info('✅ SumUp configuration loaded successfully');
-      } catch (error: any) {
-        logger.error('❌ Failed to fetch SumUp configuration:', error);
-        setConfigError(error?.message || 'Failed to load payment configuration');
+      } catch (error: unknown) {
+        const errorMsg = getErrorMessage(error);
+        logger.error('❌ Failed to fetch SumUp configuration:', errorMsg);
+        setConfigError(errorMsg);
         setIsLoadingConfig(false);
 
         // Call the error callback
@@ -532,7 +566,31 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = (props) => {
   }
 };
 
-const styles = StyleSheet.create({
+interface Styles {
+  container: ViewStyle;
+  amountContainer: ViewStyle;
+  amountLabel: TextStyle;
+  amountValue: TextStyle;
+  iconContainer: ViewStyle;
+  messageContainer: ViewStyle;
+  statusMessage: TextStyle;
+  errorMessage: TextStyle;
+  helpText: TextStyle;
+  buttonContainer: ViewStyle;
+  cancelButton: ViewStyle;
+  retryButton: ViewStyle;
+  buttonText: TextStyle;
+  processingContainer: ViewStyle;
+  processingText: TextStyle;
+  loadingContainer: ViewStyle;
+  loadingText: TextStyle;
+  errorContainer: ViewStyle;
+  errorTitle: TextStyle;
+  errorDescription: TextStyle;
+  errorButton: ViewStyle;
+}
+
+const styles = StyleSheet.create<Styles>({
   container: {
     padding: 20,
     alignItems: 'center',
