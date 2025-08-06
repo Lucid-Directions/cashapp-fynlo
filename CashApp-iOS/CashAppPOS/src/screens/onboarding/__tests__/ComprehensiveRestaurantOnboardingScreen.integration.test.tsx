@@ -97,7 +97,7 @@ jest.mock('react-native/Libraries/Components/Keyboard/Keyboard', () => ({
   removeAllListeners: jest.fn(),
 }));
 
-describe.skip('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () => {
+describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAlert.mockClear();
@@ -110,7 +110,7 @@ describe.skip('ComprehensiveRestaurantOnboardingScreen - Complete User Journey',
     jest.restoreAllMocks();
   });
 
-  describe.skip('Complete 9-Step Onboarding Process', () => {
+  describe('Complete 9-Step Onboarding Process', () => {
     it('should complete the entire onboarding flow as a new user would - testing all 9 steps', async () => {
       // Mock successful API response for onboarding completion
       (fetch as jest.Mock).mockImplementation((url) => {
@@ -379,7 +379,7 @@ describe.skip('ComprehensiveRestaurantOnboardingScreen - Complete User Journey',
     });
   });
 
-  describe.skip('Skip Functionality', () => {
+  describe('Skip Functionality', () => {
     it('should properly handle skip scenarios - only menu setup has skip button, bank details cannot be skipped', async () => {
       const { getByText, getByPlaceholderText, getByTestId, queryByText } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />
@@ -452,7 +452,7 @@ describe.skip('ComprehensiveRestaurantOnboardingScreen - Complete User Journey',
     });
   });
 
-  describe.skip('Dictation/Speech Input Support', () => {
+  describe('Dictation/Speech Input Support', () => {
     it('should support dictation for all text inputs', async () => {
       const { getByPlaceholderText, getByTestId } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />
@@ -510,7 +510,7 @@ describe.skip('ComprehensiveRestaurantOnboardingScreen - Complete User Journey',
     });
   });
 
-  describe.skip('Error Handling and Edge Cases', () => {
+  describe('Error Handling and Edge Cases', () => {
     it('should validate all required fields before allowing navigation', async () => {
       const { getByTestId, getByText, getByPlaceholderText } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />
@@ -723,7 +723,7 @@ describe.skip('ComprehensiveRestaurantOnboardingScreen - Complete User Journey',
     });
   });
 
-  describe.skip('Navigation and Data Persistence', () => {
+  describe('Navigation and Data Persistence', () => {
     it('should persist data when navigating back and forth between steps', async () => {
       const { getByTestId, getByText, getByPlaceholderText } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />
@@ -784,7 +784,7 @@ describe.skip('ComprehensiveRestaurantOnboardingScreen - Complete User Journey',
     });
   });
 
-  describe.skip('Complete API Integration', () => {
+  describe('Complete API Integration', () => {
     it('should send complete and correct payload to onboarding API', async () => {
       (fetch as jest.Mock).mockResolvedValue({
         ok: true,

@@ -20,12 +20,12 @@ const mockPerformance = {
 // @ts-expect-error
 global.performance = mockPerformance;
 
-describe.skip('Performance Tests', () => {
+describe('Performance Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe.skip('Store Performance', () => {
+  describe('Store Performance', () => {
     it('should handle rapid cart operations efficiently', async () => {
       const { result } = renderHook(() => useAppStore());
 
@@ -106,7 +106,7 @@ describe.skip('Performance Tests', () => {
     });
   });
 
-  describe.skip('Database Service Performance', () => {
+  describe('Database Service Performance', () => {
     let service: DatabaseService;
 
     beforeEach(() => {
@@ -159,7 +159,7 @@ describe.skip('Performance Tests', () => {
     });
   });
 
-  describe.skip('Memory Performance', () => {
+  describe('Memory Performance', () => {
     it('should not leak memory during rapid state changes', async () => {
       const { result } = renderHook(() => useAppStore());
 
@@ -209,7 +209,7 @@ describe.skip('Performance Tests', () => {
     });
   });
 
-  describe.skip('Rendering Performance', () => {
+  describe('Rendering Performance', () => {
     it('should measure component render times', async () => {
       // This would typically be done with React DevTools Profiler
       // For now, we simulate the measurement
@@ -237,7 +237,7 @@ describe.skip('Performance Tests', () => {
     });
   });
 
-  describe.skip('Search Performance', () => {
+  describe('Search Performance', () => {
     it('should search through large datasets efficiently', async () => {
       const { result } = renderHook(() => useAppStore());
 
@@ -269,7 +269,7 @@ describe.skip('Performance Tests', () => {
     });
   });
 
-  describe.skip('Animation Performance', () => {
+  describe('Animation Performance', () => {
     it('should maintain 60fps during animations', async () => {
       // Simulate 60fps requirement
       const targetFrameTime = 1000 / 60; // ~16.67ms per frame

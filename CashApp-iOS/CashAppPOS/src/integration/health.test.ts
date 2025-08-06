@@ -1,7 +1,7 @@
 // @ts-nocheck
 import fetchMock from 'jest-fetch-mock';
 
-describe.skip('Backend Health Endpoint', () => {
+describe('Backend Health Endpoint', () => {
   beforeAll(() => {
     // Disable fetch mocking so we hit the real backend running via Docker
     fetchMock.disableMocks();

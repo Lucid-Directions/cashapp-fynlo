@@ -15,7 +15,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
-describe.skip('API Integration Tests', () => {
+describe('API Integration Tests', () => {
   let service: DatabaseService;
 
   beforeEach(() => {
@@ -27,7 +27,7 @@ describe.skip('API Integration Tests', () => {
     jest.resetAllMocks();
   });
 
-  describe.skip('Authentication Flow', () => {
+  describe('Authentication Flow', () => {
     it('should complete full authentication flow', async () => {
       // Mock successful login
       mockFetch.mockResolvedValueOnce({
@@ -98,7 +98,7 @@ describe.skip('API Integration Tests', () => {
     });
   });
 
-  describe.skip('Product Data Flow', () => {
+  describe('Product Data Flow', () => {
     it('should fetch and process product data', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -153,7 +153,7 @@ describe.skip('API Integration Tests', () => {
     });
   });
 
-  describe.skip('Order Management Flow', () => {
+  describe('Order Management Flow', () => {
     it('should create and update order', async () => {
       // Mock order creation
       const newOrder = {
@@ -238,7 +238,7 @@ describe.skip('API Integration Tests', () => {
     });
   });
 
-  describe.skip('Payment Processing Flow', () => {
+  describe('Payment Processing Flow', () => {
     it('should process payment successfully', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -302,7 +302,7 @@ describe.skip('API Integration Tests', () => {
     });
   });
 
-  describe.skip('Session Management Flow', () => {
+  describe('Session Management Flow', () => {
     it('should manage POS sessions', async () => {
       // Get current session
       mockFetch.mockResolvedValueOnce({
@@ -340,7 +340,7 @@ describe.skip('API Integration Tests', () => {
     });
   });
 
-  describe.skip('Error Handling and Recovery', () => {
+  describe('Error Handling and Recovery', () => {
     it('should handle API server errors', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
@@ -384,7 +384,7 @@ describe.skip('API Integration Tests', () => {
     });
   });
 
-  describe.skip('Data Consistency', () => {
+  describe('Data Consistency', () => {
     it('should maintain data integrity across operations', async () => {
       // Create order
       mockFetch.mockResolvedValueOnce({
@@ -445,7 +445,7 @@ describe.skip('API Integration Tests', () => {
     });
   });
 
-  describe.skip('Performance and Caching', () => {
+  describe('Performance and Caching', () => {
     it('should handle multiple concurrent requests', async () => {
       const requests = Array.from({ length: 10 }, (_, i) => {
         mockFetch.mockResolvedValueOnce({
