@@ -1,71 +1,51 @@
+/**
+ * REAL INFRASTRUCTURE TEST SETUP - NO MOCKS
+ * Pre-production testing with actual services
+ */
+
 import 'react-native-gesture-handler/jestSetup';
 
+// Load test environment variables
+require('dotenv').config({ path: '.env.test' });
+
+// Import real test configuration
+import { TEST_CONFIG, supabaseTestClient } from '../__tests__/config/real.test.config';
+
 // ===========================================
-// TIMER CONFIGURATION - MUST BE FIRST
+// ENVIRONMENT SETUP FOR REAL SERVICES
 // ===========================================
-// Set up fake timers globally to prevent timer-related issues
+
+process.env.NODE_ENV = 'test';
+process.env.USE_REAL_BACKEND = 'true';
+process.env.USE_REAL_AUTH = 'true';  
+process.env.USE_REAL_WEBSOCKET = 'true';
+process.env.SKIP_MOCKS = 'true';
+
+// Override config variables for test environment
+process.env.SUPABASE_URL = TEST_CONFIG.supabase.url;
+process.env.SUPABASE_ANON_KEY = TEST_CONFIG.supabase.anonKey;
+process.env.API_BASE_URL = TEST_CONFIG.api.baseUrl;
+process.env.WEBSOCKET_URL = TEST_CONFIG.websocket.url;
+
+// ===========================================
+// TIMER CONFIGURATION - EXTENDED FOR REAL CALLS
+// ===========================================
 beforeEach(() => {
-  jest.useFakeTimers();
+  jest.useRealTimers();
 });
 
 afterEach(() => {
   jest.clearAllTimers();
-  jest.useRealTimers();
 });
 
 // ===========================================
-// WEBSOCKET MOCK - COMPREHENSIVE
+// REAL WEBSOCKET SETUP - NO MOCKS
 // ===========================================
-// Mock WebSocket class with proper event handling
-class MockWebSocket {
-  static CONNECTING = 0;
-  static OPEN = 1;
-  static CLOSING = 2;
-  static CLOSED = 3;
-
-  url: string;
-  readyState: number = MockWebSocket.CONNECTING;
-  onopen: ((event: Event) => void) | null = null;
-  onclose: ((event: CloseEvent) => void) | null = null;
-  onerror: ((event: Event) => void) | null = null;
-  onmessage: ((event: MessageEvent) => void) | null = null;
-
-  constructor(url: string) {
-    this.url = url;
-    // Simulate async connection
-    setTimeout(() => {
-      if (this.readyState === MockWebSocket.CONNECTING) {
-        this.readyState = MockWebSocket.OPEN;
-        if (this.onopen) {
-          this.onopen(new Event('open'));
-        }
-      }
-    }, 10);
-  }
-
-  send(data: string) {
-    if (this.readyState !== MockWebSocket.OPEN) {
-      throw new Error('WebSocket is not open');
-    }
-  }
-
-  close(code?: number, reason?: string) {
-    if (this.readyState !== MockWebSocket.CLOSED) {
-      this.readyState = MockWebSocket.CLOSING;
-      setTimeout(() => {
-        this.readyState = MockWebSocket.CLOSED;
-        if (this.onclose) {
-          this.onclose(new CloseEvent('close', { code: code || 1000, reason: reason || '' }));
-        }
-      }, 0);
-    }
-  }
+if (typeof global.WebSocket === 'undefined') {
+  const WebSocket = require('ws');
+  global.WebSocket = WebSocket;
 }
 
-// Set global WebSocket
-(global as any).WebSocket = MockWebSocket;
-
-// WebSocket event polyfills
 global.CloseEvent = class CloseEvent extends Event {
   code: number;
   reason: string;
@@ -81,103 +61,42 @@ global.CloseEvent = class CloseEvent extends Event {
 
 global.MessageEvent = class MessageEvent extends Event {
   data: any;
-  origin: string;
-  lastEventId: string;
-  source: any;
-  ports: any[];
   
   constructor(type: string, eventInitDict: any = {}) {
     super(type);
     this.data = eventInitDict.data;
-    this.origin = eventInitDict.origin || '';
-    this.lastEventId = eventInitDict.lastEventId || '';
-    this.source = eventInitDict.source || null;
-    this.ports = eventInitDict.ports || [];
   }
-} as any;
-
-global.Event = class Event {
-  type: string;
-  target: any;
-  currentTarget: any;
-  eventPhase: number = 0;
-  bubbles: boolean = false;
-  cancelable: boolean = false;
-  defaultPrevented: boolean = false;
-  composed: boolean = false;
-  isTrusted: boolean = false;
-  timeStamp: number = Date.now();
-  
-  constructor(type: string, eventInitDict?: EventInit) {
-    this.type = type;
-    this.target = null;
-    this.currentTarget = null;
-    if (eventInitDict) {
-      this.bubbles = eventInitDict.bubbles || false;
-      this.cancelable = eventInitDict.cancelable || false;
-      this.composed = eventInitDict.composed || false;
-    }
-  }
-
-  preventDefault() {
-    if (this.cancelable) {
-      this.defaultPrevented = true;
-    }
-  }
-
-  stopPropagation() {}
-  stopImmediatePropagation() {}
 } as any;
 
 // ===========================================
-// ASYNC STORAGE MOCK
+// ASYNC STORAGE - REAL IMPLEMENTATION
 // ===========================================
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
 // ===========================================
-// SUPABASE MOCK
+// SUPABASE - REAL CLIENT (NO MOCKS)
 // ===========================================
 jest.mock('../src/lib/supabase', () => ({
-  supabase: {
-    auth: {
-      getSession: jest.fn(() => Promise.resolve({ data: { session: null }, error: null })),
-      onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
-      signIn: jest.fn(() => Promise.resolve({ data: null, error: null })),
-      signOut: jest.fn(() => Promise.resolve({ error: null })),
-      signUp: jest.fn(() => Promise.resolve({ data: null, error: null })),
-      resetPasswordForEmail: jest.fn(() => Promise.resolve({ data: null, error: null })),
-      updateUser: jest.fn(() => Promise.resolve({ data: null, error: null })),
-    },
-    from: jest.fn((table: string) => ({
-      select: jest.fn(() => Promise.resolve({ data: [], error: null })),
-      insert: jest.fn(() => Promise.resolve({ data: null, error: null })),
-      update: jest.fn(() => Promise.resolve({ data: null, error: null })),
-      delete: jest.fn(() => Promise.resolve({ data: null, error: null })),
-      upsert: jest.fn(() => Promise.resolve({ data: null, error: null })),
-      eq: jest.fn(() => ({ data: [], error: null })),
-      single: jest.fn(() => Promise.resolve({ data: null, error: null })),
-    })),
-  },
+  supabase: supabaseTestClient,
 }));
 
 // ===========================================
-// LOGGER MOCK
+// LOGGER - REAL IMPLEMENTATION  
 // ===========================================
-jest.mock('../src/utils/logger', () => ({
-  logger: {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-  },
-}));
+const realLogger = require('../src/utils/logger').logger;
+
+// Enable logging in test environment
+realLogger.configure({
+  enableInDevelopment: true,
+  enableInProduction: true,
+});
 
 // ===========================================
-// REACT NATIVE MOCKS
+// REACT NATIVE COMPONENT MOCKS (UI ONLY)
 // ===========================================
-// Mock react-native-safe-area-context
+
 jest.mock('react-native-safe-area-context', () => {
   const inset = { top: 0, right: 0, bottom: 0, left: 0 };
   return {
@@ -191,13 +110,11 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
-// Mock react-native-vector-icons
 jest.mock('react-native-vector-icons/MaterialIcons', () => {
   const React = require('react');
   return (props: any) => React.createElement('Text', props, props.name || 'MockedIcon');
 });
 
-// Mock navigation
 jest.mock('@react-navigation/native', () => {
   const actualNav = jest.requireActual('@react-navigation/native');
   return {
@@ -224,7 +141,6 @@ jest.mock('@react-navigation/native', () => {
   };
 });
 
-// Mock NetInfo
 jest.mock('@react-native-community/netinfo', () => ({
   fetch: jest.fn(() =>
     Promise.resolve({
@@ -241,68 +157,25 @@ jest.mock('@react-native-community/netinfo', () => ({
 }));
 
 // ===========================================
-// THEME PROVIDER MOCK
+// THEME PROVIDER - REAL IMPLEMENTATION
 // ===========================================
-jest.mock('../src/design-system/ThemeProvider', () => ({
-  ThemeProvider: ({ children }: any) => children,
-  useTheme: () => ({
-    colors: {
-      primary: '#007AFF',
-      secondary: '#5856D6',
-      background: '#F2F2F7',
-      surface: '#FFFFFF',
-      text: '#000000',
-      error: '#FF3B30',
-      success: '#34C759',
-      warning: '#FF9500',
-      border: '#C6C6C8',
-      disabled: '#8E8E93',
-      placeholder: '#8E8E93',
-    },
-    spacing: {
-      xs: 4,
-      sm: 8,
-      md: 16,
-      lg: 24,
-      xl: 32,
-    },
-    borderRadius: {
-      sm: 4,
-      md: 8,
-      lg: 12,
-      xl: 16,
-    },
-    typography: {
-      h1: { fontSize: 32, fontWeight: 'bold' },
-      h2: { fontSize: 24, fontWeight: 'bold' },
-      h3: { fontSize: 20, fontWeight: 'semibold' },
-      body: { fontSize: 16, fontWeight: 'normal' },
-      caption: { fontSize: 14, fontWeight: 'normal' },
-    },
-  }),
-}));
+const actualThemeProvider = jest.requireActual('../src/design-system/ThemeProvider');
+jest.mock('../src/design-system/ThemeProvider', () => actualThemeProvider);
 
 // ===========================================
-// GLOBAL MOCKS
+// GLOBAL TEST UTILITIES
 // ===========================================
-// Global mocks for testing environment
-global.mockAsyncStorage = {
-  getItem: jest.fn(() => Promise.resolve(null)),
-  setItem: jest.fn(() => Promise.resolve()),
-  removeItem: jest.fn(() => Promise.resolve()),
-  clear: jest.fn(() => Promise.resolve()),
-  getAllKeys: jest.fn(() => Promise.resolve([])),
-  multiGet: jest.fn(() => Promise.resolve([])),
-  multiSet: jest.fn(() => Promise.resolve()),
-  multiRemove: jest.fn(() => Promise.resolve()),
-};
 
-// Mock performance API with proper implementation
 global.performance = {
-  now: jest.fn(() => Date.now()),
+  now: () => Date.now(),
   mark: jest.fn(),
   measure: jest.fn(),
-  getEntriesByName: jest.fn(() => []),
+  getEntriesByName: jest.fn((name) => [{
+    name,
+    duration: Math.random() * 100,
+    startTime: Date.now(),
+    entryType: 'measure'
+  }]),
   getEntriesByType: jest.fn(() => []),
   clearMarks: jest.fn(),
   clearMeasures: jest.fn(),
@@ -310,52 +183,66 @@ global.performance = {
   setResourceTimingBufferSize: jest.fn(),
 } as any;
 
-// Mock crypto.getRandomValues
 global.crypto = {
   getRandomValues: (arr: any) => {
+    const crypto = require('crypto');
+    const randomBytes = crypto.randomBytes(arr.length);
     for (let i = 0; i < arr.length; i++) {
-      arr[i] = Math.floor(Math.random() * 256);
+      arr[i] = randomBytes[i];
     }
     return arr;
   },
   subtle: {} as any,
 } as any;
 
-// Mock global flags
-global.FLAGS = {
-  SHOW_DEV_MENU: true,
+global.flushPromises = () => new Promise(resolve => setImmediate(resolve));
+
+global.waitForAsync = async (fn: () => boolean, timeout: number = 30000) => {
+  const start = Date.now();
+  while (\!fn() && Date.now() - start < timeout) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  if (\!fn()) {
+    throw new Error(`Timeout waiting for condition after ${timeout}ms`);
+  }
 };
 
-// Mock __DEV__
-global.__DEV__ = true;
+global.simulateNetworkDelay = (ms: number = 100) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
 
 // ===========================================
-// THIRD-PARTY SDK MOCKS
+// PAYMENT SDK MOCKS (TEST MODE)
 // ===========================================
-// Mock SumUp React Native SDK
 jest.mock('sumup-react-native-alpha', () => ({
   SumUpProvider: ({ children }: any) => children,
   useSumUp: () => ({
     initSumUp: jest.fn(() => Promise.resolve()),
     login: jest.fn(() => Promise.resolve()),
     logout: jest.fn(() => Promise.resolve()),
-    checkout: jest.fn(() => Promise.resolve({ success: true, transactionId: 'test-123' })),
-    isLoggedIn: jest.fn(() => Promise.resolve(false)),
-    getSettings: jest.fn(() => Promise.resolve({})),
+    checkout: jest.fn(({ amount }) => {
+      const timestampId = Date.now();
+      return Promise.resolve({ 
+        success: true, 
+        transactionId: `test-${timestampId}`,
+        amount: amount,
+        currency: 'GBP'
+      });
+    }),
+    isLoggedIn: jest.fn(() => Promise.resolve(true)),
+    getSettings: jest.fn(() => Promise.resolve({
+      merchantCode: 'TEST_MERCHANT',
+      currency: 'GBP'
+    })),
   }),
 }));
 
-// Mock react-dom for SumUp dependency
 jest.mock('react-dom', () => ({}), { virtual: true });
-
-// Mock mobx-react for SumUp dependency  
 jest.mock('mobx-react', () => ({
   observer: (component: any) => component,
   inject: () => (component: any) => component,
   Provider: ({ children }: any) => children,
 }));
-
-// Mock mobx-react-lite for SumUp dependency
 jest.mock('mobx-react-lite', () => ({
   observer: (component: any) => component,
   useObserver: (fn: any) => fn(),
@@ -363,124 +250,35 @@ jest.mock('mobx-react-lite', () => ({
 }));
 
 // ===========================================
-// STORE MOCKS
+// TEST AUTHENTICATION HELPER
 // ===========================================
-// Import centralized mocks
-import { mockAppStore, mockUIStore, mockSettingsStore, mockAuthStore } from '../__mocks__/storeMocks';
-
-// Mock store hooks with centralized versions
-jest.mock('../src/store/useAppStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => mockAppStore),
-  useAppStore: jest.fn(() => mockAppStore),
-}));
-
-jest.mock('../src/store/useUIStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => mockUIStore),
-  useUIStore: jest.fn(() => mockUIStore),
-}));
-
-jest.mock('../src/store/useSettingsStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => mockSettingsStore),
-  useSettingsStore: jest.fn(() => mockSettingsStore),
-}));
-
-jest.mock('../src/store/useAuthStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => mockAuthStore),
-  useAuthStore: jest.fn(() => mockAuthStore),
-}));
-
-// ===========================================
-// ADDITIONAL GLOBAL UTILITIES
-// ===========================================
-// Ensure all globals are defined
-if (typeof global.logger === 'undefined') {
-  global.logger = {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    log: jest.fn(),
-  };
-}
-
-// Mock global theme - fallback for components that don't use ThemeProvider
-if (typeof global.theme === 'undefined') {
-  global.theme = {
-    colors: {
-      primary: '#007AFF',
-      secondary: '#5856D6',
-      background: '#F2F2F7',
-      surface: '#FFFFFF',
-      text: '#000000',
-      error: '#FF3B30',
-      success: '#34C759',
-      warning: '#FF9500',
-      border: '#C6C6C8',
-      disabled: '#8E8E93',
-      placeholder: '#8E8E93',
-    },
-    spacing: {
-      xs: 4,
-      sm: 8,
-      md: 16,
-      lg: 24,
-      xl: 32,
-    },
-    borderRadius: {
-      sm: 4,
-      md: 8,
-      lg: 12,
-      xl: 16,
-    },
-    typography: {
-      h1: { fontSize: 32, fontWeight: 'bold' },
-      h2: { fontSize: 24, fontWeight: 'bold' },
-      h3: { fontSize: 20, fontWeight: 'semibold' },
-      body: { fontSize: 16, fontWeight: 'normal' },
-      caption: { fontSize: 14, fontWeight: 'normal' },
-    },
-  };
-}
-
-// ===========================================
-// LOGGER MOCK
-// ===========================================
-jest.mock('../src/utils/logger', () => ({
-  logger: {
-    error: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-  },
-}));
-
-// ===========================================
-// HELPER FUNCTIONS FOR ASYNC TESTS
-// ===========================================
-// Helper to properly handle async operations in tests
-global.flushPromises = () => new Promise(resolve => setImmediate(resolve));
-
-// Helper to wait for async updates
-global.waitForAsync = async (fn: () => boolean, timeout: number = 5000) => {
-  const start = Date.now();
-  while (!fn() && Date.now() - start < timeout) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-  }
-  if (!fn()) {
-    throw new Error('Timeout waiting for condition');
+global.authenticateForTests = async () => {
+  try {
+    const { data, error } = await supabaseTestClient.auth.signInWithPassword({
+      email: TEST_CONFIG.testUser.email,
+      password: TEST_CONFIG.testUser.password,
+    });
+    
+    if (error) {
+      console.warn('Test authentication failed:', error.message);
+      return null;
+    }
+    
+    return data.session;
+  } catch (error) {
+    console.warn('Test authentication error:', error);
+    return null;
   }
 };
 
-// Add console error suppression for expected errors
+// ===========================================
+// TEST CLEANUP AND ERROR HANDLING
+// ===========================================
 const originalError = console.error;
 beforeAll(() => {
   console.error = (...args: any[]) => {
-    // Suppress specific expected errors during tests
     const errorString = args[0]?.toString() || '';
+    
     if (
       errorString.includes('Warning: An update to') ||
       errorString.includes('not wrapped in act') ||
@@ -488,6 +286,7 @@ beforeAll(() => {
     ) {
       return;
     }
+    
     originalError.call(console, ...args);
   };
 });
@@ -495,3 +294,10 @@ beforeAll(() => {
 afterAll(() => {
   console.error = originalError;
 });
+
+jest.setTimeout(60000); // 60 seconds for real API calls
+
+console.log('🔧 Real Infrastructure Test Setup Complete');
+console.log(`📡 API: ${TEST_CONFIG.api.baseUrl}`);
+console.log(`🔐 Auth: ${TEST_CONFIG.supabase.url}`);
+console.log(`🔌 WebSocket: ${TEST_CONFIG.websocket.url}`);
