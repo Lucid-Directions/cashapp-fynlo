@@ -205,4 +205,3 @@ export const useWebSocketStatus = () => {
     manualReconnect,
   };
 };
-EOF < /dev/null

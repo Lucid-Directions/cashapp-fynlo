@@ -113,7 +113,7 @@ describe('modificationHelpers', () => {
       expect(formatModificationPrice(1.5)).toBe('+$1.50');
     });
 
-    it('formats negative prices without plus sign', () => {
+    it('formats negative prices with minus sign', () => {
       expect(formatModificationPrice(-0.5)).toBe('-$0.50');
     });
 

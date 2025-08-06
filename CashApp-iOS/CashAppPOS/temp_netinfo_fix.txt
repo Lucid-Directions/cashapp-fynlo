@@ -1,0 +1,9 @@
+// Mock NetInfo
+jest.mock('@react-native-community/netinfo', () => {
+  const mockAddEventListener = jest.fn();
+  return {
+    addEventListener: mockAddEventListener,
+    fetch: jest.fn()
+  };
+});
+EOF < /dev/null

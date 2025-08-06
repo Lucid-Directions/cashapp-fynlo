@@ -1,9 +1,19 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import { errorHandler, ErrorType, ErrorSeverity } from '../../src/utils/errorHandler';
+import { logger } from '../../src/utils/logger';
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage');
+
+// Mock logger
+jest.mock('../../src/utils/logger', () => ({
+  logger: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
 
 // Mock Alert
 jest.mock('react-native/Libraries/Alert/Alert', () => ({
@@ -19,20 +29,16 @@ describe('ErrorHandler', () => {
 
   describe('handleError', () => {
     it('should handle basic error', async () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-
       await errorHandler.handleError(
         new Error('Test error'),
         ErrorType.SYSTEM,
         ErrorSeverity.MEDIUM
       );
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('[SYSTEM] Test error'),
         expect.any(Object)
       );
-
-      consoleSpy.mockRestore();
     });
 
     it('should store error in AsyncStorage', async () => {
@@ -46,20 +52,16 @@ describe('ErrorHandler', () => {
     });
 
     it('should categorize errors correctly', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
       await errorHandler.handleError(
         new Error('Critical error'),
         ErrorType.PAYMENT,
         ErrorSeverity.CRITICAL
       );
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('[PAYMENT] Critical error'),
         expect.any(Object)
       );
-
-      consoleSpy.mockRestore();
     });
   });
 
@@ -74,19 +76,15 @@ describe('ErrorHandler', () => {
 
     it('should determine severity correctly', async () => {
       const unauthorizedError = new Error('Unauthorized access');
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
       await errorHandler.handleNetworkError(unauthorizedError);
 
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      expect(logger.error).toHaveBeenCalled();
     });
   });
 
   describe('handleValidationError', () => {
     it('should handle validation errors', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
       await errorHandler.handleValidationError(
         'email',
         'Invalid email format',
@@ -94,31 +92,26 @@ describe('ErrorHandler', () => {
         'user_form'
       );
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('[VALIDATION]'),
         expect.any(Object)
       );
-
-      consoleSpy.mockRestore();
     });
   });
 
   describe('handlePaymentError', () => {
     it('should handle payment errors with high severity', async () => {
       const paymentError = new Error('Card declined');
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
       await errorHandler.handlePaymentError(paymentError, {
         amount: 50.0,
         cardNumber: '1234****',
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('[PAYMENT]'),
         expect.any(Object)
       );
-
-      consoleSpy.mockRestore();
     });
 
     it('should sanitize payment data', async () => {
@@ -204,17 +197,14 @@ describe('ErrorHandler', () => {
 
   describe('Error Recovery', () => {
     it('should attempt recovery for storage errors', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
       await errorHandler.handleError(
         new Error('Storage failed'),
         ErrorType.STORAGE,
         ErrorSeverity.MEDIUM
       );
 
-      // Should trigger recovery attempt
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      // Should trigger recovery attempt - logger.info will be called
+      expect(logger.info).toHaveBeenCalled();
     });
   });
 

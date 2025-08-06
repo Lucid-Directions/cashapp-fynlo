@@ -1,133 +1,158 @@
 /**
- * Helper utilities for cart item modifications
- * Provides formatting, display, and conversion functions
+ * Helper utilities for product modifications
+ * Provides formatting, calculations, and utility functions for modifications
  */
 
 import { CartItemModification, EnhancedOrderItem } from '../types/cart';
 
 /**
- * Format modification list for display in cart
- * Returns a concise summary of selected modifications
+ * Format modification price for display
+ * Shows + for positive prices (charges), - for negative prices (discounts)
+ */
+export function formatModificationPrice(price: number): string {
+  if (price === 0) return '';
+  
+  // Round to avoid floating point issues
+  const roundedPrice = Math.round(Math.abs(price) * 100) / 100;
+  
+  if (price > 0) {
+    return `+$${roundedPrice.toFixed(2)}`;
+  } else {
+    return `-$${roundedPrice.toFixed(2)}`;
+  }
+}
+/**
+ * Calculate total modification price for selected modifications
+ */
+export function calculateTotalModificationPrice(modifications: CartItemModification[]): number {
+  if (!modifications || modifications.length === 0) return 0;
+  
+  return modifications.reduce((total, mod) => {
+    if (!mod.selected) return total;
+    const price = mod.price || 0;
+    const quantity = mod.quantity || 1;
+    return total + (price * quantity);
+  }, 0);
+}
+
+/**
+ * Calculate modification total for any array with price/quantity
+ */
+export function calculateModificationTotal(modifications: any[]): number {
+  if (!modifications || modifications.length === 0) return 0;
+  
+  return modifications.reduce((total, mod) => {
+    const price = mod.price || 0;
+    const quantity = mod.quantity || 1;
+    return total + (price * quantity);
+  }, 0);
+}
+
+/**
+ * Format modification summary for display
+ * @param modifications - Array of modifications
+ * @param maxLength - Optional max length for truncation
  */
 export function formatModificationSummary(
-  modifications: CartItemModification[],
-  maxLength: number = 50
+  modifications: CartItemModification[], 
+  maxLength?: number
 ): string {
-  const selected = modifications.filter((mod) => mod.selected);
-  if (selected.length === 0) return '';
-
-  // Group by type for better organization
-  const byType: Record<string, string[]> = {};
-
-  selected.forEach((mod) => {
-    const key = mod.type === 'custom' ? mod.category : mod.type;
-    if (!byType[key]) byType[key] = [];
-
-    const name = mod.quantity && mod.quantity > 1 ? `${mod.quantity}x ${mod.name}` : mod.name;
-    byType[key].push(name);
-  });
-
-  // Build summary
-  const parts: string[] = [];
-
-  // Order: size, temperature, additions, removals, custom
-  const typeOrder = ['size', 'temperature', 'addition', 'removal', 'custom'];
-
-  typeOrder.forEach((type) => {
-    if (byType[type]) {
-      parts.push(...byType[type]);
-    }
-  });
-
-  // Handle other types not in order
-  Object.keys(byType).forEach((type) => {
-    if (!typeOrder.includes(type)) {
-      parts.push(...byType[type]);
-    }
-  });
-
-  const summary = parts.join(', ');
-
-  // Truncate if too long
-  if (summary.length > maxLength) {
-    return summary.substring(0, maxLength - 3) + '...';
+  if (!modifications || modifications.length === 0) return '';
+  
+  const selectedMods = modifications.filter(mod => mod.selected);
+  if (selectedMods.length === 0) return '';
+  
+  let summary = selectedMods
+    .map(mod => {
+      // Format as "2x Extra Shot" instead of "Extra Shot (2x)"
+      if (mod.quantity && mod.quantity > 1) {
+        return `${mod.quantity}x ${mod.name}`;
+      }
+      return mod.name;
+    })
+    .join(', ');
+    
+  // Truncate if maxLength specified
+  if (maxLength && summary.length > maxLength) {
+    summary = summary.substring(0, maxLength - 3) + '...';
   }
-
+  
   return summary;
 }
 
 /**
- * Calculate the total modification price for an item
- * Including quantity multipliers
+ * Check if item has any selected modifications or special instructions
  */
-export function calculateTotalModificationPrice(modifications: CartItemModification[]): number {
-  return modifications
-    .filter((mod) => mod.selected)
-    .reduce((total, mod) => {
-      const quantity = mod.quantity || 1;
-      return total + mod.price * quantity;
-    }, 0);
+export function hasModifications(item: EnhancedOrderItem | CartItemModification[]): boolean {
+  if (Array.isArray(item)) {
+    return !!(item && item.some(mod => mod.selected));
+  }
+  
+  // For EnhancedOrderItem, check both modifications and special instructions
+  const hasSelectedMods = !!(item.modifications && item.modifications.some(mod => mod.selected));
+  const hasInstructions = !!(item.specialInstructions && item.specialInstructions.trim().length > 0);
+  
+  return hasSelectedMods || hasInstructions;
 }
 
 /**
- * Get a display-friendly price string for modifications
+ * Get count of selected modifications and special instructions
  */
-export function formatModificationPrice(price: number): string {
-  if (price === 0) return '';
-
-  const sign = price > 0 ? '+' : '';
-  return `${sign}$${Math.abs(price).toFixed(2)}`;
+export function getModificationCount(item: EnhancedOrderItem | CartItemModification[]): number {
+  if (Array.isArray(item)) {
+    return item.filter(mod => mod.selected).length;
+  }
+  
+  // For EnhancedOrderItem, count both modifications and special instructions
+  let count = 0;
+  
+  if (item.modifications) {
+    count += item.modifications.filter(mod => mod.selected).length;
+  }
+  
+  if (item.specialInstructions && item.specialInstructions.trim().length > 0) {
+    count += 1;
+  }
+  
+  return count;
 }
 
 /**
- * Check if an item has any modifications
- */
-export function hasModifications(item: EnhancedOrderItem): boolean {
-  return item.modifications.some((mod) => mod.selected) || !!item.specialInstructions;
-}
-
-/**
- * Get modification count for display (e.g., badge)
- */
-export function getModificationCount(item: EnhancedOrderItem): number {
-  const modCount = item.modifications.filter((mod) => mod.selected).length;
-  const hasInstructions = !!item.specialInstructions ? 1 : 0;
-  return modCount + hasInstructions;
-}
-
-/**
- * Convert modifications to a shareable format
- * Useful for duplicating items or sharing between components
+ * Serialize modifications for storage/comparison
  */
 export function serializeModifications(modifications: CartItemModification[]): string {
-  const selected = modifications.filter((mod) => mod.selected);
-  return JSON.stringify(
-    selected.map((mod) => ({
+  if (!modifications || modifications.length === 0) return '';
+  
+  const selected = modifications
+    .filter(mod => mod.selected)
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map(mod => ({
       id: mod.id,
-      name: mod.name,
-      price: mod.price,
-      quantity: mod.quantity,
-    }))
-  );
+      quantity: mod.quantity || 1,
+    }));
+  
+  return JSON.stringify(selected);
 }
 
 /**
- * Parse serialized modifications back to full format
+ * Deserialize modifications from string
  */
 export function deserializeModifications(
   serialized: string,
   availableModifications: CartItemModification[]
 ): CartItemModification[] {
+  if (!serialized || !availableModifications) return availableModifications || [];
+  
   try {
     const selected = JSON.parse(serialized);
-
-    return availableModifications.map((mod) => {
-      const savedMod = selected.find((s: any) => s.id === mod.id);
-      if (savedMod) {
+    
+    return availableModifications.map(mod => {
+      const selectedMod = selected.find((s: any) => s.id === mod.id);
+      if (selectedMod) {
         return {
           ...mod,
           selected: true,
-          quantity: savedMod.quantity || mod.quantity,
+          quantity: selectedMod.quantity || 1,
         };
       }
       return { ...mod, selected: false };
@@ -138,74 +163,104 @@ export function deserializeModifications(
 }
 
 /**
- * Group modifications by category for display
+ * Group modifications by category
  */
 export function groupModificationsByCategory(
   modifications: CartItemModification[]
 ): Record<string, CartItemModification[]> {
-  return modifications.reduce((acc, mod) => {
-    if (!acc[mod.category]) {
-      acc[mod.category] = [];
+  if (!modifications) return {};
+  
+  return modifications.reduce((groups, mod) => {
+    const category = mod.category || 'Other';
+    if (!groups[category]) {
+      groups[category] = [];
     }
-    acc[mod.category].push(mod);
-    return acc;
+    groups[category].push(mod);
+    return groups;
   }, {} as Record<string, CartItemModification[]>);
 }
 
 /**
- * Get a color for modification display based on type
+ * Get color for modification type based on theme
  */
-export function getModificationTypeColor(type: CartItemModification['type'], theme: any): string {
+export function getModificationTypeColor(type: CartItemModification['type'], theme?: any): string {
+  if (theme?.colors) {
+    switch (type) {
+      case 'size':
+        return theme.colors.info || '#2196F3';
+      case 'temperature':
+        return theme.colors.warning || '#FF9800';
+      case 'addition':
+        return theme.colors.success || '#4CAF50';
+      case 'removal':
+        return theme.colors.error || '#F44336';
+      default:
+        return theme.colors.primary || '#007AFF';
+    }
+  }
+  
+  // Fallback colors without theme
   switch (type) {
     case 'size':
-      return theme.colors.info || '#2196F3';
+      return '#4ECDC4';
     case 'temperature':
-      return theme.colors.warning || '#FF9800';
+      return '#FF6B6B';
     case 'addition':
-      return theme.colors.success || '#4CAF50';
+      return '#45B7D1';
     case 'removal':
-      return theme.colors.error || '#F44336';
-    case 'custom':
+      return '#FFA07A';
+    case 'substitution':
+      return '#98D8C8';
+    case 'preparation':
+      return '#BB8FCE';
     default:
-      return theme.colors.primary || '#007AFF';
+      return '#8E8E93';
   }
 }
 
 /**
- * Validate if a modification combination is allowed
+ * Check if modification combination is valid
  */
-export function isModificationCombinationValid(modifications: CartItemModification[]): {
-  valid: boolean;
-  reason?: string;
-} {
-  const selected = modifications.filter((mod) => mod.selected);
-
-  // Check for multiple exclusive selections
-  const exclusiveTypes = ['size', 'temperature'];
-  const milkMods = selected.filter((mod) => mod.category === 'Milk Options');
-
-  for (const type of exclusiveTypes) {
-    const typeCount = selected.filter((mod) => mod.type === type).length;
-    if (typeCount > 1) {
-      return {
-        valid: false,
-        reason: `Only one ${type} option can be selected`,
-      };
-    }
+export function isModificationCombinationValid(
+  modifications: CartItemModification[],
+  newModId?: string
+): { valid: boolean; reason?: string } {
+  if (!modifications) return { valid: true };
+  
+  const selected = modifications.filter(mod => mod.selected);
+  
+  // Count by type
+  const typeCount: Record<string, number> = {};
+  selected.forEach(mod => {
+    typeCount[mod.type] = (typeCount[mod.type] || 0) + 1;
+  });
+  
+  // Check size selection (only one allowed)
+  if (typeCount.size > 1) {
+    return { valid: false, reason: 'Only one size option can be selected' };
   }
-
-  if (milkMods.length > 1) {
-    return {
-      valid: false,
-      reason: 'Only one milk option can be selected',
-    };
+  
+  // Check temperature selection (only one allowed)  
+  if (typeCount.temperature > 1) {
+    return { valid: false, reason: 'Only one temperature option can be selected' };
   }
-
+  
+  // Check milk options (only one allowed)
+  const milkOptions = selected.filter(mod => 
+    mod.category === 'Milk Options' || 
+    mod.name.toLowerCase().includes('milk') ||
+    mod.name.toLowerCase().includes('oat') ||
+    mod.name.toLowerCase().includes('whole')
+  );
+  if (milkOptions.length > 1) {
+    return { valid: false, reason: 'Only one milk option can be selected' };
+  }
+  
   return { valid: true };
 }
 
 /**
- * Get icon name for modification type
+ * Get icon for modification type
  */
 export function getModificationIcon(type: CartItemModification['type']): string {
   switch (type) {
@@ -217,47 +272,66 @@ export function getModificationIcon(type: CartItemModification['type']): string 
       return 'add-circle-outline';
     case 'removal':
       return 'remove-circle-outline';
-    case 'custom':
+    case 'substitution':
+      return 'swap-horizontal';
+    case 'preparation':
+      return 'chef-hat';
     default:
       return 'tune';
   }
 }
 
 /**
- * Sort modifications for consistent display order
+ * Sort modifications by type order and name
  */
 export function sortModifications(modifications: CartItemModification[]): CartItemModification[] {
-  const typeOrder = ['size', 'temperature', 'addition', 'removal', 'custom'];
-
+  if (!modifications) return [];
+  
+  const typeOrder: Record<string, number> = {
+    size: 1,
+    temperature: 2,
+    addition: 3,
+    removal: 4,
+    substitution: 5,
+    preparation: 6,
+  };
+  
   return [...modifications].sort((a, b) => {
-    const aIndex = typeOrder.indexOf(a.type);
-    const bIndex = typeOrder.indexOf(b.type);
-
-    if (aIndex !== bIndex) {
-      return aIndex - bIndex;
+    // First sort by type priority
+    const aOrder = typeOrder[a.type] || 999;
+    const bOrder = typeOrder[b.type] || 999;
+    
+    if (aOrder !== bOrder) {
+      return aOrder - bOrder;
     }
-
-    // Within same type, sort by name
+    
+    // Then by name
     return a.name.localeCompare(b.name);
   });
 }
 
 /**
- * Check if two modification sets are equivalent
+ * Check if two modification sets are equal
  */
 export function areModificationsEqual(
   mods1: CartItemModification[],
   mods2: CartItemModification[]
 ): boolean {
-  if (mods1.length !== mods2.length) return false;
+  const serialize1 = serializeModifications(mods1);
+  const serialize2 = serializeModifications(mods2);
+  return serialize1 === serialize2;
+}
 
-  const selected1 = mods1.filter((m) => m.selected).sort((a, b) => a.id.localeCompare(b.id));
-  const selected2 = mods2.filter((m) => m.selected).sort((a, b) => a.id.localeCompare(b.id));
-
-  if (selected1.length !== selected2.length) return false;
-
-  return selected1.every((mod1, index) => {
-    const mod2 = selected2[index];
-    return mod1.id === mod2.id && mod1.quantity === mod2.quantity;
+/**
+ * Validate modifications array
+ */
+export function validateModifications(modifications: any[]): boolean {
+  if (!modifications) return false;
+  
+  return modifications.every(mod => {
+    return mod.id && 
+           typeof mod.price === 'number' &&
+           (!mod.quantity || typeof mod.quantity === 'number');
   });
 }
+

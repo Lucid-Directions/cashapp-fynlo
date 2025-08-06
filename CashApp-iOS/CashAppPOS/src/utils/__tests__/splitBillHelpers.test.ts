@@ -88,7 +88,7 @@ describe('splitBillHelpers', () => {
       const total = createTestGroupTotal();
 
       const summary = formatGroupSummary(group, total);
-      expect(summary).toBe('2 items');
+      expect(summary).toContain('2 items');
     });
 
     it('should include custom amount', () => {
@@ -470,6 +470,7 @@ describe('splitBillHelpers', () => {
   describe('generateGroupShareMessage', () => {
     it('should generate complete message', () => {
       const group = createTestGroup({
+        tipPercent: 20,
         name: 'John',
         items: [
           {

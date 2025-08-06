@@ -4,7 +4,7 @@ import { ExponentialBackoff } from '@fynlo/shared/src/utils/exponentialBackoff';
 
 import API_CONFIG from '../../config/api';
 import { WebSocketEvent } from '../../types/websocket';
-import tokenManager from '../../utils/enhancedTokenManager';
+import tokenManager from '../../utils/tokenManager';
 import logger from '../../utils/logger';
 
 import type { WebSocketMessage, WebSocketConfig } from '../../types/websocket';

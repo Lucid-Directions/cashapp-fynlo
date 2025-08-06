@@ -161,6 +161,12 @@ price = Column(DECIMAL(10, 2), nullable=False)
 - `gh` - GitHub management
 - `doctl` - DigitalOcean
 - `trivy` - Security scanning
+- `supabase` - Database & auth (`/opt/homebrew/bin/supabase`)
+  - Access production database via REST API
+  - Credentials location: `backend/.env.production` (NEVER expose keys in docs!)
+  - Existing test users for testing:
+    - Platform Owner: sleepyarno@gmail.com (Arnaud)
+    - Restaurant Manager: arnaud@luciddirections.co.uk (Arnaud)
 
 ### Specialized Agents (in parallel via Task tool)
 

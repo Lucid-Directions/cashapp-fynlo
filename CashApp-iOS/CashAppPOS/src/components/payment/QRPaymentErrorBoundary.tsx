@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-// TODO: Unused import - import React, { Component } from 'react';
+import React, { Component } from 'react';
 
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { logger } from '../../utils/logger';
 
 interface QRPaymentErrorBoundaryProps {
   children: ReactNode;

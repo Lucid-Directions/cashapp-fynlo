@@ -13,6 +13,11 @@ import ErrorTrackingService from '../services/ErrorTrackingService';
  */
 export function migrateOrderItem(oldItem: OrderItem, userId?: string): EnhancedOrderItem | null {
   try {
+    // Validate input
+    if (!oldItem || oldItem === null || oldItem === undefined) {
+      return null;
+    }
+
     const now = new Date().toISOString();
 
     // Convert number ID to string, handling various edge cases
@@ -29,8 +34,11 @@ export function migrateOrderItem(oldItem: OrderItem, userId?: string): EnhancedO
     // Validate required fields
     if (
       !oldItem.name ||
+      oldItem.name.trim() === '' ||
       typeof oldItem.price !== 'number' ||
-      typeof oldItem.quantity !== 'number'
+      isNaN(oldItem.price) ||
+      typeof oldItem.quantity !== 'number' ||
+      isNaN(oldItem.quantity)
     ) {
       return null;
     }

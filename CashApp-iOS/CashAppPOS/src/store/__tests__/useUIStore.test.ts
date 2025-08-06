@@ -1,3 +1,5 @@
+// Unmock this store for unit testing
+jest.unmock("../useUIStore");
 /**
  * Unit Tests for UI Store (Zustand)
  * Testing UI state management and actions

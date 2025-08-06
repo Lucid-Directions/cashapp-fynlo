@@ -27,7 +27,7 @@ import DataService from '../../services/DataService'; // Added
 import type { EmployeeData } from '../../types'; // Updated import path
 
 // Get screen dimensions for responsive design
-const { width: screenWidth, height: _screenHeight } = Dimensions.get('window');
+const getScreenDimensions = () => { try { return Dimensions.get('window'); } catch (error) { return { width: 375, height: 812 }; } }; const { width: screenWidth, height: _screenHeight } = getScreenDimensions();
 const isTablet = screenWidth > 768;
 const isSmallDevice = screenWidth < 380;
 

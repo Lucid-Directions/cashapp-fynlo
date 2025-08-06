@@ -1,5 +1,6 @@
 // Using simple error tracking for immediate deployment
 import SimpleErrorTrackingService from './SimpleErrorTrackingService';
+import { logger } from '../utils/logger';
 
 export interface ErrorContext {
   userId?: string;
@@ -53,6 +54,15 @@ class ErrorTrackingService {
 
   trackEvent(event: string, data?: Record<string, unknown>): void {
     this.simpleTracker.trackEvent(event, data);
+  }
+
+  // Generic error tracking method used by ModificationPricingService
+  trackError(error: Error | unknown, context?: any): void {
+    if (error instanceof Error) {
+      this.captureError(error, context);
+    } else {
+      this.captureMessage(String(error), 'error', context);
+    }
   }
 
   startTransaction(context: PerformanceContext): unknown {

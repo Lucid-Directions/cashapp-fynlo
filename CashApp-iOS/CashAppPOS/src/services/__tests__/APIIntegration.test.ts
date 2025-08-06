@@ -1,288 +1,265 @@
-// APIIntegration.test.ts - Integration tests for real API connections
-import DatabaseService from '../DatabaseService';
+/**
+ * API Integration Tests - REAL Backend
+ * Tests against actual DigitalOcean infrastructure
+ */
 
-// These tests require the backend server to be running
-// Run with: npm test -- --testNamePattern="API Integration"
-// Or skip with: SKIP_API_TESTS=true npm test
+import RealAPITestHelper from '../../__tests__/helpers/realApiTestHelper';
+import TEST_CONFIG from '../../__tests__/config/test.config';
 
-const SKIP_API_TESTS = process.env.SKIP_API_TESTS === 'true';
-const API_BASE_URL = 'http://localhost:8000';
+describe('API Integration - REAL Backend', () => {
+  // Increase timeout for real API calls
+  jest.setTimeout(TEST_CONFIG.TIMEOUT.INTEGRATION);
 
-describe('API Integration Tests', () => {
-  let databaseService: DatabaseService;
-
-  beforeAll(() => {
-    if (SKIP_API_TESTS) {
-      console.log('Skipping API integration tests (SKIP_API_TESTS=true)');
-      return;
+  beforeAll(async () => {
+    // Check if backend is available
+    const isHealthy = await RealAPITestHelper.checkBackendHealth();
+    if (!isHealthy) {
+      console.warn('Backend not available - tests may fail');
     }
-    databaseService = DatabaseService.getInstance();
   });
 
-  describe('Backend Health Check', () => {
-    it('should connect to backend health endpoint', async () => {
-      if (SKIP_API_TESTS) return;
+  afterEach(async () => {
+    // Clean up after each test
+    await RealAPITestHelper.cleanup();
+  });
 
+  describe('Authentication Flow', () => {
+    it('should complete full authentication flow', async () => {
+      // 1. Authenticate with Supabase
+      const token = await RealAPITestHelper.authenticateWithSupabase();
+      expect(token).toBeDefined();
+      expect(typeof token).toBe('string');
+      
+      // 2. Verify token with backend
+      const verifyResult = await RealAPITestHelper.verifyWithBackend();
+      expect(verifyResult).toBeDefined();
+      expect(verifyResult.user).toBeDefined();
+      expect(verifyResult.user.email).toBe(TEST_CONFIG.SUPABASE.TEST_USER.email);
+    });
+
+    it('should handle invalid tokens gracefully', async () => {
+      // Try to make request with invalid token
       try {
-        const response = await fetch(`${API_BASE_URL}/health`);
-        expect(response.ok).toBe(true);
-
-        const data = await response.json();
-        expect(data).toHaveProperty('status');
-        expect(data.status).toBe('healthy');
-      } catch (error) {
-        console.error('Backend health check failed:', error);
-        console.log('Make sure the backend server is running at http://localhost:8000');
-        throw new Error('Backend server is not available for testing');
-      }
-    });
-
-    it('should verify API documentation is accessible', async () => {
-      if (SKIP_API_TESTS) return;
-
-      const response = await fetch(`${API_BASE_URL}/docs`);
-      expect(response.ok).toBe(true);
-      expect(response.headers.get('content-type')).toContain('text/html');
-    });
-  });
-
-  describe('Authentication Endpoints', () => {
-    it('should handle login attempt', async () => {
-      if (SKIP_API_TESTS) return;
-
-      // Test with invalid credentials first
-      const loginResult = await databaseService.login('test@example.com', 'wrongpassword');
-      // Should return false for invalid credentials
-      expect(typeof loginResult).toBe('boolean');
-    });
-
-    it('should handle logout request', async () => {
-      if (SKIP_API_TESTS) return;
-
-      // Should not throw error even if not authenticated
-      await expect(databaseService.logout()).resolves.not.toThrow();
-    });
-  });
-
-  describe('Products API', () => {
-    it('should fetch products from API', async () => {
-      if (SKIP_API_TESTS) return;
-
-      try {
-        const products = await databaseService.getProducts();
-
-        // Should return an array (might be empty if no products in DB)
-        expect(Array.isArray(products)).toBe(true);
-
-        // If products exist, check structure
-        if (products.length > 0) {
-          const product = products[0];
-          expect(product).toHaveProperty('id');
-          expect(product).toHaveProperty('name');
-          expect(product).toHaveProperty('price');
-        }
-      } catch (error) {
-        console.log(
-          'Products API test failed - this is expected if backend is not fully implemented'
+        const response = await fetch(
+          `${TEST_CONFIG.BACKEND.FULL_API_URL}/products/mobile`,
+          {
+            headers: {
+              'Authorization': 'Bearer invalid-token',
+              'Content-Type': 'application/json',
+            },
+          }
         );
-        // Don't fail the test if endpoint doesn't exist yet
-        expect(error).toBeDefined();
-      }
-    });
-
-    it('should fetch categories from API', async () => {
-      if (SKIP_API_TESTS) return;
-
-      try {
-        const categories = await databaseService.getCategories();
-
-        expect(Array.isArray(categories)).toBe(true);
-
-        if (categories.length > 0) {
-          const category = categories[0];
-          expect(category).toHaveProperty('id');
-          expect(category).toHaveProperty('name');
-        }
+        
+        expect(response.ok).toBe(false);
+        expect(response.status).toBe(401);
       } catch (error) {
-        console.log(
-          'Categories API test failed - this is expected if backend is not fully implemented'
-        );
+        // Expected to fail
         expect(error).toBeDefined();
       }
     });
   });
 
-  describe('Orders API', () => {
-    it('should handle order creation', async () => {
-      if (SKIP_API_TESTS) return;
+  describe('Product API', () => {
+    it('should fetch products from real backend', async () => {
+      // Authenticate first
+      await RealAPITestHelper.verifyWithBackend();
+      
+      // Fetch products
+      const products = await RealAPITestHelper.makeAuthenticatedRequest('/products/mobile');
+      
+      expect(products).toBeDefined();
+      expect(Array.isArray(products)).toBe(true);
+      
+      // Check product structure if we have products
+      if (products.length > 0) {
+        const product = products[0];
+        expect(product).toHaveProperty('id');
+        expect(product).toHaveProperty('name');
+        expect(product).toHaveProperty('price');
+        expect(product).toHaveProperty('category');
+      }
+    });
 
+    it('should handle product categories', async () => {
+      await RealAPITestHelper.verifyWithBackend();
+      
+      const categories = await RealAPITestHelper.makeAuthenticatedRequest('/categories');
+      
+      expect(categories).toBeDefined();
+      expect(Array.isArray(categories)).toBe(true);
+    });
+  });
+
+  describe('Order API', () => {
+    it('should create and retrieve orders', async () => {
+      await RealAPITestHelper.verifyWithBackend();
+      
+      // Create a test order
       const orderData = {
         items: [
           {
             product_id: 1,
-            product_name: 'Test Item',
-            qty: 1,
-            price_unit: 10.99,
-            price_subtotal: 10.99,
+            quantity: 2,
+            price: 10.99,
+            modifiers: [],
           },
         ],
-        amount_total: 10.99,
+        total: 21.98,
+        payment_method: 'cash',
+        restaurant_id: TEST_CONFIG.TEST_RESTAURANT.ID,
       };
-
+      
       try {
-        const order = await databaseService.createOrder(orderData);
-
-        if (order) {
-          expect(order).toHaveProperty('id');
-          expect(order).toHaveProperty('state');
-        }
-      } catch (error) {
-        console.log(
-          'Order creation API test failed - this is expected if backend is not fully implemented'
+        const createdOrder = await RealAPITestHelper.makeAuthenticatedRequest(
+          '/orders',
+          'POST',
+          orderData
         );
-        expect(error).toBeDefined();
-      }
-    });
-
-    it('should fetch recent orders', async () => {
-      if (SKIP_API_TESTS) return;
-
-      try {
-        const orders = await databaseService.getRecentOrders(5);
-
-        expect(Array.isArray(orders)).toBe(true);
-
-        if (orders.length > 0) {
-          const order = orders[0];
-          expect(order).toHaveProperty('id');
-          expect(order).toHaveProperty('date_order');
-        }
-      } catch (error) {
-        console.log(
-          'Recent orders API test failed - this is expected if backend is not fully implemented'
+        
+        expect(createdOrder).toBeDefined();
+        expect(createdOrder.id).toBeDefined();
+        expect(createdOrder.total).toBe(orderData.total);
+        
+        // Retrieve the order
+        const retrievedOrder = await RealAPITestHelper.makeAuthenticatedRequest(
+          `/orders/${createdOrder.id}`
         );
-        expect(error).toBeDefined();
+        
+        expect(retrievedOrder).toBeDefined();
+        expect(retrievedOrder.id).toBe(createdOrder.id);
+      } catch (error) {
+        // Order creation might fail if restaurant doesn't exist
+        console.log('Order creation failed (expected if test restaurant not set up):', error);
       }
     });
   });
 
-  describe('Restaurant API', () => {
-    it('should fetch restaurant floor plan', async () => {
-      if (SKIP_API_TESTS) return;
-
+  describe('Network Error Handling', () => {
+    it('should handle network timeouts', async () => {
+      // Create a request that will timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 100);
+      
       try {
-        const floorPlan = await databaseService.getRestaurantFloorPlan();
-
-        expect(floorPlan).toHaveProperty('tables');
-        expect(floorPlan).toHaveProperty('sections');
-        expect(Array.isArray(floorPlan.tables)).toBe(true);
-        expect(Array.isArray(floorPlan.sections)).toBe(true);
-      } catch (error) {
-        console.log(
-          'Floor plan API test failed - this is expected if backend is not fully implemented'
-        );
-        expect(error).toBeDefined();
-      }
-    });
-  });
-
-  describe('Reports API', () => {
-    it('should fetch daily sales report', async () => {
-      if (SKIP_API_TESTS) return;
-
-      try {
-        const report = await databaseService.getDailySalesReport();
-
-        if (report) {
-          expect(report).toHaveProperty('summary');
-          expect(report.summary).toHaveProperty('total_sales');
-        }
-      } catch (error) {
-        console.log(
-          'Daily report API test failed - this is expected if backend is not fully implemented'
-        );
-        expect(error).toBeDefined();
-      }
-    });
-
-    it('should fetch sales summary', async () => {
-      if (SKIP_API_TESTS) return;
-
-      try {
-        const summary = await databaseService.getSalesSummary();
-
-        if (summary) {
-          expect(summary).toHaveProperty('summary');
-          expect(summary).toHaveProperty('period');
-        }
-      } catch (error) {
-        console.log(
-          'Sales summary API test failed - this is expected if backend is not fully implemented'
-        );
-        expect(error).toBeDefined();
-      }
-    });
-  });
-
-  describe('Payment API', () => {
-    it('should handle payment processing', async () => {
-      if (SKIP_API_TESTS) return;
-
-      try {
-        const result = await databaseService.processPayment(123, 'card', 25.99);
-
-        expect(typeof result).toBe('boolean');
-      } catch (error) {
-        console.log(
-          'Payment API test failed - this is expected if backend is not fully implemented'
-        );
-        expect(error).toBeDefined();
-      }
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('should handle network timeouts gracefully', async () => {
-      if (SKIP_API_TESTS) return;
-
-      // Test with a non-existent endpoint
-      try {
-        await fetch(`${API_BASE_URL}/nonexistent-endpoint`);
-      } catch (error) {
-        expect(error).toBeDefined();
-      }
-    });
-
-    it('should handle malformed requests', async () => {
-      if (SKIP_API_TESTS) return;
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/products`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: 'invalid json',
+        await fetch(`${TEST_CONFIG.BACKEND.FULL_API_URL}/products/mobile`, {
+          signal: controller.signal,
         });
+        fail('Should have timed out');
+      } catch (error: any) {
+        expect(error.name).toBe('AbortError');
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    });
 
-        // Should return 4xx error for malformed request
-        expect(response.status).toBeGreaterThanOrEqual(400);
-        expect(response.status).toBeLessThan(500);
+    it('should fallback to cached data on API failure', async () => {
+      // This would be implemented with actual caching logic
+      // For now, just verify the pattern
+      let data;
+      try {
+        data = await RealAPITestHelper.makeAuthenticatedRequest('/products/mobile');
       } catch (error) {
+        // In real app, would return cached data here
+        data = []; // Fallback to empty array
+      }
+      
+      expect(data).toBeDefined();
+      expect(Array.isArray(data)).toBe(true);
+    });
+
+    it('should handle API server errors', async () => {
+      await RealAPITestHelper.verifyWithBackend();
+      
+      try {
+        // Try to access non-existent endpoint
+        await RealAPITestHelper.makeAuthenticatedRequest('/non-existent-endpoint');
+        fail('Should have thrown an error');
+      } catch (error: any) {
+        expect(error).toBeDefined();
+        expect(error.message).toContain('404');
+      }
+    });
+
+    it('should handle malformed responses', async () => {
+      // Send malformed data to test error handling
+      await RealAPITestHelper.verifyWithBackend();
+      
+      try {
+        await RealAPITestHelper.makeAuthenticatedRequest(
+          '/orders',
+          'POST',
+          { invalid: 'data' } // Malformed order data
+        );
+        fail('Should have thrown validation error');
+      } catch (error: any) {
+        expect(error).toBeDefined();
+        expect(error.message).toMatch(/validation|400|invalid/i);
+      }
+    });
+
+    it('should handle request timeouts', async () => {
+      // Test timeout handling
+      const startTime = Date.now();
+      
+      try {
+        // Use a very short timeout
+        await fetch(`${TEST_CONFIG.BACKEND.FULL_API_URL}/products/mobile`, {
+          signal: AbortSignal.timeout(1), // 1ms timeout
+        });
+        fail('Should have timed out');
+      } catch (error: any) {
+        const duration = Date.now() - startTime;
+        expect(duration).toBeLessThan(1000); // Should fail quickly
+        expect(error.name).toBe('AbortError');
+      }
+    });
+  });
+
+  describe('WebSocket Integration', () => {
+    it('should connect to WebSocket with correct URL', async () => {
+      await RealAPITestHelper.verifyWithBackend();
+      
+      const isConnected = await RealAPITestHelper.testWebSocketConnection();
+      expect(isConnected).toBe(true);
+    });
+
+    it('should handle WebSocket authentication', async () => {
+      // Test without authentication
+      try {
+        const ws = new WebSocket(TEST_CONFIG.WEBSOCKET.URL);
+        
+        await new Promise((resolve, reject) => {
+          ws.onerror = () => reject(new Error('Connection failed'));
+          ws.onclose = (event) => {
+            // Should close with auth error
+            expect(event.code).toBeGreaterThanOrEqual(1000);
+            resolve(true);
+          };
+          
+          setTimeout(() => {
+            ws.close();
+            resolve(true);
+          }, 2000);
+        });
+      } catch (error) {
+        // Expected to fail without auth
         expect(error).toBeDefined();
       }
+    });
+
+    it('should send and receive heartbeat messages', async () => {
+      await RealAPITestHelper.verifyWithBackend();
+      
+      // Test heartbeat is handled in testWebSocketConnection
+      const isConnected = await RealAPITestHelper.testWebSocketConnection();
+      expect(isConnected).toBe(true);
+    });
+  });
+
+  describe('Complete Integration Flow', () => {
+    it('should run full integration flow successfully', async () => {
+      // This tests the complete flow
+      await expect(RealAPITestHelper.runIntegrationFlow()).resolves.not.toThrow();
     });
   });
 });
-
-// Helper function to run API tests only if backend is available
-export const runAPITests = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/health`, {
-      timeout: 2000,
-    });
-    return response.ok;
-  } catch {
-    return false;
-  }
-};

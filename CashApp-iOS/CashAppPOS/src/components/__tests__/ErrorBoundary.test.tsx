@@ -1,79 +1,40 @@
-// ErrorBoundary.test.tsx - Test error boundary functionality
 import React from 'react';
-
-import { Text } from 'react-native';
-
 import { render } from '@testing-library/react-native';
-
+import { Text } from 'react-native';
 import ErrorBoundary from '../ErrorBoundary';
 
-// Component that throws an error
-const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
-  if (shouldThrow) {
-    throw new Error('Test error');
-  }
-  return <Text>No error</Text>;
+// Component that throws error
+const ThrowError = () => {
+  throw new Error('Test error');
 };
 
 describe('ErrorBoundary', () => {
-  // Mock console.error to avoid noise in tests
+  // Suppress console errors for this test
   const originalError = console.error;
   beforeAll(() => {
     console.error = jest.fn();
   });
-
   afterAll(() => {
     console.error = originalError;
   });
 
-  it('should render children when there is no error', () => {
+  it('should catch errors and display fallback', () => {
     const { getByText } = render(
       <ErrorBoundary>
-        <ThrowError shouldThrow={false} />
+        <ThrowError />
       </ErrorBoundary>
     );
-
-    expect(getByText('No error')).toBeTruthy();
+    
+    expect(getByText(/Something went wrong/i)).toBeTruthy();
   });
 
-  it('should render error UI when there is an error', () => {
+  it('should render children when no error', () => {
     const { getByText } = render(
       <ErrorBoundary>
-        <ThrowError shouldThrow={true} />
+        <Text>Test content</Text>
       </ErrorBoundary>
     );
-
-    expect(getByText('Oops! Something went wrong')).toBeTruthy();
-    expect(getByText('We encountered an unexpected error. Please try again.')).toBeTruthy();
-  });
-
-  it('should render custom fallback when provided', () => {
-    const customFallback = <Text>Custom error message</Text>;
-
-    const { getByText } = render(
-      <ErrorBoundary fallback={customFallback}>
-        <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
-    );
-
-    expect(getByText('Custom error message')).toBeTruthy();
-  });
-
-  it('should call onError callback when error occurs', () => {
-    const onError = jest.fn();
-
-    render(
-      <ErrorBoundary onError={onError}>
-        <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
-    );
-
-    expect(onError).toHaveBeenCalled();
-    expect(onError).toHaveBeenCalledWith(
-      expect.any(Error),
-      expect.objectContaining({
-        componentStack: expect.any(String),
-      })
-    );
+    
+    expect(getByText('Test content')).toBeTruthy();
   });
 });

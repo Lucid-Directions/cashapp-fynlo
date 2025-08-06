@@ -47,8 +47,8 @@ export class DataServiceTester {
     logger.info(`📈 Success Rate: ${((passed / (passed + failed)) * 100).toFixed(1)}%\n`);
 
     // Print detailed results
-    Object.entries(this.testResults).forEach(([test, passed]) => {
-      logger.info(`${passed ? '✅' : '❌'} ${test}`);
+    Object.entries(this.testResults).forEach(([test, isPassed]) => {
+      logger.info(`${isPassed ? '✅' : '❌'} ${test}`);
     });
 
     return { passed, failed, results: this.testResults };

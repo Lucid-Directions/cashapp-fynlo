@@ -84,6 +84,9 @@ class SQLInjectionWAFMiddleware(BaseHTTPMiddleware):
         "/openapi.json",
         "/health",
         "/metrics",
+        "/api/v1/auth/verify",  # Auth endpoints handle their own validation
+        "/api/v1/auth/register",
+        "/api/v1/auth/login",
     ]
 
     def __init__(self, app, enabled: bool = True, log_attacks: bool = True):
@@ -160,9 +163,25 @@ class SQLInjectionWAFMiddleware(BaseHTTPMiddleware):
             request = Request(request.scope, receive)
 
         # Check headers
+        # Skip headers that commonly contain base64 or special characters
+        SKIP_HEADERS = [
+            "authorization",
+            "cookie",
+            "x-api-key",
+            "x-auth-token",
+            "accept",
+            "accept-encoding",
+            "accept-language",
+            "user-agent",
+            "referer",
+            "sec-fetch-dest",
+            "sec-fetch-mode",
+            "sec-fetch-site",
+        ]
+        
         for header_name, header_value in request.headers.items():
-            # Skip binary headers
-            if header_name.lower() in ["authorization", "cookie"]:
+            # Skip headers that are known to be safe or contain encoded data
+            if header_name.lower() in SKIP_HEADERS:
                 continue
 
             header_check = self._check_string(header_value, f"Header '{header_name}'")
@@ -176,7 +195,8 @@ class SQLInjectionWAFMiddleware(BaseHTTPMiddleware):
 
             if self.log_attacks:
                 logger.warning(
-                    f"SQL Injection attempt blocked: {request.method} {request.url.path}\n"
+                    f"SQL Injection attempt blocked: "
+                    f"{request.method} {request.url.path}\n"
                     f"Client: {request.client.host if request.client else 'Unknown'}\n"
                     f"Details: {attack_details}\n"
                     f"Total attacks blocked: {self.attack_counter}"
@@ -207,6 +227,10 @@ class SQLInjectionWAFMiddleware(BaseHTTPMiddleware):
         if not text:
             return None
 
+        # Skip JWT tokens (base64.base64.base64 format)
+        if self._is_jwt_token(text):
+            return None
+
         # Decode URL encoding
         decoded_text = unquote(text)
 
@@ -226,6 +250,20 @@ class SQLInjectionWAFMiddleware(BaseHTTPMiddleware):
             return f"{context} contains null byte"
 
         return None
+
+    def _is_jwt_token(self, text: str) -> bool:
+        """Check if a string looks like a JWT token"""
+        # JWT tokens have 3 parts separated by dots, each part is base64
+        parts = text.split('.')
+        if len(parts) == 3:
+            # Check if each part looks like base64
+            import string
+            base64_chars = string.ascii_letters + string.digits + '+/='
+            for part in parts:
+                if not all(c in base64_chars for c in part):
+                    return False
+            return True
+        return False
 
     def _check_json_recursive(self, obj: Any, path: str = "") -> List[str]:
         """Recursively check JSON objects for SQL injection"""
