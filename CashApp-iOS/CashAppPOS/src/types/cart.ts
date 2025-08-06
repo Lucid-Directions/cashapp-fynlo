@@ -247,4 +247,21 @@ export interface CartMigrationResult {
     modified: number;
   };
 }
-EOF < /dev/null
+
+
+/**
+ * Enhanced order item fields for API compatibility
+ */
+export interface EnhancedOrderItemAPI extends EnhancedOrderItem {
+  isAvailable?: boolean; // Alternative naming for availability
+}
+
+/**
+ * Split bill validation result
+ */
+export interface SplitBillValidation {
+  isValid: boolean;
+  isFullySplit: boolean;
+  errors: string[];
+  warnings: string[];
+}

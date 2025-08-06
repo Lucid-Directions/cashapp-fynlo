@@ -272,4 +272,3 @@ const styles = StyleSheet.create({
 });
 
 export default WebSocketStatus;
-EOF < /dev/null

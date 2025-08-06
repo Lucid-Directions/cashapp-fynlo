@@ -1,0 +1,12 @@
+// At the top of the test file, after imports
+const { logger } = require('../../src/utils/logger');
+
+// In the test setup
+beforeEach(() => {
+  jest.clearAllMocks();
+  // Reset logger mocks
+  logger.error.mockClear();
+  logger.warn.mockClear();
+  logger.info.mockClear();
+  logger.debug.mockClear();
+});
