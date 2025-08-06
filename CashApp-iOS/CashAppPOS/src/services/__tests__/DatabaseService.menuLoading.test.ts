@@ -63,7 +63,7 @@ describe('DatabaseService - Menu Loading Tests', () => {
       expect(items).toHaveLength(3);
       expect(items[0].price).toBe(10.99);
       expect(typeof items[1].price).toBe('number'); // Price should always be converted to number
-      expect(items[1].price).toBe(25.50); // Verify the actual value
+      expect(items[1].price).toBe(4.99); // String '4.99' converts to number 4.99
       expect(items[2].price).toBe(2.5);
     });
 
