@@ -5,6 +5,7 @@ import API_CONFIG from '../config/api';
 import { CHUCHO_MENU_ITEMS, CHUCHO_CATEGORIES } from '../data/chuchoMenu';
 // TODO: Unused import - import { supabase } from '../lib/supabase';
 import errorLogger from '../utils/ErrorLogger';
+import logger from '../utils/logger';
 import tokenManager from '../utils/tokenManager';
 
 import BackendCompatibilityService from './BackendCompatibilityService';
@@ -481,21 +482,38 @@ class DatabaseService {
         method: 'GET',
       });
 
-      if (response.data) {
+      // Enhanced response validation and parsing
+      logger.info('📦 API Response structure:', { 
+        hasData: !!response.data,
+        hasSuccess: !!response.success,
+        dataType: Array.isArray(response.data) ? 'array' : typeof response.data,
+        dataLength: Array.isArray(response.data) ? response.data.length : 0
+      });
+
+      if (response.success && response.data && Array.isArray(response.data)) {
+        // Fix type conversion: Backend sends price as string, we need number
+        const menuItems = response.data.map((item: any) => ({
+          ...item,
+          price: typeof item.price === 'string' ? parseFloat(item.price) : item.price,
+          id: String(item.id), // Ensure ID is string
+          available: item.available !== undefined ? item.available : true
+        }));
+
         // Apply compatibility transformation if needed
-        if (BackendCompatibilityService.needsMenuTransformation(response.data)) {
+        if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
           logger.info('🔄 Applying menu compatibility transformation in DatabaseService');
-          const transformedData = BackendCompatibilityService.transformMenuItems(response.data);
+          const transformedData = BackendCompatibilityService.transformMenuItems(menuItems);
           // Cache the transformed data with current timestamp
           this.menuCache.items = transformedData;
           this.menuCache.itemsTimestamp = Date.now();
           return transformedData;
         }
-        // Cache the data with current timestamp
-        this.menuCache.items = response.data;
+        
+        // Cache the properly typed items
+        this.menuCache.items = menuItems;
         this.menuCache.itemsTimestamp = Date.now();
-        logger.info(`✅ Menu items loaded and cached (${response.data.length} items)`);
-        return response.data;
+        logger.info(`✅ Menu items loaded and cached (${menuItems.length} items)`);
+        return menuItems;
       }
 
       logger.warn('🚨 Production Mode: API returned no menu data');
