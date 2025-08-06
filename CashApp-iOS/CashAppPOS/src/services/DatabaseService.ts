@@ -5,6 +5,7 @@ import API_CONFIG from '../config/api';
 import { CHUCHO_MENU_ITEMS, CHUCHO_CATEGORIES } from '../data/chuchoMenu';
 // TODO: Unused import - import { supabase } from '../lib/supabase';
 import errorLogger from '../utils/ErrorLogger';
+import logger from '../utils/logger';
 import tokenManager from '../utils/tokenManager';
 
 import BackendCompatibilityService from './BackendCompatibilityService';
@@ -30,6 +31,22 @@ export interface Category {
   id: number;
   name: string;
   active: boolean;
+}
+
+// Interface for menu items from API
+export interface MenuItem {
+  id: string | number;
+  name: string;
+  price: string | number;
+  category?: string;
+  category_id?: string | number;
+  emoji?: string;
+  icon?: string;
+  image?: string;
+  available?: boolean;
+  description?: string;
+  dietary_info?: string[];
+  modifiers?: any[];
 }
 
 export interface Order {
@@ -466,7 +483,7 @@ class DatabaseService {
   }
 
   // Menu operations - Get menu items formatted for POS screen with caching
-  async getMenuItems(): Promise<any[]> {
+  async getMenuItems(): Promise<MenuItem[]> {
     // Check cache first
     const now = Date.now();
     if (this.menuCache.items && now - this.menuCache.itemsTimestamp < this.CACHE_DURATION) {
@@ -481,21 +498,49 @@ class DatabaseService {
         method: 'GET',
       });
 
-      if (response.data) {
+      // Enhanced response validation and parsing
+      logger.info('📦 API Response structure:', { 
+        hasData: !!response.data,
+        hasSuccess: !!response.success,
+        dataType: Array.isArray(response.data) ? 'array' : typeof response.data,
+        dataLength: Array.isArray(response.data) ? response.data.length : 0
+      });
+
+      if (response.success && response.data && Array.isArray(response.data)) {
+        // Fix type conversion: Backend sends price as string, we need number
+        const menuItems = response.data.map((item: MenuItem) => {
+          // Safely convert price with NaN check
+          let price = 0;
+          if (typeof item.price === 'string') {
+            const parsed = parseFloat(item.price);
+            price = isNaN(parsed) ? 0 : parsed;
+          } else if (typeof item.price === 'number') {
+            price = item.price;
+          }
+          
+          return {
+            ...item,
+            price,
+            id: String(item.id), // Ensure ID is string
+            available: item.available !== undefined ? item.available : true
+          };
+        });
+
         // Apply compatibility transformation if needed
-        if (BackendCompatibilityService.needsMenuTransformation(response.data)) {
+        if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
           logger.info('🔄 Applying menu compatibility transformation in DatabaseService');
-          const transformedData = BackendCompatibilityService.transformMenuItems(response.data);
+          const transformedData = BackendCompatibilityService.transformMenuItems(menuItems);
           // Cache the transformed data with current timestamp
           this.menuCache.items = transformedData;
           this.menuCache.itemsTimestamp = Date.now();
           return transformedData;
         }
-        // Cache the data with current timestamp
-        this.menuCache.items = response.data;
+        
+        // Cache the properly typed items
+        this.menuCache.items = menuItems;
         this.menuCache.itemsTimestamp = Date.now();
-        logger.info(`✅ Menu items loaded and cached (${response.data.length} items)`);
-        return response.data;
+        logger.info(`✅ Menu items loaded and cached (${menuItems.length} items)`);
+        return menuItems;
       }
 
       logger.warn('🚨 Production Mode: API returned no menu data');
