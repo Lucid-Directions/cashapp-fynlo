@@ -447,6 +447,18 @@ if (typeof global.theme === 'undefined') {
 }
 
 // ===========================================
+// LOGGER MOCK
+// ===========================================
+jest.mock('../src/utils/logger', () => ({
+  logger: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
+// ===========================================
 // HELPER FUNCTIONS FOR ASYNC TESTS
 // ===========================================
 // Helper to properly handle async operations in tests

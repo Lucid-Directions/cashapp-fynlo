@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { errorHandler, ErrorType, ErrorSeverity } from '../../src/utils/errorHandler';
+import { logger } from '../../src/utils/logger';
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage');
@@ -9,28 +10,16 @@ jest.mock('react-native/Libraries/Alert/Alert', () => ({
   alert: jest.fn(),
 }));
 
-// Mock logger with proper implementation
-const mockLogger = {
-  error: jest.fn(),
-  warn: jest.fn(),
-  info: jest.fn(),
-  debug: jest.fn(),
-};
-
-jest.mock('../../src/utils/logger', () => ({
-  logger: mockLogger,
-}));
-
 describe('ErrorHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
     (AsyncStorage.setItem as jest.Mock).mockResolvedValue(undefined);
     // Clear logger mocks
-    mockLogger.error.mockClear();
-    mockLogger.warn.mockClear();
-    mockLogger.info.mockClear();
-    mockLogger.debug.mockClear();
+    (logger.error as jest.Mock).mockClear();
+    (logger.warn as jest.Mock).mockClear();
+    (logger.info as jest.Mock).mockClear();
+    (logger.debug as jest.Mock).mockClear();
   });
 
   describe('handleError', () => {
@@ -41,7 +30,7 @@ describe('ErrorHandler', () => {
         ErrorSeverity.MEDIUM
       );
 
-      expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('[SYSTEM] Test error'),
         expect.any(Object)
       );
@@ -64,7 +53,7 @@ describe('ErrorHandler', () => {
         ErrorSeverity.CRITICAL
       );
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('[PAYMENT] Critical error'),
         expect.any(Object)
       );
@@ -85,7 +74,7 @@ describe('ErrorHandler', () => {
 
       await errorHandler.handleNetworkError(unauthorizedError);
 
-      expect(mockLogger.error).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalled();
     });
   });
 
@@ -98,7 +87,7 @@ describe('ErrorHandler', () => {
         'user_form'
       );
 
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('[VALIDATION]'),
         expect.any(Object)
       );
@@ -114,7 +103,7 @@ describe('ErrorHandler', () => {
         cardNumber: '1234****',
       });
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('[PAYMENT]'),
         expect.any(Object)
       );
@@ -210,7 +199,7 @@ describe('ErrorHandler', () => {
       );
 
       // Should trigger recovery attempt - logger.info will be called
-      expect(mockLogger.info).toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalled();
     });
   });
 

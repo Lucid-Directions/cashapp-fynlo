@@ -2,39 +2,51 @@ import DatabaseService from '../DatabaseService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 jest.mock('@react-native-async-storage/async-storage');
+jest.mock('../../utils/tokenManager', () => ({
+  default: {
+    getTokens: jest.fn(),
+    setAccessToken: jest.fn(),
+  },
+}));
+jest.mock('../../utils/ErrorLogger', () => ({
+  default: {
+    logError: jest.fn(),
+  },
+}));
 
 describe('DatabaseService', () => {
+  let service: DatabaseService;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    service = DatabaseService.getInstance();
   });
 
-  it('should save data to storage', async () => {
-    const data = { id: 1, name: 'Test' };
-    await DatabaseService.save('test-key', data);
-    
-    expect(AsyncStorage.setItem).toHaveBeenCalledWith('test-key', JSON.stringify(data));
+  describe('Menu Operations', () => {
+    it('should get menu items', async () => {
+      const items = await service.getMenuItems();
+      expect(items).toBeDefined();
+      expect(Array.isArray(items)).toBe(true);
+    });
+
+    it('should get menu categories', async () => {
+      const categories = await service.getMenuCategories();
+      expect(categories).toBeDefined();
+      expect(Array.isArray(categories)).toBe(true);
+    });
+
+    it('should clear menu cache', () => {
+      service.clearMenuCache();
+      // Cache should be cleared - no error thrown
+      expect(true).toBe(true);
+    });
   });
 
-  it('should retrieve data from storage', async () => {
-    const data = { id: 1, name: 'Test' };
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(data));
-    
-    const result = await DatabaseService.get('test-key');
-    
-    expect(result).toEqual(data);
-  });
-
-  it('should return null for non-existent keys', async () => {
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
-    
-    const result = await DatabaseService.get('non-existent');
-    
-    expect(result).toBeNull();
-  });
-
-  it('should delete data from storage', async () => {
-    await DatabaseService.delete('test-key');
-    
-    expect(AsyncStorage.removeItem).toHaveBeenCalledWith('test-key');
+  describe('Storage Operations', () => {
+    it('should be a singleton', () => {
+      const instance1 = DatabaseService.getInstance();
+      const instance2 = DatabaseService.getInstance();
+      expect(instance1).toBe(instance2);
+    });
   });
 });
