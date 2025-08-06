@@ -163,6 +163,18 @@ jest.mock('../src/lib/supabase', () => ({
 }));
 
 // ===========================================
+// LOGGER MOCK
+// ===========================================
+jest.mock('../src/utils/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
+// ===========================================
 // REACT NATIVE MOCKS
 // ===========================================
 // Mock react-native-safe-area-context

@@ -2,7 +2,7 @@ export class WebSocketService {
   private static instance: WebSocketService;
   
   static getInstance() {
-    if (\!WebSocketService.instance) {
+    if (!WebSocketService.instance) {
       WebSocketService.instance = new WebSocketService();
     }
     return WebSocketService.instance;

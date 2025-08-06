@@ -235,10 +235,10 @@ export const createTestUser = (overrides = {}) => ({
 // Async test helpers
 export const waitForCondition = async (condition: () => boolean, timeout = 5000) => {
   const start = Date.now();
-  while (\!condition() && Date.now() - start < timeout) {
+  while (!condition() && Date.now() - start < timeout) {
     await new Promise(resolve => setTimeout(resolve, 10));
   }
-  if (\!condition()) {
+  if (!condition()) {
     throw new Error(`Condition not met within ${timeout}ms`);
   }
 };
