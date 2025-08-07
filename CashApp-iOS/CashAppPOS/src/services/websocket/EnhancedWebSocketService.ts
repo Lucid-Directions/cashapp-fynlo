@@ -117,18 +117,15 @@ export class EnhancedWebSocketService {
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
 
       // Include token and user_id as query parameters for backend authentication
-      // Use URLSearchParams for proper encoding (converts undefined/null to string, handles special chars)
+      // Use URLSearchParams for proper encoding
       const params = new URLSearchParams();
       params.append('token', token);
       
-      // Only add user_id if it exists (backend expects Optional[str])
-      if (user.id) {
-        params.append('user_id', user.id);
+      // Always add user_id if it's defined (including 0, which is a valid ID)
+      // Only skip if undefined or null
+      if (user.id !== undefined && user.id !== null) {
+        params.append('user_id', String(user.id));
       }
-      
-      // Debug: Verify URLSearchParams is working
-      logger.info(`🔗 URLSearchParams toString: ${params.toString().substring(0, 50)}...`);
-      logger.info(`🔗 Has token param: ${params.has('token')}, Has user_id param: ${params.has('user_id')}`);
       
       const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${params.toString()}`;
       
