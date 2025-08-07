@@ -7,6 +7,7 @@ import { WebSocketEvent } from '../../types/websocket';
 import type { WebSocketMessage, WebSocketConfig } from '../../types/websocket';
 import logger from '../../utils/logger';
 import tokenManager from '../../utils/tokenManager';
+import WebSocketDebugService from './WebSocketDebugService';
 
 type ConnectionState =
   | 'DISCONNECTED'
@@ -103,37 +104,90 @@ export class EnhancedWebSocketService {
       }
 
       const user = JSON.parse(userInfo);
+      logger.info('🔍 User info loaded:', {
+        hasUser: !!user,
+        userId: user?.id,
+        userIdType: typeof user?.id,
+        hasRestaurant: !!user?.restaurant_id,
+      });
+      
       // Allow users without restaurants to connect (for onboarding)
       const restaurantId = user.restaurant_id || 'onboarding';
 
       // Get authentication token (use override if provided for reauthentication)
+      logger.info('🔍 Getting token...', { hasOverride: !!overrideToken });
       const token = overrideToken || await tokenManager.getTokenWithRefresh();
+      
+      logger.info('🔍 Token retrieved:', {
+        hasToken: !!token,
+        tokenLength: token?.length,
+        tokenPreview: token ? `${token.substring(0, 20)}...` : 'NONE',
+      });
+      
       if (!token) {
         throw new Error('No authentication token available');
       }
+
+      // Debug: Log token availability
+      WebSocketDebugService.logURLConstruction('Token Retrieved', {
+        token,
+        userId: user.id,
+        restaurantId,
+      });
 
       // Build WebSocket URL with authentication parameters
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
 
-      // Include token and user_id as query parameters for backend authentication
-      // Use URLSearchParams for proper encoding
-      const params = new URLSearchParams();
-      params.append('token', token);
+      // Test if URLSearchParams is available and working
+      const urlSearchParamsWorks = WebSocketDebugService.testURLSearchParams();
       
-      // Always add user_id if it's defined (including 0, which is a valid ID)
-      // Only skip if undefined or null
-      if (user.id !== undefined && user.id !== null) {
-        params.append('user_id', String(user.id));
+      let queryString: string;
+      
+      if (urlSearchParamsWorks) {
+        // Use URLSearchParams if available
+        const params = new URLSearchParams();
+        params.append('token', token);
+        
+        // Always add user_id if it's defined (including 0, which is a valid ID)
+        if (user.id !== undefined && user.id !== null) {
+          params.append('user_id', String(user.id));
+        }
+        
+        queryString = params.toString();
+        
+        WebSocketDebugService.logURLConstruction('URLSearchParams Used', {
+          params,
+          userId: user.id,
+        });
+      } else {
+        // Fallback: Build query string manually
+        logger.warn('⚠️ URLSearchParams not available, using manual encoding');
+        queryString = WebSocketDebugService.buildQueryStringManually(token, user.id);
       }
       
-      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${params.toString()}`;
+      // Construct the final URL
+      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${queryString}`;
+      
+      // Debug: Log the complete URL before masking
+      WebSocketDebugService.logURLConstruction('Final URL Built', {
+        wsUrl,
+        userId: user.id,
+      });
       
       // Mask the token in logs for security
       const maskedUrl = wsUrl.replace(/token=[^&]+/, 'token=TOKEN_HIDDEN');
       logger.info('🔌 Connecting to WebSocket:', maskedUrl);
 
+      // Create WebSocket and verify URL is preserved
+      logger.info('🔍 Creating WebSocket with URL:', maskedUrl);
       this.ws = new WebSocket(wsUrl);
+      
+      // Check if the WebSocket has a url property (some implementations expose it)
+      if ('url' in this.ws) {
+        logger.info('🔍 WebSocket.url property:', (this.ws as any).url);
+      }
+      
       this.setupEventHandlers();
 
       // Connection timeout
