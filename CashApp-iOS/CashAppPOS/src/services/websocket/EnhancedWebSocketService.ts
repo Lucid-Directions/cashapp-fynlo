@@ -104,7 +104,11 @@ export class EnhancedWebSocketService {
         throw new Error('No authentication token available');
       }
 
-      logger.info(`🔑 Token available: ${token ? 'YES' : 'NO'}, User ID: ${user.id || 'MISSING'}`);
+      // Debug: Check what we actually have
+      logger.info(`🔑 Token exists: ${!!token}`);
+      logger.info(`🔑 Token length: ${token ? token.length : 0}`);
+      logger.info(`🔑 User ID: ${user.id || 'MISSING'}`);
+      logger.info(`🔑 User object keys: ${Object.keys(user).join(', ')}`);
 
       // Build WebSocket URL with authentication parameters
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
@@ -113,14 +117,22 @@ export class EnhancedWebSocketService {
       // Include token and user_id as query parameters for backend authentication
       // React Native might not handle URLSearchParams correctly, so build manually
       const encodedToken = encodeURIComponent(token);
-      const encodedUserId = encodeURIComponent(user.id);
+      const encodedUserId = encodeURIComponent(user.id || '');
+      
+      // Debug: Log the actual values
+      logger.info(`🔗 Encoded token first 20 chars: ${encodedToken.substring(0, 20)}...`);
+      logger.info(`🔗 Encoded user ID: ${encodedUserId}`);
+      
       const queryString = `token=${encodedToken}&user_id=${encodedUserId}`;
       
       const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${queryString}`;
 
-      // Log the actual URL for debugging (will remove after fixing)
-      logger.info('🔗 Query string length:', queryString.length);
-      logger.info('🔗 Full URL length:', wsUrl.length);
+      // Debug: Check the URL construction
+      logger.info(`🔗 Base URL: ${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}`);
+      logger.info(`🔗 Query string length: ${queryString.length}`);
+      logger.info(`🔗 Full URL length: ${wsUrl.length}`);
+      logger.info(`🔗 URL includes '?': ${wsUrl.includes('?')}`);
+      logger.info(`🔗 URL includes 'token=': ${wsUrl.includes('token=')}`);
       
       // Properly mask the token in logs (handle URL encoding)
       const maskedUrl = wsUrl.replace(/token=[^&]+/, 'token=TOKEN_HIDDEN');
