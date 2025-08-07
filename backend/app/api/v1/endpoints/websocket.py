@@ -737,33 +737,123 @@ async def websocket_kitchen_endpoint(
 async def websocket_pos_endpoint(
     websocket: WebSocket,
     restaurant_id: str = Path(..., description="Restaurant ID"),
-    user_id: Optional[str] = Query(None, description="User ID"),
+    user_id: Optional[str] = Query(None, description="User ID (deprecated - use message auth)"),
     db: Session = Depends(get_db),
 ):
     """
-    POS-specific WebSocket endpoint
+    POS-specific WebSocket endpoint with message-based authentication
     Handles order updates, payment notifications, and inventory alerts
+    
+    Authentication flow:
+    1. Accept WebSocket connection
+    2. Wait for authentication message (or use query params for backward compat)
+    3. Validate token with Supabase
+    4. Establish authenticated connection
     """
     connection_id = None
     verified_user = None
+    authenticated = False
 
     # Ensure cleanup task is running
     await get_or_create_cleanup_task()
 
     try:
-        # Perform security checks first
-        if not await perform_security_checks(websocket, user_id):
-            return
+        # Accept the connection first to allow message exchange
+        await websocket.accept()
+        logger.info(f"WebSocket connection accepted for restaurant: {restaurant_id}")
 
-        # Get token from query parameters
+        # Try legacy authentication via query params first (backward compatibility)
         token = websocket.query_params.get("token")
-
-        # Verify access with token validation
-        has_access, verified_user = await verify_websocket_access(
-            restaurant_id, user_id, token, "pos", db
-        )
-        if not has_access:
-            await websocket.close(code=4003, reason="Access denied")
+        
+        if token and user_id:
+            # Legacy path: authenticate via query params
+            logger.info("Attempting query param authentication (legacy)")
+            has_access, verified_user = await verify_websocket_access(
+                restaurant_id, user_id, token, "pos", db
+            )
+            if has_access:
+                authenticated = True
+                logger.info(f"Query param authentication successful for user: {user_id}")
+        
+        if not authenticated:
+            # New path: wait for authentication message
+            logger.info("Waiting for authentication message...")
+            try:
+                auth_timeout = 10  # seconds
+                auth_message_text = await asyncio.wait_for(
+                    websocket.receive_text(), 
+                    timeout=auth_timeout
+                )
+                
+                auth_message = json.loads(auth_message_text)
+                logger.info(f"Received message type: {auth_message.get('type')}")
+                
+                # Check if this is an authentication message
+                if auth_message.get("type") in ["authenticate", "AUTHENTICATE"]:
+                    auth_data = auth_message.get("data", {})
+                    token = auth_data.get("token")
+                    user_id = auth_data.get("user_id")
+                    
+                    if token and user_id:
+                        logger.info(f"Authenticating user {user_id} via message")
+                        has_access, verified_user = await verify_websocket_access(
+                            restaurant_id, user_id, token, "pos", db
+                        )
+                        
+                        if has_access:
+                            authenticated = True
+                            # Send authentication success
+                            await websocket.send_text(json.dumps({
+                                "type": "authenticated",
+                                "data": {
+                                    "message": "Authentication successful",
+                                    "user_id": str(verified_user.id) if verified_user else user_id
+                                }
+                            }))
+                            logger.info(f"Message authentication successful for user: {user_id}")
+                        else:
+                            # Send authentication error
+                            await websocket.send_text(json.dumps({
+                                "type": "auth_error",
+                                "data": {"message": "Invalid credentials"}
+                            }))
+                            await websocket.close(code=4003, reason="Authentication failed")
+                            logger.warning(f"Authentication failed for user: {user_id}")
+                            return
+                    else:
+                        await websocket.send_text(json.dumps({
+                            "type": "auth_error",
+                            "data": {"message": "Missing token or user_id"}
+                        }))
+                        await websocket.close(code=4003, reason="Missing credentials")
+                        logger.warning("Authentication message missing token or user_id")
+                        return
+                else:
+                    # Not an auth message, close connection
+                    await websocket.close(code=4002, reason="Expected authentication")
+                    logger.warning(f"Expected authentication but got: {auth_message.get('type')}")
+                    return
+                    
+            except asyncio.TimeoutError:
+                await websocket.close(code=4002, reason="Authentication timeout")
+                logger.warning("Authentication timeout - no message received")
+                return
+            except json.JSONDecodeError as e:
+                await websocket.close(code=4002, reason="Invalid message format")
+                logger.error(f"Invalid JSON in authentication message: {e}")
+                return
+            except Exception as e:
+                await websocket.close(code=4002, reason="Authentication error")
+                logger.error(f"Unexpected error during authentication: {e}")
+                return
+        
+        if not authenticated:
+            await websocket.close(code=4003, reason="Not authenticated")
+            logger.warning("Connection closed - not authenticated")
+            return
+        
+        # Perform security checks after authentication
+        if not await perform_security_checks(websocket, user_id):
             return
 
         # Check connection limits for authenticated users
