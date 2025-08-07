@@ -276,18 +276,20 @@ export class SecureOfflineQueueService {
   private unsubscribeNetInfo?: () => void;
   private unsubscribeConfig?: () => void;
   private encryptionKeyRotationTimer?: NodeJS.Timeout;
-  private requestCounts = {
-    minute: 0,
-    hour: 0,
-    minuteReset: Date.now(),
-    hourReset: Date.now(),
-  };
+  // CRITICAL: Per-restaurant rate limiting for multi-tenant isolation
+  private requestCounts = new Map<string, {
+    minute: number;
+    hour: number;
+    minuteReset: number;
+    hourReset: number;
+  }>();
   private encryptionKey?: string;
 
   // Enhanced security: Restaurant access cache
   private restaurantAccessCache = new Map<string, { valid: boolean; expiry: number }>();
   private readonly ACCESS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
   private accessCacheCleanupTimer?: NodeJS.Timeout;
+  private rateLimitCleanupTimer?: NodeJS.Timeout;
   // Storage keys
   private readonly STORAGE_KEY_PREFIX = 'secure_offline_queue_v3';
   private readonly ENCRYPTION_KEY_SERVICE = 'FynloOfflineQueueEncryption';
@@ -347,6 +349,7 @@ export class SecureOfflineQueueService {
       }
       this.startCleanupTimer();
       this.startAccessCacheCleanup();
+      this.startRateLimitCleanup();
       logger.info('SecureOfflineQueueService initialized', {
         queueSize: this.queue.size,
         isOnline: this.isOnline,
@@ -382,6 +385,7 @@ export class SecureOfflineQueueService {
       this.stopAccessCacheCleanup();
       this.startCleanupTimer();
       this.startAccessCacheCleanup();
+      this.startRateLimitCleanup();
     }
     // Update encryption if changed
     if (oldConfig.enableEncryption !== newConfig.enableEncryption) {
@@ -438,56 +442,75 @@ export class SecureOfflineQueueService {
   }
 
   /**
-   * Check rate limiting
+   * CRITICAL: Check rate limiting PER RESTAURANT for multi-tenant isolation
    */
-  private checkRateLimit(): void {
+  private checkRateLimit(restaurantId: string): void {
     if (!this.config.rateLimitEnabled) return;
 
+    // Get or create restaurant-specific counters
+    if (!this.requestCounts.has(restaurantId)) {
+      this.requestCounts.set(restaurantId, {
+        minute: 0,
+        hour: 0,
+        minuteReset: Date.now(),
+        hourReset: Date.now(),
+      });
+    }
+
+    const counts = this.requestCounts.get(restaurantId)!;
     const now = Date.now();
     
-    // Reset counters if needed
-    if (now - this.requestCounts.minuteReset > 60000) {
-      this.requestCounts.minute = 0;
-      this.requestCounts.minuteReset = now;
+    // Reset counters if time windows expired
+    if (now - counts.minuteReset > 60000) {
+      counts.minute = 0;
+      counts.minuteReset = now;
     }
     
-    if (now - this.requestCounts.hourReset > 3600000) {
-      this.requestCounts.hour = 0;
-      this.requestCounts.hourReset = now;
+    if (now - counts.hourReset > 3600000) {
+      counts.hour = 0;
+      counts.hourReset = now;
     }
 
-    // Check limits
-    if (offlineConfig.isRateLimited(this.requestCounts.minute, 'minute')) {
+    // Check minute limit for THIS restaurant
+    if (offlineConfig.isRateLimited(counts.minute, 'minute')) {
       // Log security event before throwing
       this.logAuditEvent('RATE_LIMIT_EXCEEDED', {
+        restaurantId, // Include restaurant in audit log
         type: 'minute',
         limit: this.config.maxRequestsPerMinute,
-        current: this.requestCounts.minute,
+        current: counts.minute,
         timestamp: now,
       }).catch(() => {}); // Don't block on audit logging
-            throw FynloException.rateLimitExceeded('Minute rate limit exceeded', {
+      
+      throw FynloException.rateLimitExceeded(`Rate limit exceeded for restaurant ${restaurantId}`, {
+        restaurantId,
         limit: this.config.maxRequestsPerMinute,
-        current: this.requestCounts.minute,
+        current: counts.minute,
+        resetIn: Math.ceil((counts.minuteReset + 60000 - now) / 1000),
       });
     }
 
-    if (offlineConfig.isRateLimited(this.requestCounts.hour, 'hour')) {
+    // Check hour limit for THIS restaurant
+    if (offlineConfig.isRateLimited(counts.hour, 'hour')) {
       // Log security event before throwing
       this.logAuditEvent('RATE_LIMIT_EXCEEDED', {
+        restaurantId, // Include restaurant in audit log
         type: 'hour',
         limit: this.config.maxRequestsPerHour,
-        current: this.requestCounts.hour,
+        current: counts.hour,
         timestamp: now,
       }).catch(() => {}); // Don't block on audit logging
-            throw FynloException.rateLimitExceeded('Hour rate limit exceeded', {
+            throw FynloException.rateLimitExceeded(`Hour rate limit exceeded for restaurant ${restaurantId}`, {
+        restaurantId,
         limit: this.config.maxRequestsPerHour,
-        current: this.requestCounts.hour,
+        current: counts.hour,
+        resetIn: Math.ceil((counts.hourReset + 3600000 - now) / 1000),
       });
     }
 
-    // Increment counters
-    this.requestCounts.minute++;
-    this.requestCounts.hour++;
+    // Increment counters for this restaurant
+    counts.minute++;
+    counts.hour++;
   }
 
 
@@ -602,8 +625,9 @@ export class SecureOfflineQueueService {
     try {
       // CRITICAL: Validate mandatory fields first
       this.validateAbsoluteMandatoryFields(options);
-      // Check rate limiting
-      this.checkRateLimit();
+      
+      // CRITICAL: Check rate limiting PER RESTAURANT
+      this.checkRateLimit(options.restaurantId);
 
       // SECURITY: Validate all inputs
       const validatedEndpoint = SecurityValidator.validateEndpoint(endpoint);
@@ -1178,6 +1202,30 @@ export class SecureOfflineQueueService {
       this.accessCacheCleanupTimer = undefined;
     }
   }
+
+  /**
+   * Clean up old rate limit entries to prevent memory leaks
+   */
+  private startRateLimitCleanup(): void {
+    this.rateLimitCleanupTimer = setInterval(() => {
+      const now = Date.now();
+      const staleThreshold = 3600000; // 1 hour
+      
+      for (const [restaurantId, counts] of this.requestCounts.entries()) {
+        // Remove entries that haven't been used in over an hour
+        if (now - counts.hourReset > staleThreshold && counts.hour === 0) {
+          this.requestCounts.delete(restaurantId);
+        }
+      }
+    }, 3600000); // Run hourly
+  }
+
+  private stopRateLimitCleanup(): void {
+    if (this.rateLimitCleanupTimer) {
+      clearInterval(this.rateLimitCleanupTimer);
+      this.rateLimitCleanupTimer = undefined;
+    }
+  }
   /**
    * Public methods
    */
@@ -1215,6 +1263,7 @@ export class SecureOfflineQueueService {
     this.stopSyncTimer();
     this.stopCleanupTimer();
     this.stopAccessCacheCleanup();
+    this.stopRateLimitCleanup();
     // Clear retry timeouts
     for (const timeout of this.retryTimeouts) {
       clearTimeout(timeout);
