@@ -116,7 +116,9 @@ export class EnhancedWebSocketService {
 
       const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${params.toString()}`;
 
-      logger.info('🔌 Connecting to WebSocket:', wsUrl.replace(token, 'TOKEN_HIDDEN')); // Hide token in logs
+      // Properly mask the token in logs (handle URL encoding)
+      const maskedUrl = wsUrl.replace(/token=[^&]+/, 'token=TOKEN_HIDDEN');
+      logger.info('🔌 Connecting to WebSocket:', maskedUrl);
 
       this.ws = new WebSocket(wsUrl);
       this.setupEventHandlers();
@@ -134,7 +136,20 @@ export class EnhancedWebSocketService {
         clearTimeout(connectionTimeout);
         logger.info('✅ WebSocket connected successfully');
         // Authentication is handled via query parameters, no need for separate auth message
-        this.handleAuthenticated();
+        // Skip AUTHENTICATING state and go directly to CONNECTED
+        this.setState('CONNECTED');
+        
+        // Reset exponential backoff on successful connection
+        this.exponentialBackoff.reset();
+
+        // Start heartbeat
+        this.startHeartbeat();
+
+        // Process queued messages
+        this.processMessageQueue();
+
+        // Emit connected event
+        this.emit(WebSocketEvent.CONNECT, { timestamp: Date.now() });
       };
     } catch (error) {
       logger.error('❌ WebSocket connection failed:', error);
@@ -200,22 +215,6 @@ export class EnhancedWebSocketService {
     }
   }
 
-  private handleAuthenticated(): void {
-    logger.info('✅ WebSocket authenticated successfully');
-    this.setState('CONNECTED');
-
-    // Reset exponential backoff on successful connection
-    this.exponentialBackoff.reset();
-
-    // Start heartbeat
-    this.startHeartbeat();
-
-    // Process queued messages
-    this.processMessageQueue();
-
-    // Emit connected event
-    this.emit(WebSocketEvent.CONNECT, { timestamp: Date.now() });
-  }
 
   private handleAuthError(message: WebSocketMessage): void {
     logger.error('❌ Authentication error:', message.data);
@@ -272,17 +271,35 @@ export class EnhancedWebSocketService {
     }
   }
 
-  private async reauthenticate(_newToken: string): Promise<void> {
+  private async reauthenticate(newToken: string): Promise<void> {
     // Since authentication is via query parameters, we need to reconnect with new token
     logger.info('🔄 Token refreshed, reconnecting WebSocket with new token...');
 
-    // Close current connection
+    // Store the new token for the next connection
+    // We'll override tokenManager's getTokenWithRefresh temporarily
+    const originalGetToken = tokenManager.getTokenWithRefresh;
+    tokenManager.getTokenWithRefresh = async () => newToken;
+
+    // Close current connection and wait for it to complete
     if (this.ws) {
-      this.ws.close(1000, 'Token refresh - reconnecting');
+      await new Promise<void>((resolve) => {
+        const onClose = () => {
+          this.ws?.removeEventListener('close', onClose);
+          resolve();
+        };
+        this.ws.addEventListener('close', onClose);
+        this.ws.close(1000, 'Token refresh - reconnecting');
+        
+        // Timeout after 2 seconds if close doesn't fire
+        setTimeout(resolve, 2000);
+      });
     }
 
-    // Reconnect with new token (will be picked up by tokenManager.getTokenWithRefresh())
+    // Reconnect with the new token
     await this.connect();
+    
+    // Restore original token getter
+    tokenManager.getTokenWithRefresh = originalGetToken;
   }
 
   private startHeartbeat(): void {
@@ -492,10 +509,10 @@ export class EnhancedWebSocketService {
 
   // Utilities
   private setState(newState: ConnectionState): void {
-    // Validate state transitions
+    // Validate state transitions (updated to allow CONNECTING -> CONNECTED)
     const validTransitions: Record<ConnectionState, ConnectionState[]> = {
       DISCONNECTED: ['CONNECTING', 'RECONNECTING'],
-      CONNECTING: ['AUTHENTICATING', 'DISCONNECTED', 'RECONNECTING'],
+      CONNECTING: ['AUTHENTICATING', 'CONNECTED', 'DISCONNECTED', 'RECONNECTING'],
       AUTHENTICATING: ['CONNECTED', 'DISCONNECTED', 'RECONNECTING'],
       CONNECTED: ['DISCONNECTED', 'RECONNECTING'],
       RECONNECTING: ['CONNECTING', 'DISCONNECTED'],
