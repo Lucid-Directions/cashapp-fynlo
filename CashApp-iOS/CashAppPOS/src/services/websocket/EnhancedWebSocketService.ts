@@ -286,26 +286,14 @@ export class EnhancedWebSocketService {
             clearTimeout(timeoutId);
             timeoutId = null;
           }
-          // React Native WebSocket uses property handlers, not addEventListener
-          // Clear our temporary handler
-          if (wsRef) {
-            wsRef.onclose = null;
-          }
           resolve();
         };
         
-        // Store previous onclose handler to restore later
-        const previousOnClose = wsRef?.onclose;
-        
-        // React Native WebSocket: Use property handler instead of addEventListener
+        // React Native WebSocket: Set a simple onclose handler that only calls cleanup
+        // Don't call any previous handlers to avoid triggering handleDisconnect
         if (wsRef) {
-          wsRef.onclose = (event) => {
+          wsRef.onclose = () => {
             cleanup();
-            // Call previous handler if it existed (but avoid our own handleDisconnect)
-            // We'll handle disconnection logic after the promise resolves
-            if (previousOnClose && previousOnClose !== this.ws?.onclose) {
-              previousOnClose(event);
-            }
           };
         }
         
@@ -327,8 +315,9 @@ export class EnhancedWebSocketService {
       });
     }
 
-    // Clear the reference to prevent any issues
+    // Clear the reference and set state to DISCONNECTED so connect() can proceed
     this.ws = null;
+    this.setState('DISCONNECTED');
     
     // Reconnect with the new token by passing it directly
     await this.connect(newToken);
