@@ -48,7 +48,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState(false); // Default to false until we check storage
   const [_showPassword, _setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{email?: string;password?: string;}>({});
@@ -65,9 +65,8 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
         if (rememberedEmail) {
           setEmail(rememberedEmail);
         }
-        if (rememberMeFlag === 'true') {
-          setRememberMe(true);
-        }
+        // Correctly set the checkbox state based on stored preference
+        setRememberMe(rememberMeFlag === 'true');
       } catch (error) {
         // Silently fail - not critical
         console.log('Could not load remembered email');
