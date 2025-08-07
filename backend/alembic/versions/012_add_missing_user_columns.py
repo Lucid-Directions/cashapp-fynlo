@@ -52,18 +52,16 @@ def upgrade():
 
 
 def downgrade():
-    """Remove columns only if they were added by this migration"""
-    # Note: This downgrade assumes both columns were added by this migration
-    # In practice, if columns pre-existed, this migration wouldn't have added them
-    # and downgrade wouldn't be called. This is a safety measure.
-    
-    connection = op.get_bind()
-    inspector = sa.inspect(connection)
-    existing_columns = [col['name'] for col in inspector.get_columns('users')]
-    
-    # Only drop columns if they exist
-    if 'last_restaurant_switch' in existing_columns:
-        op.drop_column('users', 'last_restaurant_switch')
-    
-    if 'current_restaurant_id' in existing_columns:
-        op.drop_column('users', 'current_restaurant_id')
+    """Downgrade is a no-op to prevent data loss"""
+    # IMPORTANT: This migration is designed to fix missing columns that should
+    # have existed but were never created in production. Since we cannot track
+    # whether the columns pre-existed or were added by this migration, we
+    # cannot safely remove them in a downgrade without risking data loss.
+    #
+    # The upgrade() function only adds columns if they don't exist, so:
+    # - If columns pre-existed: upgrade() does nothing, downgrade() should do nothing
+    # - If columns were added: they're needed for the app to function
+    #
+    # Therefore, this downgrade is intentionally a no-op to prevent accidental
+    # removal of critical columns.
+    pass
