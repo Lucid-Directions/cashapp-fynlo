@@ -104,18 +104,24 @@ export class EnhancedWebSocketService {
         throw new Error('No authentication token available');
       }
 
+      logger.info(`🔑 Token available: ${token ? 'YES' : 'NO'}, User ID: ${user.id || 'MISSING'}`);
+
       // Build WebSocket URL with authentication parameters
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
 
       // Include token and user_id as query parameters for backend authentication
-      const params = new URLSearchParams({
-        token: token,
-        user_id: user.id,
-      });
+      // React Native might not handle URLSearchParams correctly, so build manually
+      const encodedToken = encodeURIComponent(token);
+      const encodedUserId = encodeURIComponent(user.id);
+      const queryString = `token=${encodedToken}&user_id=${encodedUserId}`;
+      
+      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${queryString}`;
 
-      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${params.toString()}`;
-
+      // Log the actual URL for debugging (will remove after fixing)
+      logger.info('🔗 Query string length:', queryString.length);
+      logger.info('🔗 Full URL length:', wsUrl.length);
+      
       // Properly mask the token in logs (handle URL encoding)
       const maskedUrl = wsUrl.replace(/token=[^&]+/, 'token=TOKEN_HIDDEN');
       logger.info('🔌 Connecting to WebSocket:', maskedUrl);
