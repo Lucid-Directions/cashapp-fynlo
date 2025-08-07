@@ -79,7 +79,15 @@ export class EnhancedWebSocketService {
     });
   }
 
-  async connect(overrideToken?: string): Promise<void> {
+  async connect(configOrToken?: string | Partial<WebSocketConfig>): Promise<void> {
+    // Handle both legacy token string and config object
+    let overrideToken: string | undefined;
+    if (typeof configOrToken === 'string') {
+      overrideToken = configOrToken;
+    } else if (configOrToken && typeof configOrToken === 'object') {
+      // Config object passed, ignore for now as we handle config in constructor
+      // This maintains compatibility with existing callers
+    }
     if (this.state !== 'DISCONNECTED' && this.state !== 'RECONNECTING') {
       logger.info(`⚠️ WebSocket already ${this.state}`);
       return;
@@ -104,37 +112,19 @@ export class EnhancedWebSocketService {
         throw new Error('No authentication token available');
       }
 
-      // Debug: Check what we actually have
-      logger.info(`🔑 Token exists: ${!!token}`);
-      logger.info(`🔑 Token length: ${token ? token.length : 0}`);
-      logger.info(`🔑 User ID: ${user.id || 'MISSING'}`);
-      logger.info(`🔑 User object keys: ${Object.keys(user).join(', ')}`);
-
       // Build WebSocket URL with authentication parameters
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
 
       // Include token and user_id as query parameters for backend authentication
-      // React Native might not handle URLSearchParams correctly, so build manually
+      // Build query string manually for React Native compatibility
       const encodedToken = encodeURIComponent(token);
       const encodedUserId = encodeURIComponent(user.id || '');
-      
-      // Debug: Log the actual values
-      logger.info(`🔗 Encoded token first 20 chars: ${encodedToken.substring(0, 20)}...`);
-      logger.info(`🔗 Encoded user ID: ${encodedUserId}`);
-      
       const queryString = `token=${encodedToken}&user_id=${encodedUserId}`;
       
       const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${queryString}`;
-
-      // Debug: Check the URL construction
-      logger.info(`🔗 Base URL: ${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}`);
-      logger.info(`🔗 Query string length: ${queryString.length}`);
-      logger.info(`🔗 Full URL length: ${wsUrl.length}`);
-      logger.info(`🔗 URL includes '?': ${wsUrl.includes('?')}`);
-      logger.info(`🔗 URL includes 'token=': ${wsUrl.includes('token=')}`);
       
-      // Properly mask the token in logs (handle URL encoding)
+      // Mask the token in logs for security
       const maskedUrl = wsUrl.replace(/token=[^&]+/, 'token=TOKEN_HIDDEN');
       logger.info('🔌 Connecting to WebSocket:', maskedUrl);
 
