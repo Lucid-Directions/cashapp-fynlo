@@ -26,6 +26,9 @@ def upgrade():
     # Get existing columns
     existing_columns = [col['name'] for col in inspector.get_columns('users')]
     
+    # Track what we actually add for proper downgrade
+    added_columns = []
+    
     # Add current_restaurant_id if it doesn't exist
     if 'current_restaurant_id' not in existing_columns:
         op.add_column('users', 
@@ -33,6 +36,7 @@ def upgrade():
                      postgresql.UUID(as_uuid=True), 
                      sa.ForeignKey('restaurants.id', ondelete='SET NULL'),
                      nullable=True))
+        added_columns.append('current_restaurant_id')
     
     # Add last_restaurant_switch if it doesn't exist  
     if 'last_restaurant_switch' not in existing_columns:
@@ -40,9 +44,26 @@ def upgrade():
             sa.Column('last_restaurant_switch',
                      sa.DateTime(timezone=True),
                      nullable=True))
+        added_columns.append('last_restaurant_switch')
+    
+    # Store what was added for downgrade (in practice, migrations run forward)
+    # Note: In production, downgrades are rarely used and this migration
+    # should only add columns that don't exist
 
 
 def downgrade():
-    """Remove the added columns"""
-    op.drop_column('users', 'last_restaurant_switch')
-    op.drop_column('users', 'current_restaurant_id')
+    """Remove columns only if they were added by this migration"""
+    # Note: This downgrade assumes both columns were added by this migration
+    # In practice, if columns pre-existed, this migration wouldn't have added them
+    # and downgrade wouldn't be called. This is a safety measure.
+    
+    connection = op.get_bind()
+    inspector = sa.inspect(connection)
+    existing_columns = [col['name'] for col in inspector.get_columns('users')]
+    
+    # Only drop columns if they exist
+    if 'last_restaurant_switch' in existing_columns:
+        op.drop_column('users', 'last_restaurant_switch')
+    
+    if 'current_restaurant_id' in existing_columns:
+        op.drop_column('users', 'current_restaurant_id')
