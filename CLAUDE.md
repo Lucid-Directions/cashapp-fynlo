@@ -1,5 +1,15 @@
 # CLAUDE.md - Fynlo POS Development Guide
 
+## 🚨 CRITICAL: NO LOCALHOST - PRODUCTION INFRASTRUCTURE ONLY
+
+**We are in pre-production mode. ALL services use production infrastructure:**
+- **Authentication**: Supabase (https://eweggzpvuqczrrrwszyy.supabase.co)
+- **Backend API**: DigitalOcean (https://fynlopos-9eg2c.ondigitalocean.app)
+- **Database**: PostgreSQL on DigitalOcean (NOT local)
+- **WebSockets**: wss://fynlopos-9eg2c.ondigitalocean.app/ws
+
+**NEVER use localhost:8000 or any local backend. The infrastructure is already deployed and running.**
+
 ## 🚨 CRITICAL: Pre-Commit Hooks Are Active
 
 **Pre-commit hooks automatically run on EVERY commit** to prevent syntax errors and maintain code quality. If a commit fails, fix the issues and try again.

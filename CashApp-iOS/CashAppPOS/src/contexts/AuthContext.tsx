@@ -195,7 +195,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await signInStore(email, password);
 
       if (rememberMe) {
+        // Save email for next login (NOT password for security)
         await AsyncStorage.setItem('@auth_remember_me', 'true');
+        await AsyncStorage.setItem('@auth_remembered_email', email);
+      } else {
+        // Clear remembered email if not checked
+        await AsyncStorage.removeItem('@auth_remember_me');
+        await AsyncStorage.removeItem('@auth_remembered_email');
       }
 
       return true;

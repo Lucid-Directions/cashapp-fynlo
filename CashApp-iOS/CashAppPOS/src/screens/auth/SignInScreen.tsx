@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   StyleSheet,
@@ -14,6 +14,7 @@ import {
   _Image } from
 'react-native';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { SimpleTextInput } from '../../components/inputs';
@@ -47,10 +48,33 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState(false); // Default to false until we check storage
   const [_showPassword, _setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{email?: string;password?: string;}>({});
+
+  // Load remembered email on mount
+  useEffect(() => {
+    const loadRememberedEmail = async () => {
+      try {
+        const [rememberedEmail, rememberMeFlag] = await Promise.all([
+          AsyncStorage.getItem('@auth_remembered_email'),
+          AsyncStorage.getItem('@auth_remember_me')
+        ]);
+        
+        if (rememberedEmail) {
+          setEmail(rememberedEmail);
+        }
+        // Correctly set the checkbox state based on stored preference
+        setRememberMe(rememberMeFlag === 'true');
+      } catch (error) {
+        // Silently fail - not critical
+        console.log('Could not load remembered email');
+      }
+    };
+    
+    loadRememberedEmail();
+  }, []);
 
   const validateForm = () => {
     const newErrors: {email?: string;password?: string;} = {};
