@@ -10,6 +10,13 @@ import { logger } from '../utils/logger';
 import tokenManager from '../utils/tokenManager';
 
 import APITestingService from './APITestingService';
+import { 
+  offlineQueueService, 
+  EntityType, 
+  ActionType, 
+  Priority,
+  ConflictResolutionStrategy 
+} from './offline';
 import authInterceptor from './auth/AuthInterceptor';
 import BackendCompatibilityService from './BackendCompatibilityService';
 import DatabaseService from './DatabaseService';
@@ -22,6 +29,7 @@ export interface FeatureFlags {
   ENABLE_HARDWARE: boolean;
   SHOW_DEV_MENU: boolean;
   MOCK_AUTHENTICATION: boolean;
+  ENABLE_OFFLINE_MODE: boolean; // New flag for offline mode
 }
 
 // -----------------------------------------------------------------------------
@@ -37,16 +45,36 @@ const DEFAULT_FLAGS: FeatureFlags = {
   ENABLE_HARDWARE: envBool('ENABLE_HARDWARE', false),
   SHOW_DEV_MENU: envBool('SHOW_DEV_MENU', IS_DEV),
   MOCK_AUTHENTICATION: envBool('MOCK_AUTHENTICATION', false), // Default to false for production
+  ENABLE_OFFLINE_MODE: envBool('ENABLE_OFFLINE_MODE', true), // Enable offline mode by default
+};
+// Cache configuration
+interface CacheConfig {
+  menuItems: number; // Cache duration for menu items in ms
+  menuCategories: number; // Cache duration for menu categories
+  products: number; // Cache duration for products
+  orders: number; // Cache duration for recent orders
+  floorPlan: number; // Cache duration for floor plan
+}
+
+const CACHE_DURATIONS: CacheConfig = {
+  menuItems: 1000 * 60 * 30, // 30 minutes
+  menuCategories: 1000 * 60 * 30, // 30 minutes
+  products: 1000 * 60 * 15, // 15 minutes
+  orders: 1000 * 60 * 5, // 5 minutes
+  floorPlan: 1000 * 60 * 60, // 1 hour
 };
 
+
+
 /**
- * DataService - Unified service that intelligently switches between mock and real data
+ * DataService - Unified service with mock/real data switching and offline support
  *
  * This allows us to:
  * 1. Keep beautiful mock data for client demos
  * 2. Gradually implement real API integration
  * 3. Fall back to mock data if API fails
  * 4. Test both modes in parallel
+ * 5. Work offline with automatic sync when connection returns
  */
 class DataService {
   private static instance: DataService;
@@ -68,6 +96,11 @@ class DataService {
       baseURL: API_CONFIG.FULL_API_URL,
       excludePaths: ['/auth/login', '/auth/register', '/health'], // Public endpoints
     });
+
+    // Initialize offline queue service
+    if (this.featureFlags.ENABLE_OFFLINE_MODE) {
+      logger.info('Offline mode enabled - initializing queue service');
+    }
   }
 
   static getInstance(): DataService {
@@ -269,7 +302,35 @@ class DataService {
     }
 
     try {
-      // Always attempt to get menu items - DatabaseService has fallback logic
+      // Use offline queue service for menu items if enabled
+      if (this.featureFlags.USE_REAL_API && this.featureFlags.ENABLE_OFFLINE_MODE) {
+        const menuItems = await offlineQueueService.executeWithFallback<any[]>(
+          EntityType.PRODUCT,
+          ActionType.SYNC,
+          'GET',
+          '/api/v1/menu/items',
+          undefined,
+          {
+            cacheKey: 'menu_items',
+            cacheDuration: CACHE_DURATIONS.menuItems,
+            offlineResponse: [],
+          }
+        ).catch(async () => {
+          // Fallback to direct database call if offline service fails
+          return this.db.getMenuItems();
+        });
+
+        // Apply transformation if needed
+        if (this.isBackendAvailable && menuItems && menuItems.length > 0) {
+          if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
+            logger.info('🔄 Applying menu compatibility transformation');
+            return BackendCompatibilityService.transformMenuItems(menuItems);
+          }
+        }
+        return menuItems || [];
+      }
+
+      // Original logic for non-offline mode
       const menuItems = await this.db.getMenuItems();
       
       // Only apply transformation if we have real API data
@@ -305,7 +366,28 @@ class DataService {
     }
 
     try {
-      // Always attempt to get categories - DatabaseService has fallback logic
+      // Use offline queue service for menu categories if enabled
+      if (this.featureFlags.USE_REAL_API && this.featureFlags.ENABLE_OFFLINE_MODE) {
+        const categories = await offlineQueueService.executeWithFallback<any[]>(
+          EntityType.CATEGORY,
+          ActionType.SYNC,
+          'GET',
+          '/api/v1/menu/categories',
+          undefined,
+          {
+            cacheKey: 'menu_categories',
+            cacheDuration: CACHE_DURATIONS.menuCategories,
+            offlineResponse: [],
+          }
+        ).catch(async () => {
+          // Fallback to direct database call if offline service fails
+          return this.db.getMenuCategories();
+        });
+        
+        return categories || [];
+      }
+
+      // Original logic for non-offline mode
       const categories = await this.db.getMenuCategories();
       // Always return array to satisfy return type
       return categories || [];
@@ -478,8 +560,34 @@ class DataService {
     }
   }
 
-  // Order operations
+  // Order operations with offline support (CRITICAL)
   async createOrder(order: unknown): Promise<unknown> {
+    if (this.featureFlags.USE_REAL_API && this.featureFlags.ENABLE_OFFLINE_MODE) {
+      // Orders are critical - always queue if offline
+      if (!this.isBackendAvailable) {
+        const tempId = `temp_order_${Date.now()}`;
+        const orderWithTempId = { ...order as any, localId: tempId };
+        
+        await offlineQueueService.queueRequest(
+          EntityType.ORDER,
+          ActionType.CREATE,
+          'POST',
+          '/api/v1/orders',
+          orderWithTempId,
+          {
+            priority: Priority.CRITICAL,
+            immediate: true,
+            metadata: {
+              originalTimestamp: Date.now(),
+            },
+          }
+        );
+        
+        logger.info('Order queued for offline sync:', tempId);
+        return { ...orderWithTempId, id: tempId, is_temp: true, offline_pending: true };
+      }
+    }
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.createOrder(order);
@@ -544,10 +652,74 @@ class DataService {
           throw new Error('Payment processing failed');
         }
       } catch (error) {
-        logger.info('❌ Real payment failed, falling back to mock:', error);
-        // Don't fall back for payment processing - we want to see the real error
+        logger.info('❌ Real payment failed:', error);
+        // Handle offline payments if enabled
+        if (this.featureFlags.ENABLE_OFFLINE_MODE && !this.isBackendAvailable) {
+          logger.warn('Processing payment offline - will sync when connection returns', {
+            orderId,
+            amount,
+            paymentMethod,
+          });
+
+          await offlineQueueService.queueRequest(
+            EntityType.PAYMENT,
+            ActionType.CREATE,
+            'POST',
+            '/api/v1/payments/process',
+            {
+              orderId,
+              paymentMethod,
+              amount,
+              timestamp: Date.now(),
+            },
+            {
+              priority: Priority.CRITICAL,
+              immediate: true,
+              metadata: {
+                originalTimestamp: Date.now(),
+              },
+              conflictResolution: ConflictResolutionStrategy.SERVER_WINS,
+            }
+          );
+
+          // Return success for offline payment (will be processed when online)
+          return true;
+        }
         throw error;
       }
+    }
+
+    // Handle offline payments - queue for later processing
+    if (this.featureFlags.ENABLE_OFFLINE_MODE && !this.isBackendAvailable) {
+      logger.warn('Processing payment offline - will sync when connection returns', {
+        orderId,
+        amount,
+        paymentMethod,
+      });
+
+      await offlineQueueService.queueRequest(
+        EntityType.PAYMENT,
+        ActionType.CREATE,
+        'POST',
+        '/api/v1/payments/process',
+        {
+          orderId,
+          paymentMethod,
+          amount,
+          timestamp: Date.now(),
+        },
+        {
+          priority: Priority.CRITICAL,
+          immediate: true,
+          metadata: {
+            originalTimestamp: Date.now(),
+          },
+          conflictResolution: ConflictResolutionStrategy.SERVER_WINS,
+        }
+      );
+
+      // Return success for offline payment (will be processed when online)
+      return true;
     }
 
     // If payments disabled or no backend, simulate success for demo
@@ -665,8 +837,27 @@ class DataService {
     return this.db.scanBarcode();
   }
 
-  // Sync and offline support
+  // Enhanced sync with offline queue
   async syncOfflineData(): Promise<void> {
+    // Sync offline queue if enabled
+    if (this.featureFlags.ENABLE_OFFLINE_MODE) {
+      logger.info('Starting offline data sync');
+      const result = await offlineQueueService.syncQueue();
+      
+      logger.info('Offline sync result:', {
+        syncedCount: result.syncedCount,
+        failedCount: result.failedCount,
+        conflictCount: result.conflictCount,
+      });
+      
+      // Handle conflicts if any
+      if (result.conflictCount > 0) {
+        logger.warn('Conflicts detected during sync:', result.conflicts);
+        // Could trigger UI notification here
+      }
+    }
+
+    // Original sync logic
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       await this.db.syncOfflineData();
     }
@@ -684,16 +875,38 @@ class DataService {
 
   async enableRealAPI(): Promise<void> {
     await this.updateFeatureFlag('USE_REAL_API', true);
+    await this.updateFeatureFlag('ENABLE_OFFLINE_MODE', true);
     await this.checkBackendAvailability();
-    logger.info('Enabled real API mode');
+    logger.info('Enabled real API mode with offline support');
   }
 
-  getConnectionStatus(): { mode: string; backend: boolean; flags: FeatureFlags } {
-    return {
+  getConnectionStatus(): { 
+    mode: string; 
+    backend: boolean; 
+    flags: FeatureFlags;
+    offlineQueue?: {
+      pending: number;
+      failed: number;
+      syncing: boolean;
+    };
+  } {
+    const status: any = {
       mode: this.featureFlags.USE_REAL_API ? 'REAL' : 'MOCK',
       backend: this.isBackendAvailable,
       flags: this.getFeatureFlags(),
     };
+
+    // Add offline queue stats if enabled
+    if (this.featureFlags.ENABLE_OFFLINE_MODE) {
+      const queueStats = offlineQueueService.getStatistics();
+      status.offlineQueue = {
+        pending: queueStats.totalQueued,
+        failed: queueStats.byStatus?.FAILED || 0,
+        syncing: offlineQueueService.getSyncState().isSyncing,
+      };
+    }
+
+    return status;
   }
 
   // --- Stubs for new methods ---
@@ -1436,6 +1649,30 @@ class DataService {
     }
 
     throw new Error('Usage tracking requires API connection');
+  }
+
+  // Get offline queue statistics
+  getOfflineQueueStats() {
+    if (this.featureFlags.ENABLE_OFFLINE_MODE) {
+      return offlineQueueService.getStatistics();
+    }
+    return null;
+  }
+
+  // Manually trigger offline sync
+  async triggerOfflineSync(): Promise<void> {
+    if (this.featureFlags.ENABLE_OFFLINE_MODE) {
+      logger.info('Manually triggering offline sync');
+      await offlineQueueService.syncQueue();
+    }
+  }
+
+  // Clear offline queue (use with caution)
+  async clearOfflineQueue(): Promise<void> {
+    if (this.featureFlags.ENABLE_OFFLINE_MODE) {
+      logger.warn('Clearing offline queue - all pending operations will be lost');
+      await offlineQueueService.clearQueue();
+    }
   }
 }
 
