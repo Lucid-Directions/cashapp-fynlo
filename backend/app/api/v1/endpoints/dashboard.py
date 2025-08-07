@@ -15,7 +15,6 @@ from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.services.activity_logger import ActivityLogger
 from app.middleware.rate_limit_middleware import limiter, PORTAL_DASHBOARD_RATE
-from app.core.exceptions import AuthenticationException
 
 router = APIRouter()
 

@@ -486,7 +486,7 @@ async def create_restaurant_onboarding(
                 "user_id": str(current_user.id),
             },
         )
-    except Exception as e:
+    except Exception:
         # Don't fail if WebSocket fails
         pass
 
@@ -1504,7 +1504,7 @@ async def update_table_position(
                 },
             },
         )
-    except Exception as e:
+    except Exception:
         # Don't fail the request if WebSocket fails
         pass
 
@@ -1627,7 +1627,7 @@ async def merge_tables(
                 "new_capacity": total_seats,
             },
         )
-    except Exception as e:
+    except Exception:
         pass
 
     return APIResponseHelper.success(

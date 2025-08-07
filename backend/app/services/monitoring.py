@@ -276,7 +276,7 @@ class MonitoringService:
                         id=f"volume_drop_{restaurant_id}_{int(time.time())}",
                         type="volume_drop",
                         severity=AlertSeverity.MEDIUM,
-                        title=f"Volume Drop Alert",
+                        title="Volume Drop Alert",
                         description=f"Restaurant {restaurant_id} volume dropped by {abs(current_metrics.growth_rate):.1f}%",
                         timestamp=datetime.utcnow(),
                         restaurant_id=restaurant_id,

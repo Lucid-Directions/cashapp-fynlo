@@ -59,6 +59,12 @@ async def verify_supabase_user(
     db: Session = Depends(get_db),
 ):
     """Verify Supabase token and return user info with subscription details"""
+    
+    # Debug logging to trace the flow
+    print(f"AUTH VERIFY STARTED at {datetime.utcnow().isoformat()}")
+    logger.info(
+        f"Auth verify started - Authorization header present: {bool(authorization)}"
+    )
 
     if not authorization:
         raise AuthenticationException(message="No authorization header provided")
@@ -71,7 +77,15 @@ async def verify_supabase_user(
             message="Invalid authorization format. Expected: Bearer <token>"
         )
     # Get Supabase client (will initialize if needed)
-    client = supabase_admin or get_admin_client()
+    print(f"Getting Supabase admin client at {datetime.utcnow().isoformat()}")
+    try:
+        client = supabase_admin or get_admin_client()
+        print(f"Got Supabase client: {client is not None}")
+    except Exception as client_error:
+        print(f"ERROR getting Supabase client: {client_error}")
+        logger.error(f"Failed to get Supabase client: {client_error}")
+        raise
+    
     if not client:
         logger.error("Supabase admin client not available")
         logger.error(f"SUPABASE_URL set: {bool(settings.SUPABASE_URL)}")
@@ -79,18 +93,23 @@ async def verify_supabase_user(
             f"SUPABASE_SERVICE_ROLE_KEY set: {bool(settings.SUPABASE_SERVICE_ROLE_KEY)}"
         )
         raise ServiceUnavailableError(
-            message="Authentication service temporarily unavailable. Please check backend configuration.",
+            message="Authentication service temporarily unavailable. "
+            "Please check backend configuration.",
             service_name="Supabase",
         )
     try:
         # Verify token with Supabase Admin API
+        print(f"Verifying token with Supabase at {datetime.utcnow().isoformat()}")
         logger.info(f"Verifying token with Supabase (token length: {len(token)})")
         # Never log token content for security reasons
 
         # Log Supabase client state
         logger.info(f"Supabase client URL: {client.supabase_url}")
+        print(f"Supabase client URL: {client.supabase_url}")
 
+        print(f"Calling client.auth.get_user() at {datetime.utcnow().isoformat()}")
         user_response = client.auth.get_user(token)
+        print(f"Got user response: {user_response is not None}")
 
         # Check if we got a valid response
         if not user_response:
@@ -127,7 +146,8 @@ async def verify_supabase_user(
                     )  # Use UUID object, not string
                     db.commit()
                     logger.info(
-                        f"Updated user {db_user.id} with Supabase ID: {supabase_user.id}"
+                        f"Updated user {db_user.id} with Supabase ID: "
+                        f"{supabase_user.id}"
                     )
         except SQLAlchemyError as e:
             logger.error(f"Database query error when finding user: {str(e)}")
@@ -149,7 +169,7 @@ async def verify_supabase_user(
                     id=uuid.uuid4(),
                     email=supabase_user.email,
                     username=supabase_user.email,  # Use email as username
-                    supabase_id=supabase_user.id,  # Store the Supabase ID for secure lookups
+                    supabase_id=supabase_user.id,  # Store Supabase ID for secure lookups
                     first_name=user_metadata.get("first_name", ""),
                     last_name=user_metadata.get("last_name", ""),
                     role="restaurant_owner",  # Default role for new users
@@ -161,7 +181,8 @@ async def verify_supabase_user(
                 db.commit()
                 db.refresh(db_user)
                 logger.info(
-                    f"Successfully created new user with ID: {db_user.id} and Supabase ID: {supabase_user.id}"
+                    f"Successfully created new user with ID: {db_user.id} and "
+                    f"Supabase ID: {supabase_user.id}"
                 )
             except IntegrityError as e:
                 logger.error(f"Integrity error creating user: {str(e)}")
@@ -188,11 +209,13 @@ async def verify_supabase_user(
                                 )  # Use UUID object, not string
                                 db.commit()
                                 logger.info(
-                                    f"Updated user {db_user.id} with Supabase ID in retry path"
+                                    f"Updated user {db_user.id} with Supabase ID "
+                                    "in retry path"
                                 )
                             except SQLAlchemyError as update_error:
                                 logger.error(
-                                    f"Failed to update supabase_id in retry path: {str(update_error)}"
+                                    f"Failed to update supabase_id in retry path: "
+                                    f"{str(update_error)}"
                                 )
                                 db.rollback()
                                 # Continue with the user even if update fails
@@ -311,10 +334,11 @@ async def verify_supabase_user(
             subscription_status = user_metadata.get("subscription_status", "trial")
 
             logger.info(
-                f"User {db_user.id} has subscription plan: {subscription_plan} (status: {subscription_status})"
+                f"User {db_user.id} has subscription plan: {subscription_plan} "
+                f"(status: {subscription_status})"
             )
 
-            # Return subscription info and features based on plan even without restaurant
+            # Return subscription info and features based on plan without restaurant
             response_data["user"]["needs_onboarding"] = True
             response_data["user"]["subscription_plan"] = subscription_plan
             response_data["user"]["subscription_status"] = subscription_status
@@ -425,9 +449,20 @@ async def verify_supabase_user(
     except Exception as e:
         # Check if this is actually an AuthApiError wrapped in another exception
         error_str = str(e)
+        
+        # Log the full error with traceback immediately
+        import traceback
+        full_traceback = traceback.format_exc()
         logger.error(
-            f"Auth verification error - Type: {type(e).__name__}, Message: {error_str}"
+            f"CRITICAL AUTH ERROR - Type: {type(e).__name__}, Message: {error_str}"
         )
+        logger.error(f"Full traceback:\n{full_traceback}")
+        
+        # Also print to stdout for DigitalOcean logs
+        print(f"CRITICAL AUTH ERROR at {datetime.utcnow().isoformat()}")
+        print(f"Error Type: {type(e).__name__}")
+        print(f"Error Message: {error_str}")
+        print(f"Full traceback:\n{full_traceback}")
 
         # Create audit logger for generic exceptions
         audit_logger = AuditLoggerService(db)
@@ -491,7 +526,8 @@ async def verify_supabase_user(
                 risk_score=90,  # Very high risk - config error
             )
             raise FynloException(
-                message="Authentication service configuration error. Please contact support.",
+                message="Authentication service configuration error. "
+                "Please contact support.",
                 status_code=503,
             )
         # Log generic authentication service error
@@ -537,7 +573,8 @@ async def register_restaurant(
             f"SUPABASE_SERVICE_ROLE_KEY set: {bool(settings.SUPABASE_SERVICE_ROLE_KEY)}"
         )
         raise ServiceUnavailableError(
-            message="Authentication service temporarily unavailable. Please check backend configuration.",
+            message="Authentication service temporarily unavailable. "
+            "Please check backend configuration.",
             service_name="Supabase",
         )
     try:
@@ -561,11 +598,13 @@ async def register_restaurant(
                     )  # Use UUID object, not string
                     db.commit()
                     logger.info(
-                        f"Updated user {db_user.id} with Supabase ID during registration"
+                        f"Updated user {db_user.id} with Supabase ID "
+                        "during registration"
                     )
                 except SQLAlchemyError as e:
                     logger.error(
-                        f"Failed to update user supabase_id during registration: {str(e)}"
+                        f"Failed to update user supabase_id during registration: "
+                        f"{str(e)}"
                     )
                     db.rollback()
                     # Continue with registration even if update fails

@@ -433,7 +433,7 @@ class EmployeeService:
 
                 if existing:
                     raise ValueError(
-                        f"Recurring schedule already exists for this day of week"
+                        "Recurring schedule already exists for this day of week"
                     )
             new_schedule = Schedule(
                 employee_id=employee_id,

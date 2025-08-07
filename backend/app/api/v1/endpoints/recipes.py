@@ -16,7 +16,6 @@ from app.crud import inventory as crud_inventory  # Using the same CRUD module
 from app.schemas import inventory_schemas as schemas  # Using the same schemas module
 from app.core.dependencies import get_current_user
 from app.core.tenant_security import TenantSecurity
-from app.core.exceptions import ValidationException, ResourceNotFoundException
 import logging
 
 logger = logging.getLogger(__name__)

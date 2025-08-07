@@ -2,7 +2,6 @@
 WebSocket endpoints for Fynlo Portal - Real-time updates for web dashboard
 """
 
-from typing import Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query, Path
 from sqlalchemy.orm import Session
 import json
@@ -15,8 +14,6 @@ from app.core.database import get_db, User, Restaurant
 from app.core.websocket import (
     websocket_manager,
     ConnectionType,
-    EventType,
-    WebSocketMessage,
 )
 
 router = APIRouter()

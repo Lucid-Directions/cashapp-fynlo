@@ -155,7 +155,7 @@ async def process_payment(
 
         # Log successful payment
         logger.info(
-            f"Payment processed successfully",
+            "Payment processed successfully",
             extra={
                 "payment_id": result["payment_id"],
                 "amount": result["amount"],

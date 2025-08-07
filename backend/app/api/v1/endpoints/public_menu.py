@@ -167,7 +167,7 @@ async def get_public_menu_categories(
             try:
                 cached_data = await redis.get(cache_key)
                 if cached_data:
-                    logger.info(f"Returning cached public menu categories")
+                    logger.info("Returning cached public menu categories")
                     return APIResponseHelper.success(
                         data=cached_data, message="Menu categories retrieved from cache"
                     )

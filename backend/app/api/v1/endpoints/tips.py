@@ -14,7 +14,6 @@ from app.models.financial_records import (
     StaffTipDistributionRecord,
 )  # For ORM response conversion
 from pydantic import BaseModel, Field
-from app.core.exceptions import ValidationException, FynloException
 
 router = APIRouter()
 

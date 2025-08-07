@@ -376,7 +376,7 @@ async def assign_restaurant_to_user(
             }
         )
 
-    except Exception as e:
+    except Exception:
         db.rollback()
         return APIResponseHelper.error(
             message="Failed to assign user to restaurant",

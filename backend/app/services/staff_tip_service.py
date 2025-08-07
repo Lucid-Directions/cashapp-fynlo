@@ -8,9 +8,6 @@ from app.schemas.fee_schemas import (
     StaffTipDistribution,
 )  # Input/Output schema
 from app.models.financial_records import StaffTipDistributionRecord  # DB model
-from app.core.database import (
-    SessionLocal,
-)  # For example usage, service should get session via DI
 
 logger = logging.getLogger(__name__)
 

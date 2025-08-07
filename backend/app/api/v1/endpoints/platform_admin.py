@@ -21,7 +21,6 @@ from app.core.auth import get_current_user
 from app.core.config import settings
 from app.core.responses import APIResponseHelper
 from pydantic import BaseModel, EmailStr
-from app.core.exceptions import ValidationException, ResourceNotFoundException
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

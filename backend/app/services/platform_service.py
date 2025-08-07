@@ -207,7 +207,7 @@ class PlatformSettingsService:
         # Validate override against platform limits
         platform_limit = self._get_platform_limit(config_key)
         if not self._validate_override(config_key, override_value, platform_limit):
-            raise ValueError(f"Override value exceeds platform limits")
+            raise ValueError("Override value exceeds platform limits")
 
         # Check for existing override
         existing = (

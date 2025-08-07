@@ -270,12 +270,12 @@ class ConfigurationManager:
                 if provider.name == "square" and not provider.custom_settings.get(
                     "location_id"
                 ):
-                    issues.append(f"Square provider missing location_id")
+                    issues.append("Square provider missing location_id")
 
                 if provider.name == "sumup" and not provider.custom_settings.get(
                     "merchant_code"
                 ):
-                    issues.append(f"SumUp provider missing merchant_code")
+                    issues.append("SumUp provider missing merchant_code")
 
         # Validate routing
         if (

@@ -996,7 +996,7 @@ class AnalyticsEngine:
             financial_summary["trends"] = trends
             return financial_summary
 
-        except Exception as e:
+        except Exception:
             # Return fallback financial data
             return {
                 "total_revenue": 15847.50,
