@@ -18,6 +18,7 @@ from app.api.v1.endpoints import (
     platform_settings_public,
     payment_configurations,
     websocket,
+    websocket_enhanced,  # Enhanced WebSocket with message-based auth
     sync,
     notifications,
     menu,
@@ -70,7 +71,11 @@ api_router.include_router(
 api_router.include_router(
     payment_configurations.router, prefix="/platform", tags=["payment_configurations"]
 )
-api_router.include_router(websocket.router, prefix="/websocket", tags=["websocket"])
+# SWITCHED TO ENHANCED WEBSOCKET ROUTER FOR MESSAGE-BASED AUTH
+# Legacy router (websocket.router) disabled - it only accepts URL query auth
+# Enhanced router supports both URL query AND message-based auth
+api_router.include_router(websocket_enhanced.router, prefix="/websocket", tags=["websocket"])
+# api_router.include_router(websocket.router, prefix="/websocket", tags=["websocket"])  # DISABLED
 api_router.include_router(sync.router, prefix="/sync", tags=["sync"])
 api_router.include_router(
     notifications.router, prefix="/notifications", tags=["notifications"]
