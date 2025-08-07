@@ -360,7 +360,7 @@ async def verify_supabase_user(
         if "invalid jwt" in error_msg_lower or "malformed" in error_msg_lower:
             # Log failed authentication attempt
             await audit_logger.create_audit_log(
-                event_type=AuditEventType.AUTHENTICATION,
+                event_type=AuditEventType.USER_LOGIN_FAILURE,
                 event_status=AuditEventStatus.FAILURE,
                 action_performed="Invalid JWT token presented",
                 ip_address=client_ip,
@@ -377,7 +377,7 @@ async def verify_supabase_user(
         elif "expired" in error_msg_lower:
             # Log expired token attempt
             await audit_logger.create_audit_log(
-                event_type=AuditEventType.AUTHENTICATION,
+                event_type=AuditEventType.USER_LOGIN_FAILURE,
                 event_status=AuditEventStatus.FAILURE,
                 action_performed="Expired JWT token presented",
                 ip_address=client_ip,
@@ -391,7 +391,7 @@ async def verify_supabase_user(
         elif "not found" in error_msg_lower:
             # Log user not found attempt
             await audit_logger.create_audit_log(
-                event_type=AuditEventType.AUTHENTICATION,
+                event_type=AuditEventType.USER_LOGIN_FAILURE,
                 event_status=AuditEventStatus.FAILURE,
                 action_performed="Authentication attempt for non-existent user",
                 ip_address=client_ip,
@@ -408,7 +408,7 @@ async def verify_supabase_user(
                 f"Unexpected Supabase auth error: {type(e).__name__}: {str(e)}"
             )
             await audit_logger.create_audit_log(
-                event_type=AuditEventType.AUTHENTICATION,
+                event_type=AuditEventType.USER_LOGIN_FAILURE,
                 event_status=AuditEventStatus.FAILURE,
                 action_performed="Authentication failed with unexpected error",
                 ip_address=client_ip,
