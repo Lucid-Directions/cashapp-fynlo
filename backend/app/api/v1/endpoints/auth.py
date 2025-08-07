@@ -440,7 +440,7 @@ async def verify_supabase_user(
                 "Detected JWT error in generic exception, treating as auth error"
             )
             await audit_logger.create_audit_log(
-                event_type=AuditEventType.AUTHENTICATION,
+                event_type=AuditEventType.USER_LOGIN_FAILURE,
                 event_status=AuditEventStatus.FAILURE,
                 action_performed="JWT error detected in generic exception",
                 ip_address=client_ip,
@@ -455,7 +455,7 @@ async def verify_supabase_user(
         elif "user not found" in error_str.lower():
             logger.warning("Detected user not found error in generic exception")
             await audit_logger.create_audit_log(
-                event_type=AuditEventType.AUTHENTICATION,
+                event_type=AuditEventType.USER_LOGIN_FAILURE,
                 event_status=AuditEventStatus.FAILURE,
                 action_performed="User not found error in generic exception",
                 ip_address=client_ip,
@@ -496,7 +496,7 @@ async def verify_supabase_user(
             )
         # Log generic authentication service error
         await audit_logger.create_audit_log(
-            event_type=AuditEventType.AUTHENTICATION,
+            event_type=AuditEventType.USER_LOGIN_FAILURE,
             event_status=AuditEventStatus.FAILURE,
             action_performed="Authentication service error",
             ip_address=client_ip,
