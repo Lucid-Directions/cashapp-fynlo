@@ -60,6 +60,11 @@ async def lifespan(app: FastAPI):
     try:
         from app.core.database import init_db
         from app.core.redis_client import init_redis
+        from app.core.run_migrations import run_migrations
+
+        # Run migrations first (before init_db)
+        logger.info("Running database migrations...")
+        run_migrations()
 
         logger.info("Initializing database...")
         await init_db()
