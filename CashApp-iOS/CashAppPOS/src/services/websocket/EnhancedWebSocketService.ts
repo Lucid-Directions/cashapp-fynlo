@@ -79,7 +79,15 @@ export class EnhancedWebSocketService {
     });
   }
 
-  async connect(overrideToken?: string): Promise<void> {
+  async connect(configOrToken?: string | Partial<WebSocketConfig>): Promise<void> {
+    // Handle both legacy token string and config object
+    let overrideToken: string | undefined;
+    if (typeof configOrToken === 'string') {
+      overrideToken = configOrToken;
+    } else if (configOrToken && typeof configOrToken === 'object') {
+      // Config object passed, ignore for now as we handle config in constructor
+      // This maintains compatibility with existing callers
+    }
     if (this.state !== 'DISCONNECTED' && this.state !== 'RECONNECTING') {
       logger.info(`⚠️ WebSocket already ${this.state}`);
       return;
@@ -109,14 +117,19 @@ export class EnhancedWebSocketService {
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
 
       // Include token and user_id as query parameters for backend authentication
-      const params = new URLSearchParams({
-        token: token,
-        user_id: user.id,
-      });
-
+      // Use URLSearchParams for proper encoding
+      const params = new URLSearchParams();
+      params.append('token', token);
+      
+      // Always add user_id if it's defined (including 0, which is a valid ID)
+      // Only skip if undefined or null
+      if (user.id !== undefined && user.id !== null) {
+        params.append('user_id', String(user.id));
+      }
+      
       const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${params.toString()}`;
-
-      // Properly mask the token in logs (handle URL encoding)
+      
+      // Mask the token in logs for security
       const maskedUrl = wsUrl.replace(/token=[^&]+/, 'token=TOKEN_HIDDEN');
       logger.info('🔌 Connecting to WebSocket:', maskedUrl);
 
