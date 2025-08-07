@@ -31,6 +31,7 @@ import tokenManager from '../../utils/tokenManager';
 import FynloException from '../../utils/exceptions/FynloException';
 import { useAuthStore } from '../../store/useAuthStore';
 
+import { offlineConfig, OfflineQueueConfig } from '../../config/offlineConfig';
 // SECURITY: Comprehensive validation configuration
 const SECURITY_CONFIG = {
   MAX_PAYLOAD_SIZE: 1024 * 1024, // 1MB
@@ -145,10 +146,16 @@ export enum ConflictType {
 
 // Security Validator Class
 class SecurityValidator {
+  private static config: OfflineQueueConfig = offlineConfig.getConfig();
+
+  static updateConfig(newConfig: OfflineQueueConfig): void {
+    this.config = newConfig;
+  }
+
   /**
    * Validate and sanitize string input
    */
-  static validateString(input: unknown, fieldName: string, maxLength: number = SECURITY_CONFIG.MAX_STRING_LENGTH): string {
+  static validateString(input: unknown, fieldName: string, maxLength?: number): string {
     if (typeof input !== 'string') {
       throw FynloException.validationError(`${fieldName} must be a string`);
     }
@@ -157,8 +164,9 @@ class SecurityValidator {
       throw FynloException.validationError(`${fieldName} cannot be empty`);
     }
 
-    if (input.length > maxLength) {
-      throw FynloException.validationError(`${fieldName} exceeds maximum length of ${maxLength}`);
+    const effectiveMaxLength = maxLength || this.config.maxStringLength;
+    if (input.length > effectiveMaxLength) {
+      throw FynloException.validationError(`${fieldName} exceeds maximum length of ${effectiveMaxLength}`);
     }
 
     // Check for SQL injection
@@ -176,7 +184,7 @@ class SecurityValidator {
    * Validate endpoint
    */
   static validateEndpoint(endpoint: unknown): string {
-    const validated = this.validateString(endpoint, 'endpoint', SECURITY_CONFIG.MAX_ENDPOINT_LENGTH);
+    const validated = this.validateString(endpoint, 'endpoint', this.config.maxEndpointLength);
     
     if (SECURITY_CONFIG.PATH_TRAVERSAL_PATTERNS.test(validated)) {
       throw FynloException.badRequest('Invalid endpoint (path traversal attempt detected)');
@@ -199,8 +207,8 @@ class SecurityValidator {
 
     // Check size
     const size = JSON.stringify(payload).length;
-    if (size > SECURITY_CONFIG.MAX_PAYLOAD_SIZE) {
-      throw FynloException.validationError(`Payload size ${size} exceeds maximum of ${SECURITY_CONFIG.MAX_PAYLOAD_SIZE}`);
+    if (size > this.config.maxPayloadSize) {
+      throw FynloException.validationError(`Payload size ${size} exceeds maximum of ${this.config.maxPayloadSize}`);
     }
 
     // Prevent deep nesting
@@ -266,27 +274,27 @@ export class SecureOfflineQueueService {
   private cleanupTimer?: NodeJS.Timeout;
   private retryTimeouts: Set<NodeJS.Timeout> = new Set();
   private unsubscribeNetInfo?: () => void;
+  private unsubscribeConfig?: () => void;
+  private encryptionKeyRotationTimer?: NodeJS.Timeout;
+  private requestCounts = {
+    minute: 0,
+    hour: 0,
+    minuteReset: Date.now(),
+    hourReset: Date.now(),
+  };
   private encryptionKey?: string;
 
+  // Enhanced security: Restaurant access cache
+  private restaurantAccessCache = new Map<string, { valid: boolean; expiry: number }>();
+  private readonly ACCESS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  private accessCacheCleanupTimer?: NodeJS.Timeout;
   // Storage keys
   private readonly STORAGE_KEY_PREFIX = 'secure_offline_queue_v3';
   private readonly ENCRYPTION_KEY_SERVICE = 'FynloOfflineQueueEncryption';
   private readonly AUDIT_LOG_KEY = 'offline_queue_audit';
 
-  // Configuration
-  private readonly config = {
-    maxQueueSize: 500,
-    maxMemoryItems: 100,
-    maxRetries: 5,
-    retryBaseDelay: 1000,
-    retryMaxDelay: 60000,
-    batchSize: 10,
-    syncInterval: 30000,
-    cleanupInterval: 3600000, // 1 hour
-    enableEncryption: true,
-    enableCompression: true,
-    enableAuditLog: true,
-  };
+  // Configuration loaded from offlineConfig
+  private config: OfflineQueueConfig;
 
   // Statistics
   private stats = {
@@ -298,6 +306,7 @@ export class SecureOfflineQueueService {
   };
 
   private constructor() {
+    this.config = offlineConfig.getConfig();
     this.initialize();
   }
 
@@ -313,6 +322,10 @@ export class SecureOfflineQueueService {
    */
   private async initialize(): Promise<void> {
     try {
+      // Subscribe to configuration changes
+      this.unsubscribeConfig = offlineConfig.subscribe((newConfig) => {
+        this.handleConfigChange(newConfig);
+      });
       // Initialize encryption
       await this.initializeEncryption();
 
@@ -333,7 +346,7 @@ export class SecureOfflineQueueService {
         this.startSyncTimer();
       }
       this.startCleanupTimer();
-
+      this.startAccessCacheCleanup();
       logger.info('SecureOfflineQueueService initialized', {
         queueSize: this.queue.size,
         isOnline: this.isOnline,
@@ -347,12 +360,145 @@ export class SecureOfflineQueueService {
   }
 
   /**
+   * Handle configuration changes
+   */
+  private handleConfigChange(newConfig: OfflineQueueConfig): void {
+    const oldConfig = this.config;
+    this.config = newConfig;
+    
+    // Update validator configuration
+    SecurityValidator.updateConfig(newConfig);
+
+    // Restart timers if intervals changed
+    if (oldConfig.syncInterval !== newConfig.syncInterval) {
+      this.stopSyncTimer();
+      if (this.isOnline && newConfig.enableAutoSync) {
+        this.startSyncTimer();
+      }
+    }
+
+    if (oldConfig.cleanupInterval !== newConfig.cleanupInterval) {
+      this.stopCleanupTimer();
+      this.stopAccessCacheCleanup();
+      this.startCleanupTimer();
+      this.startAccessCacheCleanup();
+    }
+    // Update encryption if changed
+    if (oldConfig.enableEncryption !== newConfig.enableEncryption) {
+      this.initializeEncryption();
+    }
+
+    logger.info('Configuration updated', {
+      environment: newConfig.environment,
+      changes: {
+        syncInterval: oldConfig.syncInterval !== newConfig.syncInterval,
+        encryptionEnabled: oldConfig.enableEncryption !== newConfig.enableEncryption,
+      },
+    });
+  }
+
+  /**
+   * CRITICAL: Validate absolutely mandatory fields for multi-tenant security
+   * Must be called at the start of queueRequest
+   */
+  private validateAbsoluteMandatoryFields(options: {
+    restaurantId?: string;
+    userId?: string;
+    [key: string]: any;
+  }): void {
+    // These fields are ABSOLUTELY MANDATORY for multi-tenant security
+    if (!options.restaurantId) {
+      throw FynloException.validationError('restaurantId is mandatory for all requests', {
+        field: 'restaurantId',
+        required: true,
+      });
+    }
+    
+    if (!options.userId) {
+      throw FynloException.validationError('userId is mandatory for all requests', {
+        field: 'userId',
+        required: true,
+      });
+    }
+    
+    // Basic format validation to prevent injection
+    if (typeof options.restaurantId !== 'string' || options.restaurantId.length === 0) {
+      throw FynloException.validationError('restaurantId must be a non-empty string', {
+        field: 'restaurantId',
+        type: typeof options.restaurantId,
+      });
+    }
+    
+    if (typeof options.userId !== 'string' || options.userId.length === 0) {
+      throw FynloException.validationError('userId must be a non-empty string', {
+        field: 'userId',
+        type: typeof options.userId,
+      });
+    }
+  }
+
+  /**
+   * Check rate limiting
+   */
+  private checkRateLimit(): void {
+    if (!this.config.rateLimitEnabled) return;
+
+    const now = Date.now();
+    
+    // Reset counters if needed
+    if (now - this.requestCounts.minuteReset > 60000) {
+      this.requestCounts.minute = 0;
+      this.requestCounts.minuteReset = now;
+    }
+    
+    if (now - this.requestCounts.hourReset > 3600000) {
+      this.requestCounts.hour = 0;
+      this.requestCounts.hourReset = now;
+    }
+
+    // Check limits
+    if (offlineConfig.isRateLimited(this.requestCounts.minute, 'minute')) {
+      // Log security event before throwing
+      this.logAuditEvent('RATE_LIMIT_EXCEEDED', {
+        type: 'minute',
+        limit: this.config.maxRequestsPerMinute,
+        current: this.requestCounts.minute,
+        timestamp: now,
+      }).catch(() => {}); // Don't block on audit logging
+            throw FynloException.rateLimitExceeded('Minute rate limit exceeded', {
+        limit: this.config.maxRequestsPerMinute,
+        current: this.requestCounts.minute,
+      });
+    }
+
+    if (offlineConfig.isRateLimited(this.requestCounts.hour, 'hour')) {
+      // Log security event before throwing
+      this.logAuditEvent('RATE_LIMIT_EXCEEDED', {
+        type: 'hour',
+        limit: this.config.maxRequestsPerHour,
+        current: this.requestCounts.hour,
+        timestamp: now,
+      }).catch(() => {}); // Don't block on audit logging
+            throw FynloException.rateLimitExceeded('Hour rate limit exceeded', {
+        limit: this.config.maxRequestsPerHour,
+        current: this.requestCounts.hour,
+      });
+    }
+
+    // Increment counters
+    this.requestCounts.minute++;
+    this.requestCounts.hour++;
+  }
+
+
+  /**
    * Initialize encryption system
    */
   private async initializeEncryption(): Promise<void> {
     if (!this.config.enableEncryption) return;
 
     try {
+
       // Try to load existing key from Keychain
       const credentials = await Keychain.getInternetCredentials(this.ENCRYPTION_KEY_SERVICE);
       
@@ -380,6 +526,13 @@ export class SecureOfflineQueueService {
    * CRITICAL: Validate restaurant access for multi-tenant isolation
    */
   private async validateRestaurantAccess(userId: string, restaurantId: string): Promise<boolean> {
+    const cacheKey = `${userId}:${restaurantId}`;
+    const cached = this.restaurantAccessCache.get(cacheKey);
+    
+    if (cached && cached.expiry > Date.now()) {
+      return cached.valid;
+    }
+
     try {
       const { user } = useAuthStore.getState();
       
@@ -394,6 +547,10 @@ export class SecureOfflineQueueService {
 
       // Platform owners have full access
       if (user.is_platform_owner) {
+        this.restaurantAccessCache.set(cacheKey, {
+          valid: true,
+          expiry: Date.now() + this.ACCESS_CACHE_TTL,
+        });
         return true;
       }
 
@@ -443,6 +600,11 @@ export class SecureOfflineQueueService {
     const requestId = this.generateRequestId();
 
     try {
+      // CRITICAL: Validate mandatory fields first
+      this.validateAbsoluteMandatoryFields(options);
+      // Check rate limiting
+      this.checkRateLimit();
+
       // SECURITY: Validate all inputs
       const validatedEndpoint = SecurityValidator.validateEndpoint(endpoint);
       const validatedPayload = SecurityValidator.validatePayload(payload);
@@ -560,7 +722,6 @@ export class SecureOfflineQueueService {
 
     this.isSyncing = true;
     const result = { success: true, syncedCount: 0, failedCount: 0, conflictCount: 0 };
-
     try {
       // Get requests for this restaurant only
       const pendingRequests = await this.getPendingRequestsForRestaurant(restaurantId);
@@ -783,7 +944,7 @@ export class SecureOfflineQueueService {
         for (const request of data) {
           // Skip expired items
           const age = Date.now() - request.timestamp;
-          const maxAge = SECURITY_CONFIG.MAX_QUEUE_AGE_DAYS * 24 * 60 * 60 * 1000;
+          const maxAge = this.config.maxQueueAgeDays * 24 * 60 * 60 * 1000;
           
           if (age < maxAge) {
             this.queue.set(request.id, request);
@@ -849,7 +1010,7 @@ export class SecureOfflineQueueService {
    */
   private async cleanupExpiredItems(): Promise<void> {
     const now = Date.now();
-    const maxAge = SECURITY_CONFIG.MAX_QUEUE_AGE_DAYS * 24 * 60 * 60 * 1000;
+    const maxAge = this.config.maxQueueAgeDays * 24 * 60 * 60 * 1000;
     let removed = 0;
 
     for (const [id, request] of this.queue.entries()) {
@@ -884,6 +1045,7 @@ export class SecureOfflineQueueService {
     if (!this.config.enableAuditLog) return;
 
     try {
+
       const auditEntry = {
         id: this.generateRequestId(),
         timestamp: Date.now(),
@@ -996,7 +1158,26 @@ export class SecureOfflineQueueService {
       this.cleanupTimer = undefined;
     }
   }
+  /**
+   * Clear access cache periodically
+   */
+  private startAccessCacheCleanup(): void {
+    this.accessCacheCleanupTimer = setInterval(() => {
+      const now = Date.now();
+      for (const [key, value] of this.restaurantAccessCache.entries()) {
+        if (value.expiry <= now) {
+          this.restaurantAccessCache.delete(key);
+        }
+      }
+    }, 60000); // Clean every minute
+  }
 
+  private stopAccessCacheCleanup(): void {
+    if (this.accessCacheCleanupTimer) {
+      clearInterval(this.accessCacheCleanupTimer);
+      this.accessCacheCleanupTimer = undefined;
+    }
+  }
   /**
    * Public methods
    */
@@ -1008,6 +1189,10 @@ export class SecureOfflineQueueService {
       isOnline: this.isOnline,
       isSyncing: this.isSyncing,
     };
+  }
+
+  public getConfiguration(): OfflineQueueConfig {
+    return { ...this.config };
   }
 
   public async clearQueue(restaurantId?: string): Promise<void> {
@@ -1029,7 +1214,7 @@ export class SecureOfflineQueueService {
     // Stop all timers
     this.stopSyncTimer();
     this.stopCleanupTimer();
-
+    this.stopAccessCacheCleanup();
     // Clear retry timeouts
     for (const timeout of this.retryTimeouts) {
       clearTimeout(timeout);

@@ -73,6 +73,14 @@ export class FynloException extends Error {
     return new FynloException(message, 429, 'TOO_MANY_REQUESTS', details);
   }
 
+  static rateLimited(message: string = 'Rate limit exceeded', details?: Record<string, any>): FynloException {
+    return new FynloException(message, 429, 'RATE_LIMIT_EXCEEDED', details);
+  }
+
+  static rateLimitExceeded(message: string = 'Rate limit exceeded', details?: Record<string, any>): FynloException {
+    return new FynloException(message, 429, 'RATE_LIMIT_EXCEEDED', details);
+  }
+
   static internalError(message: string = 'Internal server error', details?: Record<string, any>): FynloException {
     return new FynloException(message, 500, 'INTERNAL_ERROR', details);
   }
