@@ -19,6 +19,7 @@ export class EnhancedWebSocketService {
   private ws: WebSocket | null = null;
   private state: ConnectionState = 'DISCONNECTED';
   private config: WebSocketConfig;
+  private pendingAuth: { token: string; user_id: string; restaurant_id: string } | null = null;
 
   // Heartbeat mechanism
   private heartbeatTimer: NodeJS.Timeout | null = null;
@@ -43,6 +44,9 @@ export class EnhancedWebSocketService {
 
   // Token refresh listener
   private tokenRefreshListener: ((newToken: string) => Promise<void>) | null = null;
+
+  // Authentication timer (cleared on success/failure)
+  private authTimer: NodeJS.Timeout | null = null;
 
   constructor(config: Partial<WebSocketConfig> = {}) {
     this.config = {
@@ -94,6 +98,11 @@ export class EnhancedWebSocketService {
     }
 
     try {
+      // Ensure network monitoring is active after previous disconnects
+      if (!this.networkUnsubscribe) {
+        this.setupNetworkMonitoring();
+      }
+
       this.setState('CONNECTING');
 
       // Get connection parameters
@@ -103,37 +112,69 @@ export class EnhancedWebSocketService {
       }
 
       const user = JSON.parse(userInfo);
+      logger.info('🔍 User info loaded:', {
+        hasUser: !!user,
+        userId: user?.id,
+        userIdType: typeof user?.id,
+        hasRestaurant: !!user?.restaurant_id,
+      });
+      
       // Allow users without restaurants to connect (for onboarding)
       const restaurantId = user.restaurant_id || 'onboarding';
 
       // Get authentication token (use override if provided for reauthentication)
+      logger.info('🔍 Getting token...', { hasOverride: !!overrideToken });
       const token = overrideToken || await tokenManager.getTokenWithRefresh();
+      
+      logger.info('🔍 Token retrieved:', {
+        hasToken: !!token,
+        tokenLength: token?.length,
+        tokenPreview: token ? `${token.substring(0, 20)}...` : 'NONE',
+      });
+      
       if (!token) {
         throw new Error('No authentication token available');
       }
+
 
       // Build WebSocket URL with authentication parameters
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
 
-      // Include token and user_id as query parameters for backend authentication
-      // Use URLSearchParams for proper encoding
-      const params = new URLSearchParams();
-      params.append('token', token);
+      // CRITICAL FIX: React Native WebSocket strips query parameters
+      // We must send authentication as the first message instead
       
-      // Always add user_id if it's defined (including 0, which is a valid ID)
-      // Only skip if undefined or null
-      if (user.id !== undefined && user.id !== null) {
-        params.append('user_id', String(user.id));
+      // Store auth data for first message
+      // Validate user id as a non-empty, non-zero string (robust against "0" and falsy values)
+      const userIdStr = String(user.id ?? '').trim();
+      if (!userIdStr || userIdStr === '0') {
+        throw new Error('Invalid user ID: must be a non-empty string');
+      }
+
+      this.pendingAuth = {
+        token,
+        user_id: userIdStr,
+        restaurant_id: restaurantId,
+      };
+      
+      // Build URL - Try with query params for backward compatibility
+      // But be prepared to auth via message if React Native strips them
+      const queryString = `token=${encodeURIComponent(token)}&user_id=${encodeURIComponent(userIdStr)}`;
+      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${queryString}`;
+      
+      // Mask token in logs
+      const maskedUrl = wsUrl.replace(/token=[^&]+/, 'token=TOKEN_HIDDEN');
+      logger.info('🔌 Connecting to WebSocket (dual auth mode):', maskedUrl);
+      logger.info('🔍 Will attempt auth via URL params AND first message with user_id:', user.id);
+
+      // Create WebSocket
+      this.ws = new WebSocket(wsUrl);
+      
+      // Check if the WebSocket has a url property (some implementations expose it)
+      if ('url' in this.ws) {
+        logger.info('🔍 WebSocket.url property:', (this.ws as any).url);
       }
       
-      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${params.toString()}`;
-      
-      // Mask the token in logs for security
-      const maskedUrl = wsUrl.replace(/token=[^&]+/, 'token=TOKEN_HIDDEN');
-      logger.info('🔌 Connecting to WebSocket:', maskedUrl);
-
-      this.ws = new WebSocket(wsUrl);
       this.setupEventHandlers();
 
       // Connection timeout
@@ -147,22 +188,52 @@ export class EnhancedWebSocketService {
 
       this.ws.onopen = () => {
         clearTimeout(connectionTimeout);
-        logger.info('✅ WebSocket connected successfully');
-        // Authentication is handled via query parameters, no need for separate auth message
-        // Skip AUTHENTICATING state and go directly to CONNECTED
-        this.setState('CONNECTED');
+        logger.info('✅ WebSocket opened');
         
-        // Reset exponential backoff on successful connection
-        this.exponentialBackoff.reset();
-
-        // Start heartbeat
-        this.startHeartbeat();
-
-        // Process queued messages
-        this.processMessageQueue();
-
-        // Emit connected event
-        this.emit(WebSocketEvent.CONNECT, { timestamp: Date.now() });
+        // DUAL AUTH MODE: Try both query params (old backend) and message auth (new backend)
+        // If backend already authenticated via query params, it will ignore the auth message
+        // If React Native stripped query params, auth message will authenticate
+        
+        if (this.pendingAuth && this.ws) {
+          // Send authentication message in case query params were stripped
+          const authMessage = {
+            type: 'authenticate',
+            token: this.pendingAuth.token,
+            user_id: this.pendingAuth.user_id,
+            restaurant_id: this.pendingAuth.restaurant_id,
+            timestamp: new Date().toISOString(),
+          };
+          
+          logger.info('🔐 Sending authentication message as backup with user_id:', this.pendingAuth.user_id);
+          
+          // Send authentication message with error handling
+          try {
+            this.ws.send(JSON.stringify(authMessage));
+          } catch (error) {
+            logger.error('❌ Failed to send authentication message:', error);
+            this.ws?.close(4003, 'Authentication message send failed');
+            this.handleDisconnect(4003, 'Failed to send authentication');
+            return;
+          }
+          
+          // Move to authenticating state
+          this.setState('AUTHENTICATING');
+          
+          // Set explicit authentication timeout using configured value
+          if (this.authTimer) {
+            clearTimeout(this.authTimer);
+            this.authTimer = null;
+          }
+          this.authTimer = setTimeout(() => {
+            if (this.state === 'AUTHENTICATING') {
+              logger.error('❌ WebSocket authentication timeout');
+              this.handleDisconnect(4002, 'Authentication timeout');
+            }
+          }, this.config.authTimeout);
+        } else {
+          logger.error('❌ No pending auth data available');
+          this.ws?.close();
+        }
       };
     } catch (error) {
       logger.error('❌ WebSocket connection failed:', error);
@@ -196,6 +267,50 @@ export class EnhancedWebSocketService {
 
   private handleMessage(message: WebSocketMessage): void {
     switch (message.type) {
+      case WebSocketEvent.AUTHENTICATED:
+        // Standard authenticated event
+        if (this.authTimer) {
+          clearTimeout(this.authTimer);
+          this.authTimer = null;
+        }
+        logger.info('✅ WebSocket authenticated successfully');
+        this.setState('CONNECTED');
+        this.pendingAuth = null;
+        this.exponentialBackoff.reset();
+        this.startHeartbeat();
+        this.processMessageQueue();
+        this.emit(WebSocketEvent.CONNECT, { timestamp: Date.now() });
+        break;
+      case 'auth_success':
+        // Authentication successful
+        if (this.authTimer) {
+          clearTimeout(this.authTimer);
+          this.authTimer = null;
+        }
+        logger.info('✅ WebSocket authenticated successfully');
+        this.setState('CONNECTED');
+        this.pendingAuth = null; // Clear auth data
+        
+        // Reset exponential backoff on successful connection
+        this.exponentialBackoff.reset();
+
+        // Start heartbeat
+        this.startHeartbeat();
+
+        // Process queued messages
+        this.processMessageQueue();
+
+        // Emit connected event
+        this.emit(WebSocketEvent.CONNECT, { timestamp: Date.now() });
+        break;
+        
+      case 'auth_error':
+        logger.error('❌ WebSocket authentication failed:', message.data);
+        this.pendingAuth = null;
+        this.ws?.close();
+        this.handleAuthError(message);
+        break;
+
       case WebSocketEvent.PONG:
         this.handlePong();
         break;
@@ -231,6 +346,10 @@ export class EnhancedWebSocketService {
 
   private handleAuthError(message: WebSocketMessage): void {
     logger.error('❌ Authentication error:', message.data);
+    if (this.authTimer) {
+      clearTimeout(this.authTimer);
+      this.authTimer = null;
+    }
 
     // Try to refresh token and reconnect
     tokenManager
@@ -409,6 +528,10 @@ export class EnhancedWebSocketService {
 
   private handleDisconnect(code: number, reason: string): void {
     this.stopHeartbeat();
+    if (this.authTimer) {
+      clearTimeout(this.authTimer);
+      this.authTimer = null;
+    }
     this.setState('DISCONNECTED');
 
     if (this.ws) {
@@ -472,7 +595,18 @@ export class EnhancedWebSocketService {
     };
 
     if (this.state === 'CONNECTED' && this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(fullMessage));
+      try {
+        this.ws.send(JSON.stringify(fullMessage));
+      } catch (error) {
+        logger.error('❌ Failed to send message:', error);
+        // Queue the message for retry
+        if (this.messageQueue.length < this.maxQueueSize) {
+          this.messageQueue.push(fullMessage);
+          logger.info(`📦 Message queued after send failure (${this.messageQueue.length} in queue)`);
+        }
+        // Trigger reconnection if send fails
+        this.handleDisconnect(4007, 'Send failure');
+      }
     } else {
       // Queue message for later (with size limit)
       if (this.messageQueue.length < this.maxQueueSize) {
@@ -501,6 +635,10 @@ export class EnhancedWebSocketService {
     logger.info('👋 Disconnecting WebSocket...');
 
     this.stopHeartbeat();
+    if (this.authTimer) {
+      clearTimeout(this.authTimer);
+      this.authTimer = null;
+    }
 
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
