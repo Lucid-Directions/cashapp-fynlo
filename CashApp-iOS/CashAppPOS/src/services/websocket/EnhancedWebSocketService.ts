@@ -79,7 +79,7 @@ export class EnhancedWebSocketService {
     });
   }
 
-  async connect(): Promise<void> {
+  async connect(overrideToken?: string): Promise<void> {
     if (this.state !== 'DISCONNECTED' && this.state !== 'RECONNECTING') {
       logger.info(`⚠️ WebSocket already ${this.state}`);
       return;
@@ -98,8 +98,8 @@ export class EnhancedWebSocketService {
       // Allow users without restaurants to connect (for onboarding)
       const restaurantId = user.restaurant_id || 'onboarding';
 
-      // Get authentication token
-      const token = await tokenManager.getTokenWithRefresh();
+      // Get authentication token (use override if provided for reauthentication)
+      const token = overrideToken || await tokenManager.getTokenWithRefresh();
       if (!token) {
         throw new Error('No authentication token available');
       }
@@ -275,31 +275,46 @@ export class EnhancedWebSocketService {
     // Since authentication is via query parameters, we need to reconnect with new token
     logger.info('🔄 Token refreshed, reconnecting WebSocket with new token...');
 
-    // Store the new token for the next connection
-    // We'll override tokenManager's getTokenWithRefresh temporarily
-    const originalGetToken = tokenManager.getTokenWithRefresh;
-    tokenManager.getTokenWithRefresh = async () => newToken;
-
     // Close current connection and wait for it to complete
-    if (this.ws) {
+    if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
       await new Promise<void>((resolve) => {
-        const onClose = () => {
-          this.ws?.removeEventListener('close', onClose);
+        let timeoutId: NodeJS.Timeout | null = null;
+        
+        const cleanup = () => {
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+          }
+          // Remove the listener safely
+          if (this.ws) {
+            this.ws.removeEventListener('close', onClose);
+          }
           resolve();
         };
-        this.ws.addEventListener('close', onClose);
-        this.ws.close(1000, 'Token refresh - reconnecting');
         
-        // Timeout after 2 seconds if close doesn't fire
-        setTimeout(resolve, 2000);
+        const onClose = () => cleanup();
+        
+        // Add listener before closing to avoid race condition
+        this.ws.addEventListener('close', onClose);
+        
+        // Set timeout for cleanup
+        timeoutId = setTimeout(() => {
+          logger.warn('⚠️ WebSocket close timeout, forcing reconnect');
+          cleanup();
+        }, 2000);
+        
+        // Now close the connection
+        try {
+          this.ws.close(1000, 'Token refresh - reconnecting');
+        } catch (error) {
+          logger.error('Error closing WebSocket:', error);
+          cleanup();
+        }
       });
     }
 
-    // Reconnect with the new token
-    await this.connect();
-    
-    // Restore original token getter
-    tokenManager.getTokenWithRefresh = originalGetToken;
+    // Reconnect with the new token by passing it directly
+    await this.connect(newToken);
   }
 
   private startHeartbeat(): void {
