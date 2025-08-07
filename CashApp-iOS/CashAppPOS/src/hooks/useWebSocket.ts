@@ -31,8 +31,10 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
   // Handle connection
   const connect = useCallback(async () => {
-    if (!user?.restaurant_id) {
-      console.warn('⚠️ Cannot connect WebSocket - no restaurant ID');
+    // Allow connection even without restaurant_id (for onboarding users)
+    // The service will fallback to 'onboarding' as the restaurant_id
+    if (!user) {
+      console.warn('⚠️ Cannot connect WebSocket - no user authenticated');
       return;
     }
 

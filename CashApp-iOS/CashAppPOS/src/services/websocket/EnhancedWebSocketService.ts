@@ -116,12 +116,16 @@ export class EnhancedWebSocketService {
       // Allow users without restaurants to connect (for onboarding)
       const restaurantId = user.restaurant_id || 'onboarding';
 
-      // Build WebSocket URL (no token in URL for security)
+      // Build WebSocket URL WITH token for compatibility with current backend
+      // NOTE: React Native may strip query params, but we'll try both approaches
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
-      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}`;
+      
+      // Add token and user_id to URL for backward compatibility with legacy backend
+      // This is a temporary fix until backend switches to websocket_enhanced router
+      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?token=${encodeURIComponent(token)}&user_id=${encodeURIComponent(user.id)}`;
 
-      logger.info('🔌 Connecting to WebSocket:', wsUrl);
+      logger.info('🔌 Connecting to WebSocket with URL auth:', wsUrl);
 
       this.ws = new WebSocket(wsUrl);
       this.setupEventHandlers();
