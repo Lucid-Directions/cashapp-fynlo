@@ -117,12 +117,20 @@ export class EnhancedWebSocketService {
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
 
       // Include token and user_id as query parameters for backend authentication
-      // Build query string manually for React Native compatibility
-      const encodedToken = encodeURIComponent(token);
-      const encodedUserId = encodeURIComponent(user.id || '');
-      const queryString = `token=${encodedToken}&user_id=${encodedUserId}`;
+      // Use URLSearchParams for proper encoding (converts undefined/null to string, handles special chars)
+      const params = new URLSearchParams();
+      params.append('token', token);
       
-      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${queryString}`;
+      // Only add user_id if it exists (backend expects Optional[str])
+      if (user.id) {
+        params.append('user_id', user.id);
+      }
+      
+      // Debug: Verify URLSearchParams is working
+      logger.info(`🔗 URLSearchParams toString: ${params.toString().substring(0, 50)}...`);
+      logger.info(`🔗 Has token param: ${params.has('token')}, Has user_id param: ${params.has('user_id')}`);
+      
+      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${params.toString()}`;
       
       // Mask the token in logs for security
       const maskedUrl = wsUrl.replace(/token=[^&]+/, 'token=TOKEN_HIDDEN');
