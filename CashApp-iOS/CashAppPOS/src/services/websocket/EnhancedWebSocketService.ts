@@ -275,31 +275,44 @@ export class EnhancedWebSocketService {
     // Since authentication is via query parameters, we need to reconnect with new token
     logger.info('🔄 Token refreshed, reconnecting WebSocket with new token...');
 
+    // First, stop heartbeat to prevent timer leaks
+    this.stopHeartbeat();
+    
     // Close current connection and wait for it to complete
     if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
+      // Clear all event handlers to prevent leaks
+      const wsRef = this.ws;
+      
       await new Promise<void>((resolve) => {
         let timeoutId: NodeJS.Timeout | null = null;
-        const wsRef = this.ws; // Capture reference to avoid race conditions
         
         const cleanup = () => {
           if (timeoutId) {
             clearTimeout(timeoutId);
             timeoutId = null;
           }
+          
+          // Ensure all handlers are cleared
+          if (wsRef) {
+            wsRef.onopen = null;
+            wsRef.onclose = null;
+            wsRef.onerror = null;
+            wsRef.onmessage = null;
+          }
+          
           resolve();
         };
         
-        // React Native WebSocket: Set a simple onclose handler that only calls cleanup
-        // Don't call any previous handlers to avoid triggering handleDisconnect
+        // Set a temporary onclose handler for cleanup
         if (wsRef) {
           wsRef.onclose = () => {
             cleanup();
           };
         }
         
-        // Set timeout for cleanup
+        // Set timeout for cleanup in case close doesn't fire
         timeoutId = setTimeout(() => {
-          logger.warn('⚠️ WebSocket close timeout, forcing reconnect');
+          logger.warn('⚠️ WebSocket close timeout, forcing cleanup');
           cleanup();
         }, 2000);
         
@@ -313,11 +326,20 @@ export class EnhancedWebSocketService {
           cleanup();
         }
       });
+    } else if (this.ws) {
+      // WebSocket already closed, just clear handlers
+      this.ws.onopen = null;
+      this.ws.onclose = null;
+      this.ws.onerror = null;
+      this.ws.onmessage = null;
     }
 
-    // Clear the reference and set state to DISCONNECTED so connect() can proceed
+    // Clear the reference and set state to DISCONNECTED
     this.ws = null;
     this.setState('DISCONNECTED');
+    
+    // Emit disconnect event for reauthentication
+    this.emit(WebSocketEvent.DISCONNECT, { code: 1000, reason: 'Token refresh - reconnecting' });
     
     // Reconnect with the new token by passing it directly
     await this.connect(newToken);
