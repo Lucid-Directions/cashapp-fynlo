@@ -1,7 +1,7 @@
 """Add current_restaurant_id to users table
 
 Revision ID: fix_missing_user_columns_20250807
-Revises: YYY_create_financial_records_tables
+Revises: performance_indexes_20250117
 Create Date: 2025-08-07 14:50:00
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'fix_missing_user_columns_20250807'
-down_revision = 'YYY_create_financial_records_tables'
+down_revision = 'performance_indexes_20250117'
 branch_labels = None
 depends_on = None
 
