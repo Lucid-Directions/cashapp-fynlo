@@ -206,7 +206,7 @@ class SecurityValidator {
     }
 
     // Check size
-    const size = JSON.stringify(payload).length;
+    const size = SafeStringifyHelper.getByteSize(payload);
     if (size > this.config.maxPayloadSize) {
       throw FynloException.validationError(`Payload size ${size} exceeds maximum of ${this.config.maxPayloadSize}`);
     }
@@ -260,6 +260,83 @@ class SecurityValidator {
     }
 
     return validated;
+  }
+}
+
+// Safe stringify utility to handle circular references
+class SafeStringifyHelper {
+  /**
+   * Safely stringify data with circular reference handling
+   * @param obj Object to stringify
+   * @param replacer Optional replacer function
+   * @param space Optional space parameter for formatting
+   * @returns JSON string or fallback string on error
+   */
+  static stringify(obj: unknown, replacer?: (key: string, value: unknown) => unknown, space?: string | number): string {
+    const seen = new WeakSet();
+    
+    try {
+      return JSON.stringify(obj, (key, value) => {
+        // Handle circular references
+        if (typeof value === 'object' && value !== null) {
+          if (seen.has(value)) {
+            return '[Circular Reference]';
+          }
+          seen.add(value);
+        }
+        
+        // Apply custom replacer if provided
+        if (replacer) {
+          return replacer(key, value);
+        }
+        
+        // Handle special types
+        if (value instanceof Error) {
+          return {
+            name: value.name,
+            message: value.message,
+            stack: value.stack
+          };
+        }
+        
+        if (typeof value === 'function') {
+          return '[Function]';
+        }
+        
+        if (typeof value === 'undefined') {
+          return '[Undefined]';
+        }
+        
+        if (typeof value === 'symbol') {
+          return value.toString();
+        }
+        
+        if (value instanceof RegExp) {
+          return value.toString();
+        }
+        
+        return value;
+      }, space);
+    } catch (error) {
+      // Fallback for any other errors
+      logger.error('SafeStringifyHelper.stringify failed', error);
+      return '[Stringify Error]';
+    }
+  }
+  
+  /**
+   * Calculate byte size of stringified data
+   * @param obj Object to measure
+   * @returns Size in bytes
+   */
+  static getByteSize(obj: unknown): number {
+    try {
+      const str = SafeStringifyHelper.stringify(obj);
+      // Calculate byte size (UTF-8)
+      return new TextEncoder().encode(str).length;
+    } catch {
+      return 0;
+    }
   }
 }
 
@@ -654,7 +731,7 @@ export class SecureOfflineQueueService {
       let encrypted = false;
       
       if (SECURITY_CONFIG.SENSITIVE_ENTITIES.has(entityType) && validatedPayload) {
-        processedPayload = await this.encryptData(JSON.stringify(validatedPayload));
+        processedPayload = await this.encryptData(SafeStringifyHelper.stringify(validatedPayload));
         encrypted = true;
         this.stats.totalEncrypted++;
       }
@@ -848,7 +925,7 @@ export class SecureOfflineQueueService {
       const response = await fetch(url, {
         method: request.method,
         headers,
-        body: payload ? JSON.stringify(payload) : undefined,
+        body: payload ? SafeStringifyHelper.stringify(payload) : undefined,
       });
 
       if (!response.ok) {
@@ -856,7 +933,7 @@ export class SecureOfflineQueueService {
       }
 
       // Update stats
-      this.stats.bytesTransferred += JSON.stringify(payload).length;
+      this.stats.bytesTransferred += SafeStringifyHelper.getByteSize(payload);
 
       return { success: true };
     } catch (error) {
@@ -935,7 +1012,7 @@ export class SecureOfflineQueueService {
         : data;
 
       // Compress and encrypt
-      const serialized = JSON.stringify(filteredData);
+      const serialized = SafeStringifyHelper.stringify(filteredData);
       const compressed = this.config.enableCompression 
         ? Buffer.from(serialized).toString('base64')
         : serialized;
@@ -1086,7 +1163,7 @@ export class SecureOfflineQueueService {
         auditLog.splice(0, auditLog.length - 1000);
       }
 
-      await AsyncStorage.setItem(this.AUDIT_LOG_KEY, JSON.stringify(auditLog));
+      await AsyncStorage.setItem(this.AUDIT_LOG_KEY, SafeStringifyHelper.stringify(auditLog));
     } catch (error) {
       logger.error('Failed to log audit event', error);
     }
@@ -1104,12 +1181,12 @@ export class SecureOfflineQueueService {
   }
 
   private generateIdempotencyKey(entityType: EntityType, action: ActionType, payload: unknown): string {
-    const data = `${entityType}_${action}_${JSON.stringify(payload)}`;
+    const data = `${entityType}_${action}_${SafeStringifyHelper.stringify(payload)}`;
     return CryptoJS.SHA256(data).toString(CryptoJS.enc.Hex);
   }
 
   private generateChecksum(data: unknown): string {
-    return CryptoJS.SHA256(JSON.stringify(data)).toString(CryptoJS.enc.Hex);
+    return CryptoJS.SHA256(SafeStringifyHelper.stringify(data)).toString(CryptoJS.enc.Hex);
   }
 
   private async getDeviceId(): Promise<string> {

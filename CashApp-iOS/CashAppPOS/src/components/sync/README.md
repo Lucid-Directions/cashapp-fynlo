@@ -179,4 +179,4 @@ Components follow the app's theme system and automatically adapt to light/dark m
 - `react-native-vector-icons/MaterialIcons` - Icons
 - `OfflineQueueService` - Queue management
 - Theme system - Consistent styling
-EOF < /dev/null
+

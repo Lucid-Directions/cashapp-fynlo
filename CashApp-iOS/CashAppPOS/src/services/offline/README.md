@@ -191,4 +191,4 @@ The service integrates with the app's error handling system:
 ## Testing
 
 See `__tests__/OfflineQueueService.test.ts` for comprehensive test coverage.
-EOF < /dev/null
+
