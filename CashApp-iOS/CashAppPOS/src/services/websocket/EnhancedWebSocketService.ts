@@ -145,20 +145,21 @@ export class EnhancedWebSocketService {
       // We must send authentication as the first message instead
       
       // Store auth data for first message
-      // Validate user.id is not 0 (security fix)
-      if (!user.id || user.id === 0) {
-        throw new Error('Invalid user ID: User ID cannot be 0 or undefined');
+      // Validate user id as a non-empty, non-zero string (robust against "0" and falsy values)
+      const userIdStr = String(user.id ?? '').trim();
+      if (!userIdStr || userIdStr === '0') {
+        throw new Error('Invalid user ID: must be a non-empty string');
       }
-      
+
       this.pendingAuth = {
         token,
-        user_id: String(user.id),
+        user_id: userIdStr,
         restaurant_id: restaurantId,
       };
       
       // Build URL - Try with query params for backward compatibility
       // But be prepared to auth via message if React Native strips them
-      const queryString = `token=${encodeURIComponent(token)}&user_id=${encodeURIComponent(String(user.id))}`;
+      const queryString = `token=${encodeURIComponent(token)}&user_id=${encodeURIComponent(userIdStr)}`;
       const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${queryString}`;
       
       // Mask token in logs
