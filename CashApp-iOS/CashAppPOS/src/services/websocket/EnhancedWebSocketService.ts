@@ -205,7 +205,16 @@ export class EnhancedWebSocketService {
           };
           
           logger.info('🔐 Sending authentication message as backup with user_id:', this.pendingAuth.user_id);
-          this.ws.send(JSON.stringify(authMessage));
+          
+          // Send authentication message with error handling
+          try {
+            this.ws.send(JSON.stringify(authMessage));
+          } catch (error) {
+            logger.error('❌ Failed to send authentication message:', error);
+            this.ws?.close(4003, 'Authentication message send failed');
+            this.handleDisconnect(4003, 'Failed to send authentication');
+            return;
+          }
           
           // Move to authenticating state
           this.setState('AUTHENTICATING');
@@ -586,7 +595,18 @@ export class EnhancedWebSocketService {
     };
 
     if (this.state === 'CONNECTED' && this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(fullMessage));
+      try {
+        this.ws.send(JSON.stringify(fullMessage));
+      } catch (error) {
+        logger.error('❌ Failed to send message:', error);
+        // Queue the message for retry
+        if (this.messageQueue.length < this.maxQueueSize) {
+          this.messageQueue.push(fullMessage);
+          logger.info(`📦 Message queued after send failure (${this.messageQueue.length} in queue)`);
+        }
+        // Trigger reconnection if send fails
+        this.handleDisconnect(4007, 'Send failure');
+      }
     } else {
       // Queue message for later (with size limit)
       if (this.messageQueue.length < this.maxQueueSize) {
