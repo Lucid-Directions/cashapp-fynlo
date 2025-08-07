@@ -7,7 +7,6 @@ import { WebSocketEvent } from '../../types/websocket';
 import type { WebSocketMessage, WebSocketConfig } from '../../types/websocket';
 import logger from '../../utils/logger';
 import tokenManager from '../../utils/tokenManager';
-import WebSocketDebugService from './WebSocketDebugService';
 
 type ConnectionState =
   | 'DISCONNECTED'
@@ -20,6 +19,7 @@ export class EnhancedWebSocketService {
   private ws: WebSocket | null = null;
   private state: ConnectionState = 'DISCONNECTED';
   private config: WebSocketConfig;
+  private pendingAuth: { token: string; user_id: string; restaurant_id: string } | null = null;
 
   // Heartbeat mechanism
   private heartbeatTimer: NodeJS.Timeout | null = null;
@@ -128,59 +128,37 @@ export class EnhancedWebSocketService {
         throw new Error('No authentication token available');
       }
 
-      // Debug: Log token availability
-      WebSocketDebugService.logURLConstruction('Token Retrieved', {
-        token,
-        userId: user.id,
-        restaurantId,
-      });
 
       // Build WebSocket URL with authentication parameters
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
 
-      // Test if URLSearchParams is available and working
-      const urlSearchParamsWorks = WebSocketDebugService.testURLSearchParams();
+      // CRITICAL FIX: React Native WebSocket strips query parameters
+      // We must send authentication as the first message instead
       
-      let queryString: string;
-      
-      if (urlSearchParamsWorks) {
-        // Use URLSearchParams if available
-        const params = new URLSearchParams();
-        params.append('token', token);
-        
-        // Always add user_id if it's defined (including 0, which is a valid ID)
-        if (user.id !== undefined && user.id !== null) {
-          params.append('user_id', String(user.id));
-        }
-        
-        queryString = params.toString();
-        
-        WebSocketDebugService.logURLConstruction('URLSearchParams Used', {
-          params,
-          userId: user.id,
-        });
-      } else {
-        // Fallback: Build query string manually
-        logger.warn('⚠️ URLSearchParams not available, using manual encoding');
-        queryString = WebSocketDebugService.buildQueryStringManually(token, user.id);
+      // Store auth data for first message
+      // Validate user.id is not 0 (security fix)
+      if (!user.id || user.id === 0) {
+        throw new Error('Invalid user ID: User ID cannot be 0 or undefined');
       }
       
-      // Construct the final URL
+      this.pendingAuth = {
+        token,
+        user_id: String(user.id),
+        restaurant_id: restaurantId,
+      };
+      
+      // Build URL - Try with query params for backward compatibility
+      // But be prepared to auth via message if React Native strips them
+      const queryString = `token=${encodeURIComponent(token)}&user_id=${encodeURIComponent(String(user.id))}`;
       const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${queryString}`;
       
-      // Debug: Log the complete URL before masking
-      WebSocketDebugService.logURLConstruction('Final URL Built', {
-        wsUrl,
-        userId: user.id,
-      });
-      
-      // Mask the token in logs for security
+      // Mask token in logs
       const maskedUrl = wsUrl.replace(/token=[^&]+/, 'token=TOKEN_HIDDEN');
-      logger.info('🔌 Connecting to WebSocket:', maskedUrl);
+      logger.info('🔌 Connecting to WebSocket (dual auth mode):', maskedUrl);
+      logger.info('🔍 Will attempt auth via URL params AND first message with user_id:', user.id);
 
-      // Create WebSocket and verify URL is preserved
-      logger.info('🔍 Creating WebSocket with URL:', maskedUrl);
+      // Create WebSocket
       this.ws = new WebSocket(wsUrl);
       
       // Check if the WebSocket has a url property (some implementations expose it)
@@ -201,22 +179,45 @@ export class EnhancedWebSocketService {
 
       this.ws.onopen = () => {
         clearTimeout(connectionTimeout);
-        logger.info('✅ WebSocket connected successfully');
-        // Authentication is handled via query parameters, no need for separate auth message
-        // Skip AUTHENTICATING state and go directly to CONNECTED
-        this.setState('CONNECTED');
+        logger.info('✅ WebSocket opened');
         
-        // Reset exponential backoff on successful connection
-        this.exponentialBackoff.reset();
-
-        // Start heartbeat
-        this.startHeartbeat();
-
-        // Process queued messages
-        this.processMessageQueue();
-
-        // Emit connected event
-        this.emit(WebSocketEvent.CONNECT, { timestamp: Date.now() });
+        // DUAL AUTH MODE: Try both query params (old backend) and message auth (new backend)
+        // If backend already authenticated via query params, it will ignore the auth message
+        // If React Native stripped query params, auth message will authenticate
+        
+        if (this.pendingAuth && this.ws) {
+          // Send authentication message in case query params were stripped
+          const authMessage = {
+            type: 'authenticate',
+            token: this.pendingAuth.token,
+            user_id: this.pendingAuth.user_id,
+            restaurant_id: this.pendingAuth.restaurant_id,
+            timestamp: new Date().toISOString(),
+          };
+          
+          logger.info('🔐 Sending authentication message as backup with user_id:', this.pendingAuth.user_id);
+          this.ws.send(JSON.stringify(authMessage));
+          
+          // Move to authenticating state
+          this.setState('AUTHENTICATING');
+          
+          // Set auth timeout - but also check if we're already connected (old backend)
+          setTimeout(() => {
+            if (this.state === 'AUTHENTICATING') {
+              // Assume old backend authenticated via query params
+              logger.info('✅ Assuming authentication via query params (old backend)');
+              this.setState('CONNECTED');
+              this.pendingAuth = null;
+              this.exponentialBackoff.reset();
+              this.startHeartbeat();
+              this.processMessageQueue();
+              this.emit(WebSocketEvent.CONNECT, { timestamp: Date.now() });
+            }
+          }, 1000); // Short timeout - if no auth response, assume old backend
+        } else {
+          logger.error('❌ No pending auth data available');
+          this.ws?.close();
+        }
       };
     } catch (error) {
       logger.error('❌ WebSocket connection failed:', error);
@@ -250,6 +251,32 @@ export class EnhancedWebSocketService {
 
   private handleMessage(message: WebSocketMessage): void {
     switch (message.type) {
+      case 'auth_success':
+        // Authentication successful
+        logger.info('✅ WebSocket authenticated successfully');
+        this.setState('CONNECTED');
+        this.pendingAuth = null; // Clear auth data
+        
+        // Reset exponential backoff on successful connection
+        this.exponentialBackoff.reset();
+
+        // Start heartbeat
+        this.startHeartbeat();
+
+        // Process queued messages
+        this.processMessageQueue();
+
+        // Emit connected event
+        this.emit(WebSocketEvent.CONNECT, { timestamp: Date.now() });
+        break;
+        
+      case 'auth_error':
+        logger.error('❌ WebSocket authentication failed:', message.data);
+        this.pendingAuth = null;
+        this.ws?.close();
+        this.handleAuthError(message);
+        break;
+
       case WebSocketEvent.PONG:
         this.handlePong();
         break;

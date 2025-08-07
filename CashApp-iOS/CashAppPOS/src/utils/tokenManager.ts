@@ -148,8 +148,9 @@ class TokenManager extends SimpleEventEmitter {
     }
 
     // Check if token expires within 30 seconds (buffer for network delays)
-    const expiryBuffer = 30 * 1000; // 30 seconds
-    return Date.now() >= this.tokenExpiryTime * 1000 - expiryBuffer;
+    const expiryBuffer = 30 * 1000; // 30 seconds in milliseconds
+    const expiryTimeMs = this.tokenExpiryTime * 1000; // Convert seconds to milliseconds
+    return Date.now() >= expiryTimeMs - expiryBuffer;
   }
 
   /**
