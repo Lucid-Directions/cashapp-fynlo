@@ -279,23 +279,35 @@ export class EnhancedWebSocketService {
     if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
       await new Promise<void>((resolve) => {
         let timeoutId: NodeJS.Timeout | null = null;
+        const wsRef = this.ws; // Capture reference to avoid race conditions
         
         const cleanup = () => {
           if (timeoutId) {
             clearTimeout(timeoutId);
             timeoutId = null;
           }
-          // Remove the listener safely
-          if (this.ws) {
-            this.ws.removeEventListener('close', onClose);
+          // React Native WebSocket uses property handlers, not addEventListener
+          // Clear our temporary handler
+          if (wsRef) {
+            wsRef.onclose = null;
           }
           resolve();
         };
         
-        const onClose = () => cleanup();
+        // Store previous onclose handler to restore later
+        const previousOnClose = wsRef?.onclose;
         
-        // Add listener before closing to avoid race condition
-        this.ws.addEventListener('close', onClose);
+        // React Native WebSocket: Use property handler instead of addEventListener
+        if (wsRef) {
+          wsRef.onclose = (event) => {
+            cleanup();
+            // Call previous handler if it existed (but avoid our own handleDisconnect)
+            // We'll handle disconnection logic after the promise resolves
+            if (previousOnClose && previousOnClose !== this.ws?.onclose) {
+              previousOnClose(event);
+            }
+          };
+        }
         
         // Set timeout for cleanup
         timeoutId = setTimeout(() => {
@@ -305,7 +317,9 @@ export class EnhancedWebSocketService {
         
         // Now close the connection
         try {
-          this.ws.close(1000, 'Token refresh - reconnecting');
+          if (wsRef) {
+            wsRef.close(1000, 'Token refresh - reconnecting');
+          }
         } catch (error) {
           logger.error('Error closing WebSocket:', error);
           cleanup();
@@ -313,6 +327,9 @@ export class EnhancedWebSocketService {
       });
     }
 
+    // Clear the reference to prevent any issues
+    this.ws = null;
+    
     // Reconnect with the new token by passing it directly
     await this.connect(newToken);
   }
