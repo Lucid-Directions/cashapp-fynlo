@@ -1,13 +1,12 @@
+import { ExponentialBackoff } from '@fynlo/shared/src/utils/exponentialBackoff';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
-import { ExponentialBackoff } from '@fynlo/shared/src/utils/exponentialBackoff';
 
 import API_CONFIG from '../../config/api';
 import { WebSocketEvent } from '../../types/websocket';
-import tokenManager from '../../utils/tokenManager';
-import logger from '../../utils/logger';
-
 import type { WebSocketMessage, WebSocketConfig } from '../../types/websocket';
+import logger from '../../utils/logger';
+import tokenManager from '../../utils/tokenManager';
 
 type ConnectionState =
   | 'DISCONNECTED'
@@ -99,12 +98,25 @@ export class EnhancedWebSocketService {
       // Allow users without restaurants to connect (for onboarding)
       const restaurantId = user.restaurant_id || 'onboarding';
 
-      // Build WebSocket URL (no token in URL for security)
+      // Get authentication token
+      const token = await tokenManager.getTokenWithRefresh();
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+
+      // Build WebSocket URL with authentication parameters
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
-      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}`;
 
-      logger.info('🔌 Connecting to WebSocket:', wsUrl);
+      // Include token and user_id as query parameters for backend authentication
+      const params = new URLSearchParams({
+        token: token,
+        user_id: user.id,
+      });
+
+      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${params.toString()}`;
+
+      logger.info('🔌 Connecting to WebSocket:', wsUrl.replace(token, 'TOKEN_HIDDEN')); // Hide token in logs
 
       this.ws = new WebSocket(wsUrl);
       this.setupEventHandlers();
@@ -120,60 +132,14 @@ export class EnhancedWebSocketService {
 
       this.ws.onopen = () => {
         clearTimeout(connectionTimeout);
-        logger.info('✅ WebSocket connected, authenticating...');
-        this.authenticate();
+        logger.info('✅ WebSocket connected successfully');
+        // Authentication is handled via query parameters, no need for separate auth message
+        this.handleAuthenticated();
       };
     } catch (error) {
       logger.error('❌ WebSocket connection failed:', error);
       this.setState('DISCONNECTED');
       this.scheduleReconnect();
-    }
-  }
-
-  private async authenticate(): Promise<void> {
-    this.setState('AUTHENTICATING');
-
-    try {
-      const token = await tokenManager.getTokenWithRefresh();
-      if (!token) {
-        throw new Error('No authentication token available');
-      }
-
-      const userInfo = await AsyncStorage.getItem('userInfo');
-      const user = JSON.parse(userInfo!);
-
-      const authMessage: WebSocketMessage = {
-        id: this.generateMessageId(),
-        type: WebSocketEvent.AUTHENTICATE,
-        data: {
-          token,
-          user_id: user.id,
-          restaurant_id: user.restaurant_id || 'onboarding',
-          client_type: 'mobile_pos',
-          client_version: '1.0.0',
-        },
-        restaurant_id: user.restaurant_id || 'onboarding',
-        timestamp: new Date().toISOString(),
-      };
-
-      // Send auth message
-      this.ws?.send(JSON.stringify(authMessage));
-
-      // Set authentication timeout
-      const authTimeout = setTimeout(() => {
-        if (this.state === 'AUTHENTICATING') {
-          logger.error('❌ WebSocket authentication timeout');
-          this.handleDisconnect(4002, 'Authentication timeout');
-        }
-      }, this.config.authTimeout);
-
-      // Store timeout to clear on success
-      this.once(WebSocketEvent.AUTHENTICATED, () => {
-        clearTimeout(authTimeout);
-      });
-    } catch (error) {
-      logger.error('❌ WebSocket authentication failed:', error);
-      this.handleDisconnect(4003, 'Authentication failed');
     }
   }
 
@@ -202,10 +168,6 @@ export class EnhancedWebSocketService {
 
   private handleMessage(message: WebSocketMessage): void {
     switch (message.type) {
-      case WebSocketEvent.AUTHENTICATED:
-        this.handleAuthenticated();
-        break;
-
       case WebSocketEvent.PONG:
         this.handlePong();
         break;
@@ -225,7 +187,7 @@ export class EnhancedWebSocketService {
         logger.error('❌ WebSocket auth error:', message.data);
         this.handleAuthError(message);
         break;
-      
+
       case WebSocketEvent.TOKEN_EXPIRED:
         logger.warn('⚠️ WebSocket token expiring:', message.data);
         this.handleTokenExpired(message);
@@ -241,7 +203,7 @@ export class EnhancedWebSocketService {
   private handleAuthenticated(): void {
     logger.info('✅ WebSocket authenticated successfully');
     this.setState('CONNECTED');
-    
+
     // Reset exponential backoff on successful connection
     this.exponentialBackoff.reset();
 
@@ -269,7 +231,7 @@ export class EnhancedWebSocketService {
         this.setState('DISCONNECTED');
       });
   }
-  
+
   private setupTokenRefreshListener(): void {
     // Check if tokenManager exists and has event emitter interface
     if (!tokenManager || typeof tokenManager.on !== 'function') {
@@ -293,11 +255,11 @@ export class EnhancedWebSocketService {
     // Listen for token refresh events from tokenManager
     tokenManager.on('token:refreshed', this.tokenRefreshListener);
   }
-  
+
   private async handleTokenExpired(message: WebSocketMessage): Promise<void> {
     const secondsUntilExpiry = message.data?.seconds_until_expiry || 0;
     logger.warn(`⚠️ Token expiring in ${secondsUntilExpiry} seconds`);
-    
+
     // Refresh token proactively
     try {
       const newToken = await tokenManager.forceRefresh();
@@ -309,37 +271,18 @@ export class EnhancedWebSocketService {
       this.handleDisconnect(4005, 'Token refresh failed');
     }
   }
-  
-  private async reauthenticate(newToken: string): Promise<void> {
-    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      logger.warn('⚠️ Cannot re-authenticate, WebSocket not connected');
-      return;
+
+  private async reauthenticate(_newToken: string): Promise<void> {
+    // Since authentication is via query parameters, we need to reconnect with new token
+    logger.info('🔄 Token refreshed, reconnecting WebSocket with new token...');
+
+    // Close current connection
+    if (this.ws) {
+      this.ws.close(1000, 'Token refresh - reconnecting');
     }
-    
-    try {
-      const userInfo = await AsyncStorage.getItem('userInfo');
-      if (!userInfo) return;
-      
-      const user = JSON.parse(userInfo);
-      
-      // Send re-authentication message
-      const reauthMessage: WebSocketMessage = {
-        id: this.generateMessageId(),
-        type: WebSocketEvent.REAUTH,
-        data: {
-          token: newToken,
-          user_id: user.id,
-          restaurant_id: user.restaurant_id || 'onboarding',
-        },
-        restaurant_id: user.restaurant_id || 'onboarding',
-        timestamp: new Date().toISOString(),
-      };
-      
-      this.ws.send(JSON.stringify(reauthMessage));
-      logger.info('✅ Re-authentication message sent');
-    } catch (error) {
-      logger.error('❌ Re-authentication failed:', error);
-    }
+
+    // Reconnect with new token (will be picked up by tokenManager.getTokenWithRefresh())
+    await this.connect();
   }
 
   private startHeartbeat(): void {
@@ -417,7 +360,7 @@ export class EnhancedWebSocketService {
     }
 
     const currentAttempt = this.exponentialBackoff.getAttemptCount();
-    
+
     if (currentAttempt >= this.config.maxReconnectAttempts) {
       logger.error('❌ Max reconnection attempts reached');
       this.emit('max_reconnect_attempts', {
