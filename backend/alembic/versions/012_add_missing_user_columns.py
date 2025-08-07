@@ -1,0 +1,48 @@
+"""Add missing current_restaurant_id columns to users table
+
+Revision ID: 012_add_missing_user_columns
+Revises: 011_add_rls_session_variables
+Create Date: 2025-08-07
+
+"""
+from alembic import op
+import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
+
+# revision identifiers, used by Alembic.
+revision = '012_add_missing_user_columns'
+down_revision = '011_add_rls_session_variables'
+branch_labels = None
+depends_on = None
+
+
+def upgrade():
+    """Add current_restaurant_id and last_restaurant_switch columns"""
+    
+    # Check if columns already exist before adding them
+    connection = op.get_bind()
+    inspector = sa.inspect(connection)
+    
+    # Get existing columns
+    existing_columns = [col['name'] for col in inspector.get_columns('users')]
+    
+    # Add current_restaurant_id if it doesn't exist
+    if 'current_restaurant_id' not in existing_columns:
+        op.add_column('users', 
+            sa.Column('current_restaurant_id', 
+                     postgresql.UUID(as_uuid=True), 
+                     sa.ForeignKey('restaurants.id', ondelete='SET NULL'),
+                     nullable=True))
+    
+    # Add last_restaurant_switch if it doesn't exist  
+    if 'last_restaurant_switch' not in existing_columns:
+        op.add_column('users',
+            sa.Column('last_restaurant_switch',
+                     sa.DateTime(timezone=True),
+                     nullable=True))
+
+
+def downgrade():
+    """Remove the added columns"""
+    op.drop_column('users', 'last_restaurant_switch')
+    op.drop_column('users', 'current_restaurant_id')
