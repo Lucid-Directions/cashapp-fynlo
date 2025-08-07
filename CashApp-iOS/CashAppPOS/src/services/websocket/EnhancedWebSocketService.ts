@@ -45,6 +45,9 @@ export class EnhancedWebSocketService {
   // Token refresh listener
   private tokenRefreshListener: ((newToken: string) => Promise<void>) | null = null;
 
+  // Authentication timer (cleared on success/failure)
+  private authTimer: NodeJS.Timeout | null = null;
+
   constructor(config: Partial<WebSocketConfig> = {}) {
     this.config = {
       heartbeatInterval: 15000, // 15 seconds
@@ -95,6 +98,11 @@ export class EnhancedWebSocketService {
     }
 
     try {
+      // Ensure network monitoring is active after previous disconnects
+      if (!this.networkUnsubscribe) {
+        this.setupNetworkMonitoring();
+      }
+
       this.setState('CONNECTING');
 
       // Get connection parameters
@@ -201,19 +209,17 @@ export class EnhancedWebSocketService {
           // Move to authenticating state
           this.setState('AUTHENTICATING');
           
-          // Set auth timeout - but also check if we're already connected (old backend)
-          setTimeout(() => {
+          // Set explicit authentication timeout using configured value
+          if (this.authTimer) {
+            clearTimeout(this.authTimer);
+            this.authTimer = null;
+          }
+          this.authTimer = setTimeout(() => {
             if (this.state === 'AUTHENTICATING') {
-              // Assume old backend authenticated via query params
-              logger.info('✅ Assuming authentication via query params (old backend)');
-              this.setState('CONNECTED');
-              this.pendingAuth = null;
-              this.exponentialBackoff.reset();
-              this.startHeartbeat();
-              this.processMessageQueue();
-              this.emit(WebSocketEvent.CONNECT, { timestamp: Date.now() });
+              logger.error('❌ WebSocket authentication timeout');
+              this.handleDisconnect(4002, 'Authentication timeout');
             }
-          }, 1000); // Short timeout - if no auth response, assume old backend
+          }, this.config.authTimeout);
         } else {
           logger.error('❌ No pending auth data available');
           this.ws?.close();
@@ -251,8 +257,26 @@ export class EnhancedWebSocketService {
 
   private handleMessage(message: WebSocketMessage): void {
     switch (message.type) {
+      case WebSocketEvent.AUTHENTICATED:
+        // Standard authenticated event
+        if (this.authTimer) {
+          clearTimeout(this.authTimer);
+          this.authTimer = null;
+        }
+        logger.info('✅ WebSocket authenticated successfully');
+        this.setState('CONNECTED');
+        this.pendingAuth = null;
+        this.exponentialBackoff.reset();
+        this.startHeartbeat();
+        this.processMessageQueue();
+        this.emit(WebSocketEvent.CONNECT, { timestamp: Date.now() });
+        break;
       case 'auth_success':
         // Authentication successful
+        if (this.authTimer) {
+          clearTimeout(this.authTimer);
+          this.authTimer = null;
+        }
         logger.info('✅ WebSocket authenticated successfully');
         this.setState('CONNECTED');
         this.pendingAuth = null; // Clear auth data
@@ -312,6 +336,10 @@ export class EnhancedWebSocketService {
 
   private handleAuthError(message: WebSocketMessage): void {
     logger.error('❌ Authentication error:', message.data);
+    if (this.authTimer) {
+      clearTimeout(this.authTimer);
+      this.authTimer = null;
+    }
 
     // Try to refresh token and reconnect
     tokenManager
@@ -490,6 +518,10 @@ export class EnhancedWebSocketService {
 
   private handleDisconnect(code: number, reason: string): void {
     this.stopHeartbeat();
+    if (this.authTimer) {
+      clearTimeout(this.authTimer);
+      this.authTimer = null;
+    }
     this.setState('DISCONNECTED');
 
     if (this.ws) {
@@ -582,6 +614,10 @@ export class EnhancedWebSocketService {
     logger.info('👋 Disconnecting WebSocket...');
 
     this.stopHeartbeat();
+    if (this.authTimer) {
+      clearTimeout(this.authTimer);
+      this.authTimer = null;
+    }
 
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
