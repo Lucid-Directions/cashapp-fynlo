@@ -33,7 +33,6 @@ import SettingsScreen from '../screens/settings/SettingsScreen';
 
 // Import Hardware screens
 import AccessibilityScreen from '../screens/settings/user/AccessibilityScreen';
-import AccessibilityScreen from '../screens/settings/user/AccessibilityScreen';
 import LocalizationScreen from '../screens/settings/user/LocalizationScreen';
 import NotificationSettingsScreen from '../screens/settings/user/NotificationSettingsScreen';
 import ThemeOptionsScreen from '../screens/settings/user/ThemeOptionsScreen';
