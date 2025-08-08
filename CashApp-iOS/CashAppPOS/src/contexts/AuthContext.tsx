@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import useAppStore from '../store/useAppStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { logger } from '../utils/logger';
 
 export interface User {
   id: string;

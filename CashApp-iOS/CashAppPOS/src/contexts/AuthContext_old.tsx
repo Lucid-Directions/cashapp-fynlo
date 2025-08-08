@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import RestaurantDataService from '../services/RestaurantDataService';
 // TODO: Unused import - import API_CONFIG from '../config/api';
 import { useAuthStore } from '../store/useAuthStore';
+import { logger } from '../utils/logger';
 
 export interface User {
   id: string;
