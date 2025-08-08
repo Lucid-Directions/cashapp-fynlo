@@ -3,6 +3,8 @@
  * Basic error tracking without external dependencies for immediate deployment
  */
 
+import { logger } from '../utils/logger';
+
 export interface ErrorContext {
   userId?: string;
   userEmail?: string;
