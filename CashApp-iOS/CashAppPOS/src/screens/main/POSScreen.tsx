@@ -1467,7 +1467,7 @@ const createDynamicStyles = (theme: unknown, serviceChargeConfig: { enabled: boo
     },
   });
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: any) =>
   StyleSheet.create({
     container: {
       flex: 1,

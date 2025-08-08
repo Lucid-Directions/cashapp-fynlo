@@ -282,7 +282,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: any) =>
   StyleSheet.create({
     container: {
       flex: 1,

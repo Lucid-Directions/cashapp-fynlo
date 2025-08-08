@@ -163,3 +163,5 @@ backend/manual_fix_instructions.md
 backend/debug_*.py
 backend/test_*.py
 backend/fix_*.py
+# Bundle source maps (should not be committed)
+*.jsbundle.map
