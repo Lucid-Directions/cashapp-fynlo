@@ -394,7 +394,7 @@ const ProfileScreenContent: React.FC = () => {
 };
 
 // Dynamic styles creator for button combinations
-const createDynamicStyles = (theme: unknown) =>
+const createDynamicStyles = (theme: any) =>
   StyleSheet.create({
     modalCancelButton: {
       flex: 1,
@@ -416,7 +416,7 @@ const createDynamicStyles = (theme: unknown) =>
     },
   });
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: any) =>
   StyleSheet.create({
     container: {
       flex: 1,
