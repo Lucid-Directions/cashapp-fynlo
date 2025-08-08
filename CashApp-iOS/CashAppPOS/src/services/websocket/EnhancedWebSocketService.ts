@@ -1,4 +1,4 @@
-import { ExponentialBackoff } from '@fynlo/shared/src/utils/exponentialBackoff';
+import { ExponentialBackoff } from '../../utils/exponentialBackoff';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 
@@ -118,24 +118,23 @@ export class EnhancedWebSocketService {
         userIdType: typeof user?.id,
         hasRestaurant: !!user?.restaurant_id,
       });
-      
+
       // Allow users without restaurants to connect (for onboarding)
       const restaurantId = user.restaurant_id || 'onboarding';
 
       // Get authentication token (use override if provided for reauthentication)
       logger.info('🔍 Getting token...', { hasOverride: !!overrideToken });
-      const token = overrideToken || await tokenManager.getTokenWithRefresh();
-      
+      const token = overrideToken || (await tokenManager.getTokenWithRefresh());
+
       logger.info('🔍 Token retrieved:', {
         hasToken: !!token,
         tokenLength: token?.length,
         tokenPreview: token ? `${token.substring(0, 20)}...` : 'NONE',
       });
-      
+
       if (!token) {
         throw new Error('No authentication token available');
       }
-
 
       // Build WebSocket URL with authentication parameters
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
@@ -143,7 +142,7 @@ export class EnhancedWebSocketService {
 
       // CRITICAL FIX: React Native WebSocket strips query parameters
       // We must send authentication as the first message instead
-      
+
       // Store auth data for first message
       // Validate user id as a non-empty, non-zero string (robust against "0" and falsy values)
       const userIdStr = String(user.id ?? '').trim();
@@ -156,12 +155,14 @@ export class EnhancedWebSocketService {
         user_id: userIdStr,
         restaurant_id: restaurantId,
       };
-      
+
       // Build URL - Try with query params for backward compatibility
       // But be prepared to auth via message if React Native strips them
-      const queryString = `token=${encodeURIComponent(token)}&user_id=${encodeURIComponent(userIdStr)}`;
+      const queryString = `token=${encodeURIComponent(token)}&user_id=${encodeURIComponent(
+        userIdStr
+      )}`;
       const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}?${queryString}`;
-      
+
       // Mask token in logs
       const maskedUrl = wsUrl.replace(/token=[^&]+/, 'token=TOKEN_HIDDEN');
       logger.info('🔌 Connecting to WebSocket (dual auth mode):', maskedUrl);
@@ -169,12 +170,12 @@ export class EnhancedWebSocketService {
 
       // Create WebSocket
       this.ws = new WebSocket(wsUrl);
-      
+
       // Check if the WebSocket has a url property (some implementations expose it)
       if ('url' in this.ws) {
         logger.info('🔍 WebSocket.url property:', (this.ws as any).url);
       }
-      
+
       this.setupEventHandlers();
 
       // Connection timeout
@@ -189,11 +190,11 @@ export class EnhancedWebSocketService {
       this.ws.onopen = () => {
         clearTimeout(connectionTimeout);
         logger.info('✅ WebSocket opened');
-        
+
         // DUAL AUTH MODE: Try both query params (old backend) and message auth (new backend)
         // If backend already authenticated via query params, it will ignore the auth message
         // If React Native stripped query params, auth message will authenticate
-        
+
         if (this.pendingAuth && this.ws) {
           // Send authentication message in case query params were stripped
           const authMessage = {
@@ -203,9 +204,12 @@ export class EnhancedWebSocketService {
             restaurant_id: this.pendingAuth.restaurant_id,
             timestamp: new Date().toISOString(),
           };
-          
-          logger.info('🔐 Sending authentication message as backup with user_id:', this.pendingAuth.user_id);
-          
+
+          logger.info(
+            '🔐 Sending authentication message as backup with user_id:',
+            this.pendingAuth.user_id
+          );
+
           // Send authentication message with error handling
           try {
             this.ws.send(JSON.stringify(authMessage));
@@ -215,10 +219,10 @@ export class EnhancedWebSocketService {
             this.handleDisconnect(4003, 'Failed to send authentication');
             return;
           }
-          
+
           // Move to authenticating state
           this.setState('AUTHENTICATING');
-          
+
           // Set explicit authentication timeout using configured value
           if (this.authTimer) {
             clearTimeout(this.authTimer);
@@ -290,7 +294,7 @@ export class EnhancedWebSocketService {
         logger.info('✅ WebSocket authenticated successfully');
         this.setState('CONNECTED');
         this.pendingAuth = null; // Clear auth data
-        
+
         // Reset exponential backoff on successful connection
         this.exponentialBackoff.reset();
 
@@ -303,7 +307,7 @@ export class EnhancedWebSocketService {
         // Emit connected event
         this.emit(WebSocketEvent.CONNECT, { timestamp: Date.now() });
         break;
-        
+
       case 'auth_error':
         logger.error('❌ WebSocket authentication failed:', message.data);
         this.pendingAuth = null;
@@ -342,7 +346,6 @@ export class EnhancedWebSocketService {
         break;
     }
   }
-
 
   private handleAuthError(message: WebSocketMessage): void {
     logger.error('❌ Authentication error:', message.data);
@@ -409,21 +412,21 @@ export class EnhancedWebSocketService {
 
     // First, stop heartbeat to prevent timer leaks
     this.stopHeartbeat();
-    
+
     // Close current connection and wait for it to complete
     if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
       // Clear all event handlers to prevent leaks
       const wsRef = this.ws;
-      
+
       await new Promise<void>((resolve) => {
         let timeoutId: NodeJS.Timeout | null = null;
-        
+
         const cleanup = () => {
           if (timeoutId) {
             clearTimeout(timeoutId);
             timeoutId = null;
           }
-          
+
           // Ensure all handlers are cleared
           if (wsRef) {
             wsRef.onopen = null;
@@ -431,23 +434,23 @@ export class EnhancedWebSocketService {
             wsRef.onerror = null;
             wsRef.onmessage = null;
           }
-          
+
           resolve();
         };
-        
+
         // Set a temporary onclose handler for cleanup
         if (wsRef) {
           wsRef.onclose = () => {
             cleanup();
           };
         }
-        
+
         // Set timeout for cleanup in case close doesn't fire
         timeoutId = setTimeout(() => {
           logger.warn('⚠️ WebSocket close timeout, forcing cleanup');
           cleanup();
         }, 2000);
-        
+
         // Now close the connection
         try {
           if (wsRef) {
@@ -469,10 +472,10 @@ export class EnhancedWebSocketService {
     // Clear the reference and set state to DISCONNECTED
     this.ws = null;
     this.setState('DISCONNECTED');
-    
+
     // Emit disconnect event for reauthentication
     this.emit(WebSocketEvent.DISCONNECT, { code: 1000, reason: 'Token refresh - reconnecting' });
-    
+
     // Reconnect with the new token by passing it directly
     await this.connect(newToken);
   }
@@ -602,7 +605,9 @@ export class EnhancedWebSocketService {
         // Queue the message for retry
         if (this.messageQueue.length < this.maxQueueSize) {
           this.messageQueue.push(fullMessage);
-          logger.info(`📦 Message queued after send failure (${this.messageQueue.length} in queue)`);
+          logger.info(
+            `📦 Message queued after send failure (${this.messageQueue.length} in queue)`
+          );
         }
         // Trigger reconnection if send fails
         this.handleDisconnect(4007, 'Send failure');

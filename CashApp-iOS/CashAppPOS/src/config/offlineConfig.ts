@@ -1,9 +1,9 @@
 /**
  * Offline Queue Configuration Management
- * 
+ *
  * CRITICAL: Production-ready configuration for SecureOfflineQueueService
  * Provides environment-specific settings for security, performance, and monitoring
- * 
+ *
  * Features:
  * - Environment detection (production/staging/development)
  * - Dynamic configuration based on environment
@@ -14,7 +14,7 @@
  */
 
 import { Platform } from 'react-native';
-import DeviceInfo from 'react-native-device-info';
+// import DeviceInfo from 'react-native-device-info'; // Commented out temporarily
 
 // Environment types
 export enum Environment {
@@ -36,7 +36,7 @@ export interface OfflineQueueConfig {
   batchSize: number;
   syncInterval: number;
   cleanupInterval: number;
-  
+
   // Security settings
   enableEncryption: boolean;
   enableCompression: boolean;
@@ -46,7 +46,7 @@ export interface OfflineQueueConfig {
   maxStringLength: number;
   maxEndpointLength: number;
   maxQueueAgeDays: number;
-  
+
   // Performance settings
   enableBatching: boolean;
   enablePrioritization: boolean;
@@ -54,14 +54,14 @@ export interface OfflineQueueConfig {
   evictionThreshold: number;
   evictionPercentage: number;
   memoryWarningThreshold: number;
-  
+
   // Rate limiting
   rateLimitEnabled: boolean;
   maxRequestsPerMinute: number;
   maxRequestsPerHour: number;
   burstLimit: number;
   throttleDelay: number;
-  
+
   // Monitoring
   enableMetrics: boolean;
   enableErrorReporting: boolean;
@@ -73,14 +73,14 @@ export interface OfflineQueueConfig {
     syncDelay: number;
     memoryUsage: number;
   };
-  
+
   // Network settings
   connectionTimeout: number;
   requestTimeout: number;
   enableAutoSync: boolean;
   enableOfflineMode: boolean;
   wifiOnlySync: boolean;
-  
+
   // Feature flags
   features: {
     enableConflictResolution: boolean;
@@ -101,7 +101,7 @@ class EnvironmentDetector {
   private readonly isDebugMode: boolean;
 
   private constructor() {
-    this.bundleId = DeviceInfo.getBundleId();
+    this.bundleId = 'com.fynlo.pos'; // DeviceInfo.getBundleId();
     this.isDebugMode = __DEV__;
     this.environment = this.detectEnvironment();
   }
@@ -123,11 +123,11 @@ class EnvironmentDetector {
     if (this.bundleId.includes('.dev') || this.bundleId.includes('.debug')) {
       return Environment.DEVELOPMENT;
     }
-    
+
     if (this.bundleId.includes('.staging') || this.bundleId.includes('.beta')) {
       return Environment.STAGING;
     }
-    
+
     if (this.bundleId.includes('.test')) {
       return Environment.TEST;
     }
@@ -177,7 +177,7 @@ class OfflineConfigFactory {
     // PRODUCTION Configuration - Optimized for reliability and security
     [Environment.PRODUCTION]: {
       environment: Environment.PRODUCTION,
-      
+
       // Core settings - Conservative for stability
       maxQueueSize: 1000,
       maxMemoryItems: 50,
@@ -187,7 +187,7 @@ class OfflineConfigFactory {
       batchSize: 5,
       syncInterval: 60000, // 1 minute
       cleanupInterval: 3600000, // 1 hour
-      
+
       // Security - Maximum protection
       enableEncryption: true,
       enableCompression: true,
@@ -197,7 +197,7 @@ class OfflineConfigFactory {
       maxStringLength: 5000,
       maxEndpointLength: 256,
       maxQueueAgeDays: 3,
-      
+
       // Performance - Balanced
       enableBatching: true,
       enablePrioritization: true,
@@ -205,14 +205,14 @@ class OfflineConfigFactory {
       evictionThreshold: 0.9,
       evictionPercentage: 0.2,
       memoryWarningThreshold: 0.8,
-      
+
       // Rate limiting - Strict
       rateLimitEnabled: true,
       maxRequestsPerMinute: 60,
       maxRequestsPerHour: 2000,
       burstLimit: 10,
       throttleDelay: 1000,
-      
+
       // Monitoring - Full
       enableMetrics: true,
       enableErrorReporting: true,
@@ -224,14 +224,14 @@ class OfflineConfigFactory {
         syncDelay: 300000,
         memoryUsage: 0.85,
       },
-      
+
       // Network - Conservative
       connectionTimeout: 10000,
       requestTimeout: 30000,
       enableAutoSync: true,
       enableOfflineMode: true,
       wifiOnlySync: false,
-      
+
       // Features - Full
       features: {
         enableConflictResolution: true,
@@ -243,11 +243,11 @@ class OfflineConfigFactory {
         enablePushNotifications: true,
       },
     },
-    
+
     // STAGING Configuration - Production-like with more logging
     [Environment.STAGING]: {
       environment: Environment.STAGING,
-      
+
       // Core settings - Similar to production
       maxQueueSize: 800,
       maxMemoryItems: 75,
@@ -257,7 +257,7 @@ class OfflineConfigFactory {
       batchSize: 8,
       syncInterval: 45000,
       cleanupInterval: 1800000, // 30 minutes
-      
+
       // Security - Strong but with debugging
       enableEncryption: true,
       enableCompression: true,
@@ -267,7 +267,7 @@ class OfflineConfigFactory {
       maxStringLength: 8000,
       maxEndpointLength: 400,
       maxQueueAgeDays: 5,
-      
+
       // Performance - More aggressive
       enableBatching: true,
       enablePrioritization: true,
@@ -275,14 +275,14 @@ class OfflineConfigFactory {
       evictionThreshold: 0.85,
       evictionPercentage: 0.25,
       memoryWarningThreshold: 0.75,
-      
+
       // Rate limiting - Moderate
       rateLimitEnabled: true,
       maxRequestsPerMinute: 120,
       maxRequestsPerHour: 4000,
       burstLimit: 20,
       throttleDelay: 500,
-      
+
       // Monitoring - Verbose
       enableMetrics: true,
       enableErrorReporting: true,
@@ -294,14 +294,14 @@ class OfflineConfigFactory {
         syncDelay: 180000,
         memoryUsage: 0.8,
       },
-      
+
       // Network - Flexible
       connectionTimeout: 15000,
       requestTimeout: 45000,
       enableAutoSync: true,
       enableOfflineMode: true,
       wifiOnlySync: false,
-      
+
       // Features - Full
       features: {
         enableConflictResolution: true,
@@ -313,11 +313,11 @@ class OfflineConfigFactory {
         enablePushNotifications: true,
       },
     },
-    
+
     // DEVELOPMENT Configuration - Maximum flexibility
     [Environment.DEVELOPMENT]: {
       environment: Environment.DEVELOPMENT,
-      
+
       // Core settings - Aggressive for testing
       maxQueueSize: 500,
       maxMemoryItems: 100,
@@ -327,7 +327,7 @@ class OfflineConfigFactory {
       batchSize: 10,
       syncInterval: 15000, // 15 seconds
       cleanupInterval: 600000, // 10 minutes
-      
+
       // Security - Relaxed for debugging
       enableEncryption: false,
       enableCompression: false,
@@ -337,7 +337,7 @@ class OfflineConfigFactory {
       maxStringLength: 10000,
       maxEndpointLength: 500,
       maxQueueAgeDays: 7,
-      
+
       // Performance - Aggressive
       enableBatching: true,
       enablePrioritization: true,
@@ -345,14 +345,14 @@ class OfflineConfigFactory {
       evictionThreshold: 0.8,
       evictionPercentage: 0.3,
       memoryWarningThreshold: 0.7,
-      
+
       // Rate limiting - Disabled
       rateLimitEnabled: false,
       maxRequestsPerMinute: 999,
       maxRequestsPerHour: 99999,
       burstLimit: 100,
       throttleDelay: 0,
-      
+
       // Monitoring - Debug level
       enableMetrics: true,
       enableErrorReporting: true,
@@ -364,14 +364,14 @@ class OfflineConfigFactory {
         syncDelay: 60000,
         memoryUsage: 0.7,
       },
-      
+
       // Network - Fast
       connectionTimeout: 30000,
       requestTimeout: 60000,
       enableAutoSync: true,
       enableOfflineMode: true,
       wifiOnlySync: false,
-      
+
       // Features - Experimental
       features: {
         enableConflictResolution: true,
@@ -383,11 +383,11 @@ class OfflineConfigFactory {
         enablePushNotifications: false,
       },
     },
-    
+
     // TEST Configuration - For automated testing
     [Environment.TEST]: {
       environment: Environment.TEST,
-      
+
       // Core settings - Minimal for speed
       maxQueueSize: 100,
       maxMemoryItems: 50,
@@ -397,7 +397,7 @@ class OfflineConfigFactory {
       batchSize: 20,
       syncInterval: 1000,
       cleanupInterval: 60000,
-      
+
       // Security - Disabled for speed
       enableEncryption: false,
       enableCompression: false,
@@ -407,7 +407,7 @@ class OfflineConfigFactory {
       maxStringLength: 50000,
       maxEndpointLength: 1000,
       maxQueueAgeDays: 30,
-      
+
       // Performance - Maximum
       enableBatching: false,
       enablePrioritization: false,
@@ -415,14 +415,14 @@ class OfflineConfigFactory {
       evictionThreshold: 0.95,
       evictionPercentage: 0.5,
       memoryWarningThreshold: 0.9,
-      
+
       // Rate limiting - Disabled
       rateLimitEnabled: false,
       maxRequestsPerMinute: 9999,
       maxRequestsPerHour: 999999,
       burstLimit: 1000,
       throttleDelay: 0,
-      
+
       // Monitoring - Minimal
       enableMetrics: false,
       enableErrorReporting: false,
@@ -434,14 +434,14 @@ class OfflineConfigFactory {
         syncDelay: 10000,
         memoryUsage: 0.95,
       },
-      
+
       // Network - Instant
       connectionTimeout: 100,
       requestTimeout: 1000,
       enableAutoSync: false,
       enableOfflineMode: true,
       wifiOnlySync: false,
-      
+
       // Features - Minimal
       features: {
         enableConflictResolution: false,
@@ -458,19 +458,19 @@ class OfflineConfigFactory {
   public static getConfig(environment?: Environment): OfflineQueueConfig {
     const env = environment || EnvironmentDetector.getInstance().getEnvironment();
     const config = this.configs[env];
-    
+
     if (!config) {
       console.warn(`No configuration found for environment: ${env}, defaulting to production`);
       return this.configs[Environment.PRODUCTION];
     }
-    
+
     // Apply platform-specific overrides
     return this.applyPlatformOverrides(config);
   }
 
   private static applyPlatformOverrides(config: OfflineQueueConfig): OfflineQueueConfig {
     const overridden = { ...config };
-    
+
     if (Platform.OS === 'ios') {
       // iOS specific adjustments
       overridden.maxMemoryItems = Math.min(config.maxMemoryItems, 75);
@@ -480,15 +480,16 @@ class OfflineConfigFactory {
       overridden.maxMemoryItems = Math.min(config.maxMemoryItems, 50);
       overridden.cleanupInterval = Math.max(config.cleanupInterval, 1800000);
     }
-    
+
     // Low-end device detection
-    const totalMemory = DeviceInfo.getTotalMemorySync();
-    if (totalMemory < 2 * 1024 * 1024 * 1024) { // Less than 2GB
+    const totalMemory = 4 * 1024 * 1024 * 1024; // DeviceInfo.getTotalMemorySync();
+    if (totalMemory < 2 * 1024 * 1024 * 1024) {
+      // Less than 2GB
       overridden.maxQueueSize = Math.min(config.maxQueueSize, 300);
       overridden.maxMemoryItems = Math.min(config.maxMemoryItems, 30);
       overridden.enableCompression = true;
     }
-    
+
     return overridden;
   }
 }
@@ -539,7 +540,7 @@ export class OfflineConfigManager {
 
   private notifyListeners(): void {
     const currentConfig = this.getConfig();
-    this.listeners.forEach(listener => listener(currentConfig));
+    this.listeners.forEach((listener) => listener(currentConfig));
   }
 
   private async loadPersistedOverrides(): Promise<void> {
@@ -577,7 +578,7 @@ export class OfflineConfigManager {
   public shouldEncrypt(entityType: string): boolean {
     const config = this.getConfig();
     if (!config.enableEncryption) return false;
-    
+
     const sensitiveEntities = ['payment', 'customer', 'employee', 'user'];
     return sensitiveEntities.includes(entityType.toLowerCase());
   }
@@ -588,12 +589,12 @@ export class OfflineConfigManager {
       config.retryBaseDelay * Math.pow(2, retryCount),
       config.retryMaxDelay
     );
-    
+
     // Add jitter (±30%)
     const jitter = 0.3;
     const minDelay = exponentialDelay * (1 - jitter);
     const maxDelay = exponentialDelay * (1 + jitter);
-    
+
     return Math.floor(Math.random() * (maxDelay - minDelay) + minDelay);
   }
 
@@ -610,7 +611,7 @@ export class OfflineConfigManager {
   public isRateLimited(requestCount: number, timeWindow: 'minute' | 'hour'): boolean {
     const config = this.getConfig();
     if (!config.rateLimitEnabled) return false;
-    
+
     if (timeWindow === 'minute') {
       return requestCount >= config.maxRequestsPerMinute;
     } else {
@@ -634,7 +635,8 @@ export class OfflineConfigManager {
 // Export singleton instance and utilities
 export const offlineConfig = OfflineConfigManager.getInstance();
 export const getOfflineConfig = () => offlineConfig.getConfig();
-export const updateOfflineConfig = (overrides: Partial<OfflineQueueConfig>) => offlineConfig.updateConfig(overrides);
+export const updateOfflineConfig = (overrides: Partial<OfflineQueueConfig>) =>
+  offlineConfig.updateConfig(overrides);
 export const resetOfflineConfig = () => offlineConfig.resetConfig();
 
 // Export for monitoring and debugging
