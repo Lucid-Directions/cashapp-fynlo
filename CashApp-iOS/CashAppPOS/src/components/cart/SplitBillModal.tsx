@@ -41,6 +41,7 @@ export default function SplitBillModal({
   useEnhancedCart = true,
 }: SplitBillModalProps) {
   const { theme } = useTheme();
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
 
   const [numberOfGroups, setNumberOfGroups] = useState(2);
   const [showGroupSetup, setShowGroupSetup] = useState(true);
@@ -412,7 +413,8 @@ export default function SplitBillModal({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => {
+  return StyleSheet.create({
   modalContainer: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -719,4 +721,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: theme.colors.white,
   },
-});
+  });
+};
