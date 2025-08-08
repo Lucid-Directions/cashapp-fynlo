@@ -16,8 +16,7 @@ import { authService as supabaseAuthService } from './supabaseAuth';
 export const authService = AUTH_CONFIG.USE_MOCK_AUTH ? mockAuthService : supabaseAuthService;
 
 // Defer logger call to avoid module-level execution
-if (__DEV__) {
-  setTimeout(() => {
-    logger.info(`🔐 Using ${AUTH_CONFIG.USE_MOCK_AUTH ? 'MOCK' : 'SUPABASE'} authentication service`);
-  }, 0);
-}
+// This should run in all environments, not just development
+setTimeout(() => {
+  logger.info(`🔐 Using ${AUTH_CONFIG.USE_MOCK_AUTH ? 'MOCK' : 'SUPABASE'} authentication service`);
+}, 0);
