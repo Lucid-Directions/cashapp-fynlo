@@ -18,6 +18,7 @@ from app.api.v1.endpoints import (
     platform_settings_public,
     payment_configurations,
     websocket,
+    websocket_enhanced,
     sync,
     notifications,
     menu,
@@ -45,6 +46,11 @@ from app.api.v1.platform import platform_router
 # Specific routes can override this with their own @limiter.limit decorator.
 # api_router = APIRouter(dependencies=[Depends(limiter.limit(DEFAULT_RATE))])
 api_router = APIRouter()
+
+# Mount enhanced websocket FIRST so it handles /ws/{connection_type}/{restaurant_id}
+api_router.include_router(
+    websocket_enhanced.router, prefix="/websocket", tags=["websocket_enhanced"]
+)
 
 
 # Include all endpoint routers
