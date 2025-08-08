@@ -6,7 +6,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { useResponsive, useResponsiveValue } from '../../hooks/useResponsive';
 
-import type { spacing } from '../../design-system/theme';
+import { spacing } from '../../design-system/theme';
 
 // Container variants
 export type ContainerVariant = 'fluid' | 'constrained';
