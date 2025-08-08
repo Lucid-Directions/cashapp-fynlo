@@ -958,7 +958,7 @@ class DataService {
     logger.info('🌐 DataService.getEmployees - fetching from API');
 
     try {
-      const response = await authInterceptor.get(`${API_CONFIG.FULL_API_URL}/employees`);
+      const response = await authInterceptor.get(`${API_CONFIG.FULL_API_URL}/employees/`);
 
       if (response.ok) {
         const result = await response.json();
@@ -1167,7 +1167,7 @@ class DataService {
         logger.info('🌐 Attempting to fetch staff data from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(
-          `${API_CONFIG.FULL_API_URL}/analytics/employees?timeframe=${period}`,
+          `${API_CONFIG.FULL_API_URL}/analytics/employees/?timeframe=${period}`,
           {
             method: 'GET',
             headers: {
@@ -1302,7 +1302,7 @@ class DataService {
     logger.info('🌐 DataService.createEmployee - creating employee via API', employeeData);
 
     try {
-      const response = await authInterceptor.post(`${API_CONFIG.FULL_API_URL}/employees`, {
+      const response = await authInterceptor.post(`${API_CONFIG.FULL_API_URL}/employees/`, {
         first_name: employeeData.firstName,
         last_name: employeeData.lastName,
         email: employeeData.email,
@@ -1338,7 +1338,7 @@ class DataService {
 
     try {
       const response = await authInterceptor.delete(
-        `${API_CONFIG.FULL_API_URL}/employees/${employeeId}`
+        `${API_CONFIG.FULL_API_URL}/employees/${employeeId}/`
       );
 
       if (response.ok) {

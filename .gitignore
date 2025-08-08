@@ -37,6 +37,13 @@ venv.bak/
 .env.test.local
 .env.production.local
 
+# Cursor IDE
+.cursor/chat/**
+.cursor/summary/**
+.cursor/prompts.json
+.cursor/recent_context/**
+.cursor/mcp.json
+
 # Database
 *.db
 *.sqlite3
