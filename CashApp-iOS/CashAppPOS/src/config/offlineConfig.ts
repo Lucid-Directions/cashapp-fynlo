@@ -14,7 +14,7 @@
  */
 
 import { Platform } from 'react-native';
-import DeviceInfo from 'react-native-device-info';
+// import DeviceInfo from 'react-native-device-info'; // Commented out - module missing
 
 // Environment types
 export enum Environment {
@@ -101,7 +101,7 @@ class EnvironmentDetector {
   private readonly isDebugMode: boolean;
 
   private constructor() {
-    this.bundleId = DeviceInfo.getBundleId();
+    this.bundleId = 'com.fynlo.pos'; // DeviceInfo.getBundleId(); // Hardcoded - module missing
     this.isDebugMode = __DEV__;
     this.environment = this.detectEnvironment();
   }
@@ -482,7 +482,7 @@ class OfflineConfigFactory {
     }
     
     // Low-end device detection
-    const totalMemory = DeviceInfo.getTotalMemorySync();
+    const totalMemory = 4 * 1024 * 1024 * 1024; // DeviceInfo.getTotalMemorySync(); // Hardcoded 4GB - module missing
     if (totalMemory < 2 * 1024 * 1024 * 1024) { // Less than 2GB
       overridden.maxQueueSize = Math.min(config.maxQueueSize, 300);
       overridden.maxMemoryItems = Math.min(config.maxMemoryItems, 30);
