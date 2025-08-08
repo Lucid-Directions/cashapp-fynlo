@@ -8,11 +8,17 @@ import logger from './logger';
 export function setupURLSearchParamsPolyfill(): void {
   // Check if URLSearchParams already exists
   if (typeof globalThis.URLSearchParams !== 'undefined') {
-    logger.info('✅ URLSearchParams already available');
+    // Defer logger call to avoid module-level execution
+    setTimeout(() => {
+      logger.info('✅ URLSearchParams already available');
+    }, 0);
     return;
   }
 
-  logger.warn('⚠️ URLSearchParams not found, installing polyfill');
+  // Defer logger call to avoid module-level execution
+  setTimeout(() => {
+    logger.warn('⚠️ URLSearchParams not found, installing polyfill');
+  }, 0);
 
   // Simple URLSearchParams polyfill
   class URLSearchParamsPolyfill {
@@ -123,7 +129,11 @@ export function setupURLSearchParamsPolyfill(): void {
   // Install the polyfill globally
   (globalThis as { URLSearchParams?: typeof URLSearchParams }).URLSearchParams =
     URLSearchParamsPolyfill as unknown as typeof URLSearchParams;
-  logger.info('✅ URLSearchParams polyfill installed');
+  
+  // Defer logger call to avoid module-level execution
+  setTimeout(() => {
+    logger.info('✅ URLSearchParams polyfill installed');
+  }, 0);
 }
 
 // Auto-install polyfill when module is imported

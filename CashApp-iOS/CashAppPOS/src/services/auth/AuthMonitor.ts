@@ -193,5 +193,8 @@ export { AuthMonitor };
 
 // Log that monitoring is active
 if (__DEV__) {
-  logger.info('🔍 Auth monitoring active');
+  // Defer logger call to avoid module-level execution
+  setTimeout(() => {
+    logger.info('🔍 Auth monitoring active');
+  }, 0);
 }
