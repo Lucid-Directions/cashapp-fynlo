@@ -22,6 +22,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AUTH_CONFIG } from '../config/auth.config';
 import { supabase } from '../lib/supabase';
 
+import { logger } from './logger';
+
 // Event listener types
 type EventListener = (...args: unknown[]) => void;
 

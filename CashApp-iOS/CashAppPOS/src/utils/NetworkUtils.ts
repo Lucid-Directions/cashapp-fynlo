@@ -4,6 +4,7 @@
  */
 
 import API_CONFIG from '../config/api';
+import { logger } from './logger';
 
 import tokenManager from './tokenManager';
 

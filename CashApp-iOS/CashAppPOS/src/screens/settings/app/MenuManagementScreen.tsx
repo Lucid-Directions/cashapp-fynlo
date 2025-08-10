@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+import { logger } from '../../../utils/logger';
+
 /* eslint-disable react-native/no-unused-styles */
 // This file uses useThemedStyles pattern which ESLint cannot statically analyze
 

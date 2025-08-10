@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { logger } from '../utils/logger';
 
 import API_CONFIG from '../config/api';
 import useAppStore from '../store/useAppStore'; // For token

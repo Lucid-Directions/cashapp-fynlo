@@ -3,6 +3,7 @@
  * This service handles the setup and initialization of Square payments
  */
 
+import { logger } from '../utils/logger';
 import { getSquareConfig, getSquareLocationId } from '../config/square';
 
 import SquareService from './SquareService';

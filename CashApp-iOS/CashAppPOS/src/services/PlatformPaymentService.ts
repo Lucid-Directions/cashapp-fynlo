@@ -6,6 +6,7 @@
 // TODO: Unused import - import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import PaymentService from './PaymentService';
+import { logger } from '../utils/logger';
 import PlatformService from './PlatformService';
 
 import type { PaymentFee, FeeCalculation } from './PlatformService';

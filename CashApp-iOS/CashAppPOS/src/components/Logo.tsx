@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { logger } from '../utils/logger';
+
 import type { ImageStyle, TextStyle, ViewStyle } from 'react-native';
 import { Image, StyleSheet, View, Text, Platform } from 'react-native';
 

@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+import { logger } from '../../utils/logger';
+
 import { View, TextInput, Text, StyleSheet, TouchableOpacity, _Dimensions } from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';

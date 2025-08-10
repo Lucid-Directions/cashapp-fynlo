@@ -1,4 +1,5 @@
 import type { AccessibilityRole, AccessibilityState, AccessibilityProps } from 'react-native';
+import { logger } from './logger';
 
 // Accessibility utility functions and constants
 

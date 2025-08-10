@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger';
+
 /**
  * Simple Error Tracking Service
  * Basic error tracking without external dependencies for immediate deployment

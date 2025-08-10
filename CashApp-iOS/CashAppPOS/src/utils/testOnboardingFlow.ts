@@ -1,3 +1,5 @@
+import { logger } from './logger';
+
 /**
  * Manual test script for onboarding flow
  * Run this to verify all navigation paths work correctly
