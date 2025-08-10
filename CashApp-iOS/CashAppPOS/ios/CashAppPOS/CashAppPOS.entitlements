@@ -2,11 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Tap to Pay on iPhone entitlement - Matches bundle ID com.fynlo.cashappposlucid -->
+	<!-- 
+	Tap to Pay on iPhone entitlement temporarily disabled
+	Apple's automatic provisioning is failing with this entitlement.
+	This needs to be enabled with the exact value Apple provides after Tap to Pay approval.
+	
 	<key>com.apple.developer.proximity-reader.payment.acceptance</key>
 	<array>
-		<string>merchant.com.fynlo.cashappposlucid</string>
+		<string>NEEDS_APPLE_PROVIDED_VALUE</string>
 	</array>
+	-->
+	
+	<!-- Apple Pay / In-App Payments entitlement -->
 	<key>com.apple.developer.in-app-payments</key>
 	<array>
 		<string>merchant.com.fynlo.cashappposlucid</string>
