@@ -1,9 +1,10 @@
 import { _AuthTokens, _User } from '@fynlo/shared';
-import { logger } from './logger';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AUTH_CONFIG } from '../config/auth.config';
 import { supabase } from '../lib/supabase';
+
+import { logger } from './logger';
 
 interface TokenCache {
   token: string | null;

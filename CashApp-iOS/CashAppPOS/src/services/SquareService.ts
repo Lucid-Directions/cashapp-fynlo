@@ -5,11 +5,11 @@
  * Positioned as secondary payment method to SumUp
  */
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import { logger } from '../utils/logger';
+
 import { _PaymentRequest, _PaymentResult } from './PaymentService';
 
 // Square SDK imports - conditionally loaded to prevent crashes

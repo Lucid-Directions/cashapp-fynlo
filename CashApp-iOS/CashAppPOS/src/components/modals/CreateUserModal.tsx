@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -9,20 +8,18 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  ActivityIndicator } from
-'react-native';
-
+  ActivityIndicator,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { UserManagementService } from '../../services/UserManagementService';
-import { SimpleTextInput } from '../inputs'; // Corrected import
-
 import type {
   CreateUserRequest,
   UserRole,
   Permission,
-  PermissionTemplate } from
-'../../services/UserManagementService';
+  PermissionTemplate,
+} from '../../services/UserManagementService';
+import { SimpleTextInput } from '../inputs'; // Corrected import
 
 // Fynlo POS Color Scheme
 const Colors = {
@@ -38,7 +35,7 @@ const Colors = {
   darkGray: '#666666',
   text: '#333333',
   lightText: '#666666',
-  border: '#DDDDDD'
+  border: '#DDDDDD',
 };
 
 interface CreateUserModalProps {
@@ -53,7 +50,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
     name: '',
     email: '',
     role: 'Restaurant Employee',
-    permissions: []
+    permissions: [],
   });
   const [permissionTemplates, setPermissionTemplates] = useState<PermissionTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
@@ -62,32 +59,32 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
   const userManagementService = UserManagementService.getInstance();
 
   const userRoles: UserRole[] = [
-  'Platform Admin',
-  'Restaurant Owner',
-  'Restaurant Manager',
-  'Restaurant Employee',
-  'Kitchen Staff',
-  'Cashier',
-  'Support Agent'];
-
+    'Platform Admin',
+    'Restaurant Owner',
+    'Restaurant Manager',
+    'Restaurant Employee',
+    'Kitchen Staff',
+    'Cashier',
+    'Support Agent',
+  ];
 
   const allPermissions: Permission[] = [
-  'view_analytics',
-  'manage_users',
-  'manage_restaurants',
-  'process_payments',
-  'manage_inventory',
-  'view_reports',
-  'manage_menu',
-  'manage_orders',
-  'access_pos',
-  'manage_settings',
-  'view_logs',
-  'export_data',
-  'manage_tables',
-  'view_kitchen_orders',
-  'manage_staff_schedules'];
-
+    'view_analytics',
+    'manage_users',
+    'manage_restaurants',
+    'process_payments',
+    'manage_inventory',
+    'view_reports',
+    'manage_menu',
+    'manage_orders',
+    'access_pos',
+    'manage_settings',
+    'view_logs',
+    'export_data',
+    'manage_tables',
+    'view_kitchen_orders',
+    'manage_staff_schedules',
+  ];
 
   const permissionDescriptions: { [key in Permission]: string } = {
     view_analytics: 'View business analytics and insights',
@@ -104,7 +101,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
     export_data: 'Export data and reports',
     manage_tables: 'Manage restaurant tables and seating',
     view_kitchen_orders: 'View orders in kitchen display',
-    manage_staff_schedules: 'Create and manage staff schedules'
+    manage_staff_schedules: 'Create and manage staff schedules',
   };
 
   useEffect(() => {
@@ -165,7 +162,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
       name: '',
       email: '',
       role: 'Restaurant Employee',
-      permissions: []
+      permissions: [],
     });
     setSelectedTemplate('');
     setShowPermissions(false);
@@ -175,14 +172,14 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
   const togglePermission = (permission: Permission) => {
     setFormData((prev) => ({
       ...prev,
-      permissions: prev.permissions.includes(permission) ?
-      prev.permissions.filter((p) => p !== permission) :
-      [...prev.permissions, permission]
+      permissions: prev.permissions.includes(permission)
+        ? prev.permissions.filter((p) => p !== permission)
+        : [...prev.permissions, permission],
     }));
   };
 
   const applicableTemplates = permissionTemplates.filter((template) =>
-  template.applicableRoles.includes(formData.role)
+    template.applicableRoles.includes(formData.role)
   );
 
   return (
@@ -190,8 +187,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={handleClose}>
-
+      onRequestClose={handleClose}
+    >
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -202,13 +199,13 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
           <TouchableOpacity
             onPress={handleSubmit}
             style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-            disabled={loading}>
-
-            {loading ?
-            <ActivityIndicator size="small" color={Colors.white} /> :
-
-            <Text style={styles.saveButtonText}>Create</Text>
-            }
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color={Colors.white} />
+            ) : (
+              <Text style={styles.saveButtonText}>Create</Text>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -223,8 +220,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
                 value={formData.name}
                 onValueChange={(text) => setFormData((prev) => ({ ...prev, name: text }))}
                 placeholder="Enter full name"
-                autoCapitalize="words" />
-
+                autoCapitalize="words"
+              />
             </View>
 
             <View style={styles.inputGroup}>
@@ -234,8 +231,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
                 onValueChange={(text) => setFormData((prev) => ({ ...prev, email: text }))}
                 placeholder="Enter email address"
                 keyboardType="email-address"
-                autoCapitalize="none" />
-
+                autoCapitalize="none"
+              />
             </View>
 
             <View style={styles.inputGroup}>
@@ -244,8 +241,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
                 value={formData.phoneNumber || ''}
                 onValueChange={(text) => setFormData((prev) => ({ ...prev, phoneNumber: text }))}
                 placeholder="Enter phone number"
-                keyboardType="phone-pad" />
-
+                keyboardType="phone-pad"
+              />
             </View>
           </View>
 
@@ -256,131 +253,131 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>User Role *</Text>
               <View style={styles.roleGrid}>
-                {userRoles.map((role) =>
-                <TouchableOpacity
-                  key={role}
-                  style={[styles.roleOption, formData.role === role && styles.roleOptionSelected]}
-                  onPress={() => {
-                    setFormData((prev) => ({ ...prev, role }));
-                    setSelectedTemplate(''); // Reset template when role changes
-                  }}>
-
+                {userRoles.map((role) => (
+                  <TouchableOpacity
+                    key={role}
+                    style={[styles.roleOption, formData.role === role && styles.roleOptionSelected]}
+                    onPress={() => {
+                      setFormData((prev) => ({ ...prev, role }));
+                      setSelectedTemplate(''); // Reset template when role changes
+                    }}
+                  >
                     <Text
-                    style={[
-                    styles.roleOptionText,
-                    formData.role === role && styles.roleOptionTextSelected]
-                    }>
-
+                      style={[
+                        styles.roleOptionText,
+                        formData.role === role && styles.roleOptionTextSelected,
+                      ]}
+                    >
                       {role}
                     </Text>
                   </TouchableOpacity>
-                )}
+                ))}
               </View>
             </View>
 
             {(formData.role === 'Restaurant Owner' ||
-            formData.role === 'Restaurant Manager' ||
-            formData.role === 'Restaurant Employee' ||
-            formData.role === 'Kitchen Staff') &&
-            <View style={styles.inputGroup}>
+              formData.role === 'Restaurant Manager' ||
+              formData.role === 'Restaurant Employee' ||
+              formData.role === 'Kitchen Staff') && (
+              <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Restaurant</Text>
                 <View style={styles.restaurantGrid}>
                   {['1', '2', '3', '4'].map((id) => {
-                  const restaurantNames: {[key: string]: string;} = {
-                    '1': 'Fynlo Coffee Shop',
-                    '2': 'Fynlo Burger Bar',
-                    '3': 'Fynlo Pizza Palace',
-                    '4': 'Fynlo Taco Stand'
-                  };
+                    const restaurantNames: { [key: string]: string } = {
+                      '1': 'Fynlo Coffee Shop',
+                      '2': 'Fynlo Burger Bar',
+                      '3': 'Fynlo Pizza Palace',
+                      '4': 'Fynlo Taco Stand',
+                    };
 
-                  return (
-                    <TouchableOpacity
-                      key={id}
-                      style={[
-                      styles.restaurantOption,
-                      formData.restaurantId === id && styles.restaurantOptionSelected]
-                      }
-                      onPress={() => setFormData((prev) => ({ ...prev, restaurantId: id }))}>
-
-                        <Text
+                    return (
+                      <TouchableOpacity
+                        key={id}
                         style={[
-                        styles.restaurantOptionText,
-                        formData.restaurantId === id && styles.restaurantOptionTextSelected]
-                        }>
-
+                          styles.restaurantOption,
+                          formData.restaurantId === id && styles.restaurantOptionSelected,
+                        ]}
+                        onPress={() => setFormData((prev) => ({ ...prev, restaurantId: id }))}
+                      >
+                        <Text
+                          style={[
+                            styles.restaurantOptionText,
+                            formData.restaurantId === id && styles.restaurantOptionTextSelected,
+                          ]}
+                        >
                           {restaurantNames[id]}
                         </Text>
-                      </TouchableOpacity>);
-
-                })}
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </View>
-            }
+            )}
           </View>
 
           {/* Permission Templates */}
-          {applicableTemplates.length > 0 &&
-          <View style={styles.section}>
+          {applicableTemplates.length > 0 && (
+            <View style={styles.section}>
               <Text style={styles.sectionTitle}>Permission Templates</Text>
               <Text style={styles.sectionSubtitle}>Quick setup with predefined permissions</Text>
 
               <View style={styles.templateGrid}>
-                {applicableTemplates.map((template) =>
-              <TouchableOpacity
-                key={template.id}
-                style={[
-                styles.templateOption,
-                selectedTemplate === template.id && styles.templateOptionSelected]
-                }
-                onPress={() => setSelectedTemplate(template.id)}>
-
+                {applicableTemplates.map((template) => (
+                  <TouchableOpacity
+                    key={template.id}
+                    style={[
+                      styles.templateOption,
+                      selectedTemplate === template.id && styles.templateOptionSelected,
+                    ]}
+                    onPress={() => setSelectedTemplate(template.id)}
+                  >
                     <Text
-                  style={[
-                  styles.templateOptionTitle,
-                  selectedTemplate === template.id && styles.templateOptionTitleSelected]
-                  }>
-
+                      style={[
+                        styles.templateOptionTitle,
+                        selectedTemplate === template.id && styles.templateOptionTitleSelected,
+                      ]}
+                    >
                       {template.name}
                     </Text>
                     <Text
-                  style={[
-                  styles.templateOptionDescription,
-                  selectedTemplate === template.id &&
-                  styles.templateOptionDescriptionSelected]
-                  }>
-
+                      style={[
+                        styles.templateOptionDescription,
+                        selectedTemplate === template.id &&
+                          styles.templateOptionDescriptionSelected,
+                      ]}
+                    >
                       {template.description}
                     </Text>
                   </TouchableOpacity>
-              )}
+                ))}
               </View>
             </View>
-          }
+          )}
 
           {/* Permissions */}
           <View style={styles.section}>
             <TouchableOpacity
               style={styles.permissionsHeader}
-              onPress={() => setShowPermissions(!showPermissions)}>
-
+              onPress={() => setShowPermissions(!showPermissions)}
+            >
               <Text style={styles.sectionTitle}>
                 Permissions ({formData.permissions.length} selected)
               </Text>
               <Icon
                 name={showPermissions ? 'expand-less' : 'expand-more'}
                 size={24}
-                color={Colors.primary} />
-
+                color={Colors.primary}
+              />
             </TouchableOpacity>
 
-            {showPermissions &&
-            <View style={styles.permissionsList}>
-                {allPermissions.map((permission) =>
-              <TouchableOpacity
-                key={permission}
-                style={styles.permissionItem}
-                onPress={() => togglePermission(permission)}>
-
+            {showPermissions && (
+              <View style={styles.permissionsList}>
+                {allPermissions.map((permission) => (
+                  <TouchableOpacity
+                    key={permission}
+                    style={styles.permissionItem}
+                    onPress={() => togglePermission(permission)}
+                  >
                     <View style={styles.permissionInfo}>
                       <Text style={styles.permissionName}>
                         {permission.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
@@ -390,30 +387,30 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
                       </Text>
                     </View>
                     <View
-                  style={[
-                  styles.checkbox,
-                  formData.permissions.includes(permission) && styles.checkboxSelected]
-                  }>
-
-                      {formData.permissions.includes(permission) &&
-                  <Icon name="check" size={16} color={Colors.white} />
-                  }
+                      style={[
+                        styles.checkbox,
+                        formData.permissions.includes(permission) && styles.checkboxSelected,
+                      ]}
+                    >
+                      {formData.permissions.includes(permission) && (
+                        <Icon name="check" size={16} color={Colors.white} />
+                      )}
                     </View>
                   </TouchableOpacity>
-              )}
+                ))}
               </View>
-            }
+            )}
           </View>
         </ScrollView>
       </SafeAreaView>
-    </Modal>);
-
+    </Modal>
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -423,15 +420,15 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border
+    borderBottomColor: Colors.border,
   },
   closeButton: {
-    padding: 8
+    padding: 8,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.text
+    color: Colors.text,
   },
   saveButton: {
     backgroundColor: Colors.primary,
@@ -439,58 +436,50 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     minWidth: 70,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   saveButtonDisabled: {
-    opacity: 0.6
+    opacity: 0.6,
   },
   saveButtonText: {
     color: Colors.white,
     fontSize: 14,
-    fontWeight: '600'
+    fontWeight: '600',
   },
   content: {
-    flex: 1
+    flex: 1,
   },
   section: {
     backgroundColor: Colors.white,
     marginBottom: 12,
     paddingHorizontal: 20,
-    paddingVertical: 16
+    paddingVertical: 16,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: Colors.text,
-    marginBottom: 4
+    marginBottom: 4,
   },
   sectionSubtitle: {
     fontSize: 14,
     color: Colors.lightText,
-    marginBottom: 16
+    marginBottom: 16,
   },
   inputGroup: {
-    marginBottom: 16
+    marginBottom: 16,
   },
   inputLabel: {
     fontSize: 14,
     fontWeight: '500',
     color: Colors.text,
-    marginBottom: 8
+    marginBottom: 8,
   },
-
-
-
-
-
-
-
-
 
   roleGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8
+    gap: 8,
   },
   roleOption: {
     paddingHorizontal: 12,
@@ -498,22 +487,22 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: Colors.border,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.background,
   },
   roleOptionSelected: {
     backgroundColor: Colors.primary,
-    borderColor: Colors.primary
+    borderColor: Colors.primary,
   },
   roleOptionText: {
     fontSize: 12,
     color: Colors.text,
-    fontWeight: '500'
+    fontWeight: '500',
   },
   roleOptionTextSelected: {
-    color: Colors.white
+    color: Colors.white,
   },
   restaurantGrid: {
-    gap: 8
+    gap: 8,
   },
   restaurantOption: {
     paddingHorizontal: 16,
@@ -521,58 +510,58 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: Colors.border,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.background,
   },
   restaurantOptionSelected: {
     backgroundColor: Colors.primary,
-    borderColor: Colors.primary
+    borderColor: Colors.primary,
   },
   restaurantOptionText: {
     fontSize: 14,
     color: Colors.text,
-    fontWeight: '500'
+    fontWeight: '500',
   },
   restaurantOptionTextSelected: {
-    color: Colors.white
+    color: Colors.white,
   },
   templateGrid: {
-    gap: 12
+    gap: 12,
   },
   templateOption: {
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.border,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.background,
   },
   templateOptionSelected: {
     backgroundColor: Colors.primary,
-    borderColor: Colors.primary
+    borderColor: Colors.primary,
   },
   templateOptionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: Colors.text,
-    marginBottom: 4
+    marginBottom: 4,
   },
   templateOptionTitleSelected: {
-    color: Colors.white
+    color: Colors.white,
   },
   templateOptionDescription: {
     fontSize: 14,
-    color: Colors.lightText
+    color: Colors.lightText,
   },
   templateOptionDescriptionSelected: {
     color: Colors.white,
-    opacity: 0.9
+    opacity: 0.9,
   },
   permissionsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   permissionsList: {
-    marginTop: 16
+    marginTop: 16,
   },
   permissionItem: {
     flexDirection: 'row',
@@ -580,21 +569,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray
+    borderBottomColor: Colors.lightGray,
   },
   permissionInfo: {
     flex: 1,
-    marginRight: 12
+    marginRight: 12,
   },
   permissionName: {
     fontSize: 14,
     fontWeight: '500',
     color: Colors.text,
-    marginBottom: 2
+    marginBottom: 2,
   },
   permissionDescription: {
     fontSize: 12,
-    color: Colors.lightText
+    color: Colors.lightText,
   },
   checkbox: {
     width: 24,
@@ -604,12 +593,12 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.white
+    backgroundColor: Colors.white,
   },
   checkboxSelected: {
     backgroundColor: Colors.primary,
-    borderColor: Colors.primary
-  }
+    borderColor: Colors.primary,
+  },
 });
 
 export default CreateUserModal;

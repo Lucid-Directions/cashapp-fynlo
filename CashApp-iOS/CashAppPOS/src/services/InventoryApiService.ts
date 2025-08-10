@@ -1,11 +1,11 @@
 import axios from 'axios';
-import { logger } from '../utils/logger';
 
 import API_CONFIG from '../config/api';
 import useAppStore from '../store/useAppStore'; // For token
 // TODO: Unused import - import { RecipeIngredientClient } from '../types'; // Assuming Recipe is the backend type for creation
 
 import type { InventoryItem, RecipeClient, InventoryLedgerEntry, Recipe } from '../types';
+import { logger } from '../utils/logger';
 
 const API_URL = API_CONFIG.BASE_URL + '/api/v1';
 

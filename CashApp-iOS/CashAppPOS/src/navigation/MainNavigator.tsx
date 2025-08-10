@@ -1,7 +1,6 @@
-import React from 'react';
-
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
+import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme } from '../design-system/ThemeProvider';
@@ -31,10 +30,9 @@ import QRScannerScreen from '../screens/scanner/QRScannerScreen';
 import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
 import HelpScreen from '../screens/support/HelpScreen';
 import TableManagementScreen from '../screens/table/TableManagementScreen';
+import type { MainTabParamList, MainStackParamList } from '../types';
 
 import SettingsNavigator from './SettingsNavigator';
-
-import type { MainTabParamList, MainStackParamList } from '../types';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const Stack = createStackNavigator<MainStackParamList>();

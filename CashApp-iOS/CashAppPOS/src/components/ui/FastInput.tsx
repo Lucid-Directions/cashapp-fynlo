@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-
 import type { TextInputProps, ViewStyle, TextStyle } from 'react-native';
 import { StyleSheet, Text, View, TextInput } from 'react-native';
 

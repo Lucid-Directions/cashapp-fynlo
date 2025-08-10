@@ -4,18 +4,12 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-  Dimensions,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useSyncStatus, useNetworkStatus } from '../../hooks/useSyncStatus';
-import { useTheme } from '../../design-system/ThemeProvider';
+
 import type { Theme } from '../../design-system/theme';
+import { useTheme } from '../../design-system/ThemeProvider';
+import { useSyncStatus, useNetworkStatus } from '../../hooks/useSyncStatus';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -36,15 +30,8 @@ const NetworkAlertBanner: React.FC<NetworkAlertBannerProps> = ({
 }) => {
   const { theme } = useTheme();
   const { isOnline, networkType } = useNetworkStatus();
-  const {
-    queueSize,
-    failedCount,
-    conflictCount,
-    isSyncing,
-    canSync,
-    triggerSync,
-    retryFailed,
-  } = useSyncStatus();
+  const { queueSize, failedCount, conflictCount, isSyncing, canSync, triggerSync, retryFailed } =
+    useSyncStatus();
 
   const slideAnim = useRef(new Animated.Value(-100)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -56,16 +43,16 @@ const NetworkAlertBanner: React.FC<NetworkAlertBannerProps> = ({
   const shouldShowBanner = React.useMemo(() => {
     // Show when offline (unless dismissed)
     if (!isOnline && !dismissedOffline) return true;
-    
+
     // Show when there are failed items
     if (failedCount > 0) return true;
-    
+
     // Show when there are conflicts
     if (conflictCount > 0) return true;
-    
+
     // Show when queue is getting large (>10 items)
     if (queueSize > 10 && !isSyncing) return true;
-    
+
     return false;
   }, [isOnline, dismissedOffline, failedCount, conflictCount, queueSize, isSyncing]);
 
@@ -77,9 +64,10 @@ const NetworkAlertBanner: React.FC<NetworkAlertBannerProps> = ({
         severity: 'warning',
         icon: 'wifi-off',
         title: 'Working Offline',
-        message: queueSize > 0 
-          ? `${queueSize} changes will sync when connection is restored`
-          : 'Changes will be saved locally until connection is restored',
+        message:
+          queueSize > 0
+            ? `${queueSize} changes will sync when connection is restored`
+            : 'Changes will be saved locally until connection is restored',
         action: null,
         color: theme.colors.warning[500],
         backgroundColor: theme.colors.warning[50],
@@ -126,16 +114,7 @@ const NetworkAlertBanner: React.FC<NetworkAlertBannerProps> = ({
     }
 
     return null;
-  }, [
-    isOnline,
-    queueSize,
-    failedCount,
-    conflictCount,
-    canSync,
-    triggerSync,
-    retryFailed,
-    theme,
-  ]);
+  }, [isOnline, queueSize, failedCount, conflictCount, canSync, triggerSync, retryFailed, theme]);
 
   // Handle banner visibility animation
   useEffect(() => {
@@ -222,17 +201,10 @@ const NetworkAlertBanner: React.FC<NetworkAlertBannerProps> = ({
       ]}
     >
       <View style={styles.content}>
-        <Icon
-          name={bannerContent.icon}
-          size={24}
-          color={bannerContent.color}
-          style={styles.icon}
-        />
-        
+        <Icon name={bannerContent.icon} size={24} color={bannerContent.color} style={styles.icon} />
+
         <View style={styles.textContainer}>
-          <Text style={[styles.title, { color: bannerContent.color }]}>
-            {bannerContent.title}
-          </Text>
+          <Text style={[styles.title, { color: bannerContent.color }]}>{bannerContent.title}</Text>
           <Text style={[styles.message, { color: bannerContent.color }]}>
             {bannerContent.message}
           </Text>
@@ -245,12 +217,10 @@ const NetworkAlertBanner: React.FC<NetworkAlertBannerProps> = ({
               onPress={bannerContent.action.onPress}
               activeOpacity={0.8}
             >
-              <Text style={styles.actionText}>
-                {bannerContent.action.label}
-              </Text>
+              <Text style={styles.actionText}>{bannerContent.action.label}</Text>
             </TouchableOpacity>
           )}
-          
+
           <TouchableOpacity
             style={styles.dismissButton}
             onPress={handleDismiss}
@@ -264,13 +234,13 @@ const NetworkAlertBanner: React.FC<NetworkAlertBannerProps> = ({
       {/* Progress bar for pending items */}
       {queueSize > 0 && isSyncing && (
         <View style={styles.progressContainer}>
-          <View 
+          <View
             style={[
               styles.progressBar,
-              { 
+              {
                 backgroundColor: bannerContent.color,
                 width: '50%', // TODO: Calculate actual progress
-              }
+              },
             ]}
           />
         </View>
@@ -345,4 +315,4 @@ const styles = StyleSheet.create({
 });
 
 export default NetworkAlertBanner;
-EOF < /dev/null
+EOF < /dev/llnu;

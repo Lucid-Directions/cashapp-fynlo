@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
 
 /* eslint-disable react-native/no-unused-styles */
@@ -12,8 +13,6 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme } from '../../design-system/ThemeProvider';

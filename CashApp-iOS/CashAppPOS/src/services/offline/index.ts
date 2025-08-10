@@ -8,7 +8,7 @@ export {
   // Main service (aliased for backward compatibility)
   secureOfflineQueueService as offlineQueueService,
   SecureOfflineQueueService as OfflineQueueService,
-  
+
   // Types and enums
   EntityType,
   ActionType,
@@ -16,7 +16,7 @@ export {
   QueueStatus,
   ConflictResolutionStrategy,
   ConflictType,
-  
+
   // React hook (aliased for backward compatibility)
   useSecureOfflineQueue as useOfflineQueue,
 } from './SecureOfflineQueueService';
@@ -29,7 +29,7 @@ export type {
 } from './SecureOfflineQueueService';
 
 // Import types for properly typed convenience functions
-import type { 
+import type {
   EntityType,
   ActionType,
   HttpMethod,

@@ -1,7 +1,6 @@
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
-
-import { logger } from '../../utils/logger';
-
 import {
   StyleSheet,
   Text,
@@ -16,20 +15,24 @@ import {
   RefreshControl,
   ActivityIndicator, // Added
 } from 'react-native';
-
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // import { generateEmployees, EmployeeData } from '../../utils/mockDataGenerator'; // Removed
 import Colors from '../../constants/Colors';
 import { useTheme } from '../../design-system/ThemeProvider';
 import DataService from '../../services/DataService'; // Added
-
 import type { EmployeeData } from '../../types'; // Updated import path
+import { logger } from '../../utils/logger';
 
 // Get screen dimensions for responsive design
-const getScreenDimensions = () => { try { return Dimensions.get('window'); } catch (error) { return { width: 375, height: 812 }; } }; const { width: screenWidth, height: _screenHeight } = getScreenDimensions();
+const getScreenDimensions = () => {
+  try {
+    return Dimensions.get('window');
+  } catch (error) {
+    return { width: 375, height: 812 };
+  }
+};
+const { width: screenWidth, height: _screenHeight } = getScreenDimensions();
 const isTablet = screenWidth > 768;
 const isSmallDevice = screenWidth < 380;
 

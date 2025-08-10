@@ -1,5 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -11,8 +11,6 @@ import {
   Linking,
   Alert,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useRestaurantConfig, useOnboardingStatus } from '../../hooks/useRestaurantConfig';

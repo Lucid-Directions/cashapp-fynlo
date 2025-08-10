@@ -1,5 +1,6 @@
 // TODO: Unused import - import React, { useState, useEffect } from 'react';
 
+import { useNavigation } from '@react-navigation/native';
 import {
   StyleSheet,
   Text,
@@ -9,10 +10,8 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  Alert } from
-'react-native';
-
-import { useNavigation } from '@react-navigation/native';
+  Alert,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import ComingSoon from '../../components/feedback/ComingSoon';
@@ -24,7 +23,7 @@ const { _width } = Dimensions.get('window');
 
 // Mock ENV flag
 const ENV = {
-  FEATURE_REPORTS: true // Set to true to enable, false to show ComingSoon
+  FEATURE_REPORTS: true, // Set to true to enable, false to show ComingSoon
 };
 
 const Colors = {
@@ -38,7 +37,7 @@ const Colors = {
   lightGray: '#ECF0F1',
   mediumGray: '#BDC3C7',
   text: '#2C3E50',
-  lightText: '#95A5A6'
+  lightText: '#95A5A6',
 };
 
 interface FinancialData {
@@ -78,20 +77,20 @@ const FinancialReportDetailScreen = () => {
 
   const handleExportReport = () => {
     Alert.alert('Export Financial Report', 'Choose export format', [
-    { text: 'Cancel', style: 'cancel' },
-    {
-      text: 'PDF P&L Statement',
-      onPress: () => Alert.alert('PDF Export', 'P&L PDF coming soon')
-    },
-    {
-      text: 'Excel Spreadsheet',
-      onPress: () => Alert.alert('Excel Export', 'Excel export coming soon')
-    },
-    {
-      text: 'Email to Accountant',
-      onPress: () => Alert.alert('Email Report', 'Email functionality coming soon')
-    }]
-    );
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'PDF P&L Statement',
+        onPress: () => Alert.alert('PDF Export', 'P&L PDF coming soon'),
+      },
+      {
+        text: 'Excel Spreadsheet',
+        onPress: () => Alert.alert('Excel Export', 'Excel export coming soon'),
+      },
+      {
+        text: 'Email to Accountant',
+        onPress: () => Alert.alert('Email Report', 'Email functionality coming soon'),
+      },
+    ]);
   };
 
   useEffect(() => {
@@ -128,7 +127,7 @@ const FinancialReportDetailScreen = () => {
   const formatCurrency = (amount: number) => {
     return `£${amount.toLocaleString('en-GB', {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     })}`;
   };
 
@@ -143,7 +142,7 @@ const FinancialReportDetailScreen = () => {
       utilities: Colors.secondary,
       rent: Colors.danger,
       marketing: Colors.success,
-      other: Colors.mediumGray
+      other: Colors.mediumGray,
     };
     return colors[expenseType as keyof typeof colors] || Colors.lightText;
   };
@@ -153,7 +152,7 @@ const FinancialReportDetailScreen = () => {
       dineIn: Colors.primary,
       takeaway: Colors.secondary,
       delivery: Colors.warning,
-      catering: Colors.success
+      catering: Colors.success,
     };
     return colors[source as keyof typeof colors] || Colors.lightText;
   };
@@ -187,8 +186,8 @@ const FinancialReportDetailScreen = () => {
             <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>);
-
+      </SafeAreaView>
+    );
   }
 
   // If reportData is available, render the report:
@@ -209,17 +208,17 @@ const FinancialReportDetailScreen = () => {
 
       {/* Period Selector */}
       <View style={styles.periodSelector}>
-        {['week', 'month', 'quarter', 'year'].map((period) =>
-        <TouchableOpacity
-          key={period}
-          style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
-          onPress={() => setSelectedPeriod(period)}>
-
+        {['week', 'month', 'quarter', 'year'].map((period) => (
+          <TouchableOpacity
+            key={period}
+            style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
+            onPress={() => setSelectedPeriod(period)}
+          >
             <Text style={[styles.periodText, selectedPeriod === period && styles.periodTextActive]}>
               {period.charAt(0).toUpperCase() + period.slice(1)}
             </Text>
           </TouchableOpacity>
-        )}
+        ))}
       </View>
 
       <ScrollView style={styles.content}>
@@ -315,14 +314,14 @@ const FinancialReportDetailScreen = () => {
               <Text style={[styles.plLabel, { fontWeight: 'bold', fontSize: 16 }]}>Net Profit</Text>
               <Text
                 style={[
-                styles.plValue,
-                {
-                  fontWeight: 'bold',
-                  fontSize: 16,
-                  color: reportData.profit >= 0 ? Colors.success : Colors.danger
-                }]
-                }>
-
+                  styles.plValue,
+                  {
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                    color: reportData.profit >= 0 ? Colors.success : Colors.danger,
+                  },
+                ]}
+              >
                 {formatCurrency(reportData.profit)}
               </Text>
             </View>
@@ -334,12 +333,13 @@ const FinancialReportDetailScreen = () => {
           <Text style={styles.sectionTitle}>Expense Breakdown</Text>
           <View style={styles.card}>
             {Object.entries(reportData.expenses).map(([key, value]) => {
-              const percentage = value / reportData.totalExpenses * 100;
+              const percentage = (value / reportData.totalExpenses) * 100;
               return (
                 <View key={key} style={styles.expenseRow}>
                   <View style={styles.expenseInfo}>
                     <View
-                      style={[styles.expenseColorDot, { backgroundColor: getExpenseColor(key) }]} />
+                      style={[styles.expenseColorDot, { backgroundColor: getExpenseColor(key) }]}
+                    />
 
                     <Text style={styles.expenseLabel}>
                       {key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
@@ -354,16 +354,16 @@ const FinancialReportDetailScreen = () => {
                   <View style={styles.expenseBar}>
                     <View
                       style={[
-                      styles.expenseBarFill,
-                      {
-                        width: `${percentage}%`,
-                        backgroundColor: getExpenseColor(key)
-                      }]
-                      } />
-
+                        styles.expenseBarFill,
+                        {
+                          width: `${percentage}%`,
+                          backgroundColor: getExpenseColor(key),
+                        },
+                      ]}
+                    />
                   </View>
-                </View>);
-
+                </View>
+              );
             })}
           </View>
         </View>
@@ -373,15 +373,16 @@ const FinancialReportDetailScreen = () => {
           <Text style={styles.sectionTitle}>Revenue by Source</Text>
           <View style={styles.card}>
             {Object.entries(reportData.revenueBySource).map(([key, value]) => {
-              const percentage = value / reportData.grossRevenue * 100;
+              const percentage = (value / reportData.grossRevenue) * 100;
               return (
                 <View key={key} style={styles.revenueRow}>
                   <View style={styles.revenueInfo}>
                     <View
                       style={[
-                      styles.revenueColorDot,
-                      { backgroundColor: getRevenueSourceColor(key) }]
-                      } />
+                        styles.revenueColorDot,
+                        { backgroundColor: getRevenueSourceColor(key) },
+                      ]}
+                    />
 
                     <Text style={styles.revenueLabel}>
                       {key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
@@ -396,16 +397,16 @@ const FinancialReportDetailScreen = () => {
                   <View style={styles.revenueBar}>
                     <View
                       style={[
-                      styles.revenueBarFill,
-                      {
-                        width: `${percentage}%`,
-                        backgroundColor: getRevenueSourceColor(key)
-                      }]
-                      } />
-
+                        styles.revenueBarFill,
+                        {
+                          width: `${percentage}%`,
+                          backgroundColor: getRevenueSourceColor(key),
+                        },
+                      ]}
+                    />
                   </View>
-                </View>);
-
+                </View>
+              );
             })}
           </View>
         </View>
@@ -440,19 +441,15 @@ const FinancialReportDetailScreen = () => {
 
         <View style={styles.spacer} />
       </ScrollView>
-    </SafeAreaView>);
-
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.background,
   },
-
-
-
-
 
   header: {
     backgroundColor: Colors.primary,
@@ -460,20 +457,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    height: 60
+    height: 60,
   },
   backButton: {
-    padding: 8
+    padding: 8,
   },
   headerTitle: {
     flex: 1,
     color: Colors.white,
     fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center'
+    textAlign: 'center',
   },
   headerAction: {
-    padding: 8
+    padding: 8,
   },
   periodSelector: {
     flexDirection: 'row',
@@ -481,7 +478,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray
+    borderBottomColor: Colors.lightGray,
   },
   periodButton: {
     flex: 1,
@@ -490,28 +487,28 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     borderRadius: 20,
     backgroundColor: Colors.lightGray,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   periodButtonActive: {
-    backgroundColor: Colors.primary
+    backgroundColor: Colors.primary,
   },
   periodText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text
+    color: Colors.text,
   },
   periodTextActive: {
-    color: Colors.white
+    color: Colors.white,
   },
   content: {
     flex: 1,
-    padding: 16
+    padding: 16,
   },
   summaryContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 20
+    marginBottom: 20,
   },
   summaryCard: {
     width: '48%',
@@ -524,18 +521,18 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    borderLeftWidth: 4
+    borderLeftWidth: 4,
   },
   summaryValue: {
     fontSize: 16,
     fontWeight: 'bold',
     color: Colors.text,
-    marginBottom: 4
+    marginBottom: 4,
   },
   summaryLabel: {
     fontSize: 12,
     color: Colors.lightText,
-    marginBottom: 8
+    marginBottom: 8,
   },
   trendIndicator: {
     flexDirection: 'row',
@@ -543,22 +540,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 8,
-    alignSelf: 'flex-start'
+    alignSelf: 'flex-start',
   },
   trendText: {
     fontSize: 10,
     color: Colors.white,
     marginLeft: 2,
-    fontWeight: '500'
+    fontWeight: '500',
   },
   section: {
-    marginBottom: 20
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: Colors.text,
-    marginBottom: 12
+    marginBottom: 12,
   },
   card: {
     backgroundColor: Colors.white,
@@ -568,18 +565,18 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 2
+    shadowRadius: 2,
   },
   plRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8
+    paddingVertical: 8,
   },
   plRowDivider: {
     borderTopWidth: 1,
     borderTopColor: Colors.lightGray,
     marginTop: 8,
-    paddingTop: 16
+    paddingTop: 16,
   },
   plRowFinal: {
     borderTopWidth: 2,
@@ -588,121 +585,121 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     backgroundColor: Colors.lightGray,
     marginHorizontal: -16,
-    paddingHorizontal: 16
+    paddingHorizontal: 16,
   },
   plLabel: {
     fontSize: 14,
-    color: Colors.text
+    color: Colors.text,
   },
   plValue: {
     fontSize: 14,
-    fontWeight: '600'
+    fontWeight: '600',
   },
   expenseRow: {
-    marginBottom: 16
+    marginBottom: 16,
   },
   expenseInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8
+    marginBottom: 8,
   },
   expenseColorDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    marginRight: 8
+    marginRight: 8,
   },
   expenseLabel: {
     fontSize: 14,
     color: Colors.text,
-    fontWeight: '500'
+    fontWeight: '500',
   },
   expenseValues: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8
+    marginBottom: 8,
   },
   expenseAmount: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: Colors.text
+    color: Colors.text,
   },
   expensePercentage: {
     fontSize: 12,
-    color: Colors.lightText
+    color: Colors.lightText,
   },
   expenseBar: {
     height: 6,
     backgroundColor: Colors.lightGray,
-    borderRadius: 3
+    borderRadius: 3,
   },
   expenseBarFill: {
     height: '100%',
-    borderRadius: 3
+    borderRadius: 3,
   },
   revenueRow: {
-    marginBottom: 16
+    marginBottom: 16,
   },
   revenueInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8
+    marginBottom: 8,
   },
   revenueColorDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    marginRight: 8
+    marginRight: 8,
   },
   revenueLabel: {
     fontSize: 14,
     color: Colors.text,
-    fontWeight: '500'
+    fontWeight: '500',
   },
   revenueValues: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8
+    marginBottom: 8,
   },
   revenueAmount: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: Colors.text
+    color: Colors.text,
   },
   revenuePercentage: {
     fontSize: 12,
-    color: Colors.lightText
+    color: Colors.lightText,
   },
   revenueBar: {
     height: 6,
     backgroundColor: Colors.lightGray,
-    borderRadius: 3
+    borderRadius: 3,
   },
   revenueBarFill: {
     height: '100%',
-    borderRadius: 3
+    borderRadius: 3,
   },
   taxRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8
+    paddingVertical: 8,
   },
   taxRowTotal: {
     borderTopWidth: 1,
     borderTopColor: Colors.lightGray,
     marginTop: 8,
-    paddingTop: 16
+    paddingTop: 16,
   },
   taxLabel: {
     fontSize: 14,
-    color: Colors.text
+    color: Colors.text,
   },
   taxValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.text
+    color: Colors.text,
   },
   taxNote: {
     flexDirection: 'row',
@@ -710,23 +707,23 @@ const styles = StyleSheet.create({
     marginTop: 16,
     padding: 12,
     backgroundColor: '#FFF9E6',
-    borderRadius: 8
+    borderRadius: 8,
   },
   taxNoteText: {
     fontSize: 12,
     color: Colors.warning,
     marginLeft: 8,
-    flex: 1
+    flex: 1,
   },
   spacer: {
-    height: 40
+    height: 40,
   },
   centeredError: {
     // Added
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20
+    padding: 20,
   },
   errorTextHeader: {
     // Added
@@ -735,28 +732,28 @@ const styles = StyleSheet.create({
     color: Colors.danger,
     marginTop: 16,
     marginBottom: 8,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   errorText: {
     // Added
     fontSize: 14,
     color: Colors.text,
     textAlign: 'center',
-    marginBottom: 20
+    marginBottom: 20,
   },
   retryButton: {
     // Added
     backgroundColor: Colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 8
+    borderRadius: 8,
   },
   retryButtonText: {
     // Added
     color: Colors.white,
     fontSize: 16,
-    fontWeight: '600'
-  }
+    fontWeight: '600',
+  },
 });
 
 export default FinancialReportDetailScreen;

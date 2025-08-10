@@ -1,11 +1,9 @@
 import React from 'react';
-
 import type { ViewStyle, GestureResponderEvent } from 'react-native';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 
-import { useTheme } from '../../design-system/ThemeProvider';
-
 import type { Theme } from '../../design-system/theme';
+import { useTheme } from '../../design-system/ThemeProvider';
 
 // Card variants
 export type CardVariant = 'default' | 'elevated' | 'outlined' | 'flat';

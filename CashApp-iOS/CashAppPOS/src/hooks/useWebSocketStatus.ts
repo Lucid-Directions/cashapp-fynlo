@@ -34,10 +34,10 @@ export const useWebSocketStatus = () => {
   // Get current state from WebSocket service
   const updateStatus = useCallback(() => {
     const wsState = webSocketService.getState();
-    
+
     setStatus((prev) => {
       let newStatus: 'connected' | 'connecting' | 'reconnecting' | 'disconnected';
-      
+
       switch (wsState) {
         case 'CONNECTED':
           newStatus = 'connected';
@@ -57,9 +57,10 @@ export const useWebSocketStatus = () => {
         ...prev,
         status: newStatus,
         lastConnectedTime: newStatus === 'connected' ? new Date() : prev.lastConnectedTime,
-        lastDisconnectedTime: newStatus === 'disconnected' && prev.status !== 'disconnected' 
-          ? new Date() 
-          : prev.lastDisconnectedTime,
+        lastDisconnectedTime:
+          newStatus === 'disconnected' && prev.status !== 'disconnected'
+            ? new Date()
+            : prev.lastDisconnectedTime,
       };
     });
   }, []);
@@ -72,7 +73,7 @@ export const useWebSocketStatus = () => {
     }
 
     const endTime = Date.now() + delay;
-    
+
     // Update immediately
     setStatus((prev) => ({
       ...prev,
@@ -82,7 +83,7 @@ export const useWebSocketStatus = () => {
     // Update countdown every second
     countdownIntervalRef.current = setInterval(() => {
       const remaining = Math.max(0, endTime - Date.now());
-      
+
       if (remaining === 0) {
         if (countdownIntervalRef.current) {
           clearInterval(countdownIntervalRef.current);
@@ -106,7 +107,7 @@ export const useWebSocketStatus = () => {
         attemptNumber: 0,
         canManualReconnect: false,
       }));
-      
+
       // Reset the exponential backoff before reconnecting
       // Note: We might need to add a method to reset the backoff in the service
       await webSocketService.connect();
@@ -123,7 +124,7 @@ export const useWebSocketStatus = () => {
         nextRetryTime: null,
         canManualReconnect: false,
       }));
-      
+
       if (countdownIntervalRef.current) {
         clearInterval(countdownIntervalRef.current);
         countdownIntervalRef.current = null;
@@ -134,20 +135,20 @@ export const useWebSocketStatus = () => {
       updateStatus();
     };
 
-    const handleReconnectionStatus = (data: { 
-      attempt: number; 
+    const handleReconnectionStatus = (data: {
+      attempt: number;
       maxAttempts: number;
       nextDelay: number;
       timestamp: number;
     }) => {
       updateStatus();
-      
+
       setStatus((prev) => ({
         ...prev,
         attemptNumber: data.attempt,
         maxAttempts: data.maxAttempts,
       }));
-      
+
       startCountdown(data.nextDelay);
     };
 
@@ -159,7 +160,7 @@ export const useWebSocketStatus = () => {
         canManualReconnect: true,
         nextRetryTime: null,
       }));
-      
+
       if (countdownIntervalRef.current) {
         clearInterval(countdownIntervalRef.current);
         countdownIntervalRef.current = null;
@@ -181,7 +182,7 @@ export const useWebSocketStatus = () => {
       webSocketService.off(WebSocketEvent.DISCONNECT, handleDisconnected);
       webSocketService.off('reconnection_status', handleReconnectionStatus);
       webSocketService.off('max_reconnect_attempts', handleMaxReconnectAttempts);
-      
+
       if (countdownIntervalRef.current) {
         clearInterval(countdownIntervalRef.current);
       }

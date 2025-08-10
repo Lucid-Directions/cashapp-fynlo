@@ -1,7 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect } from 'react';
-
-import { logger } from '../../utils/logger';
-
 import {
   StyleSheet,
   Text,
@@ -13,8 +11,6 @@ import {
   Dimensions,
   Animated,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { SubscriptionStatusBadge } from '../../components/subscription/SubscriptionStatusBadge';
@@ -22,6 +18,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import useAppStore from '../../store/useAppStore';
+import { logger } from '../../utils/logger';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isTablet = screenWidth > 768;

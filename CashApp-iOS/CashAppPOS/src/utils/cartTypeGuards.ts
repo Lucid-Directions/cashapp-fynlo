@@ -3,8 +3,8 @@
  * Provides runtime type checking for cart data structures
  */
 
-import { OrderItem } from '../types';
-import {
+import type { OrderItem } from '../types';
+import type {
   EnhancedOrderItem,
   CartItemModification,
   SplitBillGroup,

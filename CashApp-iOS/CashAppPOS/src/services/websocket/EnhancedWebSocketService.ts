@@ -1,10 +1,10 @@
-import { ExponentialBackoff } from '../../utils/exponentialBackoff';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 
 import API_CONFIG from '../../config/api';
 import { WebSocketEvent } from '../../types/websocket';
 import type { WebSocketMessage, WebSocketConfig } from '../../types/websocket';
+import { ExponentialBackoff } from '../../utils/exponentialBackoff';
 import logger from '../../utils/logger';
 import tokenManager from '../../utils/tokenManager';
 

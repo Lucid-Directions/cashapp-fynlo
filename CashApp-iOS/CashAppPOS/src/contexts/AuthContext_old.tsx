@@ -1,7 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import RestaurantDataService from '../services/RestaurantDataService';
 // TODO: Unused import - import API_CONFIG from '../config/api';

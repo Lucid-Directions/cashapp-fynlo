@@ -5,9 +5,6 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-
-import { logger } from '../../utils/logger';
-
 import {
   View,
   Text,
@@ -21,6 +18,7 @@ import {
 import { Button } from '../../components/ui';
 import { useTheme } from '../../design-system/ThemeProvider';
 import SquareService from '../../services/SquareService';
+import { logger } from '../../utils/logger';
 
 // Square SDK imports - conditionally loaded
 let SQIPCardEntry: unknown;

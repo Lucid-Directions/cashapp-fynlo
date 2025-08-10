@@ -6,11 +6,11 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { logger } from '../utils/logger';
 
-import SumUpNativeService from './SumUpNativeService';
-
 import type { PaymentRequest, PaymentResult } from './PaymentService';
+import SumUpNativeService from './SumUpNativeService';
 
 export interface SumUpConfig {
   apiKey: string;

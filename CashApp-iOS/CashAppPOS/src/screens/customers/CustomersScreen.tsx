@@ -1,5 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -13,14 +13,11 @@ import {
   Modal,
   ActivityIndicator,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // import { generateCustomers, CustomerData } from '../../utils/mockDataGenerator'; // Removed
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import DataService from '../../services/DataService'; // Added
-
 import type { CustomerData } from '../../types'; // Updated import path
 
 const CustomersScreen: React.FC = () => {

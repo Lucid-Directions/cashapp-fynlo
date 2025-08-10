@@ -1,5 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -10,8 +10,6 @@ import {
   Alert,
   FlatList,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // TODO: Unused import - import useAppStore from '../../store/useAppStore';

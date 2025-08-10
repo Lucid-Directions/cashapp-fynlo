@@ -1,6 +1,5 @@
 // APITestScreen.tsx - Developer API testing interface
 import React, { useState, useEffect } from 'react';
-
 import {
   View,
   Text,
@@ -11,13 +10,11 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { Colors, Typography } from '../../design-system/theme';
 import APITestingService from '../../services/APITestingService';
-
 import type { APITestResult, APITestSuite } from '../../services/APITestingService';
 
 /**

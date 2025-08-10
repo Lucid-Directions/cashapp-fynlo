@@ -7,8 +7,8 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import { useWebSocketStatus } from '../hooks/useWebSocketStatus';
 import { Colors, Typography } from '../design-system/theme';
+import { useWebSocketStatus } from '../hooks/useWebSocketStatus';
 
 interface WebSocketStatusProps {
   compact?: boolean;
@@ -16,10 +16,10 @@ interface WebSocketStatusProps {
   style?: any;
 }
 
-const WebSocketStatus: React.FC<WebSocketStatusProps> = ({ 
+const WebSocketStatus: React.FC<WebSocketStatusProps> = ({
   compact = false,
   showDetails = true,
-  style 
+  style,
 }) => {
   const {
     status,
@@ -69,10 +69,10 @@ const WebSocketStatus: React.FC<WebSocketStatusProps> = ({
   // Format time elapsed
   const formatTimeElapsed = (date: Date | null) => {
     if (!date) return null;
-    
+
     const elapsed = Date.now() - date.getTime();
     const seconds = Math.floor(elapsed / 1000);
-    
+
     if (seconds < 60) return seconds + 's ago';
     const minutes = Math.floor(seconds / 60);
     if (minutes < 60) return minutes + 'm ago';
@@ -128,13 +128,11 @@ const WebSocketStatus: React.FC<WebSocketStatusProps> = ({
             )}
           </View>
         </View>
-        
+
         {nextRetryTime !== null && (
           <View style={styles.countdownContainer}>
             <Icon name="schedule" size={16} color={Colors.textSecondary} />
-            <Text style={styles.countdownText}>
-              {nextRetryTime}s
-            </Text>
+            <Text style={styles.countdownText}>{nextRetryTime}s</Text>
           </View>
         )}
       </View>
@@ -144,18 +142,14 @@ const WebSocketStatus: React.FC<WebSocketStatusProps> = ({
           {lastConnectedTime && status !== 'connected' && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Last connected:</Text>
-              <Text style={styles.detailValue}>
-                {formatTimeElapsed(lastConnectedTime)}
-              </Text>
+              <Text style={styles.detailValue}>{formatTimeElapsed(lastConnectedTime)}</Text>
             </View>
           )}
-          
+
           {lastDisconnectedTime && status === 'connected' && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Connected for:</Text>
-              <Text style={styles.detailValue}>
-                {formatTimeElapsed(lastDisconnectedTime)}
-              </Text>
+              <Text style={styles.detailValue}>{formatTimeElapsed(lastDisconnectedTime)}</Text>
             </View>
           )}
         </View>
@@ -168,9 +162,7 @@ const WebSocketStatus: React.FC<WebSocketStatusProps> = ({
           activeOpacity={0.7}
         >
           <Icon name="refresh" size={20} color={Colors.white} />
-          <Text style={styles.reconnectButtonText}>
-            Reconnect Now
-          </Text>
+          <Text style={styles.reconnectButtonText}>Reconnect Now</Text>
         </TouchableOpacity>
       )}
     </View>

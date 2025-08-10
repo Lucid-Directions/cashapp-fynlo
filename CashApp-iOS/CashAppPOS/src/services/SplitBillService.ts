@@ -3,10 +3,12 @@
  * Handles bill splitting logic, calculations, and group management
  */
 
-import { SplitBillGroup, SplitBillItem, SplitMethod, EnhancedOrderItem } from '../types/cart';
-import { calculateSum, validatePrice, calculatePercentageFee } from '../utils/priceValidation';
-import ErrorTrackingService from './ErrorTrackingService';
+import type { SplitBillGroup, SplitBillItem, EnhancedOrderItem } from '../types/cart';
+import { SplitMethod } from '../types/cart';
 import { logger } from '../utils/logger';
+import { calculateSum, validatePrice, calculatePercentageFee } from '../utils/priceValidation';
+
+import ErrorTrackingService from './ErrorTrackingService';
 
 export interface SplitBillCalculation {
   groups: SplitBillGroup[];
@@ -106,9 +108,9 @@ export class SplitBillService {
     // Distribute whole units as much as possible
     const quantityPerGroup = Math.floor(item.quantity / groupIds.length);
     const remainder = item.quantity % groupIds.length;
-    
+
     let remainderDistributed = 0;
-    
+
     const getSplitQuantity = () => {
       const baseQuantity = quantityPerGroup;
       const hasExtra = remainderDistributed < remainder;
@@ -478,4 +480,3 @@ export class SplitBillService {
     return lines.join('\n');
   }
 }
-

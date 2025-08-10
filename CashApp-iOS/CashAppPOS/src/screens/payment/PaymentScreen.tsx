@@ -1,7 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
-
-import { logger } from '../../utils/logger';
-
 import {
   StyleSheet,
   Text,
@@ -12,8 +10,6 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import QRCodePayment from '../../components/payment/QRCodePayment';
@@ -21,11 +17,12 @@ import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponen
 import PaymentService from '../../services/PaymentService';
 // TODO: Unused import - import SquarePaymentProvider from '../../services/providers/SquarePaymentProvider';
 // TODO: Unused import - import SumUpPaymentProvider from '../../services/providers/SumUpPaymentProvider';
+
+import type { PaymentRequest, PaymentResult } from '../../services/PaymentService';
 import SumUpNativeService from '../../services/SumUpNativeService';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
-
-import type { PaymentRequest, PaymentResult } from '../../services/PaymentService';
+import { logger } from '../../utils/logger';
 
 // Clover POS Color Scheme
 const Colors = {

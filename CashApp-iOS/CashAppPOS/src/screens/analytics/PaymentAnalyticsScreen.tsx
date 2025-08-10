@@ -1,5 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -10,8 +10,6 @@ import {
   RefreshControl,
   Dimensions,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import { LineChart, _BarChart, PieChart } from 'react-native-chart-kit';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 

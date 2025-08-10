@@ -1,12 +1,14 @@
-import React from 'react';
-import { render, RenderOptions } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { ThemeProvider } from '../design-system/ThemeProvider';
-import { AuthProvider } from '../contexts/AuthContext';
+import type { RenderOptions } from '@testing-library/react-native';
+import { render } from '@testing-library/react-native';
+import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import { AuthProvider } from '../contexts/AuthContext';
 import { DataProvider } from '../contexts/DataContext';
 import { OrderProvider } from '../contexts/OrderContext';
 import { PaymentProvider } from '../contexts/PaymentContext';
+import { ThemeProvider } from '../design-system/ThemeProvider';
 
 // Create mock providers
 const mockNavigation = {
@@ -30,11 +32,11 @@ const mockRoute = {
 
 const mockAuth = {
   isAuthenticated: true,
-  user: { 
-    id: '1', 
+  user: {
+    id: '1',
     email: 'test@test.com',
     role: 'manager',
-    restaurantId: 'test-restaurant'
+    restaurantId: 'test-restaurant',
   },
   login: jest.fn(() => Promise.resolve()),
   logout: jest.fn(() => Promise.resolve()),
@@ -91,9 +93,7 @@ const AllTheProviders = ({ children, auth, data, order, payment }: any) => {
           <AuthProvider value={auth}>
             <DataProvider value={data}>
               <OrderProvider value={order}>
-                <PaymentProvider value={payment}>
-                  {children}
-                </PaymentProvider>
+                <PaymentProvider value={payment}>{children}</PaymentProvider>
               </OrderProvider>
             </DataProvider>
           </AuthProvider>
@@ -103,10 +103,7 @@ const AllTheProviders = ({ children, auth, data, order, payment }: any) => {
   );
 };
 
-export function renderWithProviders(
-  ui: React.ReactElement,
-  options?: CustomRenderOptions
-) {
+export function renderWithProviders(ui: React.ReactElement, options?: CustomRenderOptions) {
   const auth = { ...mockAuth, ...options?.initialAuth };
   const data = { ...mockData, ...options?.initialData };
   const order = { ...mockOrder, ...options?.initialOrder };

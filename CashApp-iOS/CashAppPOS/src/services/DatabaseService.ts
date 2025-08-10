@@ -499,11 +499,11 @@ class DatabaseService {
       });
 
       // Enhanced response validation and parsing
-      logger.info('📦 API Response structure:', { 
+      logger.info('📦 API Response structure:', {
         hasData: !!response.data,
         hasSuccess: !!response.success,
         dataType: Array.isArray(response.data) ? 'array' : typeof response.data,
-        dataLength: Array.isArray(response.data) ? response.data.length : 0
+        dataLength: Array.isArray(response.data) ? response.data.length : 0,
       });
 
       if (response.success && response.data && Array.isArray(response.data)) {
@@ -517,12 +517,12 @@ class DatabaseService {
           } else if (typeof item.price === 'number') {
             price = item.price;
           }
-          
+
           return {
             ...item,
             price,
             id: String(item.id), // Ensure ID is string
-            available: item.available !== undefined ? item.available : true
+            available: item.available !== undefined ? item.available : true,
           };
         });
 
@@ -535,7 +535,7 @@ class DatabaseService {
           this.menuCache.itemsTimestamp = Date.now();
           return transformedData;
         }
-        
+
         // Cache the properly typed items
         this.menuCache.items = menuItems;
         this.menuCache.itemsTimestamp = Date.now();

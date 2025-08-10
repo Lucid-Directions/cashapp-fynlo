@@ -1,5 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -12,8 +12,6 @@ import {
   ActivityIndicator,
   TextInput,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Clover POS Color Scheme

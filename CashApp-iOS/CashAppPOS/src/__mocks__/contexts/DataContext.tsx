@@ -14,9 +14,7 @@ export const DataContext = React.createContext({
 });
 
 export const DataProvider = ({ children, value }: any) => (
-  <DataContext.Provider value={value || {}}>
-    {children}
-  </DataContext.Provider>
+  <DataContext.Provider value={value || {}}>{children}</DataContext.Provider>
 );
 
 export const useData = () => React.useContext(DataContext);

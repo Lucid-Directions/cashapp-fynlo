@@ -1,10 +1,8 @@
-import React from 'react';
-
 import { createStackNavigator } from '@react-navigation/stack';
+import React from 'react';
 
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
-
 import type { AuthStackParamList } from '../types';
 
 const Stack = createStackNavigator<AuthStackParamList>();

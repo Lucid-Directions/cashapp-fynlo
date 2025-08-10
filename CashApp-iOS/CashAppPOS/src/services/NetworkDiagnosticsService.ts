@@ -3,9 +3,8 @@
  * Provides comprehensive network testing and error reporting for platform owner authentication
  */
 
-import { Alert } from 'react-native';
-
 import NetInfo from '@react-native-community/netinfo';
+import { Alert } from 'react-native';
 
 import API_CONFIG from '../config/api';
 import { logger } from '../utils/logger';

@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-
 import {
   View,
   Text,
@@ -16,15 +15,13 @@ import {
   ScrollView,
   RefreshControl,
 } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { useTheme } from '../../hooks/useTheme';
-import { logger } from '../../utils/logger';
-import SecurePaymentConfig from '../../services/SecurePaymentConfig';
-
-import type { PaymentMethod } from '../../services/SecurePaymentConfig';
 import type { Theme } from '../../design-system/theme';
+import { useTheme } from '../../hooks/useTheme';
+import SecurePaymentConfig from '../../services/SecurePaymentConfig';
+import type { PaymentMethod } from '../../services/SecurePaymentConfig';
+import { logger } from '../../utils/logger';
 
 // Helper function to create theme-aware text styles
 const createThemedStyles = (theme: Theme) =>

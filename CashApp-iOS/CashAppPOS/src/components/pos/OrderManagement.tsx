@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
-import { logger } from '../../utils/logger';
-
 import {
   StyleSheet,
   Text,
@@ -12,15 +9,14 @@ import {
   Alert,
   Modal,
 } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import SharedDataStore from '../../services/SharedDataStore';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import { _Order } from '../../types';
-
 import type { OrderItem } from '../../types';
+import { logger } from '../../utils/logger';
 
 // Clover POS Color Scheme
 const Colors = {

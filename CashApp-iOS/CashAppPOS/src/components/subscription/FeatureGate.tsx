@@ -6,15 +6,12 @@
  */
 
 import React, { useEffect, useState } from 'react';
-
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { useSubscription } from '../../contexts/SubscriptionContext';
-import { useTheme } from '../../contexts/ThemeContext';
-
 import type { FeatureGateResult } from '../../contexts/SubscriptionContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 // Helper function to safely add transparency to any color format
 const addColorTransparency = (color: string, opacity: number): string => {

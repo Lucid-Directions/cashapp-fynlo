@@ -1,5 +1,4 @@
 import React, { useMemo, useCallback, memo } from 'react';
-
 import type { FlatListProps, ViewToken } from 'react-native';
 import { FlatList, StyleSheet } from 'react-native';
 

@@ -1,13 +1,11 @@
 import React from 'react';
-
 import type { ViewStyle } from 'react-native';
 import { View, StyleSheet } from 'react-native';
 
+import type { Theme } from '../../design-system/theme';
+import type { spacing } from '../../design-system/theme';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { useResponsiveColumns, useResponsiveSpacing } from '../../hooks/useResponsive';
-
-import type { Theme } from '../../design-system/theme';
-import { spacing } from '../../design-system/theme';
 
 // Grid props interface
 export interface ResponsiveGridProps {

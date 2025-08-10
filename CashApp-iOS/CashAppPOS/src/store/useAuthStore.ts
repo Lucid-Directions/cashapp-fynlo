@@ -4,10 +4,10 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logger } from '../utils/logger';
 import { create } from 'zustand';
 
 import { authService } from '../services/auth/unifiedAuthService';
+import { logger } from '../utils/logger';
 import tokenManager from '../utils/tokenManager';
 
 interface User {

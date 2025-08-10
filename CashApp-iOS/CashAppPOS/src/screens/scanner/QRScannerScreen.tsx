@@ -1,7 +1,6 @@
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
 import React, { useState, useEffect, useRef } from 'react';
-
-import { logger } from '../../utils/logger';
-
 import {
   StyleSheet,
   Text,
@@ -16,13 +15,11 @@ import {
   Linking,
   ActivityIndicator,
 } from 'react-native';
-
-import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import Colors from '../../constants/Colors';
+import { logger } from '../../utils/logger';
 
-import type { RouteProp } from '@react-navigation/native';
 const { width: _screenWidth, height: _screenHeight } = Dimensions.get('window');
 type QRScannerRouteProp = RouteProp<
   {

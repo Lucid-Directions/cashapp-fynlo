@@ -1,0 +1,16 @@
+@@ -322,8 +327,13 @@
+         setShowQRModal(true);
+         generateQRCode();
+       } else if (methodId === 'card') {
+-        // Card payment handling - could show card reader interface
+-        setShowSumUpModal(true);
++        // Card payment handling - validate customer info first
++        // Validate customer info before triggering SumUp
++        if (\!isFormValid) {
++          Alert.alert('Required Information', 'Please enter valid customer name and email address.');
++          return;
++        }
++        setShowSumUpModal(true);
+       } else if (methodId === 'applePay') {
+         // Apple Pay handling
+         Alert.alert('Apple Pay', 'Hold near reader and confirm with Touch ID or Face ID.');

@@ -1,7 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
-
-import { logger } from '../../utils/logger';
-
 import {
   StyleSheet,
   Text,
@@ -18,9 +17,6 @@ import {
   Keyboard,
   Dimensions,
 } from 'react-native';
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import FastInput from '../../components/ui/FastInput';
@@ -41,6 +37,7 @@ import {
   validateIBAN,
   validateSWIFT,
 } from '../../utils/inputValidation';
+import { logger } from '../../utils/logger';
 
 interface RestaurantFormData {
   // Basic Information

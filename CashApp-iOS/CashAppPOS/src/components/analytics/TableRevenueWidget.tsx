@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
-import { logger } from '../../utils/logger';
-
 import {
   View,
   Text,
@@ -11,10 +8,10 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme } from '../../design-system/ThemeProvider';
+import { logger } from '../../utils/logger';
 
 interface TableRevenueData {
   table_id: string;

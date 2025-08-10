@@ -1,14 +1,14 @@
 /**
  * SecureOfflineQueueService - Production-ready offline queue with comprehensive security
- * 
+ *
  * SECURITY FEATURES:
  * - AES-256 encryption for sensitive data
- * - Input validation and SQL injection prevention  
+ * - Input validation and SQL injection prevention
  * - Multi-tenant isolation with mandatory restaurantId
  * - Payload size limits and sanitization
  * - FynloException error handling
  * - Audit logging for compliance
- * 
+ *
  * PERFORMANCE FEATURES:
  * - Smart queue eviction strategy
  * - Memory management with cleanup
@@ -20,18 +20,19 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import CryptoJS from 'crypto-js';
-import * as Keychain from 'react-native-keychain';
 import { useState, useEffect } from 'react';
+import * as Keychain from 'react-native-keychain';
 
 import API_CONFIG from '../../config/api';
+import type { OfflineQueueConfig } from '../../config/offlineConfig';
+import { offlineConfig } from '../../config/offlineConfig';
+import { useAuthStore } from '../../store/useAuthStore';
 import { errorHandler, ErrorType, ErrorSeverity } from '../../utils/errorHandler';
+import FynloException from '../../utils/exceptions/FynloException';
 import { logger } from '../../utils/logger';
 import NetworkUtils from '../../utils/NetworkUtils';
 import tokenManager from '../../utils/tokenManager';
-import FynloException from '../../utils/exceptions/FynloException';
-import { useAuthStore } from '../../store/useAuthStore';
 
-import { offlineConfig, OfflineQueueConfig } from '../../config/offlineConfig';
 // SECURITY: Comprehensive validation configuration
 const SECURITY_CONFIG = {
   MAX_PAYLOAD_SIZE: 1024 * 1024, // 1MB
@@ -166,13 +167,17 @@ class SecurityValidator {
 
     const effectiveMaxLength = maxLength || this.config.maxStringLength;
     if (input.length > effectiveMaxLength) {
-      throw FynloException.validationError(`${fieldName} exceeds maximum length of ${effectiveMaxLength}`);
+      throw FynloException.validationError(
+        `${fieldName} exceeds maximum length of ${effectiveMaxLength}`
+      );
     }
 
     // Check for SQL injection
     for (const pattern of SECURITY_CONFIG.SQL_INJECTION_PATTERNS) {
       if (pattern.test(input)) {
-        throw FynloException.badRequest(`Invalid characters in ${fieldName} (SQL injection attempt detected)`);
+        throw FynloException.badRequest(
+          `Invalid characters in ${fieldName} (SQL injection attempt detected)`
+        );
       }
     }
 
@@ -185,7 +190,7 @@ class SecurityValidator {
    */
   static validateEndpoint(endpoint: unknown): string {
     const validated = this.validateString(endpoint, 'endpoint', this.config.maxEndpointLength);
-    
+
     if (SECURITY_CONFIG.PATH_TRAVERSAL_PATTERNS.test(validated)) {
       throw FynloException.badRequest('Invalid endpoint (path traversal attempt detected)');
     }
@@ -208,7 +213,9 @@ class SecurityValidator {
     // Check size
     const size = SafeStringifyHelper.getByteSize(payload);
     if (size > this.config.maxPayloadSize) {
-      throw FynloException.validationError(`Payload size ${size} exceeds maximum of ${this.config.maxPayloadSize}`);
+      throw FynloException.validationError(
+        `Payload size ${size} exceeds maximum of ${this.config.maxPayloadSize}`
+      );
     }
 
     // Prevent deep nesting
@@ -241,7 +248,7 @@ class SecurityValidator {
    */
   static validateRestaurantId(restaurantId: unknown): string {
     const validated = this.validateString(restaurantId, 'restaurantId', 50);
-    
+
     if (!/^[a-zA-Z0-9_-]+$/.test(validated)) {
       throw FynloException.validationError('Invalid restaurant ID format');
     }
@@ -254,7 +261,7 @@ class SecurityValidator {
    */
   static validateUserId(userId: unknown): string {
     const validated = this.validateString(userId, 'userId', 50);
-    
+
     if (!/^[a-zA-Z0-9_-]+$/.test(validated)) {
       throw FynloException.validationError('Invalid user ID format');
     }
@@ -272,58 +279,66 @@ class SafeStringifyHelper {
    * @param space Optional space parameter for formatting
    * @returns JSON string or fallback string on error
    */
-  static stringify(obj: unknown, replacer?: (key: string, value: unknown) => unknown, space?: string | number): string {
+  static stringify(
+    obj: unknown,
+    replacer?: (key: string, value: unknown) => unknown,
+    space?: string | number
+  ): string {
     const seen = new WeakSet();
-    
+
     try {
-      return JSON.stringify(obj, (key, value) => {
-        // Handle circular references
-        if (typeof value === 'object' && value !== null) {
-          if (seen.has(value)) {
-            return '[Circular Reference]';
+      return JSON.stringify(
+        obj,
+        (key, value) => {
+          // Handle circular references
+          if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) {
+              return '[Circular Reference]';
+            }
+            seen.add(value);
           }
-          seen.add(value);
-        }
-        
-        // Apply custom replacer if provided
-        if (replacer) {
-          return replacer(key, value);
-        }
-        
-        // Handle special types
-        if (value instanceof Error) {
-          return {
-            name: value.name,
-            message: value.message,
-            stack: value.stack
-          };
-        }
-        
-        if (typeof value === 'function') {
-          return '[Function]';
-        }
-        
-        if (typeof value === 'undefined') {
-          return '[Undefined]';
-        }
-        
-        if (typeof value === 'symbol') {
-          return value.toString();
-        }
-        
-        if (value instanceof RegExp) {
-          return value.toString();
-        }
-        
-        return value;
-      }, space);
+
+          // Apply custom replacer if provided
+          if (replacer) {
+            return replacer(key, value);
+          }
+
+          // Handle special types
+          if (value instanceof Error) {
+            return {
+              name: value.name,
+              message: value.message,
+              stack: value.stack,
+            };
+          }
+
+          if (typeof value === 'function') {
+            return '[Function]';
+          }
+
+          if (typeof value === 'undefined') {
+            return '[Undefined]';
+          }
+
+          if (typeof value === 'symbol') {
+            return value.toString();
+          }
+
+          if (value instanceof RegExp) {
+            return value.toString();
+          }
+
+          return value;
+        },
+        space
+      );
     } catch (error) {
       // Fallback for any other errors
       logger.error('SafeStringifyHelper.stringify failed', error);
       return '[Stringify Error]';
     }
   }
-  
+
   /**
    * Calculate byte size of stringified data
    * @param obj Object to measure
@@ -354,12 +369,15 @@ export class SecureOfflineQueueService {
   private unsubscribeConfig?: () => void;
   private encryptionKeyRotationTimer?: NodeJS.Timeout;
   // CRITICAL: Per-restaurant rate limiting for multi-tenant isolation
-  private requestCounts = new Map<string, {
-    minute: number;
-    hour: number;
-    minuteReset: number;
-    hourReset: number;
-  }>();
+  private requestCounts = new Map<
+    string,
+    {
+      minute: number;
+      hour: number;
+      minuteReset: number;
+      hourReset: number;
+    }
+  >();
   private encryptionKey?: string;
 
   // Enhanced security: Restaurant access cache
@@ -445,7 +463,7 @@ export class SecureOfflineQueueService {
   private handleConfigChange(newConfig: OfflineQueueConfig): void {
     const oldConfig = this.config;
     this.config = newConfig;
-    
+
     // Update validator configuration
     SecurityValidator.updateConfig(newConfig);
 
@@ -494,14 +512,14 @@ export class SecureOfflineQueueService {
         required: true,
       });
     }
-    
+
     if (!options.userId) {
       throw FynloException.validationError('userId is mandatory for all requests', {
         field: 'userId',
         required: true,
       });
     }
-    
+
     // Basic format validation to prevent injection
     if (typeof options.restaurantId !== 'string' || options.restaurantId.length === 0) {
       throw FynloException.validationError('restaurantId must be a non-empty string', {
@@ -509,7 +527,7 @@ export class SecureOfflineQueueService {
         type: typeof options.restaurantId,
       });
     }
-    
+
     if (typeof options.userId !== 'string' || options.userId.length === 0) {
       throw FynloException.validationError('userId must be a non-empty string', {
         field: 'userId',
@@ -536,13 +554,13 @@ export class SecureOfflineQueueService {
 
     const counts = this.requestCounts.get(restaurantId)!;
     const now = Date.now();
-    
+
     // Reset counters if time windows expired
     if (now - counts.minuteReset > 60000) {
       counts.minute = 0;
       counts.minuteReset = now;
     }
-    
+
     if (now - counts.hourReset > 3600000) {
       counts.hour = 0;
       counts.hourReset = now;
@@ -558,7 +576,7 @@ export class SecureOfflineQueueService {
         current: counts.minute,
         timestamp: now,
       }).catch(() => {}); // Don't block on audit logging
-      
+
       throw FynloException.rateLimitExceeded(`Rate limit exceeded for restaurant ${restaurantId}`, {
         restaurantId,
         limit: this.config.maxRequestsPerMinute,
@@ -577,19 +595,21 @@ export class SecureOfflineQueueService {
         current: counts.hour,
         timestamp: now,
       }).catch(() => {}); // Don't block on audit logging
-            throw FynloException.rateLimitExceeded(`Hour rate limit exceeded for restaurant ${restaurantId}`, {
-        restaurantId,
-        limit: this.config.maxRequestsPerHour,
-        current: counts.hour,
-        resetIn: Math.ceil((counts.hourReset + 3600000 - now) / 1000),
-      });
+      throw FynloException.rateLimitExceeded(
+        `Hour rate limit exceeded for restaurant ${restaurantId}`,
+        {
+          restaurantId,
+          limit: this.config.maxRequestsPerHour,
+          current: counts.hour,
+          resetIn: Math.ceil((counts.hourReset + 3600000 - now) / 1000),
+        }
+      );
     }
 
     // Increment counters for this restaurant
     counts.minute++;
     counts.hour++;
   }
-
 
   /**
    * Initialize encryption system
@@ -598,16 +618,15 @@ export class SecureOfflineQueueService {
     if (!this.config.enableEncryption) return;
 
     try {
-
       // Try to load existing key from Keychain
       const credentials = await Keychain.getInternetCredentials(this.ENCRYPTION_KEY_SERVICE);
-      
+
       if (credentials && credentials.password) {
         this.encryptionKey = credentials.password;
       } else {
         // Generate new key
-        this.encryptionKey = CryptoJS.lib.WordArray.random(256/8).toString(CryptoJS.enc.Hex);
-        
+        this.encryptionKey = CryptoJS.lib.WordArray.random(256 / 8).toString(CryptoJS.enc.Hex);
+
         // Store in Keychain
         await Keychain.setInternetCredentials(
           this.ENCRYPTION_KEY_SERVICE,
@@ -618,7 +637,7 @@ export class SecureOfflineQueueService {
     } catch (error) {
       logger.error('Encryption initialization failed', error);
       // Generate session key as fallback
-      this.encryptionKey = CryptoJS.lib.WordArray.random(256/8).toString(CryptoJS.enc.Hex);
+      this.encryptionKey = CryptoJS.lib.WordArray.random(256 / 8).toString(CryptoJS.enc.Hex);
     }
   }
 
@@ -628,14 +647,14 @@ export class SecureOfflineQueueService {
   private async validateRestaurantAccess(userId: string, restaurantId: string): Promise<boolean> {
     const cacheKey = `${userId}:${restaurantId}`;
     const cached = this.restaurantAccessCache.get(cacheKey);
-    
+
     if (cached && cached.expiry > Date.now()) {
       return cached.valid;
     }
 
     try {
       const { user } = useAuthStore.getState();
-      
+
       if (!user) {
         throw FynloException.unauthorized('No authenticated user');
       }
@@ -702,7 +721,7 @@ export class SecureOfflineQueueService {
     try {
       // CRITICAL: Validate mandatory fields first
       this.validateAbsoluteMandatoryFields(options);
-      
+
       // CRITICAL: Check rate limiting PER RESTAURANT
       this.checkRateLimit(options.restaurantId);
 
@@ -729,7 +748,7 @@ export class SecureOfflineQueueService {
       // Encrypt sensitive data
       let processedPayload = validatedPayload;
       let encrypted = false;
-      
+
       if (SECURITY_CONFIG.SENSITIVE_ENTITIES.has(entityType) && validatedPayload) {
         processedPayload = await this.encryptData(SafeStringifyHelper.stringify(validatedPayload));
         encrypted = true;
@@ -772,7 +791,7 @@ export class SecureOfflineQueueService {
 
       // Add to queue
       this.queue.set(requestId, request);
-      
+
       // Add to memory queue if space available
       if (this.memoryQueue.size < this.config.maxMemoryItems) {
         this.memoryQueue.set(requestId, request);
@@ -830,14 +849,14 @@ export class SecureOfflineQueueService {
       // Process in batches
       for (let i = 0; i < pendingRequests.length; i += this.config.batchSize) {
         const batch = pendingRequests.slice(i, i + this.config.batchSize);
-        
+
         const batchResults = await Promise.allSettled(
-          batch.map(request => this.syncSingleRequest(request))
+          batch.map((request) => this.syncSingleRequest(request))
         );
 
         for (const [index, batchResult] of batchResults.entries()) {
           const request = batch[index];
-          
+
           if (batchResult.status === 'fulfilled' && batchResult.value.success) {
             result.syncedCount++;
             this.queue.delete(request.id);
@@ -871,18 +890,20 @@ export class SecureOfflineQueueService {
   /**
    * Get pending requests filtered by restaurant
    */
-  private async getPendingRequestsForRestaurant(restaurantId?: string): Promise<SecureQueuedRequest[]> {
+  private async getPendingRequestsForRestaurant(
+    restaurantId?: string
+  ): Promise<SecureQueuedRequest[]> {
     const { user } = useAuthStore.getState();
-    
+
     let requests = Array.from(this.queue.values()).filter(
-      r => r.status === QueueStatus.PENDING || r.status === QueueStatus.FAILED
+      (r) => r.status === QueueStatus.PENDING || r.status === QueueStatus.FAILED
     );
 
     // Filter by restaurant if not platform owner
     if (restaurantId || (user && !user.is_platform_owner)) {
       const targetRestaurantId = restaurantId || user?.restaurant_id;
       if (targetRestaurantId) {
-        requests = requests.filter(r => r.restaurantId === targetRestaurantId);
+        requests = requests.filter((r) => r.restaurantId === targetRestaurantId);
       }
     }
 
@@ -903,7 +924,7 @@ export class SecureOfflineQueueService {
         request.metadata.userId,
         request.restaurantId
       );
-      
+
       if (!hasAccess) {
         throw FynloException.multiTenantViolation('Access denied during sync');
       }
@@ -938,7 +959,7 @@ export class SecureOfflineQueueService {
       return { success: true };
     } catch (error) {
       logger.error('Sync failed for request', { requestId: request.id, error });
-      
+
       // Schedule retry if retryable
       if (this.isRetryableError(error) && request.retryCount < request.maxRetries) {
         const delay = this.calculateRetryDelay(request.retryCount);
@@ -963,7 +984,7 @@ export class SecureOfflineQueueService {
       throw FynloException.encryptionError('Encryption key not initialized');
     }
 
-    const iv = CryptoJS.lib.WordArray.random(128/8);
+    const iv = CryptoJS.lib.WordArray.random(128 / 8);
     const encrypted = CryptoJS.AES.encrypt(data, this.encryptionKey, {
       iv: iv,
       mode: CryptoJS.mode.CBC,
@@ -1005,15 +1026,15 @@ export class SecureOfflineQueueService {
     try {
       const storageKey = this.getStorageKey(restaurantId);
       const data = Array.from(this.queue.values());
-      
+
       // Filter by restaurant if specified
-      const filteredData = restaurantId 
-        ? data.filter(r => r.restaurantId === restaurantId)
+      const filteredData = restaurantId
+        ? data.filter((r) => r.restaurantId === restaurantId)
         : data;
 
       // Compress and encrypt
       const serialized = SafeStringifyHelper.stringify(filteredData);
-      const compressed = this.config.enableCompression 
+      const compressed = this.config.enableCompression
         ? Buffer.from(serialized).toString('base64')
         : serialized;
 
@@ -1030,7 +1051,7 @@ export class SecureOfflineQueueService {
     try {
       // Load all restaurant queues
       const keys = await AsyncStorage.getAllKeys();
-      const queueKeys = keys.filter(k => k.startsWith(this.STORAGE_KEY_PREFIX));
+      const queueKeys = keys.filter((k) => k.startsWith(this.STORAGE_KEY_PREFIX));
 
       for (const key of queueKeys) {
         const stored = await AsyncStorage.getItem(key);
@@ -1039,14 +1060,14 @@ export class SecureOfflineQueueService {
         const decompressed = this.config.enableCompression
           ? Buffer.from(stored, 'base64').toString()
           : stored;
-        
+
         const data = JSON.parse(decompressed) as SecureQueuedRequest[];
-        
+
         for (const request of data) {
           // Skip expired items
           const age = Date.now() - request.timestamp;
           const maxAge = this.config.maxQueueAgeDays * 24 * 60 * 60 * 1000;
-          
+
           if (age < maxAge) {
             this.queue.set(request.id, request);
           }
@@ -1063,9 +1084,7 @@ export class SecureOfflineQueueService {
    * Get tenant-specific storage key
    */
   private getStorageKey(restaurantId?: string): string {
-    return restaurantId 
-      ? `${this.STORAGE_KEY_PREFIX}_${restaurantId}`
-      : this.STORAGE_KEY_PREFIX;
+    return restaurantId ? `${this.STORAGE_KEY_PREFIX}_${restaurantId}` : this.STORAGE_KEY_PREFIX;
   }
 
   /**
@@ -1074,12 +1093,12 @@ export class SecureOfflineQueueService {
   private async evictOldestLowPriorityItems(restaurantId: string): Promise<void> {
     const now = Date.now();
     const items = Array.from(this.queue.values())
-      .filter(r => r.restaurantId === restaurantId && r.status !== QueueStatus.IN_PROGRESS)
+      .filter((r) => r.restaurantId === restaurantId && r.status !== QueueStatus.IN_PROGRESS)
       .sort((a, b) => {
         // Never evict critical items
         if (a.priority === Priority.CRITICAL) return 1;
         if (b.priority === Priority.CRITICAL) return -1;
-        
+
         // Sort by priority then age
         if (a.priority !== b.priority) return b.priority - a.priority;
         return a.timestamp - b.timestamp;
@@ -1090,9 +1109,9 @@ export class SecureOfflineQueueService {
 
     for (const item of items) {
       if (removed >= toRemove) break;
-      
+
       // Skip recent high priority items
-      if (item.priority <= Priority.HIGH && (now - item.timestamp) < 3600000) {
+      if (item.priority <= Priority.HIGH && now - item.timestamp < 3600000) {
         continue;
       }
 
@@ -1115,7 +1134,7 @@ export class SecureOfflineQueueService {
     let removed = 0;
 
     for (const [id, request] of this.queue.entries()) {
-      if ((now - request.timestamp) > maxAge) {
+      if (now - request.timestamp > maxAge) {
         this.queue.delete(id);
         this.memoryQueue.delete(id);
         removed++;
@@ -1130,9 +1149,8 @@ export class SecureOfflineQueueService {
     // Offload memory if needed
     if (this.memoryQueue.size > this.config.maxMemoryItems) {
       const toOffload = this.memoryQueue.size - this.config.maxMemoryItems;
-      const sorted = Array.from(this.memoryQueue.values())
-        .sort((a, b) => b.priority - a.priority);
-      
+      const sorted = Array.from(this.memoryQueue.values()).sort((a, b) => b.priority - a.priority);
+
       for (let i = 0; i < toOffload; i++) {
         this.memoryQueue.delete(sorted[i].id);
       }
@@ -1146,7 +1164,6 @@ export class SecureOfflineQueueService {
     if (!this.config.enableAuditLog) return;
 
     try {
-
       const auditEntry = {
         id: this.generateRequestId(),
         timestamp: Date.now(),
@@ -1180,7 +1197,11 @@ export class SecureOfflineQueueService {
     return `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private generateIdempotencyKey(entityType: EntityType, action: ActionType, payload: unknown): string {
+  private generateIdempotencyKey(
+    entityType: EntityType,
+    action: ActionType,
+    payload: unknown
+  ): string {
     const data = `${entityType}_${action}_${SafeStringifyHelper.stringify(payload)}`;
     return CryptoJS.SHA256(data).toString(CryptoJS.enc.Hex);
   }
@@ -1287,7 +1308,7 @@ export class SecureOfflineQueueService {
     this.rateLimitCleanupTimer = setInterval(() => {
       const now = Date.now();
       const staleThreshold = 3600000; // 1 hour
-      
+
       for (const [restaurantId, counts] of this.requestCounts.entries()) {
         // Remove entries that haven't been used in over an hour
         if (now - counts.hourReset > staleThreshold && counts.hour === 0) {

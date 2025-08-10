@@ -1,5 +1,6 @@
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState, useEffect, useCallback } from 'react';
-
 import {
   View,
   Text,
@@ -11,15 +12,11 @@ import {
   RefreshControl,
   SegmentedControl,
 } from 'react-native';
-
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import type { MainStackParamList } from '../../navigation/MainNavigator';
 import { DatabaseService } from '../../services/DatabaseService';
 import useAppStore from '../../store/useAppStore';
-
-import type { MainStackParamList } from '../../navigation/MainNavigator';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 type NavigationProp = NativeStackNavigationProp<MainStackParamList, 'TableSelection'>;
 

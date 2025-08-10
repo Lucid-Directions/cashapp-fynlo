@@ -4,10 +4,11 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import { CartItemModification, EnhancedOrderItem } from '../types/cart';
+
 import { ModificationPricingService } from '../services/ModificationPricingService';
-import useEnhancedCartStore from '../store/useEnhancedCartStore';
 import { useCartStore } from '../store/cartStoreAdapter';
+import useEnhancedCartStore from '../store/useEnhancedCartStore';
+import type { CartItemModification, EnhancedOrderItem } from '../types/cart';
 
 interface UseItemModificationsProps {
   item: EnhancedOrderItem | null;
@@ -84,7 +85,7 @@ export function useItemModifications({
   }, [item, pricingService]);
 
   const originalSpecialInstructions = useMemo(() => {
-    return item?.specialInstructions || "";
+    return item?.specialInstructions || '';
   }, [item]);
 
   // Check if modifications have changed from original
@@ -165,7 +166,7 @@ export function useItemModifications({
   const resetModifications = useCallback(() => {
     if (item?.modifications && item.modifications.length > 0) {
       setModifications([...item.modifications]);
-      setSpecialInstructions(item.specialInstructions || "");
+      setSpecialInstructions(item.specialInstructions || '');
     } else {
       const defaults = pricingService.resetToDefaults(modifications);
       setModifications(defaults);

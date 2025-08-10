@@ -3,9 +3,9 @@
  * Handles backward compatibility and data validation
  */
 
-import { OrderItem } from '../types';
-import { EnhancedOrderItem, CartMigrationResult, CartValidationError } from '../types/cart';
 import ErrorTrackingService from '../services/ErrorTrackingService';
+import type { OrderItem } from '../types';
+import type { EnhancedOrderItem, CartMigrationResult, CartValidationError } from '../types/cart';
 
 /**
  * Migrates old OrderItem format to EnhancedOrderItem format

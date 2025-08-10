@@ -13,9 +13,10 @@ import {
   Animated,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useSyncStatus } from '../../hooks/useSyncStatus';
-import { useTheme } from '../../design-system/ThemeProvider';
+
 import type { Theme } from '../../design-system/theme';
+import { useTheme } from '../../design-system/ThemeProvider';
+import { useSyncStatus } from '../../hooks/useSyncStatus';
 
 interface SyncStatusBarProps {
   position?: 'top' | 'bottom';
@@ -33,15 +34,8 @@ const SyncStatusBar: React.FC<SyncStatusBarProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
-  const {
-    isOnline,
-    isSyncing,
-    queueSize,
-    failedCount,
-    conflictCount,
-    canSync,
-    triggerSync,
-  } = useSyncStatus();
+  const { isOnline, isSyncing, queueSize, failedCount, conflictCount, canSync, triggerSync } =
+    useSyncStatus();
 
   // Animation for pulsing effect when syncing
   const pulseAnim = React.useRef(new Animated.Value(1)).current;
@@ -142,12 +136,7 @@ const SyncStatusBar: React.FC<SyncStatusBarProps> = ({
   ];
 
   return (
-    <Animated.View
-      style={[
-        containerStyles,
-        isSyncing && { transform: [{ scale: pulseAnim }] },
-      ]}
-    >
+    <Animated.View style={[containerStyles, isSyncing && { transform: [{ scale: pulseAnim }] }]}>
       <TouchableOpacity
         style={styles.content}
         onPress={handlePress}
@@ -186,12 +175,7 @@ const SyncStatusBar: React.FC<SyncStatusBarProps> = ({
         )}
 
         {canSync && (
-          <Icon 
-            name="refresh" 
-            size={18} 
-            color={statusDisplay.color}
-            style={styles.actionIcon}
-          />
+          <Icon name="refresh" size={18} color={statusDisplay.color} style={styles.actionIcon} />
         )}
       </TouchableOpacity>
     </Animated.View>

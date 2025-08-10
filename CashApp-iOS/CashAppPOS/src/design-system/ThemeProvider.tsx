@@ -1,7 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Appearance, ColorSchemeName } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Theme, lightTheme, darkThemeConfig } from './theme';
+import type { ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { ColorSchemeName } from 'react-native';
+import { Appearance } from 'react-native';
+
+import type { Theme } from './theme';
+import { lightTheme, darkThemeConfig } from './theme';
 
 // Theme mode types
 export type ThemeMode = 'light' | 'dark' | 'auto';

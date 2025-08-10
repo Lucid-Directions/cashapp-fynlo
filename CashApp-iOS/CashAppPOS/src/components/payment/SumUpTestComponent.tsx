@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-
 import { SumUpProvider, useSumUp } from 'sumup-react-native-alpha';
 
 import sumUpConfigService from '../../services/SumUpConfigService';

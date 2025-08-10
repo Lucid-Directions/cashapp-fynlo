@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 
 /* eslint-disable react-native/no-unused-styles */
@@ -15,8 +16,6 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import ErrorBoundary from '../../components/ErrorBoundary';

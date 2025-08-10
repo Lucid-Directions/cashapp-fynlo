@@ -3,8 +3,8 @@
  * Provides formatting, validation, and utility functions
  */
 
-import { SplitBillGroup, SplitBillItem, SplitMethod, EnhancedOrderItem } from '../types/cart';
-import { GroupTotal } from '../services/SplitBillService';
+import type { GroupTotal } from '../services/SplitBillService';
+import type { SplitBillGroup, SplitBillItem, SplitMethod, EnhancedOrderItem } from '../types/cart';
 
 /**
  * Format a split bill group summary for display

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -10,7 +9,6 @@ import {
   Alert,
   Image,
 } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import {

@@ -17,11 +17,13 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../../design-system/ThemeProvider';
-import { EnhancedOrderItem, SplitMethod } from '../../types/cart';
 import { useSplitBill } from '../../hooks/useSplitBill';
-import SplitBillGroupCard from './SplitBillGroupCard';
+import type { EnhancedOrderItem, SplitMethod } from '../../types/cart';
 import { formatPrice } from '../../utils/priceValidation';
+
+import SplitBillGroupCard from './SplitBillGroupCard';
 
 interface SplitBillModalProps {
   visible: boolean;
@@ -415,311 +417,311 @@ export default function SplitBillModal({
 
 const createStyles = (theme: any) => {
   return StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: '90%',
-    maxWidth: 600,
-    height: '85%',
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: theme.colors.text,
-  },
-  closeButton: {
-    padding: 5,
-  },
+    modalContainer: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContent: {
+      width: '90%',
+      maxWidth: 600,
+      height: '85%',
+      borderRadius: 20,
+      overflow: 'hidden',
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 20,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: theme.colors.text,
+    },
+    closeButton: {
+      padding: 5,
+    },
 
-  // Setup Screen
-  setupContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  setupTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: theme.colors.text,
-    marginBottom: 40,
-  },
-  groupCountSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 60,
-  },
-  countButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: theme.colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  countDisplay: {
-    marginHorizontal: 40,
-    alignItems: 'center',
-  },
-  countText: {
-    fontSize: 48,
-    fontWeight: '700',
-    color: theme.colors.primary,
-  },
-  countLabel: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-    marginTop: 4,
-  },
-  startButton: {
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: 40,
-    paddingVertical: 16,
-    borderRadius: 12,
-  },
-  startButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.colors.white,
-  },
+    // Setup Screen
+    setupContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 40,
+    },
+    setupTitle: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginBottom: 40,
+    },
+    groupCountSelector: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 60,
+    },
+    countButton: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: theme.colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    countDisplay: {
+      marginHorizontal: 40,
+      alignItems: 'center',
+    },
+    countText: {
+      fontSize: 48,
+      fontWeight: '700',
+      color: theme.colors.primary,
+    },
+    countLabel: {
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+      marginTop: 4,
+    },
+    startButton: {
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: 40,
+      paddingVertical: 16,
+      borderRadius: 12,
+    },
+    startButtonText: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.colors.white,
+    },
 
-  // Method Selector
-  methodSelector: {
-    maxHeight: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  methodSelectorContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 10,
-  },
-  methodButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    gap: 6,
-  },
-  methodButtonActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
-  },
-  methodButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: theme.colors.text,
-  },
-  methodButtonTextActive: {
-    color: theme.colors.white,
-  },
+    // Method Selector
+    methodSelector: {
+      maxHeight: 60,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    methodSelectorContent: {
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      gap: 10,
+    },
+    methodButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 20,
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      gap: 6,
+    },
+    methodButtonActive: {
+      backgroundColor: theme.colors.primary,
+      borderColor: theme.colors.primary,
+    },
+    methodButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text,
+    },
+    methodButtonTextActive: {
+      color: theme.colors.white,
+    },
 
-  // Main Content
-  scrollView: {
-    flex: 1,
-  },
+    // Main Content
+    scrollView: {
+      flex: 1,
+    },
 
-  // Unassigned Items
-  unassignedSection: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  unassignedTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.text,
-    marginBottom: 12,
-  },
-  unassignedItem: {
-    alignItems: 'center',
-    padding: 12,
-    marginRight: 12,
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    minWidth: 80,
-  },
-  unassignedItemSelected: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primaryLight,
-  },
-  unassignedItemEmoji: {
-    fontSize: 24,
-    marginBottom: 4,
-  },
-  unassignedItemName: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: theme.colors.text,
-    textAlign: 'center',
-  },
-  unassignedItemQuantity: {
-    fontSize: 11,
-    color: theme.colors.textSecondary,
-    marginTop: 2,
-  },
+    // Unassigned Items
+    unassignedSection: {
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    unassignedTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginBottom: 12,
+    },
+    unassignedItem: {
+      alignItems: 'center',
+      padding: 12,
+      marginRight: 12,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      minWidth: 80,
+    },
+    unassignedItemSelected: {
+      borderColor: theme.colors.primary,
+      backgroundColor: theme.colors.primaryLight,
+    },
+    unassignedItemEmoji: {
+      fontSize: 24,
+      marginBottom: 4,
+    },
+    unassignedItemName: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text,
+      textAlign: 'center',
+    },
+    unassignedItemQuantity: {
+      fontSize: 11,
+      color: theme.colors.textSecondary,
+      marginTop: 2,
+    },
 
-  // Groups
-  groupsContainer: {
-    padding: 16,
-    gap: 16,
-  },
+    // Groups
+    groupsContainer: {
+      padding: 16,
+      gap: 16,
+    },
 
-  // Assignment Overlay
-  assignmentOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  assignmentCard: {
-    backgroundColor: theme.colors.background,
-    width: '80%',
-    maxWidth: 400,
-    borderRadius: 16,
-    padding: 20,
-    maxHeight: '60%',
-  },
-  assignmentTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.colors.text,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  assignmentGroups: {
-    maxHeight: 200,
-  },
-  assignmentGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: theme.colors.surface,
-    borderRadius: 10,
-    marginBottom: 8,
-  },
-  assignmentGroupColor: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  assignmentGroupName: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '500',
-    color: theme.colors.text,
-  },
-  assignmentGroupTotal: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-  },
-  assignmentActions: {
-    flexDirection: 'row',
-    marginTop: 20,
-    gap: 12,
-  },
-  assignmentButton: {
-    flex: 1,
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  assignmentButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.white,
-  },
-  assignmentButtonCancel: {
-    backgroundColor: theme.colors.surface,
-  },
-  assignmentButtonCancelText: {
-    color: theme.colors.text,
-  },
+    // Assignment Overlay
+    assignmentOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    assignmentCard: {
+      backgroundColor: theme.colors.background,
+      width: '80%',
+      maxWidth: 400,
+      borderRadius: 16,
+      padding: 20,
+      maxHeight: '60%',
+    },
+    assignmentTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginBottom: 16,
+      textAlign: 'center',
+    },
+    assignmentGroups: {
+      maxHeight: 200,
+    },
+    assignmentGroup: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 16,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 10,
+      marginBottom: 8,
+    },
+    assignmentGroupColor: {
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      marginRight: 12,
+    },
+    assignmentGroupName: {
+      flex: 1,
+      fontSize: 16,
+      fontWeight: '500',
+      color: theme.colors.text,
+    },
+    assignmentGroupTotal: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+    },
+    assignmentActions: {
+      flexDirection: 'row',
+      marginTop: 20,
+      gap: 12,
+    },
+    assignmentButton: {
+      flex: 1,
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 12,
+      borderRadius: 10,
+      alignItems: 'center',
+    },
+    assignmentButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.white,
+    },
+    assignmentButtonCancel: {
+      backgroundColor: theme.colors.surface,
+    },
+    assignmentButtonCancelText: {
+      color: theme.colors.text,
+    },
 
-  // Footer
-  footer: {
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    padding: 20,
-    backgroundColor: theme.colors.background,
-  },
-  totalSummary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  totalLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.text,
-    marginRight: 8,
-  },
-  totalAmount: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: theme.colors.primary,
-  },
-  remainingAmount: {
-    fontSize: 14,
-    color: theme.colors.error,
-    marginLeft: 8,
-  },
-  footerButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  exportButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 10,
-    backgroundColor: theme.colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  confirmButton: {
-    flex: 1,
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  confirmButtonDisabled: {
-    backgroundColor: theme.colors.disabled,
-  },
-  confirmButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.white,
-  },
+    // Footer
+    footer: {
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+      padding: 20,
+      backgroundColor: theme.colors.background,
+    },
+    totalSummary: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    totalLabel: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginRight: 8,
+    },
+    totalAmount: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: theme.colors.primary,
+    },
+    remainingAmount: {
+      fontSize: 14,
+      color: theme.colors.error,
+      marginLeft: 8,
+    },
+    footerButtons: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    exportButton: {
+      width: 48,
+      height: 48,
+      borderRadius: 10,
+      backgroundColor: theme.colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    confirmButton: {
+      flex: 1,
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 14,
+      borderRadius: 10,
+      alignItems: 'center',
+    },
+    confirmButtonDisabled: {
+      backgroundColor: theme.colors.disabled,
+    },
+    confirmButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.white,
+    },
   });
 };

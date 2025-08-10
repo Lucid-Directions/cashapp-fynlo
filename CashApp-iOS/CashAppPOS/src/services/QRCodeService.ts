@@ -3,8 +3,9 @@
  * Provides utilities for creating QR codes and managing real-time payment status
  */
 
-import type { SumUpQRPayment } from './SumUpService';
 import { logger } from '../utils/logger';
+
+import type { SumUpQRPayment } from './SumUpService';
 
 export interface QRCodeOptions {
   size: number;

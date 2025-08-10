@@ -248,7 +248,6 @@ export interface CartMigrationResult {
   };
 }
 
-
 /**
  * Enhanced order item fields for API compatibility
  */

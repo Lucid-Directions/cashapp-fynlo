@@ -3,7 +3,7 @@
  * Provides formatting, calculations, and utility functions for modifications
  */
 
-import { CartItemModification, EnhancedOrderItem } from '../types/cart';
+import type { CartItemModification, EnhancedOrderItem } from '../types/cart';
 
 /**
  * Format modification price for display
@@ -11,10 +11,10 @@ import { CartItemModification, EnhancedOrderItem } from '../types/cart';
  */
 export function formatModificationPrice(price: number): string {
   if (price === 0) return '';
-  
+
   // Round to avoid floating point issues
   const roundedPrice = Math.round(Math.abs(price) * 100) / 100;
-  
+
   if (price > 0) {
     return `+$${roundedPrice.toFixed(2)}`;
   } else {
@@ -26,12 +26,12 @@ export function formatModificationPrice(price: number): string {
  */
 export function calculateTotalModificationPrice(modifications: CartItemModification[]): number {
   if (!modifications || modifications.length === 0) return 0;
-  
+
   return modifications.reduce((total, mod) => {
     if (!mod.selected) return total;
     const price = mod.price || 0;
     const quantity = mod.quantity || 1;
-    return total + (price * quantity);
+    return total + price * quantity;
   }, 0);
 }
 
@@ -40,11 +40,11 @@ export function calculateTotalModificationPrice(modifications: CartItemModificat
  */
 export function calculateModificationTotal(modifications: any[]): number {
   if (!modifications || modifications.length === 0) return 0;
-  
+
   return modifications.reduce((total, mod) => {
     const price = mod.price || 0;
     const quantity = mod.quantity || 1;
-    return total + (price * quantity);
+    return total + price * quantity;
   }, 0);
 }
 
@@ -54,16 +54,16 @@ export function calculateModificationTotal(modifications: any[]): number {
  * @param maxLength - Optional max length for truncation
  */
 export function formatModificationSummary(
-  modifications: CartItemModification[], 
+  modifications: CartItemModification[],
   maxLength?: number
 ): string {
   if (!modifications || modifications.length === 0) return '';
-  
-  const selectedMods = modifications.filter(mod => mod.selected);
+
+  const selectedMods = modifications.filter((mod) => mod.selected);
   if (selectedMods.length === 0) return '';
-  
+
   let summary = selectedMods
-    .map(mod => {
+    .map((mod) => {
       // Format as "2x Extra Shot" instead of "Extra Shot (2x)"
       if (mod.quantity && mod.quantity > 1) {
         return `${mod.quantity}x ${mod.name}`;
@@ -71,12 +71,12 @@ export function formatModificationSummary(
       return mod.name;
     })
     .join(', ');
-    
+
   // Truncate if maxLength specified
   if (maxLength && summary.length > maxLength) {
     summary = summary.substring(0, maxLength - 3) + '...';
   }
-  
+
   return summary;
 }
 
@@ -85,13 +85,15 @@ export function formatModificationSummary(
  */
 export function hasModifications(item: EnhancedOrderItem | CartItemModification[]): boolean {
   if (Array.isArray(item)) {
-    return !!(item && item.some(mod => mod.selected));
+    return !!(item && item.some((mod) => mod.selected));
   }
-  
+
   // For EnhancedOrderItem, check both modifications and special instructions
-  const hasSelectedMods = !!(item.modifications && item.modifications.some(mod => mod.selected));
-  const hasInstructions = !!(item.specialInstructions && item.specialInstructions.trim().length > 0);
-  
+  const hasSelectedMods = !!(item.modifications && item.modifications.some((mod) => mod.selected));
+  const hasInstructions = !!(
+    item.specialInstructions && item.specialInstructions.trim().length > 0
+  );
+
   return hasSelectedMods || hasInstructions;
 }
 
@@ -100,20 +102,20 @@ export function hasModifications(item: EnhancedOrderItem | CartItemModification[
  */
 export function getModificationCount(item: EnhancedOrderItem | CartItemModification[]): number {
   if (Array.isArray(item)) {
-    return item.filter(mod => mod.selected).length;
+    return item.filter((mod) => mod.selected).length;
   }
-  
+
   // For EnhancedOrderItem, count both modifications and special instructions
   let count = 0;
-  
+
   if (item.modifications) {
-    count += item.modifications.filter(mod => mod.selected).length;
+    count += item.modifications.filter((mod) => mod.selected).length;
   }
-  
+
   if (item.specialInstructions && item.specialInstructions.trim().length > 0) {
     count += 1;
   }
-  
+
   return count;
 }
 
@@ -122,15 +124,15 @@ export function getModificationCount(item: EnhancedOrderItem | CartItemModificat
  */
 export function serializeModifications(modifications: CartItemModification[]): string {
   if (!modifications || modifications.length === 0) return '';
-  
+
   const selected = modifications
-    .filter(mod => mod.selected)
+    .filter((mod) => mod.selected)
     .sort((a, b) => a.id.localeCompare(b.id))
-    .map(mod => ({
+    .map((mod) => ({
       id: mod.id,
       quantity: mod.quantity || 1,
     }));
-  
+
   return JSON.stringify(selected);
 }
 
@@ -142,11 +144,11 @@ export function deserializeModifications(
   availableModifications: CartItemModification[]
 ): CartItemModification[] {
   if (!serialized || !availableModifications) return availableModifications || [];
-  
+
   try {
     const selected = JSON.parse(serialized);
-    
-    return availableModifications.map(mod => {
+
+    return availableModifications.map((mod) => {
       const selectedMod = selected.find((s: any) => s.id === mod.id);
       if (selectedMod) {
         return {
@@ -169,7 +171,7 @@ export function groupModificationsByCategory(
   modifications: CartItemModification[]
 ): Record<string, CartItemModification[]> {
   if (!modifications) return {};
-  
+
   return modifications.reduce((groups, mod) => {
     const category = mod.category || 'Other';
     if (!groups[category]) {
@@ -198,7 +200,7 @@ export function getModificationTypeColor(type: CartItemModification['type'], the
         return theme.colors.primary || '#007AFF';
     }
   }
-  
+
   // Fallback colors without theme
   switch (type) {
     case 'size':
@@ -226,36 +228,37 @@ export function isModificationCombinationValid(
   newModId?: string
 ): { valid: boolean; reason?: string } {
   if (!modifications) return { valid: true };
-  
-  const selected = modifications.filter(mod => mod.selected);
-  
+
+  const selected = modifications.filter((mod) => mod.selected);
+
   // Count by type
   const typeCount: Record<string, number> = {};
-  selected.forEach(mod => {
+  selected.forEach((mod) => {
     typeCount[mod.type] = (typeCount[mod.type] || 0) + 1;
   });
-  
+
   // Check size selection (only one allowed)
   if (typeCount.size > 1) {
     return { valid: false, reason: 'Only one size option can be selected' };
   }
-  
-  // Check temperature selection (only one allowed)  
+
+  // Check temperature selection (only one allowed)
   if (typeCount.temperature > 1) {
     return { valid: false, reason: 'Only one temperature option can be selected' };
   }
-  
+
   // Check milk options (only one allowed)
-  const milkOptions = selected.filter(mod => 
-    mod.category === 'Milk Options' || 
-    mod.name.toLowerCase().includes('milk') ||
-    mod.name.toLowerCase().includes('oat') ||
-    mod.name.toLowerCase().includes('whole')
+  const milkOptions = selected.filter(
+    (mod) =>
+      mod.category === 'Milk Options' ||
+      mod.name.toLowerCase().includes('milk') ||
+      mod.name.toLowerCase().includes('oat') ||
+      mod.name.toLowerCase().includes('whole')
   );
   if (milkOptions.length > 1) {
     return { valid: false, reason: 'Only one milk option can be selected' };
   }
-  
+
   return { valid: true };
 }
 
@@ -286,7 +289,7 @@ export function getModificationIcon(type: CartItemModification['type']): string 
  */
 export function sortModifications(modifications: CartItemModification[]): CartItemModification[] {
   if (!modifications) return [];
-  
+
   const typeOrder: Record<string, number> = {
     size: 1,
     temperature: 2,
@@ -295,16 +298,16 @@ export function sortModifications(modifications: CartItemModification[]): CartIt
     substitution: 5,
     preparation: 6,
   };
-  
+
   return [...modifications].sort((a, b) => {
     // First sort by type priority
     const aOrder = typeOrder[a.type] || 999;
     const bOrder = typeOrder[b.type] || 999;
-    
+
     if (aOrder !== bOrder) {
       return aOrder - bOrder;
     }
-    
+
     // Then by name
     return a.name.localeCompare(b.name);
   });
@@ -327,11 +330,10 @@ export function areModificationsEqual(
  */
 export function validateModifications(modifications: any[]): boolean {
   if (!modifications) return false;
-  
-  return modifications.every(mod => {
-    return mod.id && 
-           typeof mod.price === 'number' &&
-           (!mod.quantity || typeof mod.quantity === 'number');
+
+  return modifications.every((mod) => {
+    return (
+      mod.id && typeof mod.price === 'number' && (!mod.quantity || typeof mod.quantity === 'number')
+    );
   });
 }
-

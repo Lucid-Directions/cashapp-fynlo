@@ -1,14 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-  TouchableOpacity,
-  TextStyle,
-  ViewStyle,
-} from 'react-native';
+import type { TextStyle, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SumUpProvider, useSumUp } from 'sumup-react-native-alpha';
 import type { InitPaymentSheetProps, InitPaymentSheetResult } from 'sumup-react-native-alpha';

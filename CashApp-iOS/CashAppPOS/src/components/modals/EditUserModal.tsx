@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
-import { logger } from '../../utils/logger';
-
 import {
   StyleSheet,
   Text,
@@ -11,21 +8,20 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  ActivityIndicator } from
-'react-native';
-
+  ActivityIndicator,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { UserManagementService } from '../../services/UserManagementService';
-import { SimpleTextInput } from '../inputs'; // Corrected import
-
 import type {
   User,
   UpdateUserRequest,
   UserRole,
   Permission,
-  PermissionTemplate } from
-'../../services/UserManagementService';
+  PermissionTemplate,
+} from '../../services/UserManagementService';
+import { logger } from '../../utils/logger';
+import { SimpleTextInput } from '../inputs'; // Corrected import
 
 // Fynlo POS Color Scheme
 const Colors = {
@@ -41,7 +37,7 @@ const Colors = {
   darkGray: '#666666',
   text: '#333333',
   lightText: '#666666',
-  border: '#DDDDDD'
+  border: '#DDDDDD',
 };
 
 interface EditUserModalProps {
@@ -62,32 +58,32 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
   const userManagementService = UserManagementService.getInstance();
 
   const userRoles: UserRole[] = [
-  'Platform Admin',
-  'Restaurant Owner',
-  'Restaurant Manager',
-  'Restaurant Employee',
-  'Kitchen Staff',
-  'Cashier',
-  'Support Agent'];
-
+    'Platform Admin',
+    'Restaurant Owner',
+    'Restaurant Manager',
+    'Restaurant Employee',
+    'Kitchen Staff',
+    'Cashier',
+    'Support Agent',
+  ];
 
   const allPermissions: Permission[] = [
-  'view_analytics',
-  'manage_users',
-  'manage_restaurants',
-  'process_payments',
-  'manage_inventory',
-  'view_reports',
-  'manage_menu',
-  'manage_orders',
-  'access_pos',
-  'manage_settings',
-  'view_logs',
-  'export_data',
-  'manage_tables',
-  'view_kitchen_orders',
-  'manage_staff_schedules'];
-
+    'view_analytics',
+    'manage_users',
+    'manage_restaurants',
+    'process_payments',
+    'manage_inventory',
+    'view_reports',
+    'manage_menu',
+    'manage_orders',
+    'access_pos',
+    'manage_settings',
+    'view_logs',
+    'export_data',
+    'manage_tables',
+    'view_kitchen_orders',
+    'manage_staff_schedules',
+  ];
 
   const permissionDescriptions: { [key in Permission]: string } = {
     view_analytics: 'View business analytics and insights',
@@ -104,7 +100,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
     export_data: 'Export data and reports',
     manage_tables: 'Manage restaurant tables and seating',
     view_kitchen_orders: 'View orders in kitchen display',
-    manage_staff_schedules: 'Create and manage staff schedules'
+    manage_staff_schedules: 'Create and manage staff schedules',
   };
 
   useEffect(() => {
@@ -118,7 +114,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
         permissions: [...user.permissions],
         phoneNumber: user.phoneNumber,
         address: user.address,
-        emergencyContact: user.emergencyContact
+        emergencyContact: user.emergencyContact,
       });
       loadPermissionTemplates();
     }
@@ -177,25 +173,25 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
       'Suspend User',
       'Are you sure you want to suspend this user? They will not be able to access the system.',
       [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Suspend',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            setLoading(true);
-            await userManagementService.suspendUser(user.id, 'Suspended via admin panel');
-            Alert.alert('Success', 'User suspended successfully');
-            onUserUpdated();
-            handleClose();
-          } catch (_error) {
-            Alert.alert('Error', 'Failed to suspend user');
-          } finally {
-            setLoading(false);
-          }
-        }
-      }]
-
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Suspend',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await userManagementService.suspendUser(user.id, 'Suspended via admin panel');
+              Alert.alert('Success', 'User suspended successfully');
+              onUserUpdated();
+              handleClose();
+            } catch (_error) {
+              Alert.alert('Error', 'Failed to suspend user');
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
     );
   };
 
@@ -222,34 +218,34 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
       'Delete User',
       'Are you sure you want to delete this user? This action cannot be undone.',
       [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            setLoading(true);
-            await userManagementService.deleteUser(user.id);
-            Alert.alert('Success', 'User deleted successfully');
-            onUserUpdated();
-            handleClose();
-          } catch (_error) {
-            Alert.alert('Error', 'Failed to delete user');
-          } finally {
-            setLoading(false);
-          }
-        }
-      }]
-
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await userManagementService.deleteUser(user.id);
+              Alert.alert('Success', 'User deleted successfully');
+              onUserUpdated();
+              handleClose();
+            } catch (_error) {
+              Alert.alert('Error', 'Failed to delete user');
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
     );
   };
 
   const togglePermission = (permission: Permission) => {
     setFormData((prev) => ({
       ...prev,
-      permissions: prev.permissions?.includes(permission) ?
-      prev.permissions.filter((p) => p !== permission) :
-      [...(prev.permissions || []), permission]
+      permissions: prev.permissions?.includes(permission)
+        ? prev.permissions.filter((p) => p !== permission)
+        : [...(prev.permissions || []), permission],
     }));
   };
 
@@ -272,8 +268,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={handleClose}>
-
+      onRequestClose={handleClose}
+    >
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -284,91 +280,92 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
           <TouchableOpacity
             onPress={handleSubmit}
             style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-            disabled={loading}>
-
-            {loading ?
-            <ActivityIndicator size="small" color={Colors.white} /> :
-
-            <Text style={styles.saveButtonText}>Save</Text>
-            }
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color={Colors.white} />
+            ) : (
+              <Text style={styles.saveButtonText}>Save</Text>
+            )}
           </TouchableOpacity>
         </View>
 
         {/* Tab Navigation */}
         <View style={styles.tabNavigation}>
           {[
-          { key: 'basic', label: 'Basic Info', icon: 'person' },
-          { key: 'permissions', label: 'Permissions', icon: 'security' },
-          { key: 'security', label: 'Security', icon: 'shield' }].
-          map((tab) =>
-          <TouchableOpacity
-            key={tab.key}
-            style={[styles.tabButton, activeTab === tab.key && styles.tabButtonActive]}
-            onPress={() => setActiveTab(tab.key as unknown)}>
-
+            { key: 'basic', label: 'Basic Info', icon: 'person' },
+            { key: 'permissions', label: 'Permissions', icon: 'security' },
+            { key: 'security', label: 'Security', icon: 'shield' },
+          ].map((tab) => (
+            <TouchableOpacity
+              key={tab.key}
+              style={[styles.tabButton, activeTab === tab.key && styles.tabButtonActive]}
+              onPress={() => setActiveTab(tab.key as unknown)}
+            >
               <Icon
-              name={tab.icon}
-              size={20}
-              color={activeTab === tab.key ? Colors.primary : Colors.mediumGray} />
+                name={tab.icon}
+                size={20}
+                color={activeTab === tab.key ? Colors.primary : Colors.mediumGray}
+              />
 
               <Text
-              style={[styles.tabButtonText, activeTab === tab.key && styles.tabButtonTextActive]}>
-
+                style={[styles.tabButtonText, activeTab === tab.key && styles.tabButtonTextActive]}
+              >
                 {tab.label}
               </Text>
             </TouchableOpacity>
-          )}
+          ))}
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {activeTab === 'basic' &&
-          <>
+          {activeTab === 'basic' && (
+            <>
               {/* Basic Information */}
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Basic Information</Text>
 
                 <View style={styles.inputGroup}>
                   <SimpleTextInput
-                  label="Full Name *"
-                  value={formData.name || ''}
-                  onValueChange={(text) => setFormData((prev) => ({ ...prev, name: text }))}
-                  placeholder="Enter full name"
-                  autoCapitalize="words" />
-
+                    label="Full Name *"
+                    value={formData.name || ''}
+                    onValueChange={(text) => setFormData((prev) => ({ ...prev, name: text }))}
+                    placeholder="Enter full name"
+                    autoCapitalize="words"
+                  />
                 </View>
 
                 <View style={styles.inputGroup}>
                   <SimpleTextInput
-                  label="Email Address *"
-                  value={formData.email || ''}
-                  onValueChange={(text) => setFormData((prev) => ({ ...prev, email: text }))}
-                  placeholder="Enter email address"
-                  keyboardType="email-address"
-                  autoCapitalize="none" />
-
+                    label="Email Address *"
+                    value={formData.email || ''}
+                    onValueChange={(text) => setFormData((prev) => ({ ...prev, email: text }))}
+                    placeholder="Enter email address"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
                 </View>
 
                 <View style={styles.inputGroup}>
                   <SimpleTextInput
-                  label="Phone Number"
-                  value={formData.phoneNumber || ''}
-                  onValueChange={(text) =>
-                  setFormData((prev) => ({ ...prev, phoneNumber: text }))
-                  }
-                  placeholder="Enter phone number"
-                  keyboardType="phone-pad" />
-
+                    label="Phone Number"
+                    value={formData.phoneNumber || ''}
+                    onValueChange={(text) =>
+                      setFormData((prev) => ({ ...prev, phoneNumber: text }))
+                    }
+                    placeholder="Enter phone number"
+                    keyboardType="phone-pad"
+                  />
                 </View>
 
                 <View style={styles.inputGroup}>
                   <SimpleTextInput
-                  label="Address"
-                  value={formData.address || ''}
-                  onValueChange={(text) => setFormData((prev) => ({ ...prev, address: text }))}
-                  placeholder="Enter address"
-                  multiline
-                  numberOfLines={3} // This is a valid TextInput prop
-                />
+                    label="Address"
+                    value={formData.address || ''}
+                    onValueChange={(text) => setFormData((prev) => ({ ...prev, address: text }))}
+                    placeholder="Enter address"
+                    multiline
+                    numberOfLines={3} // This is a valid TextInput prop
+                  />
                 </View>
               </View>
 
@@ -379,100 +376,100 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>User Role *</Text>
                   <View style={styles.roleGrid}>
-                    {userRoles.map((role) =>
-                  <TouchableOpacity
-                    key={role}
-                    style={[
-                    styles.roleOption,
-                    formData.role === role && styles.roleOptionSelected]
-                    }
-                    onPress={() => setFormData((prev) => ({ ...prev, role }))}>
-
+                    {userRoles.map((role) => (
+                      <TouchableOpacity
+                        key={role}
+                        style={[
+                          styles.roleOption,
+                          formData.role === role && styles.roleOptionSelected,
+                        ]}
+                        onPress={() => setFormData((prev) => ({ ...prev, role }))}
+                      >
                         <Text
-                      style={[
-                      styles.roleOptionText,
-                      formData.role === role && styles.roleOptionTextSelected]
-                      }>
-
+                          style={[
+                            styles.roleOptionText,
+                            formData.role === role && styles.roleOptionTextSelected,
+                          ]}
+                        >
                           {role}
                         </Text>
                       </TouchableOpacity>
-                  )}
+                    ))}
                   </View>
                 </View>
 
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Status</Text>
                   <View style={styles.statusGrid}>
-                    {['active', 'inactive', 'suspended'].map((status) =>
-                  <TouchableOpacity
-                    key={status}
-                    style={[
-                    styles.statusOption,
-                    formData.status === status && styles.statusOptionSelected]
-                    }
-                    onPress={() =>
-                    setFormData((prev) => ({ ...prev, status: status as unknown }))
-                    }>
-
+                    {['active', 'inactive', 'suspended'].map((status) => (
+                      <TouchableOpacity
+                        key={status}
+                        style={[
+                          styles.statusOption,
+                          formData.status === status && styles.statusOptionSelected,
+                        ]}
+                        onPress={() =>
+                          setFormData((prev) => ({ ...prev, status: status as unknown }))
+                        }
+                      >
                         <Text
-                      style={[
-                      styles.statusOptionText,
-                      formData.status === status && styles.statusOptionTextSelected]
-                      }>
-
+                          style={[
+                            styles.statusOptionText,
+                            formData.status === status && styles.statusOptionTextSelected,
+                          ]}
+                        >
                           {status.charAt(0).toUpperCase() + status.slice(1)}
                         </Text>
                       </TouchableOpacity>
-                  )}
+                    ))}
                   </View>
                 </View>
               </View>
             </>
-          }
+          )}
 
-          {activeTab === 'permissions' &&
-          <>
+          {activeTab === 'permissions' && (
+            <>
               {/* Permission Templates */}
-              {applicableTemplates.length > 0 &&
-            <View style={styles.section}>
+              {applicableTemplates.length > 0 && (
+                <View style={styles.section}>
                   <Text style={styles.sectionTitle}>Permission Templates</Text>
                   <Text style={styles.sectionSubtitle}>
                     Quick setup with predefined permissions
                   </Text>
 
                   <View style={styles.templateGrid}>
-                    {applicableTemplates.map((template) =>
-                <TouchableOpacity
-                  key={template.id}
-                  style={[
-                  styles.templateOption,
-                  selectedTemplate === template.id && styles.templateOptionSelected]
-                  }
-                  onPress={() => applyTemplate(template.id)}>
-
+                    {applicableTemplates.map((template) => (
+                      <TouchableOpacity
+                        key={template.id}
+                        style={[
+                          styles.templateOption,
+                          selectedTemplate === template.id && styles.templateOptionSelected,
+                        ]}
+                        onPress={() => applyTemplate(template.id)}
+                      >
                         <Text
-                    style={[
-                    styles.templateOptionTitle,
-                    selectedTemplate === template.id && styles.templateOptionTitleSelected]
-                    }>
-
+                          style={[
+                            styles.templateOptionTitle,
+                            selectedTemplate === template.id && styles.templateOptionTitleSelected,
+                          ]}
+                        >
                           {template.name}
                         </Text>
                         <Text
-                    style={[
-                    styles.templateOptionDescription,
-                    selectedTemplate === template.id &&
-                    styles.templateOptionDescriptionSelected]
-                    }>
-
+                          style={[
+                            styles.templateOptionDescription,
+                            selectedTemplate === template.id &&
+                              styles.templateOptionDescriptionSelected,
+                          ]}
+                        >
                           {template.description}
                         </Text>
                       </TouchableOpacity>
-                )}
+                    ))}
                   </View>
                 </View>
-            }
+              )}
 
               {/* Individual Permissions */}
               <View style={styles.section}>
@@ -481,12 +478,12 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
                 </Text>
 
                 <View style={styles.permissionsList}>
-                  {allPermissions.map((permission) =>
-                <TouchableOpacity
-                  key={permission}
-                  style={styles.permissionItem}
-                  onPress={() => togglePermission(permission)}>
-
+                  {allPermissions.map((permission) => (
+                    <TouchableOpacity
+                      key={permission}
+                      style={styles.permissionItem}
+                      onPress={() => togglePermission(permission)}
+                    >
                       <View style={styles.permissionInfo}>
                         <Text style={styles.permissionName}>
                           {permission.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
@@ -496,56 +493,56 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
                         </Text>
                       </View>
                       <View
-                    style={[
-                    styles.checkbox,
-                    formData.permissions?.includes(permission) && styles.checkboxSelected]
-                    }>
-
-                        {formData.permissions?.includes(permission) &&
-                    <Icon name="check" size={16} color={Colors.white} />
-                    }
+                        style={[
+                          styles.checkbox,
+                          formData.permissions?.includes(permission) && styles.checkboxSelected,
+                        ]}
+                      >
+                        {formData.permissions?.includes(permission) && (
+                          <Icon name="check" size={16} color={Colors.white} />
+                        )}
                       </View>
                     </TouchableOpacity>
-                )}
+                  ))}
                 </View>
               </View>
             </>
-          }
+          )}
 
-          {activeTab === 'security' &&
-          <View style={styles.section}>
+          {activeTab === 'security' && (
+            <View style={styles.section}>
               <Text style={styles.sectionTitle}>Security Actions</Text>
               <Text style={styles.sectionSubtitle}>Manage user access and security</Text>
 
               <View style={styles.actionsList}>
-                {user.status === 'suspended' ?
-              <TouchableOpacity
-                style={[styles.actionButton, styles.actionButtonSuccess]}
-                onPress={handleActivateUser}>
-
+                {user.status === 'suspended' ? (
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.actionButtonSuccess]}
+                    onPress={handleActivateUser}
+                  >
                     <Icon name="check-circle" size={24} color={Colors.white} />
                     <View style={styles.actionButtonContent}>
                       <Text style={styles.actionButtonTitle}>Activate User</Text>
                       <Text style={styles.actionButtonDescription}>Restore user access</Text>
                     </View>
-                  </TouchableOpacity> :
-
-              <TouchableOpacity
-                style={[styles.actionButton, styles.actionButtonWarning]}
-                onPress={handleSuspendUser}>
-
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.actionButtonWarning]}
+                    onPress={handleSuspendUser}
+                  >
                     <Icon name="block" size={24} color={Colors.white} />
                     <View style={styles.actionButtonContent}>
                       <Text style={styles.actionButtonTitle}>Suspend User</Text>
                       <Text style={styles.actionButtonDescription}>Temporarily disable access</Text>
                     </View>
                   </TouchableOpacity>
-              }
+                )}
 
                 <TouchableOpacity
-                style={[styles.actionButton, styles.actionButtonDanger]}
-                onPress={handleDeleteUser}>
-
+                  style={[styles.actionButton, styles.actionButtonDanger]}
+                  onPress={handleDeleteUser}
+                >
                   <Icon name="delete" size={24} color={Colors.white} />
                   <View style={styles.actionButtonContent}>
                     <Text style={styles.actionButtonTitle}>Delete User</Text>
@@ -577,17 +574,17 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
                 </View>
               </View>
             </View>
-          }
+          )}
         </ScrollView>
       </SafeAreaView>
-    </Modal>);
-
+    </Modal>
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -597,15 +594,15 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border
+    borderBottomColor: Colors.border,
   },
   closeButton: {
-    padding: 8
+    padding: 8,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.text
+    color: Colors.text,
   },
   saveButton: {
     backgroundColor: Colors.primary,
@@ -613,21 +610,21 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     minWidth: 70,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   saveButtonDisabled: {
-    opacity: 0.6
+    opacity: 0.6,
   },
   saveButtonText: {
     color: Colors.white,
     fontSize: 14,
-    fontWeight: '600'
+    fontWeight: '600',
   },
   tabNavigation: {
     flexDirection: 'row',
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border
+    borderBottomColor: Colors.border,
   },
   tabButton: {
     flex: 1,
@@ -635,66 +632,54 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    gap: 8
+    gap: 8,
   },
   tabButtonActive: {
     borderBottomWidth: 2,
-    borderBottomColor: Colors.primary
+    borderBottomColor: Colors.primary,
   },
   tabButtonText: {
     fontSize: 14,
     color: Colors.mediumGray,
-    fontWeight: '500'
+    fontWeight: '500',
   },
   tabButtonTextActive: {
-    color: Colors.primary
+    color: Colors.primary,
   },
   content: {
-    flex: 1
+    flex: 1,
   },
   section: {
     backgroundColor: Colors.white,
     marginBottom: 12,
     paddingHorizontal: 20,
-    paddingVertical: 16
+    paddingVertical: 16,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: Colors.text,
-    marginBottom: 4
+    marginBottom: 4,
   },
   sectionSubtitle: {
     fontSize: 14,
     color: Colors.lightText,
-    marginBottom: 16
+    marginBottom: 16,
   },
   inputGroup: {
-    marginBottom: 16
+    marginBottom: 16,
   },
   inputLabel: {
     fontSize: 14,
     fontWeight: '500',
     color: Colors.text,
-    marginBottom: 8
+    marginBottom: 8,
   },
-
-
-
-
-
-
-
-
-
-
-
-
 
   roleGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8
+    gap: 8,
   },
   roleOption: {
     paddingHorizontal: 12,
@@ -702,23 +687,23 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: Colors.border,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.background,
   },
   roleOptionSelected: {
     backgroundColor: Colors.primary,
-    borderColor: Colors.primary
+    borderColor: Colors.primary,
   },
   roleOptionText: {
     fontSize: 12,
     color: Colors.text,
-    fontWeight: '500'
+    fontWeight: '500',
   },
   roleOptionTextSelected: {
-    color: Colors.white
+    color: Colors.white,
   },
   statusGrid: {
     flexDirection: 'row',
-    gap: 8
+    gap: 8,
   },
   statusOption: {
     paddingHorizontal: 16,
@@ -726,53 +711,53 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: Colors.border,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.background,
   },
   statusOptionSelected: {
     backgroundColor: Colors.primary,
-    borderColor: Colors.primary
+    borderColor: Colors.primary,
   },
   statusOptionText: {
     fontSize: 14,
     color: Colors.text,
-    fontWeight: '500'
+    fontWeight: '500',
   },
   statusOptionTextSelected: {
-    color: Colors.white
+    color: Colors.white,
   },
   templateGrid: {
-    gap: 12
+    gap: 12,
   },
   templateOption: {
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.border,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.background,
   },
   templateOptionSelected: {
     backgroundColor: Colors.primary,
-    borderColor: Colors.primary
+    borderColor: Colors.primary,
   },
   templateOptionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: Colors.text,
-    marginBottom: 4
+    marginBottom: 4,
   },
   templateOptionTitleSelected: {
-    color: Colors.white
+    color: Colors.white,
   },
   templateOptionDescription: {
     fontSize: 14,
-    color: Colors.lightText
+    color: Colors.lightText,
   },
   templateOptionDescriptionSelected: {
     color: Colors.white,
-    opacity: 0.9
+    opacity: 0.9,
   },
   permissionsList: {
-    marginTop: 8
+    marginTop: 8,
   },
   permissionItem: {
     flexDirection: 'row',
@@ -780,21 +765,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray
+    borderBottomColor: Colors.lightGray,
   },
   permissionInfo: {
     flex: 1,
-    marginRight: 12
+    marginRight: 12,
   },
   permissionName: {
     fontSize: 14,
     fontWeight: '500',
     color: Colors.text,
-    marginBottom: 2
+    marginBottom: 2,
   },
   permissionDescription: {
     fontSize: 12,
-    color: Colors.lightText
+    color: Colors.lightText,
   },
   checkbox: {
     width: 24,
@@ -804,71 +789,71 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.white
+    backgroundColor: Colors.white,
   },
   checkboxSelected: {
     backgroundColor: Colors.primary,
-    borderColor: Colors.primary
+    borderColor: Colors.primary,
   },
   actionsList: {
-    gap: 12
+    gap: 12,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     borderRadius: 12,
-    gap: 12
+    gap: 12,
   },
   actionButtonSuccess: {
-    backgroundColor: Colors.success
+    backgroundColor: Colors.success,
   },
   actionButtonWarning: {
-    backgroundColor: Colors.warning
+    backgroundColor: Colors.warning,
   },
   actionButtonDanger: {
-    backgroundColor: Colors.danger
+    backgroundColor: Colors.danger,
   },
   actionButtonContent: {
-    flex: 1
+    flex: 1,
   },
   actionButtonTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: Colors.white,
-    marginBottom: 2
+    marginBottom: 2,
   },
   actionButtonDescription: {
     fontSize: 14,
     color: Colors.white,
-    opacity: 0.9
+    opacity: 0.9,
   },
   userStats: {
-    marginTop: 24
+    marginTop: 24,
   },
   statsTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: Colors.text,
-    marginBottom: 16
+    marginBottom: 16,
   },
   statsGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
   statItem: {
-    alignItems: 'center'
+    alignItems: 'center',
   },
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
     color: Colors.primary,
-    marginBottom: 4
+    marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: Colors.lightText
-  }
+    color: Colors.lightText,
+  },
 });
 
 export default EditUserModal;

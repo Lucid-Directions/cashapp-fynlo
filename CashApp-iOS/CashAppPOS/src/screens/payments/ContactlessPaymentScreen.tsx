@@ -1,5 +1,6 @@
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
 import React, { useState, useEffect, useRef } from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -10,15 +11,11 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
-
-import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme } from '../../contexts/ThemeProvider';
 import SumUpService from '../../services/SumUpService';
-
 import type { SumUpContactlessPayment } from '../../services/SumUpService';
-import type { RouteProp } from '@react-navigation/native';
 
 const { width: _screenWidth } = Dimensions.get('window');
 

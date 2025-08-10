@@ -15,8 +15,6 @@ const mockDataContext = {
 
 export const DataContext = React.createContext(mockDataContext);
 export const DataProvider = ({ children, value }: any) => (
-  <DataContext.Provider value={value || mockDataContext}>
-    {children}
-  </DataContext.Provider>
+  <DataContext.Provider value={value || mockDataContext}>{children}</DataContext.Provider>
 );
 export const useData = () => mockDataContext;

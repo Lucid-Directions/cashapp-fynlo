@@ -9,8 +9,6 @@ const mockPaymentContext = {
 
 export const PaymentContext = React.createContext(mockPaymentContext);
 export const PaymentProvider = ({ children, value }: any) => (
-  <PaymentContext.Provider value={value || mockPaymentContext}>
-    {children}
-  </PaymentContext.Provider>
+  <PaymentContext.Provider value={value || mockPaymentContext}>{children}</PaymentContext.Provider>
 );
 export const usePayment = () => mockPaymentContext;

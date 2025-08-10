@@ -1,10 +1,8 @@
-import React from 'react';
-
-import { logger } from '../../utils/logger';
-
 /* eslint-disable react-native/no-unused-styles */
 // This file uses useThemedStyles pattern which ESLint cannot statically analyze
 
+import { useNavigation } from '@react-navigation/native';
+import React from 'react';
 import {
   StyleSheet,
   Text,
@@ -14,13 +12,12 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import useAppStore from '../../store/useAppStore';
+import { logger } from '../../utils/logger';
 
 interface MenuOption {
   id: string;

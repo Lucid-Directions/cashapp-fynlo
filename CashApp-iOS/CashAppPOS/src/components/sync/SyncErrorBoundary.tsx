@@ -3,19 +3,14 @@
  * Catches and handles errors in offline sync operations
  */
 
-import React, { Component, ReactNode } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-} from 'react-native';
+import type { ReactNode } from 'react';
+import React, { Component } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { logger } from '../../utils/logger';
-import { FynloException } from '../../utils/exceptions/FynloException';
+
 import { offlineQueueService } from '../../services/offline';
+import { FynloException } from '../../utils/exceptions/FynloException';
+import { logger } from '../../utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -58,12 +53,13 @@ class SyncErrorBoundary extends Component<Props, State> {
     });
 
     // Convert to FynloException if not already
-    const fynloError = error instanceof FynloException 
-      ? error 
-      : FynloException.fromError(error, 'SYNC_COMPONENT_ERROR');
+    const fynloError =
+      error instanceof FynloException
+        ? error
+        : FynloException.fromError(error, 'SYNC_COMPONENT_ERROR');
 
     // Update state
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       errorInfo,
       errorCount: prevState.errorCount + 1,
     }));
@@ -124,9 +120,9 @@ class SyncErrorBoundary extends Component<Props, State> {
         <View style={styles.container}>
           <View style={styles.errorCard}>
             <Icon name="error-outline" size={48} color="#DC2626" />
-            
+
             <Text style={styles.title}>Sync Error</Text>
-            
+
             <Text style={styles.message}>
               {this.state.error?.message || 'An unexpected error occurred'}
             </Text>
@@ -135,16 +131,14 @@ class SyncErrorBoundary extends Component<Props, State> {
               <ScrollView style={styles.detailsContainer}>
                 <Text style={styles.detailsTitle}>Error Details:</Text>
                 <Text style={styles.details}>
-                  {this.state.error instanceof FynloException 
+                  {this.state.error instanceof FynloException
                     ? JSON.stringify(this.state.error.toJSON(), null, 2)
                     : this.state.error.toString()}
                 </Text>
                 {this.state.errorInfo && (
                   <>
                     <Text style={styles.detailsTitle}>Component Stack:</Text>
-                    <Text style={styles.details}>
-                      {this.state.errorInfo.componentStack}
-                    </Text>
+                    <Text style={styles.details}>{this.state.errorInfo.componentStack}</Text>
                   </>
                 )}
               </ScrollView>
@@ -170,9 +164,7 @@ class SyncErrorBoundary extends Component<Props, State> {
               )}
             </View>
 
-            <Text style={styles.errorCount}>
-              Error count: {this.state.errorCount}
-            </Text>
+            <Text style={styles.errorCount}>Error count: {this.state.errorCount}</Text>
           </View>
         </View>
       );
@@ -283,4 +275,4 @@ export function withSyncErrorBoundary<P extends object>(
     </SyncErrorBoundary>
   );
 }
-EOF < /dev/null
+EOF < /dev/llnu;

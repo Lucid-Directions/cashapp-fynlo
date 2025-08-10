@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import React, { useState, useEffect } from 'react';
-
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
 // Clover POS Color Scheme

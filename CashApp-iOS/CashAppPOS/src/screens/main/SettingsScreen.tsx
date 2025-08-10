@@ -1,5 +1,4 @@
 import React from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -8,9 +7,8 @@ import {
   StatusBar,
   ScrollView,
   TouchableOpacity,
-  Alert } from
-'react-native';
-
+  Alert,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import Logo from '../../components/Logo';
@@ -27,7 +25,7 @@ const Colors = {
   white: '#FFFFFF',
   lightGray: '#ECF0F1',
   text: '#2C3E50',
-  lightText: '#95A5A6'
+  lightText: '#95A5A6',
 };
 
 const SettingsScreen: React.FC = () => {
@@ -36,13 +34,13 @@ const SettingsScreen: React.FC = () => {
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
-    { text: 'Cancel', style: 'cancel' },
-    {
-      text: 'Logout',
-      style: 'destructive',
-      onPress: logout
-    }]
-    );
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: logout,
+      },
+    ]);
   };
 
   const SettingItem = ({
@@ -50,22 +48,22 @@ const SettingsScreen: React.FC = () => {
     icon,
     onPress,
     showArrow = true,
-    color = Colors.text
-
-
-
-
-
-
-  }: {title: string;icon: string;onPress?: () => void;showArrow?: boolean;color?: string;}) =>
-  <TouchableOpacity style={styles.settingItem} onPress={onPress} activeOpacity={0.7}>
+    color = Colors.text,
+  }: {
+    title: string;
+    icon: string;
+    onPress?: () => void;
+    showArrow?: boolean;
+    color?: string;
+  }) => (
+    <TouchableOpacity style={styles.settingItem} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.settingLeft}>
         <Icon name={icon} size={24} color={color} />
         <Text style={[styles.settingTitle, { color }]}>{title}</Text>
       </View>
       {showArrow && <Icon name="chevron-right" size={24} color={Colors.lightText} />}
-    </TouchableOpacity>;
-
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -75,8 +73,8 @@ const SettingsScreen: React.FC = () => {
       <HeaderWithBackButton
         title="Settings"
         backgroundColor={theme.colors.primary}
-        textColor={theme.colors.white} />
-
+        textColor={theme.colors.white}
+      />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* General Settings */}
@@ -87,19 +85,21 @@ const SettingsScreen: React.FC = () => {
               title="Notifications"
               icon="notifications"
               onPress={() =>
-              Alert.alert('Coming Soon', 'Notification settings will be available soon')
-              } />
+                Alert.alert('Coming Soon', 'Notification settings will be available soon')
+              }
+            />
 
             <SettingItem
               title="Display"
               icon="display-settings"
-              onPress={() => Alert.alert('Coming Soon', 'Display settings will be available soon')} />
+              onPress={() => Alert.alert('Coming Soon', 'Display settings will be available soon')}
+            />
 
             <SettingItem
               title="Language"
               icon="language"
-              onPress={() => Alert.alert('Coming Soon', 'Language settings will be available soon')} />
-
+              onPress={() => Alert.alert('Coming Soon', 'Language settings will be available soon')}
+            />
           </View>
         </View>
 
@@ -111,19 +111,21 @@ const SettingsScreen: React.FC = () => {
               title="Payment Methods"
               icon="payment"
               onPress={() =>
-              Alert.alert('Coming Soon', 'Payment method settings will be available soon')
-              } />
+                Alert.alert('Coming Soon', 'Payment method settings will be available soon')
+              }
+            />
 
             <SettingItem
               title="Receipt Settings"
               icon="receipt"
-              onPress={() => Alert.alert('Coming Soon', 'Receipt settings will be available soon')} />
+              onPress={() => Alert.alert('Coming Soon', 'Receipt settings will be available soon')}
+            />
 
             <SettingItem
               title="Tax Settings"
               icon="calculate"
-              onPress={() => Alert.alert('Coming Soon', 'Tax settings will be available soon')} />
-
+              onPress={() => Alert.alert('Coming Soon', 'Tax settings will be available soon')}
+            />
           </View>
         </View>
 
@@ -134,18 +136,20 @@ const SettingsScreen: React.FC = () => {
             <SettingItem
               title="Privacy Policy"
               icon="privacy-tip"
-              onPress={() => Alert.alert('Coming Soon', 'Privacy policy will be available soon')} />
+              onPress={() => Alert.alert('Coming Soon', 'Privacy policy will be available soon')}
+            />
 
             <SettingItem
               title="Terms of Service"
               icon="article"
-              onPress={() => Alert.alert('Coming Soon', 'Terms of service will be available soon')} />
+              onPress={() => Alert.alert('Coming Soon', 'Terms of service will be available soon')}
+            />
 
             <SettingItem
               title="Help & Support"
               icon="help"
-              onPress={() => Alert.alert('Coming Soon', 'Help & support will be available soon')} />
-
+              onPress={() => Alert.alert('Coming Soon', 'Help & support will be available soon')}
+            />
           </View>
         </View>
 
@@ -157,8 +161,8 @@ const SettingsScreen: React.FC = () => {
               icon="logout"
               onPress={handleLogout}
               showArrow={false}
-              color={Colors.danger} />
-
+              color={Colors.danger}
+            />
           </View>
         </View>
 
@@ -169,42 +173,28 @@ const SettingsScreen: React.FC = () => {
           <Text style={styles.appInfoText}>Powered by CashApp</Text>
         </View>
       </ScrollView>
-    </SafeAreaView>);
-
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.background,
   },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   content: {
     flex: 1,
-    padding: 20
+    padding: 20,
   },
   section: {
-    marginBottom: 30
+    marginBottom: 30,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: Colors.text,
-    marginBottom: 15
+    marginBottom: 15,
   },
   settingsGroup: {
     backgroundColor: Colors.white,
@@ -213,7 +203,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 2
+    shadowRadius: 2,
   },
   settingItem: {
     flexDirection: 'row',
@@ -222,30 +212,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 18,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray
+    borderBottomColor: Colors.lightGray,
   },
   settingLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1
+    flex: 1,
   },
   settingTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginLeft: 15
+    marginLeft: 15,
   },
   appInfo: {
     alignItems: 'center',
-    paddingVertical: 30
+    paddingVertical: 30,
   },
   appLogo: {
-    marginBottom: 12
+    marginBottom: 12,
   },
   appInfoText: {
     fontSize: 14,
     color: Colors.lightText,
-    marginBottom: 4
-  }
+    marginBottom: 4,
+  },
 });
 
 export default SettingsScreen;

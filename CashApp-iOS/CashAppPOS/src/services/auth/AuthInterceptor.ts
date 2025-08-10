@@ -9,8 +9,8 @@
  * - Provides hooks for request/response transformation
  */
 
-import tokenManager from '../../utils/tokenManager';
 import { logger } from '../../utils/logger';
+import tokenManager from '../../utils/tokenManager';
 
 interface RequestConfig {
   url: string;

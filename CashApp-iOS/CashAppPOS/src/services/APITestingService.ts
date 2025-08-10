@@ -1,8 +1,8 @@
 // APITestingService.ts - Frontend API testing without affecting demo data
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logger } from '../utils/logger';
 
 import API_CONFIG from '../config/api';
+import { logger } from '../utils/logger';
 
 // API Test Result Interface
 export interface APITestResult {

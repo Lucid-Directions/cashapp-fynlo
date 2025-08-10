@@ -4,11 +4,13 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import { SplitBillGroup, SplitMethod, EnhancedOrderItem } from '../types/cart';
-import { SplitBillService, SplitBillCalculation, GroupTotal } from '../services/SplitBillService';
-import useEnhancedCartStore from '../store/useEnhancedCartStore';
+
+import type { SplitBillCalculation, GroupTotal } from '../services/SplitBillService';
+import { SplitBillService } from '../services/SplitBillService';
 import { useCartStore } from '../store/cartStoreAdapter';
+import type useEnhancedCartStore from '../store/useEnhancedCartStore';
 import useSettingsStore from '../store/useSettingsStore';
+import type { SplitBillGroup, SplitMethod, EnhancedOrderItem } from '../types/cart';
 import { logger } from '../utils/logger';
 
 interface UseSplitBillProps {

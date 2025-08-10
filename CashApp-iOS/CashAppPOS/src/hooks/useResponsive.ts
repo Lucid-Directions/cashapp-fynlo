@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-
 import { Dimensions, _ScaledSize } from 'react-native';
 
 import { breakpoints, _deviceTypes } from '../design-system/theme';

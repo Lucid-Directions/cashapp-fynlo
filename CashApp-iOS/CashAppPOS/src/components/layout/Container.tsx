@@ -1,12 +1,10 @@
 import React from 'react';
-
 import type { ViewStyle } from 'react-native';
 import { View, Text, StyleSheet } from 'react-native';
 
+import type { spacing } from '../../design-system/theme';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { useResponsive, useResponsiveValue } from '../../hooks/useResponsive';
-
-import { spacing } from '../../design-system/theme';
 
 // Container variants
 export type ContainerVariant = 'fluid' | 'constrained';
@@ -189,12 +187,8 @@ export const Spacer: React.FC<SpacerProps> = ({
   const currentSize = useResponsiveValue(size, 4);
   const spacingValue = theme.spacing[currentSize];
 
-    const dynamicStyle1 = {[horizontal ? 'width' : 'height']: spacingValue,};
-  return (
-    <View
-      style={dynamicStyle1}
-    />
-  );
+  const dynamicStyle1 = { [horizontal ? 'width' : 'height']: spacingValue };
+  return <View style={dynamicStyle1} />;
 };
 
 // Row Component for horizontal layouts
@@ -276,7 +270,7 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     // fontSize and color will be added inline
-  }
+  },
 });
 
 export default Container;

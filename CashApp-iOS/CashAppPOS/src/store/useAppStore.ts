@@ -1,12 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logger } from '../utils/logger';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import ErrorTrackingService from '../services/ErrorTrackingService';
-import { calculateItemTotal, calculateSum } from '../utils/priceValidation';
-
 import type { AppState, User, PosSession, OrderItem, Order } from '../types';
+import { logger } from '../utils/logger';
+import { calculateItemTotal, calculateSum } from '../utils/priceValidation';
 
 interface AppStore extends AppState {
   // User actions

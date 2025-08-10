@@ -1,11 +1,9 @@
 import React from 'react';
-
 import type { ViewStyle, TextStyle } from 'react-native';
 import { View, Text, StyleSheet } from 'react-native';
 
-import { useTheme } from '../../design-system/ThemeProvider';
-
 import type { Theme } from '../../design-system/theme';
+import { useTheme } from '../../design-system/ThemeProvider';
 
 // Badge variants
 export type BadgeVariant =

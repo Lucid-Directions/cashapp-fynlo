@@ -1,8 +1,6 @@
 // APIStatusMonitor.tsx - Real-time API status monitoring component
 import React, { useState, useEffect } from 'react';
-
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { Colors, Typography } from '../design-system/theme';

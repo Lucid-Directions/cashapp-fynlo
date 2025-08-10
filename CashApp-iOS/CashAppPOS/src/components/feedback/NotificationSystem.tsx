@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-
 import {
   View,
   Text,
@@ -10,7 +9,6 @@ import {
   Platform,
   StatusBar,
 } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Clover POS Color Scheme

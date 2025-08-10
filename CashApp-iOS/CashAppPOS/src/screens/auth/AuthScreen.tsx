@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-
 import { StyleSheet, View, StatusBar } from 'react-native';
 
 import SignInScreen from './SignInScreen';

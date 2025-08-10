@@ -1,7 +1,7 @@
 // TODO: Unused import - import React, { useState, useEffect, useCallback } from 'react';
 
-import { logger } from '../../utils/logger';
-
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -13,15 +13,12 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // import { Icon } from 'react-native-elements'; // Or your preferred icon library
 
 // import { Product, InventoryItem, Recipe, RecipeIngredient } from '../../types'; // Assuming these types exist
 import DatabaseService from '../../services/DatabaseService'; // Using DatabaseService instead
-
-import type { RouteProp } from '@react-navigation/native';
+import { logger } from '../../utils/logger';
 
 // Placeholder types (replace with actual types from '../../types')
 interface Product {

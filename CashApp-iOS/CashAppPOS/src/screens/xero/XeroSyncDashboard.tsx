@@ -1,7 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect, useCallback } from 'react';
-
-import { logger } from '../../utils/logger';
-
 import {
   View,
   Text,
@@ -13,8 +11,6 @@ import {
   RefreshControl,
   Modal,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { Colors } from '../../design-system/theme';
@@ -23,6 +19,7 @@ import XeroCustomerSyncService from '../../services/XeroCustomerSyncService';
 import XeroItemsSyncService from '../../services/XeroItemsSyncService';
 import XeroSalesSyncService from '../../services/XeroSalesSyncService';
 import { XeroSyncStatus, XeroEntityType } from '../../types/xero';
+import { logger } from '../../utils/logger';
 
 interface SyncStatistics {
   customers: {

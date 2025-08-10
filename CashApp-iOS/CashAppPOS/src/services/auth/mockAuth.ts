@@ -4,6 +4,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { logger } from '../../utils/logger';
 
 interface MockUser {
