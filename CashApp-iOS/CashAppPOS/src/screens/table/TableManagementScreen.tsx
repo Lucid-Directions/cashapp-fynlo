@@ -1,5 +1,7 @@
 import React, { useState, useEffect, _useMemo, useCallback, _memo } from 'react';
 
+import { logger } from '../../utils/logger';
+
 import type { GestureEvent, PanGestureHandlerGestureEvent } from 'react-native';
 import {
   StyleSheet,

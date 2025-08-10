@@ -4,6 +4,7 @@
  */
 
 import type { SumUpQRPayment } from './SumUpService';
+import { logger } from '../utils/logger';
 
 export interface QRCodeOptions {
   size: number;

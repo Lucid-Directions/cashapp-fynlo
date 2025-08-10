@@ -7,6 +7,8 @@
 
 import type { SettingsStackParamList } from '../navigation/SettingsNavigator';
 
+import { logger } from './logger';
+
 // Define the expected navigation structure
 export const expectedSettingsRoutes = {
   Settings: 'Main settings hub screen',

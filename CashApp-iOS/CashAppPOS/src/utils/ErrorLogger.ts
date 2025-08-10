@@ -1,3 +1,5 @@
+import { logger } from './logger';
+
 /**
  * Enhanced Error Logger for Better Debugging
  * Provides detailed error information with context

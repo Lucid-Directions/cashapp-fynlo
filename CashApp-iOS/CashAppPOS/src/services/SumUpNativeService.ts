@@ -1,4 +1,5 @@
 import { Platform, _NativeModules } from 'react-native';
+import { logger } from '../utils/logger';
 
 // Note: This service provides a bridge between our existing architecture
 // and the React hook-based SumUp SDK. The actual SumUp functionality

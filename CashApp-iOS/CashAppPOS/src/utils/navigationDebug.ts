@@ -5,6 +5,8 @@
 
 import type { NavigationState } from '@react-navigation/native';
 
+import { logger } from './logger';
+
 // All valid routes in the app
 export const VALID_ROUTES = {
   // Main Navigator Routes

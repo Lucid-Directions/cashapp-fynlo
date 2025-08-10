@@ -1,6 +1,8 @@
 // testDataService.ts - Practical testing script for DataService
 import DataService from '../services/DataService';
 
+import { logger } from './logger';
+
 /**
  * Comprehensive test suite for DataService functionality
  * This can be run in development to verify everything works

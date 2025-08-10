@@ -6,6 +6,7 @@
 // TODO: Unused import - import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import API_CONFIG from '../config/api';
+import { logger } from '../utils/logger';
 import tokenManager from '../utils/tokenManager';
 
 import SharedDataStore from './SharedDataStore';

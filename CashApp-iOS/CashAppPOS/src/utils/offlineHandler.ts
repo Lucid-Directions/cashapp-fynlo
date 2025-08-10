@@ -1,9 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
+import type { NetInfoState } from '@react-native-community/netinfo';
 
 import { errorHandler, ErrorType, ErrorSeverity } from './errorHandler';
-
-import type { NetInfoState } from '@react-native-community/netinfo';
+import { logger } from './logger';
 
 export interface OfflineAction {
   id: string;

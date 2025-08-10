@@ -1,5 +1,7 @@
 // TODO: Unused import - import React, { useState, useEffect, useCallback } from 'react';
 
+import { logger } from '../../utils/logger';
+
 import {
   View,
   Text,

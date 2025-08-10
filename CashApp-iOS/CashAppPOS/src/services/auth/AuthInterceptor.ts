@@ -10,6 +10,7 @@
  */
 
 import tokenManager from '../../utils/tokenManager';
+import { logger } from '../../utils/logger';
 
 interface RequestConfig {
   url: string;

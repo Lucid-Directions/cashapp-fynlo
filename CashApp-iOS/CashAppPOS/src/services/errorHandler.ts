@@ -5,6 +5,7 @@
  */
 
 import { Alert } from 'react-native';
+import { logger } from '../utils/logger';
 
 import type { NavigationProp } from '@react-navigation/native';
 
