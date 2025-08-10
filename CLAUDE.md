@@ -82,6 +82,77 @@ Run monthly to catch genuine unused styles:
 
 ESLint rules designed for older React Native patterns may not work with modern hooks and custom theming systems. Always investigate bulk warnings before attempting automated fixes.
 
+## 🚨 iOS App Launch Troubleshooting
+
+### Common Error: "CashAppPOS has not been registered"
+
+**Symptom**: iOS app fails to launch with error:
+```
+Invariant Violation: "CashAppPOS" has not been registered.
+```
+
+**Root Cause**: JavaScript bundle fails to execute due to runtime errors BEFORE app registration. The most common cause is missing imports (especially `logger`).
+
+### Debugging Steps
+
+1. **Check JavaScript Console**: The Xcode error is misleading. Use Safari Web Inspector:
+   ```bash
+   # Launch app in simulator
+   xcrun simctl launch booted com.fynlone.CashAppPOS
+   
+   # Open Safari > Develop > [Simulator] > JSContext
+   # Look for the ACTUAL JavaScript error (usually ReferenceError)
+   ```
+
+2. **Common Issue: Missing Logger Imports**
+   - Files using `logger.info()`, `logger.error()` etc. without importing
+   - Run detection script:
+   ```bash
+   ./scripts/fix-missing-logger-imports.sh
+   ```
+
+3. **Rebuild Bundle with Cache Clear**:
+   ```bash
+   cd CashApp-iOS/CashAppPOS
+   npx metro build index.js --platform ios --dev false --out ios/main.jsbundle --reset-cache
+   mv ios/main.jsbundle.js ios/main.jsbundle
+   cp ios/main.jsbundle ios/CashAppPOS/main.jsbundle
+   ```
+
+4. **Force Clean Build**:
+   ```bash
+   # Clean everything
+   cd ios
+   rm -rf build/
+   xcodebuild clean -workspace CashAppPOS.xcworkspace -scheme CashAppPOS
+   
+   # Rebuild in Xcode
+   open CashAppPOS.xcworkspace
+   # Click Run button (▶️)
+   ```
+
+### Prevention
+
+- **Always import logger**: When using `logger` anywhere, import it:
+  ```typescript
+  import { logger } from '../utils/logger'; // Adjust path as needed
+  ```
+- **Check bundle after changes**: After modifying many files, rebuild bundle
+- **Test in simulator**: Don't rely on Xcode errors alone - check actual runtime
+
+### Quick Fix Script
+
+We have an automated script that fixes missing logger imports:
+```bash
+chmod +x scripts/fix-missing-logger-imports.sh
+./scripts/fix-missing-logger-imports.sh
+```
+
+This script:
+- Finds all files using logger without importing it
+- Adds correct relative import paths automatically
+- Works for any depth of directory nesting
+
 ## 🛠️ Quick Reference
 
 ### Python Quality (MANDATORY before commits)
