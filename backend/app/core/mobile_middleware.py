@@ -56,18 +56,13 @@ class MobileCompatibilityMiddleware(BaseHTTPMiddleware):
 
     def add_cors_headers(self, response: Response, request: Request):
         """
-        Add CORS headers for mobile app requests
+        DEPRECATED: CORS headers are now handled securely by the main application.
+        Mobile apps don't need CORS headers as they're not browsers.
+        This method is kept for compatibility but does nothing.
         """
-        # Allow all origins for development (restrict in production)
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Methods"] = (
-            "GET, POST, PUT, DELETE, OPTIONS"
-        )
-        response.headers["Access-Control-Allow-Headers"] = (
-            "Content-Type, Authorization, X-Requested-With"
-        )
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Max-Age"] = "3600"
+        # CORS is now handled by CORSMiddleware in main app with proper origin validation
+        # Mobile apps make direct API calls without CORS restrictions
+        pass
 
     def add_mobile_headers(self, response: Response, request: Request):
         """
@@ -76,9 +71,9 @@ class MobileCompatibilityMiddleware(BaseHTTPMiddleware):
         if self.is_mobile_request(request):
             response.headers["X-Mobile-Optimized"] = "true"
             response.headers["X-API-Version"] = "1.0"
-            response.headers["X-Cache-Control"] = (
-                "public, max-age=300"  # 5 minutes cache
-            )
+            response.headers[
+                "X-Cache-Control"
+            ] = "public, max-age=300"  # 5 minutes cache
 
         # Add JSON content type for consistency
         if not response.headers.get("content-type"):

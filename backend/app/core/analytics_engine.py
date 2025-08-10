@@ -677,7 +677,9 @@ class AnalyticsEngine:
             change_direction = (
                 "up"
                 if change_percent > 0
-                else "down" if change_percent < 0 else "neutral"
+                else "down"
+                if change_percent < 0
+                else "neutral"
             )
 
         return {

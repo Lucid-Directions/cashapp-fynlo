@@ -43,9 +43,9 @@ class Settings(BaseSettings):
     SUPABASE_ANON_KEY: Optional[str] = None
     SUPABASE_SERVICE_ROLE_KEY: Optional[str] = None
     # Platform owner emails - comma-separated list from environment
-    PLATFORM_OWNER_EMAILS: Optional[str] = (
-        None  # e.g., "ryan@fynlo.co.uk,arnaud@fynlo.co.uk"
-    )
+    PLATFORM_OWNER_EMAILS: Optional[
+        str
+    ] = None  # e.g., "ryan@fynlo.co.uk,arnaud@fynlo.co.uk"
     # Platform owner verification - requires both email AND secret key
     PLATFORM_OWNER_SECRET_KEY: Optional[str] = None  # Set via environment variable
     PLATFORM_OWNER_REQUIRE_2FA: bool = True  # Require 2FA for platform owners
@@ -118,7 +118,22 @@ class Settings(BaseSettings):
     # Note: For Vercel preview deployments, we use regex pattern in CORSMiddleware
     # to dynamically handle preview URLs like https://fynlo-pr-123.vercel.app
 
-    @field_validator("DEBUG", "ERROR_DETAIL_ENABLED", mode="before")
+    # Extended CORS Configuration
+    CORS_ALLOWED_ORIGINS: Optional[str] = None  # Comma-separated list from env
+    CORS_ALLOW_CREDENTIALS: bool = True
+    CORS_ALLOW_VERCEL_PREVIEWS: bool = False
+    CORS_ALLOW_ALL_ORIGINS: bool = (
+        False  # NEVER true in production - security validation below
+    )
+
+    @field_validator(
+        "DEBUG",
+        "ERROR_DETAIL_ENABLED",
+        "CORS_ALLOW_CREDENTIALS",
+        "CORS_ALLOW_VERCEL_PREVIEWS",
+        "CORS_ALLOW_ALL_ORIGINS",
+        mode="before",
+    )
     @classmethod
     def parse_boolean(cls, v: Any) -> bool:
         """Parse boolean values from environment variables that might be strings"""
@@ -134,6 +149,18 @@ class Settings(BaseSettings):
             else:
                 raise ValueError(f"Invalid boolean value: {v}")
         return bool(v)
+
+    @field_validator("CORS_ALLOW_ALL_ORIGINS", mode="after")
+    @classmethod
+    def validate_cors_wildcard(cls, v: bool, info) -> bool:
+        """Prevent wildcard CORS in production for security"""
+        if v and info.data.get("ENVIRONMENT") == "production":
+            raise ValueError(
+                "CRITICAL SECURITY ERROR: CORS_ALLOW_ALL_ORIGINS cannot be true in production! "
+                "This would allow any website to make authenticated requests to your API. "
+                "Please configure specific origins in CORS_ALLOWED_ORIGINS instead."
+            )
+        return v
 
     @field_validator("DATABASE_URL", mode="before")
     @classmethod
@@ -231,6 +258,55 @@ class Settings(BaseSettings):
             if email.strip()
         ]
         return emails
+
+    @property
+    def get_cors_origins(self) -> List[str]:
+        """Get validated CORS origins list for the current environment"""
+        origins = []
+
+        # Parse environment variable if provided
+        if self.CORS_ALLOWED_ORIGINS:
+            origins.extend(
+                [
+                    origin.strip()
+                    for origin in self.CORS_ALLOWED_ORIGINS.split(",")
+                    if origin.strip()
+                ]
+            )
+
+        # Add production defaults if in production
+        if self.ENVIRONMENT == "production":
+            origins.extend(self.PRODUCTION_ALLOWED_ORIGINS)
+            # Remove localhost entries in production
+            origins = [o for o in origins if not o.startswith("http://localhost")]
+        elif self.ENVIRONMENT == "development":
+            # Add localhost origins for development
+            localhost_origins = [
+                "http://localhost:3000",
+                "http://localhost:8080",
+                "http://localhost:8081",
+                "http://127.0.0.1:3000",
+                "http://127.0.0.1:8080",
+                "http://127.0.0.1:8081",
+            ]
+            origins.extend(localhost_origins)
+
+        # Add the backend's own URL if available
+        if self.BASE_URL:
+            origins.append(self.BASE_URL)
+
+        # Add specific Supabase project URL
+        origins.append("https://eweggzpvuqczrrrwszyy.supabase.co")
+
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_origins = []
+        for origin in origins:
+            if origin not in seen:
+                seen.add(origin)
+                unique_origins.append(origin)
+
+        return unique_origins
 
     class Config:
         case_sensitive = True
@@ -340,13 +416,15 @@ def validate_production_settings(s: Settings):
                 )
 
         if s.SUMUP_API_KEY:
-            # DEBUG: Log the actual value
-            logger.error(f"SUMUP_ENVIRONMENT actual value: '{s.SUMUP_ENVIRONMENT}'")
-            logger.error(f"SUMUP_ENVIRONMENT repr: {repr(s.SUMUP_ENVIRONMENT)}")
-            logger.error(f"SUMUP_ENVIRONMENT type: {type(s.SUMUP_ENVIRONMENT)}")
-            sumup_len = len(s.SUMUP_ENVIRONMENT) if s.SUMUP_ENVIRONMENT else 'None'
-            logger.error(f"Length: {sumup_len}")
-            
+            # Log environment details only in non-production for debugging
+            if s.ENVIRONMENT != "production":
+                logger.debug(f"SUMUP_ENVIRONMENT actual value: '{s.SUMUP_ENVIRONMENT}'")
+                logger.debug(f"SUMUP_ENVIRONMENT repr: {repr(s.SUMUP_ENVIRONMENT)}")
+                logger.debug(f"SUMUP_ENVIRONMENT type: {type(s.SUMUP_ENVIRONMENT)}")
+            if s.ENVIRONMENT != "production":
+                sumup_len = len(s.SUMUP_ENVIRONMENT) if s.SUMUP_ENVIRONMENT else "None"
+                logger.debug(f"Length: {sumup_len}")
+
             # Check if SUMUP_ENVIRONMENT is set and valid
             if not s.SUMUP_ENVIRONMENT:
                 errors.append(

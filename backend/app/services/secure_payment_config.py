@@ -60,7 +60,7 @@ class SecurePaymentConfigService:
                 "PAYMENT_CONFIG_ENCRYPTION_KEY environment variable is required. "
                 "This key encrypts sensitive payment provider credentials. "
                 "Generate a key with: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'",
-                status_code=500
+                status_code=500,
             )
 
         # Handle both string and bytes format

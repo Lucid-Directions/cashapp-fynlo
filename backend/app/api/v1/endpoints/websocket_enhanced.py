@@ -159,11 +159,11 @@ class EnhancedWebSocketManager:
             )
 
             logger.info(f"WebSocket authenticated: {connection_id} for user {user_id}")
-            
+
             # Store token for expiry checking
             conn_info.token = token
             conn_info.token_expiry_warning_sent = False  # Ensure flag is initialized
-            
+
             return conn_info
 
         except Exception as e:
@@ -172,7 +172,7 @@ class EnhancedWebSocketManager:
                 websocket, WebSocketEventType.AUTH_ERROR, "Authentication failed"
             )
             return None
-    
+
     async def reauthenticate(
         self, connection_id: str, new_token: str, db: Session
     ) -> Optional[ConnectionInfo]:
@@ -181,26 +181,24 @@ class EnhancedWebSocketManager:
         if not conn_info:
             logger.error(f"Connection not found for re-authentication: {connection_id}")
             return None
-        
+
         try:
             # Verify new token
-            user = await verify_websocket_token(
-                new_token, conn_info.user_id, db
-            )
-            
+            user = await verify_websocket_token(new_token, conn_info.user_id, db)
+
             if not user:
                 logger.warning(f"Re-authentication failed for {connection_id}")
                 return None
-            
+
             # Update connection info
             conn_info.token = new_token
             conn_info.last_ping = datetime.utcnow()
             # Reset warning flag after refresh
             conn_info.token_expiry_warning_sent = False
-            
+
             logger.info(f"WebSocket re-authenticated: {connection_id}")
             return conn_info
-            
+
         except Exception as e:
             logger.error(f"Re-authentication error: {e}")
             return None
@@ -287,18 +285,18 @@ class EnhancedWebSocketManager:
         except Exception as e:
             logger.error(f"Failed to send heartbeat to {connection_id}: {e}")
             return False
-    
+
     async def check_token_expiry_for_connection(self, connection_id: str) -> bool:
         """Check if connection's token is expiring soon"""
         conn_info = self.connection_map.get(connection_id)
         if not conn_info or not conn_info.token:
             return False
-        
+
         # Check token expiry
         seconds_until_expiry = check_token_expiry(conn_info.token)
         if seconds_until_expiry is None:
             return False
-        
+
         # Notify if token expires in less than 5 minutes and we haven't already warned
         if seconds_until_expiry < 300 and not conn_info.token_expiry_warning_sent:
             try:
@@ -307,7 +305,7 @@ class EnhancedWebSocketManager:
                     WebSocketEventType.TOKEN_EXPIRED,
                     {
                         "seconds_until_expiry": seconds_until_expiry,
-                        "message": "Token expiring soon, please refresh"
+                        "message": "Token expiring soon, please refresh",
                     },
                     conn_info.restaurant_id,
                 )
@@ -316,11 +314,11 @@ class EnhancedWebSocketManager:
                 return True
             except Exception as e:
                 logger.error(f"Failed to send token expiry notice: {e}")
-        
+
         # Reset warning flag if token is no longer expiring (e.g., after refresh)
         elif seconds_until_expiry >= 300 and conn_info.token_expiry_warning_sent:
             conn_info.token_expiry_warning_sent = False
-        
+
         return False
 
     async def broadcast_to_restaurant(
@@ -448,7 +446,7 @@ class EnhancedWebSocketManager:
                     else:
                         # Client is actively pinging, reset missed pongs
                         conn_info.missed_pongs = 0
-                    
+
                     # Check token expiry for active connections
                     await self.check_token_expiry_for_connection(conn_id)
 

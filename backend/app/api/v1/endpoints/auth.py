@@ -59,7 +59,7 @@ async def verify_supabase_user(
     db: Session = Depends(get_db),
 ):
     """Verify Supabase token and return user info with subscription details"""
-    
+
     # Debug logging to trace the flow
     print(f"AUTH VERIFY STARTED at {datetime.utcnow().isoformat()}")
     logger.info(
@@ -85,7 +85,7 @@ async def verify_supabase_user(
         print(f"ERROR getting Supabase client: {client_error}")
         logger.error(f"Failed to get Supabase client: {client_error}")
         raise
-    
+
     if not client:
         logger.error("Supabase admin client not available")
         logger.error(f"SUPABASE_URL set: {bool(settings.SUPABASE_URL)}")
@@ -449,15 +449,16 @@ async def verify_supabase_user(
     except Exception as e:
         # Check if this is actually an AuthApiError wrapped in another exception
         error_str = str(e)
-        
+
         # Log the full error with traceback immediately
         import traceback
+
         full_traceback = traceback.format_exc()
         logger.error(
             f"CRITICAL AUTH ERROR - Type: {type(e).__name__}, Message: {error_str}"
         )
         logger.error(f"Full traceback:\n{full_traceback}")
-        
+
         # Also print to stdout for DigitalOcean logs
         print(f"CRITICAL AUTH ERROR at {datetime.utcnow().isoformat()}")
         print(f"Error Type: {type(e).__name__}")

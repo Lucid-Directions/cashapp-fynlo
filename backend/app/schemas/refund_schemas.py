@@ -9,9 +9,9 @@ class RefundItemSchema(BaseModel):
 
 
 class RefundRequestSchema(BaseModel):
-    items: Optional[List[RefundItemSchema]] = (
-        None  # Null or empty for full order refund
-    )
+    items: Optional[
+        List[RefundItemSchema]
+    ] = None  # Null or empty for full order refund
     reason: Optional[str] = None
     # For full order refund, amount might be passed or calculated based on order total
     amount: Optional[Decimal] = None  # Explicit amount for full refund, if provided

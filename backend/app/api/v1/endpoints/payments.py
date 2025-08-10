@@ -1421,9 +1421,9 @@ class SquareCreatePaymentRequest(BaseModel):
 
 class SquareProcessPaymentRequest(BaseModel):
     payment_id: str  # The Square Payment ID from the create_payment step
-    order_id: Optional[str] = (
-        None  # Optional: if completing a payment for a specific order
-    )
+    order_id: Optional[
+        str
+    ] = None  # Optional: if completing a payment for a specific order
 
 
 class SquarePaymentResponseData(BaseModel):

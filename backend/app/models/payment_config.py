@@ -5,7 +5,6 @@ from app.core.database import (
 )  # Assuming Base is correctly defined in app.core.database
 
 
-
 class PaymentMethodSetting(Base):
     __tablename__ = "payment_method_settings"
 

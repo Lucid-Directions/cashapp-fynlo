@@ -19,7 +19,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
             "Referrer-Policy": "strict-origin-when-cross-origin",
             "Content-Security-Policy": self._prod_csp,
-            "Permissions-Policy": self._permissions
+            "Permissions-Policy": self._permissions,
         }
         self._dev_headers = {
             "X-Content-Type-Options": "nosniff",
@@ -28,16 +28,16 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "Strict-Transport-Security": "max-age=31536000",
             "Referrer-Policy": "no-referrer-when-downgrade",
             "Content-Security-Policy": self._dev_csp,
-            "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
+            "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
         }
-    
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         # Fast path for health checks - critical for DigitalOcean
         if request.url.path in ["/health", "/api/health", "/"]:
             return await call_next(request)
-            
+
         response = await call_next(request)
-        
+
         # Use pre-computed headers for performance
         if settings.ENVIRONMENT == "production":
             response.headers.update(self._prod_headers)

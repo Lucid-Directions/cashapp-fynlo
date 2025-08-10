@@ -13,6 +13,15 @@ import os
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Try to import settings, but don't fail if configuration is missing
+try:
+    from app.core.config import settings
+    settings_available = True
+except Exception as e:
+    logger.warning(f"Could not load settings (this is expected in minimal mode): {e}")
+    settings = None
+    settings_available = False
+
 # Create FastAPI app with minimal configuration
 app = FastAPI(
     title="Fynlo POS Backend",
@@ -21,14 +30,37 @@ app = FastAPI(
     debug=False,
 )
 
-# CORS middleware for React Native frontend
+# SECURE CORS middleware configuration
+if settings_available and hasattr(settings, "get_cors_origins"):
+    origins = settings.get_cors_origins
+else:
+    # Use hardcoded secure origins when settings aren't available
+    origins = [
+        "https://app.fynlo.co.uk",
+        "https://fynlo.co.uk",
+        "https://fynlopos-9eg2c.ondigitalocean.app",
+        "https://eweggzpvuqczrrrwszyy.supabase.co",
+    ]
+    # Add development origins if explicitly in development
+    if os.getenv("ENVIRONMENT", "production").lower() == "development":
+        origins.extend([
+            "http://localhost:3000",
+            "http://localhost:8080",
+            "http://localhost:8081",
+        ])
+    logger.info(f"Using hardcoded secure CORS origins (settings not available)")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permissive for now
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=origins,
+    allow_credentials=settings.CORS_ALLOW_CREDENTIALS if (settings_available and hasattr(settings, "CORS_ALLOW_CREDENTIALS")) else True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+
+environment = settings.ENVIRONMENT if (settings_available and hasattr(settings, 'ENVIRONMENT')) else os.getenv("ENVIRONMENT", "unknown")
+logger.info(f"CORS configured for {environment} environment with {len(origins)} allowed origins")
 
 
 @app.get("/")

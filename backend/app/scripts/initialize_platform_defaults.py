@@ -222,7 +222,9 @@ def main():
     args = parser.parse_args()
 
     if args.update_existing:
-        logger.warning("⚠️  WARNING: This will update existing platform configurations!")
+        logger.warning(
+            "⚠️  WARNING: This will update existing platform configurations!"
+        )
         confirmation = input(
             "Are you sure you want to update existing configs? (yes/no): "
         )

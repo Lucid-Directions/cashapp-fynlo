@@ -249,8 +249,7 @@ async def verify_websocket_token(
         # Verify user_id matches (critical security check)
         if str(db_user.id) != str(user_id):
             logger.error(
-                f"User ID mismatch - security violation: "
-                f"{db_user.id} != {user_id}"
+                f"User ID mismatch - security violation: " f"{db_user.id} != {user_id}"
             )
             return None
 
@@ -272,11 +271,11 @@ def check_token_expiry(token: str) -> Optional[int]:
         exp = payload.get("exp")
         if not exp:
             return None
-        
+
         # Calculate seconds until expiry
         current_time = datetime.utcnow().timestamp()
         seconds_until_expiry = exp - current_time
-        
+
         return int(seconds_until_expiry) if seconds_until_expiry > 0 else 0
     except Exception as e:
         logger.error(f"Error checking token expiry: {e}")
