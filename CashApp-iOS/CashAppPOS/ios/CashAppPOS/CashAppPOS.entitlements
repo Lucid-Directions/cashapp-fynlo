@@ -2,13 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- IMPORTANT: Replace "SUMUP_MERCHANT" with the actual entitlement string provided by Apple -->
-	<!-- After Tap to Pay approval, Apple will provide a specific merchant identifier string -->
-	<!-- This should be something like "ABCD1234.merchant.identifier" not "SUMUP_MERCHANT" -->
+	<!-- IMPORTANT: Tap to Pay on iPhone requires Apple approval and special entitlements -->
+	<!-- This entitlement is commented out until Apple provides the actual merchant identifier -->
+	<!-- After approval, uncomment and replace with the Apple-provided string like "ABCD1234.merchant.identifier" -->
+	<!--
 	<key>com.apple.developer.proximity-reader.payment.acceptance</key>
 	<array>
-		<string>SUMUP_MERCHANT</string>
+		<string>REPLACE_WITH_APPLE_PROVIDED_IDENTIFIER</string>
 	</array>
+	-->
 	<key>com.apple.developer.in-app-payments</key>
 	<array>
 		<string>merchant.com.fynlo.pos</string>

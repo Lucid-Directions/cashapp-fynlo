@@ -94,10 +94,7 @@
 	</array>
 	<key>UIApplicationSupportsMultipleScenes</key>
 	<false/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>nfc</string>
-	</array>
+	<!-- NFC operations are foreground-only and don't require background modes -->
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>
 	<key>UIPerformanceLoggingEnabled</key>
