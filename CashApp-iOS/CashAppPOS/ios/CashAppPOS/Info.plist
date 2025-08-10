@@ -94,6 +94,10 @@
 	</array>
 	<key>UIApplicationSupportsMultipleScenes</key>
 	<false/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>nfc</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>
 	<key>UIPerformanceLoggingEnabled</key>
@@ -101,6 +105,7 @@
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>arm64</string>
+		<string>nfc</string>
 	</array>
 	<key>UIRequiresFullScreen</key>
 	<false/>
