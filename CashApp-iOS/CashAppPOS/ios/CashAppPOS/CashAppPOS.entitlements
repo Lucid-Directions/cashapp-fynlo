@@ -2,14 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Tap to Pay on iPhone entitlement - Active for physical device testing -->
+	<!-- Tap to Pay on iPhone entitlement - Matches bundle ID com.fynlo.cashappposlucid -->
 	<key>com.apple.developer.proximity-reader.payment.acceptance</key>
 	<array>
-		<string>merchant.com.fynlo.pos</string>
+		<string>merchant.com.fynlo.cashappposlucid</string>
 	</array>
 	<key>com.apple.developer.in-app-payments</key>
 	<array>
-		<string>merchant.com.fynlo.pos</string>
+		<string>merchant.com.fynlo.cashappposlucid</string>
 	</array>
 </dict>
 </plist>
