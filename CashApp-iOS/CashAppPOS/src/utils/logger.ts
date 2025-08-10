@@ -14,12 +14,13 @@ interface LoggerConfig {
 class Logger {
   private config: LoggerConfig = {
     enableInProduction: false,
-    enableInDevelopment: __DEV__,
+    enableInDevelopment: typeof __DEV__ !== 'undefined' ? __DEV__ : true,
     logToService: false,
   };
 
   private shouldLog(): boolean {
-    if (__DEV__) {
+    const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : true;
+    if (isDev) {
       return this.config.enableInDevelopment;
     }
     return this.config.enableInProduction;
@@ -38,7 +39,8 @@ class Logger {
     const formattedMessage = this.formatMessage(level, message, ...args);
 
     // In development, use console methods
-    if (__DEV__) {
+    const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : true;
+    if (isDev) {
       switch (level) {
         case 'debug':
           // Debug logs are only shown in development

@@ -3,21 +3,32 @@
  * Ensures URLSearchParams is available in all environments
  */
 
-import logger from './logger';
+// Safe logger import with fallback
+let logger: any;
+try {
+  logger = require('./logger').default;
+} catch (e) {
+  // Fallback to console if logger fails to load
+  logger = {
+    info: console.log,
+    warn: console.warn,
+    error: console.error
+  };
+}
 
 export function setupURLSearchParamsPolyfill(): void {
   // Check if URLSearchParams already exists
   if (typeof globalThis.URLSearchParams !== 'undefined') {
     // Defer logger call to avoid module-level execution
     setTimeout(() => {
-      logger.info('✅ URLSearchParams already available');
+      logger?.info?.('✅ URLSearchParams already available');
     }, 0);
     return;
   }
 
   // Defer logger call to avoid module-level execution
   setTimeout(() => {
-    logger.warn('⚠️ URLSearchParams not found, installing polyfill');
+    logger?.warn?.('⚠️ URLSearchParams not found, installing polyfill');
   }, 0);
 
   // Simple URLSearchParams polyfill
@@ -132,7 +143,7 @@ export function setupURLSearchParamsPolyfill(): void {
   
   // Defer logger call to avoid module-level execution
   setTimeout(() => {
-    logger.info('✅ URLSearchParams polyfill installed');
+    logger?.info?.('✅ URLSearchParams polyfill installed');
   }, 0);
 }
 
