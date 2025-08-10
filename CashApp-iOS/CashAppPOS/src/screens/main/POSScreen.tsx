@@ -160,12 +160,6 @@ const POSScreen: React.FC = () => {
   // Dynamic styles that depend on state
   const dynamicStyles = createDynamicStyles(theme, serviceChargeConfig);
 
-  // For split bill integration - convert cart items to enhanced format
-  const cartItems = cart.map((item) => ({
-    ...item,
-    id: item.id.toString(), // Ensure string ID for enhanced cart
-  }));
-
   // Using regular cart for now
   const useEnhancedCart = false;
 
@@ -187,6 +181,13 @@ const POSScreen: React.FC = () => {
 
   const { selectedCategory, setSelectedCategory, showPaymentModal, setShowPaymentModal } =
     useUIStore();
+
+  // For split bill integration - convert cart items to enhanced format
+  // This MUST come after cart is defined from useAppStore()
+  const cartItems = cart.map((item) => ({
+    ...item,
+    id: item.id.toString(), // Ensure string ID for enhanced cart
+  }));
 
   const { taxConfiguration } = useSettingsStore();
 
