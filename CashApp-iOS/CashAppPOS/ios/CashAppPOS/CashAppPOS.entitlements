@@ -2,16 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- 
-	Tap to Pay on iPhone entitlement temporarily disabled
-	Apple's automatic provisioning is failing with this entitlement.
-	This needs to be enabled with the exact value Apple provides after Tap to Pay approval.
-	
+	<!-- Tap to Pay on iPhone entitlement -->
 	<key>com.apple.developer.proximity-reader.payment.acceptance</key>
 	<array>
-		<string>NEEDS_APPLE_PROVIDED_VALUE</string>
+		<string>SUMUP</string>
 	</array>
-	-->
 	
 	<!-- Apple Pay / In-App Payments entitlement -->
 	<key>com.apple.developer.in-app-payments</key>
