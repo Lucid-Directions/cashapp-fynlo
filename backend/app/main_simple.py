@@ -9,6 +9,9 @@ import uvicorn
 import logging
 import os
 
+# Import settings for CORS configuration
+from app.core.config import settings
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,13 +24,34 @@ app = FastAPI(
     debug=False,
 )
 
-# CORS middleware for React Native frontend
+# SECURE CORS middleware configuration
+origins = settings.get_cors_origins if hasattr(settings, "get_cors_origins") else []
+
+# Fallback for minimal deployment if settings not loaded properly
+if not origins:
+    origins = [
+        "https://app.fynlo.co.uk",
+        "https://fynlo.co.uk",
+        "https://fynlopos-9eg2c.ondigitalocean.app",
+        "https://eweggzpvuqczrrrwszyy.supabase.co",
+    ]
+    logger.warning(
+        "Using hardcoded CORS origins as fallback - settings may not be loaded properly"
+    )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permissive for now
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=origins,
+    allow_credentials=settings.CORS_ALLOW_CREDENTIALS
+    if hasattr(settings, "CORS_ALLOW_CREDENTIALS")
+    else True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
+)
+
+logger.info(
+    f"CORS configured for {settings.ENVIRONMENT if hasattr(settings, 'ENVIRONMENT') else 'unknown'} environment with {len(origins)} allowed origins"
 )
 
 

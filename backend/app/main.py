@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 # Apply logging filters for production
 # This should be done after basic logging config but before the app starts
-# handling requests. Note: Uvicorn sets up its own handlers. This filter 
+# handling requests. Note: Uvicorn sets up its own handlers. This filter
 # will apply to log records processed by the application's loggers.
 
 if settings.ENVIRONMENT == "production" or not settings.ERROR_DETAIL_ENABLED:
@@ -141,43 +141,76 @@ app = FastAPI(
     and settings.ENVIRONMENT != "production",  # Ensure debug is disabled in production
 )
 
-# CORS middleware for React Native frontend and Supabase
-if settings.ENVIRONMENT == "production":
-    allowed_origins = settings.PRODUCTION_ALLOWED_ORIGINS
-else:
-    # Use CORS_ORIGINS from settings for development, fallback to permissive
-    allowed_origins = (
-        settings.cors_origins_list if settings.cors_origins_list else ["*"]
+# ============================================================================
+# CORS Configuration - Centralized and Secure
+# ============================================================================
+# This configuration uses the centralized settings.get_cors_origins method
+# to ensure consistent and secure CORS handling across all environments.
+#
+# Security principles:
+# - No wildcards allowed in production
+# - Specific origins only (no *.supabase.co patterns)
+# - Vercel preview regex only when explicitly enabled and not in production
+# - Clear logging for debugging and auditing
+# ============================================================================
+
+# Get the validated CORS origins from centralized settings
+allowed_origins = settings.get_cors_origins
+
+# Handle Vercel preview deployments with regex pattern
+# Only enabled when explicitly configured AND not in production
+vercel_preview_regex = None
+if settings.CORS_ALLOW_VERCEL_PREVIEWS and settings.ENVIRONMENT != "production":
+    vercel_preview_regex = r"^https://fynlo-[a-zA-Z0-9\-]+\.vercel\.app$"
+    logger.info(
+        "CORS: Vercel preview regex pattern enabled for environment: %s",
+        settings.ENVIRONMENT,
     )
 
-# Add Supabase domains to allowed origins
-supabase_origins = ["https://*.supabase.co", "https://*.supabase.io"]
+# Log the CORS configuration for debugging and auditing
+logger.info("=" * 60)
+logger.info("CORS Configuration Summary")
+logger.info("=" * 60)
+logger.info("Environment: %s", settings.ENVIRONMENT)
+logger.info("Allow Credentials: %s", settings.CORS_ALLOW_CREDENTIALS)
+logger.info("Number of Allowed Origins: %d", len(allowed_origins))
 
-# Add specific Supabase URL if configured
-if settings.SUPABASE_URL:
-    supabase_origins.append(settings.SUPABASE_URL)
-
-# Combine all allowed origins
-if isinstance(allowed_origins, list):
-    allowed_origins = allowed_origins + supabase_origins
+# Log each origin for clarity (but not in production to avoid log spam)
+if settings.ENVIRONMENT != "production":
+    for origin in allowed_origins:
+        logger.info("  - %s", origin)
 else:
-    allowed_origins = [allowed_origins] + supabase_origins
+    # In production, just log the count and first few
+    logger.info("  First 3 origins: %s", allowed_origins[:3])
 
-# Ensure unique origins
-allowed_origins = list(set(allowed_origins))
+if vercel_preview_regex:
+    logger.info("Vercel Preview Pattern: %s", vercel_preview_regex)
 
+# Validate that no wildcards are present in production
+if settings.ENVIRONMENT == "production":
+    wildcard_origins = [origin for origin in allowed_origins if "*" in origin]
+    if wildcard_origins:
+        error_msg = (
+            f"SECURITY ERROR: Wildcard origins detected in production: "
+            f"{wildcard_origins}. This is not allowed for security reasons."
+        )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+logger.info("=" * 60)
+
+# Apply the CORS middleware with secure configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    allow_origin_regex=(
-        r"^https://fynlo-[a-zA-Z0-9\-]+\.vercel\.app$"
-        if settings.ENVIRONMENT != "production"
-        else None
-    ),
+    allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
+    allow_methods=["*"],  # Could be restricted to specific methods if needed
+    allow_headers=["*"],  # Could be restricted to specific headers if needed
+    allow_origin_regex=vercel_preview_regex,  # None if not enabled
 )
+
+logger.info("CORS middleware configured successfully")
+
 
 # Re-enabled optimized middleware with performance improvements
 # Add API version middleware for backward compatibility (FIRST in middleware stack)
@@ -321,9 +354,7 @@ async def get_employees(
     try:
         employees = (
             db.query(User)
-            .filter(
-                User.restaurant_id == current_user.restaurant_id, User.is_active
-            )
+            .filter(User.restaurant_id == current_user.restaurant_id, User.is_active)
             .all()
         )
 

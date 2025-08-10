@@ -74,7 +74,6 @@ class PaymentProviderFactory:
                 and payment_method in provider.get_supported_payment_methods()
                 and currency in provider.get_supported_currencies()
             ):
-
                 # Calculate fee for this provider
                 fee = provider.calculate_fee(amount)
 
@@ -123,7 +122,6 @@ class PaymentProviderFactory:
                 and payment_method in provider.get_supported_payment_methods()
                 and currency in provider.get_supported_currencies()
             ):
-
                 fee = provider.calculate_fee(amount)
                 metrics = await self._get_provider_metrics(name)
 

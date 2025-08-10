@@ -283,9 +283,9 @@ async def health_instances(
                     if instance_data:
                         # Convert bytes to strings if needed
                         instance_info = {
-                            k.decode() if isinstance(k, bytes) else k: (
-                                v.decode() if isinstance(v, bytes) else v
-                            )
+                            k.decode()
+                            if isinstance(k, bytes)
+                            else k: (v.decode() if isinstance(v, bytes) else v)
                             for k, v in instance_data.items()
                         }
 

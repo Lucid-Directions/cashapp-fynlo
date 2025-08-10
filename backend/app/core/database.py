@@ -59,9 +59,9 @@ if "postgresql" in database_url:
         # PgBouncer (port 25061) doesn't support statement_timeout in connection options
         # Only add it for direct connections (port 25060)
         if ":25060" in database_url:
-            connect_args["options"] = (
-                "-c statement_timeout=30000"  # 30 second statement timeout
-            )
+            connect_args[
+                "options"
+            ] = "-c statement_timeout=30000"  # 30 second statement timeout
 
         # Provide the CA certificate
         cert_path = os.path.join(
@@ -75,9 +75,9 @@ if "postgresql" in database_url:
             logger.warning(f"CA certificate not found at {cert_path}")
     else:
         # For non-DigitalOcean databases, add statement timeout
-        connect_args["options"] = (
-            "-c statement_timeout=30000"  # 30 second statement timeout
-        )
+        connect_args[
+            "options"
+        ] = "-c statement_timeout=30000"  # 30 second statement timeout
 
 # Import security config
 from app.core.database_security import DatabaseSecurityConfig
@@ -558,9 +558,9 @@ import contextvars
 from typing import Dict, Any
 
 # Use contextvars for proper async context management
-_rls_context_var: contextvars.ContextVar[Optional[Dict[str, Any]]] = (
-    contextvars.ContextVar("rls_context", default=None)
-)
+_rls_context_var: contextvars.ContextVar[
+    Optional[Dict[str, Any]]
+] = contextvars.ContextVar("rls_context", default=None)
 
 
 class RLSContext:

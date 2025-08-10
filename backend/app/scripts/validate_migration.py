@@ -597,9 +597,7 @@ def main():
         if success:
             logger.info("✅ Migration validation passed!")
         else:
-            logger.error(
-                "❌ Migration validation failed. Check the report for details."
-            )
+            logger.error("❌ Migration validation failed. Check the report for details.")
             sys.exit(1)
 
 

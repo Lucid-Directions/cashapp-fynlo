@@ -178,7 +178,7 @@ class SQLInjectionWAFMiddleware(BaseHTTPMiddleware):
             "sec-fetch-mode",
             "sec-fetch-site",
         ]
-        
+
         for header_name, header_value in request.headers.items():
             # Skip headers that are known to be safe or contain encoded data
             if header_name.lower() in SKIP_HEADERS:
@@ -205,8 +205,7 @@ class SQLInjectionWAFMiddleware(BaseHTTPMiddleware):
             # Return a generic error to avoid information disclosure
             # Fix: APIResponseHelper.error already returns a JSONResponse, don't wrap it
             return APIResponseHelper.error(
-                "Invalid request parameters",
-                status_code=400
+                "Invalid request parameters", status_code=400
             )
 
         # Process the request normally
@@ -254,11 +253,12 @@ class SQLInjectionWAFMiddleware(BaseHTTPMiddleware):
     def _is_jwt_token(self, text: str) -> bool:
         """Check if a string looks like a JWT token"""
         # JWT tokens have 3 parts separated by dots, each part is base64
-        parts = text.split('.')
+        parts = text.split(".")
         if len(parts) == 3:
             # Check if each part looks like base64
             import string
-            base64_chars = string.ascii_letters + string.digits + '+/='
+
+            base64_chars = string.ascii_letters + string.digits + "+/="
             for part in parts:
                 if not all(c in base64_chars for c in part):
                     return False

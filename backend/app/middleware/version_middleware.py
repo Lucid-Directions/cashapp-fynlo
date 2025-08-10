@@ -37,12 +37,12 @@ class APIVersionMiddleware:
     async def __call__(self, scope, receive, send):
         if scope["type"] in ["http", "websocket"]:
             path = scope.get("path", "")
-            
+
             # Skip health checks for performance
             if path in ["/health", "/api/health", "/"]:
                 await self.app(scope, receive, send)
                 return
-            
+
             # Check cache first
             if path in self._path_cache:
                 rewritten_path = self._path_cache[path]
@@ -55,11 +55,11 @@ class APIVersionMiddleware:
                         rewritten_path = self.rewrite_api_path(path)
                     else:  # websocket
                         rewritten_path = self.rewrite_websocket_path(path)
-                
+
                 # Cache result if cache not full
                 if len(self._path_cache) < self._cache_max_size:
                     self._path_cache[path] = rewritten_path
-            
+
             if rewritten_path != path:
                 if API_VERSION_CONFIG["log_version_rewrites"]:
                     logger.info(f"Path rewrite: {path} -> {rewritten_path}")

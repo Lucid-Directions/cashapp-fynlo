@@ -15,13 +15,34 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Add CORS middleware
+# SECURE CORS middleware - minimal configuration
+# This file is for emergency deployment only - uses hardcoded secure origins
+secure_origins = [
+    "https://app.fynlo.co.uk",
+    "https://fynlo.co.uk",
+    "https://api.fynlo.co.uk",
+    "https://fynlo.vercel.app",
+    "https://fynlopos-9eg2c.ondigitalocean.app",
+    "https://eweggzpvuqczrrrwszyy.supabase.co",
+]
+
+# Add development origins only if explicitly in development
+if os.getenv("ENVIRONMENT", "production").lower() == "development":
+    secure_origins.extend(
+        [
+            "http://localhost:3000",
+            "http://localhost:8080",
+            "http://localhost:8081",
+        ]
+    )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permissive for now
+    allow_origins=secure_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 

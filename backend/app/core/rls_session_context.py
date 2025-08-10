@@ -14,9 +14,9 @@ from app.core.tenant_security import TenantSecurity
 from app.core.database import get_db
 
 # Context variable to store current tenant context
-current_tenant_context: contextvars.ContextVar[Optional[Dict[str, Any]]] = (
-    contextvars.ContextVar("current_tenant_context", default=None)
-)
+current_tenant_context: contextvars.ContextVar[
+    Optional[Dict[str, Any]]
+] = contextvars.ContextVar("current_tenant_context", default=None)
 
 
 class RLSSessionContext:
