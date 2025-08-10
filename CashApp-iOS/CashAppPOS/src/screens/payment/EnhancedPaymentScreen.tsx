@@ -21,6 +21,7 @@ import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponen
 import { useAuth } from '../../contexts/AuthContext';
 import OrderService from '../../services/OrderService';
 import SharedDataStore from '../../services/SharedDataStore';
+import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import { logger } from '../../utils/logger';
@@ -82,6 +83,7 @@ const EnhancedPaymentScreen: React.FC = () => {
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [sumUpAvailable, setSumUpAvailable] = useState<boolean | null>(null);
 
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -113,6 +115,22 @@ const EnhancedPaymentScreen: React.FC = () => {
     if (!platformServiceCharge.enabled) return 0;
     return subtotal * (platformServiceCharge.rate / 100);
   };
+
+  // Check SumUp availability on mount
+  useEffect(() => {
+    const checkSumUpAvailability = async () => {
+      try {
+        const compatibilityService = SumUpCompatibilityService.getInstance();
+        const shouldAttempt = await compatibilityService.shouldAttemptSumUp();
+        setSumUpAvailable(shouldAttempt);
+        logger.info('🔍 SumUp availability check:', { available: shouldAttempt });
+      } catch (error) {
+        logger.error('Failed to check SumUp availability:', error);
+        setSumUpAvailable(false);
+      }
+    };
+    checkSumUpAvailability();
+  }, []);
 
   // Load platform service charge configuration on component mount
   useEffect(() => {
@@ -284,6 +302,55 @@ const EnhancedPaymentScreen: React.FC = () => {
     setCustomTipInput('');
   };
 
+  const handleCardPayment = async () => {
+    // First validate customer info
+    if (!isFormValid) {
+      Alert.alert('Required Information', 'Please enter valid customer name and email address.');
+      return;
+    }
+
+    // Check if SumUp is available
+    if (sumUpAvailable === null) {
+      // Still checking availability
+      Alert.alert('Please Wait', 'Checking payment system availability...');
+      return;
+    }
+
+    if (sumUpAvailable) {
+      // SumUp is available, proceed with it
+      setShowSumUpModal(true);
+    } else {
+      // SumUp not available, show fallback options
+      const compatibilityService = SumUpCompatibilityService.getInstance();
+      const fallbackMethods = compatibilityService.getFallbackPaymentMethods();
+      
+      const availableFallbacks = fallbackMethods.filter(m => m.available);
+      const buttons = availableFallbacks.map(method => ({
+        text: method.name,
+        onPress: () => {
+          if (method.id === 'qr') {
+            setSelectedPaymentMethod('qrCode');
+            setShowQRModal(true);
+            generateQRCode();
+          } else if (method.id === 'cash') {
+            setSelectedPaymentMethod('cash');
+            setShowCashModal(true);
+          } else {
+            Alert.alert('Coming Soon', `${method.name} integration is coming soon.`);
+          }
+        }
+      }));
+      
+      buttons.push({ text: 'Cancel', style: 'cancel' });
+      
+      Alert.alert(
+        'Card Payment Unavailable',
+        'Tap to Pay on iPhone requires Apple entitlements which are pending approval. Please select an alternative payment method:',
+        buttons
+      );
+    }
+  };
+
   const handlePaymentMethodSelect = (methodId: string) => {
     const method = availablePaymentMethods.find((m) => m.id === methodId);
     if (method?.requiresAuth) {
@@ -303,7 +370,8 @@ const EnhancedPaymentScreen: React.FC = () => {
                 setShowQRModal(true);
                 generateQRCode();
               } else if (methodId === 'card') {
-                setShowSumUpModal(true);
+                // Check SumUp availability before payment
+                handleCardPayment();
               } else if (methodId === 'applePay') {
                 Alert.alert('Apple Pay', 'Hold near reader and confirm with Touch ID or Face ID.');
               } else if (methodId === 'googlePay') {
@@ -321,8 +389,8 @@ const EnhancedPaymentScreen: React.FC = () => {
         setShowQRModal(true);
         generateQRCode();
       } else if (methodId === 'card') {
-        // Card payment handling - could show card reader interface
-        setShowSumUpModal(true);
+        // Card payment handling - check SumUp availability first
+        handleCardPayment();
       } else if (methodId === 'applePay') {
         // Apple Pay handling
         Alert.alert('Apple Pay', 'Hold near reader and confirm with Touch ID or Face ID.');
@@ -918,7 +986,7 @@ const EnhancedPaymentScreen: React.FC = () => {
         <TouchableOpacity
           style={[styles.processButton, processing && styles.processingButton]}
           onPress={handleProcessPayment}
-          disabled={processing || (!selectedPaymentMethod && !splitPayment) || !isFormValid}
+          disabled={processing || (!selectedPaymentMethod && !splitPayment) || !isFormValid || showSumUpModal}
         >
           {processing ? (
             <>
