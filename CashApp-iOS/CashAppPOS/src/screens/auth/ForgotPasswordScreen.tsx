@@ -1,5 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -9,10 +9,8 @@ import {
   TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
-  Platform } from
-'react-native';
-
-import { useNavigation } from '@react-navigation/native';
+  Platform,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { SimpleTextInput } from '../../components/inputs';
@@ -25,7 +23,7 @@ const Colors = {
   white: '#FFFFFF',
   lightGray: '#ECF0F1',
   text: '#2C3E50',
-  lightText: '#95A5A6'
+  lightText: '#95A5A6',
 };
 
 const ForgotPasswordScreen: React.FC = () => {
@@ -49,11 +47,11 @@ const ForgotPasswordScreen: React.FC = () => {
         'Reset Link Sent',
         'If an account with this email exists, you will receive a password reset link shortly.',
         [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack()
-        }]
-
+          {
+            text: 'OK',
+            onPress: () => navigation.goBack(),
+          },
+        ]
       );
     } catch (error) {
       Alert.alert('Error', 'Failed to send reset link. Please try again.');
@@ -68,8 +66,8 @@ const ForgotPasswordScreen: React.FC = () => {
 
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -101,7 +99,8 @@ const ForgotPasswordScreen: React.FC = () => {
             keyboardType="email-address"
             returnKeyType="done"
             onSubmitEditing={handleResetPassword}
-            containerStyle={styles.inputContainer} />
+            containerStyle={styles.inputContainer}
+          />
 
           {/* Icon removed, SimpleTextInput does not specify an icon prop */}
           {/* inputProps removed, styling is internal to SimpleTextInput */}
@@ -110,8 +109,8 @@ const ForgotPasswordScreen: React.FC = () => {
           <TouchableOpacity
             style={[styles.resetButton, isLoading && styles.resetButtonDisabled]}
             onPress={handleResetPassword}
-            disabled={isLoading}>
-
+            disabled={isLoading}
+          >
             <Text style={styles.resetButtonText}>
               {isLoading ? 'Sending...' : 'Send Reset Link'}
             </Text>
@@ -123,48 +122,48 @@ const ForgotPasswordScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>);
-
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.background,
   },
   keyboardView: {
-    flex: 1
+    flex: 1,
   },
   header: {
     paddingHorizontal: 20,
-    paddingVertical: 15
+    paddingVertical: 15,
   },
   backButton: {
     padding: 8,
-    alignSelf: 'flex-start'
+    alignSelf: 'flex-start',
   },
   content: {
     flex: 1,
     paddingHorizontal: 30,
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   iconContainer: {
     alignItems: 'center',
-    marginBottom: 40
+    marginBottom: 40,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: Colors.text,
     textAlign: 'center',
-    marginBottom: 16
+    marginBottom: 16,
   },
   subtitle: {
     fontSize: 16,
     color: Colors.lightText,
     textAlign: 'center',
     marginBottom: 40,
-    lineHeight: 24
+    lineHeight: 24,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -178,16 +177,8 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 2
+    shadowRadius: 2,
   },
-
-
-
-
-
-
-
-
 
   resetButton: {
     backgroundColor: Colors.secondary,
@@ -199,25 +190,25 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
-    shadowRadius: 4
+    shadowRadius: 4,
   },
   resetButtonDisabled: {
-    opacity: 0.7
+    opacity: 0.7,
   },
   resetButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.white
+    color: Colors.white,
   },
   backToLoginButton: {
     alignItems: 'center',
-    paddingVertical: 15
+    paddingVertical: 15,
   },
   backToLoginText: {
     fontSize: 16,
     color: Colors.secondary,
-    fontWeight: '600'
-  }
+    fontWeight: '600',
+  },
 });
 
 export default ForgotPasswordScreen;

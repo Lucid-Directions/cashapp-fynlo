@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { logger } from '../utils/logger';
 // TODO: Unused import - import QRCode from 'react-native-qrcode-svg';
 

@@ -1,5 +1,5 @@
+import { useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -11,8 +11,6 @@ import {
   Alert,
   Linking, // Added Linking
 } from 'react-native';
-
-import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const Colors = {

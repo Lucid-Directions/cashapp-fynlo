@@ -1,7 +1,5 @@
 import React, { useState, useRef } from 'react';
-
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, Keyboard } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';

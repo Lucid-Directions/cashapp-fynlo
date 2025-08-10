@@ -4,13 +4,7 @@
  */
 
 import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  SafeAreaView,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
 
 import { SyncStatusBar, NetworkAlertBanner } from './index';
 
@@ -34,9 +28,9 @@ export const MinimalExample: React.FC = () => {
 export const DetailedExample: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <SyncStatusBar 
-        position="top" 
-        compact={false} 
+      <SyncStatusBar
+        position="top"
+        compact={false}
         showDetails={true}
         onPress={() => console.log('Navigate to sync details')}
       />
@@ -53,11 +47,7 @@ export const DetailedExample: React.FC = () => {
 export const WithAlertBanner: React.FC = () => {
   return (
     <View style={styles.container}>
-      <NetworkAlertBanner 
-        position="top"
-        autoHide={true}
-        autoHideDelay={5000}
-      />
+      <NetworkAlertBanner position="top" autoHide={true} autoHideDelay={5000} />
       <SafeAreaView style={styles.container}>
         <SyncStatusBar position="top" compact={true} />
         <ScrollView style={styles.content}>
@@ -77,11 +67,7 @@ export const BottomPositionExample: React.FC = () => {
       <ScrollView style={styles.content}>
         <Text>Your main content here</Text>
       </ScrollView>
-      <SyncStatusBar 
-        position="bottom" 
-        compact={false} 
-        showDetails={true}
-      />
+      <SyncStatusBar position="bottom" compact={false} showDetails={true} />
     </SafeAreaView>
   );
 };
@@ -121,7 +107,7 @@ const POSScreen = () => {
 export const CustomStyledExample: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <SyncStatusBar 
+      <SyncStatusBar
         position="top"
         style={{
           backgroundColor: '#f0f0f0',
@@ -157,4 +143,4 @@ export default {
   BottomPositionExample,
   CustomStyledExample,
 };
-EOF < /dev/null
+EOF < /dev/llnu;

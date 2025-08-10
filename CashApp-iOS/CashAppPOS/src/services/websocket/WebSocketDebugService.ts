@@ -17,26 +17,26 @@ export class WebSocketDebugService {
     }
   ): void {
     logger.info(`🔍 WebSocket URL Debug - ${stage}:`);
-    
+
     if (data.token) {
       logger.info(`  Token: ${data.token ? `${data.token.substring(0, 10)}...` : 'NOT AVAILABLE'}`);
     }
-    
+
     if (data.userId !== undefined) {
       logger.info(`  User ID: ${data.userId} (type: ${typeof data.userId})`);
     }
-    
+
     if (data.restaurantId) {
       logger.info(`  Restaurant ID: ${data.restaurantId}`);
     }
-    
+
     if (data.params) {
       logger.info(`  Params object: ${JSON.stringify(data.params)}`);
       if (typeof data.params.toString === 'function') {
         logger.info(`  Params toString(): ${data.params.toString()}`);
       }
     }
-    
+
     if (data.wsUrl) {
       logger.info(`  Final URL: ${data.wsUrl}`);
       // Check if URL has query parameters
@@ -59,7 +59,7 @@ export class WebSocketDebugService {
       const params = new URLSearchParams();
       params.append('test', 'value');
       const result = params.toString();
-      
+
       if (result === 'test=value') {
         logger.info('✅ URLSearchParams works correctly');
         return true;
@@ -75,15 +75,15 @@ export class WebSocketDebugService {
 
   static buildQueryStringManually(token: string, userId?: string | number | null): string {
     const parts: string[] = [];
-    
+
     // Always add token
     parts.push(`token=${encodeURIComponent(token)}`);
-    
+
     // Add user_id if it's defined (including 0, which is valid)
     if (userId !== undefined && userId !== null) {
       parts.push(`user_id=${encodeURIComponent(String(userId))}`);
     }
-    
+
     const queryString = parts.join('&');
     logger.info(`🔧 Manual query string built: ${queryString}`);
     return queryString;

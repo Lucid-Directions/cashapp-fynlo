@@ -38,7 +38,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NFCReaderUsageDescription</key>
-	<string>Fynlo uses NFC to process contactless payments including Tap to Pay on iPhone.</string>
+	<string>Fynlo POS uses NFC to accept contactless card payments directly on your iPhone through Tap to Pay. This allows customers to tap their cards or phones to complete payments securely without additional hardware.</string>
 	<key>NSAllowsArbitraryLoads</key>
 	<true/>
 	<key>NSAllowsLocalNetworking</key>
@@ -94,6 +94,7 @@
 	</array>
 	<key>UIApplicationSupportsMultipleScenes</key>
 	<false/>
+	<!-- NFC operations are foreground-only and don't require background modes -->
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>
 	<key>UIPerformanceLoggingEnabled</key>
@@ -101,6 +102,7 @@
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>arm64</string>
+		<string>nfc</string>
 	</array>
 	<key>UIRequiresFullScreen</key>
 	<false/>

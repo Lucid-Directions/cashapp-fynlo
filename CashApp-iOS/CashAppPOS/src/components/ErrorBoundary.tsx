@@ -6,7 +6,6 @@
 
 import type { ErrorInfo, ReactNode } from 'react';
 import React, { Component } from 'react';
-
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 
 import { errorHandler } from '../services/errorHandler';

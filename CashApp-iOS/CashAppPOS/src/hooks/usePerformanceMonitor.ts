@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-
 import { InteractionManager, Platform } from 'react-native';
 
 interface PerformanceMetrics {

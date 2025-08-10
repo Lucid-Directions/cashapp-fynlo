@@ -1,5 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -14,13 +14,10 @@ import {
   Dimensions,
   ActivityIndicator,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // import { generateEmployees, EmployeeData } from '../../utils/mockDataGenerator'; // Removed
 import DataService from '../../services/DataService'; // Added
-
 import type { EmployeeData } from '../../types'; // Updated import path
 
 // Get screen dimensions for responsive design

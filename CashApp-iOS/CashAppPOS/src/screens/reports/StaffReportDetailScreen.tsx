@@ -1,5 +1,6 @@
 // TODO: Unused import - import React, { useState, useEffect } from 'react';
 
+import { useNavigation } from '@react-navigation/native';
 import {
   StyleSheet,
   Text,
@@ -11,8 +12,6 @@ import {
   Dimensions,
   Alert,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import ComingSoon from '../../components/feedback/ComingSoon';

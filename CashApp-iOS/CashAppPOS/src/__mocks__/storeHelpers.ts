@@ -3,8 +3,8 @@
  * Provides properly typed mock stores that match the actual store interfaces
  */
 
-import type { EnhancedOrderItem, CartTemplate, SplitBillConfig } from '../types/cart';
 import type { User, PosSession, Order } from '../types';
+import type { EnhancedOrderItem, CartTemplate, SplitBillConfig } from '../types/cart';
 
 // Helper to create mock enhanced order items
 export const createMockEnhancedOrderItem = (
@@ -13,13 +13,13 @@ export const createMockEnhancedOrderItem = (
   id: '1',
   productId: '1',
   name: 'Test Item',
-  price: 10.00,
+  price: 10.0,
   quantity: 1,
   emoji: '🍔',
   modifications: [],
-  originalPrice: 10.00,
+  originalPrice: 10.0,
   modificationPrice: 0,
-  totalPrice: 10.00,
+  totalPrice: 10.0,
   addedAt: new Date().toISOString(),
   lastModified: new Date().toISOString(),
   addedBy: 'test-user',
@@ -223,8 +223,8 @@ export const createMockSettingsStore = (overrides?: any) => ({
   receiptSettings: {
     showLogo: true,
     logoUrl: '',
-    headerText: 'Thank you for dining with us\!',
-    footerText: 'Visit us again soon\!',
+    headerText: 'Thank you for dining with us!',
+    footerText: 'Visit us again soon!',
     showVatNumber: true,
     showQrCode: true,
     emailReceipts: true,
@@ -380,7 +380,7 @@ export const createMockSettingsStore = (overrides?: any) => ({
 // Create basic mock cart store (for backward compatibility)
 export const createMockCartStore = (overrides?: any) => {
   const enhancedStore = createMockEnhancedCartStore(overrides);
-  
+
   // Return a simplified version for components that don't need enhanced features
   return {
     cart: enhancedStore.cart,
@@ -436,13 +436,13 @@ export const createMockUIStore = (overrides?: any) => ({
 export const createMockAppStore = (overrides?: any) => ({
   ...createMockEnhancedCartStore(),
   ...createMockUIStore(),
-  
+
   // Additional app-wide state
   menuItems: [],
   setMenuItems: jest.fn(),
   orders: [],
   setOrders: jest.fn(),
-  
+
   ...overrides,
 });
 
@@ -457,7 +457,7 @@ export const mockAppStore = createMockAppStore();
 // Helper to create authenticated mock stores
 export const createAuthenticatedMocks = (userOverrides?: Partial<User>) => {
   const user = createMockUser(userOverrides);
-  
+
   return {
     authStore: createMockAuthStore({
       user,

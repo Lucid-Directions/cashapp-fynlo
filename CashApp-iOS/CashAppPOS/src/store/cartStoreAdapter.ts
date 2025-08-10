@@ -3,10 +3,11 @@
  * Allows gradual migration of components
  */
 
+import type { OrderItem } from '../types';
+import type { EnhancedOrderItem } from '../types/cart';
+
 import useAppStore from './useAppStore';
 import useEnhancedCartStore from './useEnhancedCartStore';
-import { OrderItem } from '../types';
-import { EnhancedOrderItem } from '../types/cart';
 
 /**
  * Hook that returns the appropriate store based on a feature flag

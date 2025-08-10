@@ -2,7 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Minimal entitlements for basic app functionality -->
-	<!-- No special capabilities that require provisioning profile updates -->
+	<!-- IMPORTANT: This Tap to Pay entitlement requires Apple approval -->
+	<!-- The merchant identifier below is a placeholder and must be replaced with Apple's provided value -->
+	<!-- Without the correct Apple-provided identifier, Tap to Pay will not function on devices -->
+	<key>com.apple.developer.proximity-reader.payment.acceptance</key>
+	<array>
+		<!-- TODO: Replace with actual Apple-provided merchant identifier after Tap to Pay approval -->
+		<string>merchant.com.fynlo.tapToPay</string>
+	</array>
+	<key>com.apple.developer.in-app-payments</key>
+	<array>
+		<string>merchant.com.fynlo.pos</string>
+	</array>
 </dict>
 </plist>

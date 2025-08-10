@@ -1,5 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -12,8 +12,6 @@ import {
   Alert,
   Switch,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useRestaurantConfig } from '../../hooks/useRestaurantConfig';

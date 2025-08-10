@@ -3,8 +3,9 @@
  * Manages dynamic pricing calculations for cart item modifications
  */
 
-import { CartItemModification, EnhancedOrderItem } from '../types/cart';
+import type { CartItemModification, EnhancedOrderItem } from '../types/cart';
 import { calculateItemTotal, calculateSum } from '../utils/priceValidation';
+
 import ErrorTrackingService from './ErrorTrackingService';
 
 /**
@@ -274,7 +275,7 @@ export class ModificationPricingService {
     return modifications.map((mod) => {
       // Find the default option for this modification type
       const isDefault = this.isDefaultModification(mod.id);
-      
+
       return {
         ...mod,
         selected: isDefault,

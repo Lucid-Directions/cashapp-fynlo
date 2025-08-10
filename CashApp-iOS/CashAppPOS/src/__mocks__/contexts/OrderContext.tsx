@@ -13,9 +13,7 @@ export const OrderContext = React.createContext({
 });
 
 export const OrderProvider = ({ children, value }: any) => (
-  <OrderContext.Provider value={value || {}}>
-    {children}
-  </OrderContext.Provider>
+  <OrderContext.Provider value={value || {}}>{children}</OrderContext.Provider>
 );
 
 export const useOrder = () => React.useContext(OrderContext);

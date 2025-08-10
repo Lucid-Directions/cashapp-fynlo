@@ -1,5 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -10,8 +10,6 @@ import {
   FlatList,
   Alert,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import Colors from '../../constants/Colors';

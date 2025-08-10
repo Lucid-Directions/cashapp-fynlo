@@ -1,5 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -10,17 +10,14 @@ import {
   StatusBar,
   RefreshControl,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import EmptyState from '../../components/common/EmptyState';
 import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import OrderService from '../../services/OrderService';
-import { logger } from '../../utils/logger';
-
 import type { Order } from '../../types';
+import { logger } from '../../utils/logger';
 
 const OrdersScreen: React.FC = () => {
   const navigation = useNavigation();

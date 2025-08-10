@@ -3,14 +3,16 @@
  * Provides all necessary providers for testing React components
  */
 
-import React from 'react';
-import { render, RenderOptions } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import type { RenderOptions } from '@testing-library/react-native';
+import { render } from '@testing-library/react-native';
+import React from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider } from 'react-native-paper';
-import { ThemeProvider } from '../design-system/ThemeProvider';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
 import { AuthProvider } from '../contexts/AuthContext';
+import { ThemeProvider } from '../design-system/ThemeProvider';
 
 // Mock navigation helpers
 export const createMockNavigation = () => ({
@@ -40,7 +42,7 @@ export const createMockRoute = (params = {}) => ({
 const mockTheme = {
   colors: {
     primary: '#007AFF',
-    secondary: '#5856D6', 
+    secondary: '#5856D6',
     background: '#F2F2F7',
     surface: '#FFFFFF',
     text: '#000000',
@@ -82,18 +84,18 @@ interface TestWrapperOptions extends Omit<RenderOptions, 'wrapper'> {
   disableNavigation?: boolean;
 }
 
-const TestWrapper = ({ 
-  children, 
+const TestWrapper = ({
+  children,
   mockNavigation = createMockNavigation(),
   mockRoute = createMockRoute(),
-  disableNavigation = false 
+  disableNavigation = false,
 }: {
   children: React.ReactNode;
   mockNavigation?: any;
   mockRoute?: any;
   disableNavigation?: boolean;
 }) => {
-  const wrappedChildren = React.isValidElement(children) 
+  const wrappedChildren = React.isValidElement(children)
     ? React.cloneElement(children, { navigation: mockNavigation, route: mockRoute })
     : children;
 
@@ -108,9 +110,7 @@ const TestWrapper = ({
         <GestureHandlerRootView style={{ flex: 1 }}>
           <PaperProvider>
             <ThemeProvider>
-              <AuthProvider>
-                {wrappedChildren}
-              </AuthProvider>
+              <AuthProvider>{wrappedChildren}</AuthProvider>
             </ThemeProvider>
           </PaperProvider>
         </GestureHandlerRootView>
@@ -129,9 +129,7 @@ const TestWrapper = ({
         <PaperProvider>
           <ThemeProvider>
             <AuthProvider>
-              <NavigationContainer>
-                {wrappedChildren}
-              </NavigationContainer>
+              <NavigationContainer>{wrappedChildren}</NavigationContainer>
             </AuthProvider>
           </ThemeProvider>
         </PaperProvider>
@@ -147,12 +145,7 @@ export const renderWithAllProviders = (
   ui: React.ReactElement,
   options: TestWrapperOptions = {}
 ) => {
-  const { 
-    mockNavigation, 
-    mockRoute, 
-    disableNavigation = false,
-    ...renderOptions 
-  } = options;
+  const { mockNavigation, mockRoute, disableNavigation = false, ...renderOptions } = options;
 
   return render(ui, {
     wrapper: ({ children }) => (

@@ -1,8 +1,6 @@
 import React from 'react';
-
 import type { ViewStyle, TextStyle } from 'react-native';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, View } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme } from '../../design-system/ThemeProvider';

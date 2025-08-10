@@ -1,7 +1,5 @@
 import React from 'react';
-
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { SettingsHeader, SettingsSection } from '../../../components/settings';

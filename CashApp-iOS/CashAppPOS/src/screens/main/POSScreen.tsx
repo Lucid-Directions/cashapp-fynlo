@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
 
 /* eslint-disable react-native/no-unused-styles */
@@ -20,8 +21,6 @@ import {
   _Image,
   Animated,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import { Swipeable } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -47,6 +46,7 @@ import SumUpCompatibilityService from '../../services/SumUpCompatibilityService'
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import useUIStore from '../../store/useUIStore';
+import type { MenuItem, OrderItem } from '../../types';
 import { logger } from '../../utils/logger';
 import {
   validatePrice,
@@ -54,8 +54,6 @@ import {
   validateCartCalculation,
   formatPrice,
 } from '../../utils/priceValidation';
-
-import type { MenuItem, OrderItem } from '../../types';
 
 // Get screen dimensions
 const { width: screenWidth } = Dimensions.get('window');

@@ -1,9 +1,7 @@
-import React from 'react';
-
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import React from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
 // TODO: Unused import - import { isFeatureEnabled } from '../config/featureFlags';
 import { useAuth } from '../contexts/AuthContext';

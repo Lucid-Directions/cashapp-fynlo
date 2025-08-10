@@ -3,13 +3,11 @@
  * Shows effective settings and allows requesting overrides where permitted by platform policy
  */
 
-import React, { useState, useEffect } from 'react';
-
-import { logger } from '../../utils/logger';
-
 /* eslint-disable react-native/no-unused-styles */
 // This file uses useThemedStyles pattern which ESLint cannot statically analyze
 
+import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   ScrollView,
@@ -22,13 +20,12 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme } from '../../design-system/ThemeProvider';
 import PlatformService from '../../services/PlatformService';
+import { logger } from '../../utils/logger';
 
 interface EffectiveSetting {
   key: string;
@@ -709,7 +706,7 @@ const createStyles = (theme: any) =>
     bottomPadding: {
       height: 24,
     },
-    inlineStyle1: {backgroundColor: theme.colors.surface, padding: 16, borderRadius: 8}
+    inlineStyle1: { backgroundColor: theme.colors.surface, padding: 16, borderRadius: 8 },
   });
 
 export default RestaurantPlatformOverridesScreen;

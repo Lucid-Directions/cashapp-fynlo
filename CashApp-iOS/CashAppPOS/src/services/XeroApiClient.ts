@@ -1,5 +1,6 @@
-import XeroAuthService, { _XeroTokens } from './XeroAuthService';
 import { logger } from '../utils/logger';
+
+import XeroAuthService, { _XeroTokens } from './XeroAuthService';
 
 export interface XeroApiResponse<T = any> {
   data: T;

@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-
 import type { TextInputProps, ViewStyle, TextStyle } from 'react-native';
 import { TextInput, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import { useTheme } from '../../design-system/ThemeProvider';
-
 import type { Theme } from '../../design-system/theme';
+import { useTheme } from '../../design-system/ThemeProvider';
 
 // Input variants
 export type InputVariant = 'default' | 'error' | 'success';

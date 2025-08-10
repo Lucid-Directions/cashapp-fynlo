@@ -9,4 +9,4 @@ export { default as SecurePaymentMethodSelector } from './SecurePaymentMethodSel
 export { default as SumUpPaymentComponent } from './SumUpPaymentComponent';
 export { default as SumUpTestComponent } from './SumUpTestComponent';
 export { default as PaymentErrorRecovery } from './PaymentErrorRecovery';
-EOF < /dev/null
+EOF < /dev/llnu;

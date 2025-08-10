@@ -11,38 +11,38 @@ export const createMockAppStore = (overrides = {}) => ({
   cart: [],
   cartTotal: 0,
   cartItemCount: 0,
-  
+
   // Cart actions
   addToCart: jest.fn(),
   removeFromCart: jest.fn(),
   updateCartItem: jest.fn(),
   clearCart: jest.fn(),
   cleanCart: jest.fn(),
-  
+
   // Menu state
   menuItems: [],
   setMenuItems: jest.fn(),
-  
+
   // Loading/Error state
   isLoading: false,
   setIsLoading: jest.fn(),
   setLoading: jest.fn(),
   error: null,
   setError: jest.fn(),
-  
+
   // Order state
   orders: [],
   setOrders: jest.fn(),
   currentOrder: null,
   setCurrentOrder: jest.fn(),
-  
+
   // User/Auth state
   user: null,
   session: null,
   setUser: jest.fn(),
   logout: jest.fn(),
   setSession: jest.fn(),
-  
+
   // Service charges and fees
   serviceChargePercentage: 10,
   addTransactionFee: false,
@@ -52,11 +52,11 @@ export const createMockAppStore = (overrides = {}) => ({
   calculateTransactionFee: jest.fn(() => 0),
   enableServiceCharge: jest.fn(),
   enableTransactionFee: jest.fn(),
-  
+
   // Network state
   isOnline: true,
   setOnlineStatus: jest.fn(),
-  
+
   ...overrides,
 });
 
@@ -168,7 +168,7 @@ export const createMockTestingUtils = (overrides = {}) => ({
   performance: createMockPerformanceUtils(),
   dataPrefetcher: createMockDataPrefetcher(),
   mockAsyncOperation: jest.fn((operation, duration = 100) => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(() => {
         resolve(operation());
       }, duration);
@@ -178,11 +178,14 @@ export const createMockTestingUtils = (overrides = {}) => ({
 });
 
 // Mock fetch with proper error handling
-export const createMockFetch = (responses = {}, defaultResponse = { ok: true, json: () => Promise.resolve({}) }) => {
+export const createMockFetch = (
+  responses = {},
+  defaultResponse = { ok: true, json: () => Promise.resolve({}) }
+) => {
   return jest.fn((url: string, options?: RequestInit) => {
     const method = options?.method || 'GET';
     const key = `${method} ${url}`;
-    
+
     if (responses[key]) {
       if (responses[key] instanceof Error) {
         return Promise.reject(responses[key]);
@@ -193,7 +196,7 @@ export const createMockFetch = (responses = {}, defaultResponse = { ok: true, js
         ...responses[key],
       });
     }
-    
+
     return Promise.resolve(defaultResponse);
   });
 };
@@ -236,7 +239,7 @@ export const createTestUser = (overrides = {}) => ({
 export const waitForCondition = async (condition: () => boolean, timeout = 5000) => {
   const start = Date.now();
   while (!condition() && Date.now() - start < timeout) {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
   }
   if (!condition()) {
     throw new Error(`Condition not met within ${timeout}ms`);
@@ -247,7 +250,7 @@ export const mockTimers = () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
-  
+
   afterEach(() => {
     jest.clearAllTimers();
     jest.useRealTimers();
@@ -259,7 +262,7 @@ export const createMockComponent = (name: string, testID?: string) => {
   return jest.fn((props: any) => {
     const React = require('react');
     const { View, Text } = require('react-native');
-    
+
     return React.createElement(
       View,
       { testID: testID || `mock-${name}`, ...props },

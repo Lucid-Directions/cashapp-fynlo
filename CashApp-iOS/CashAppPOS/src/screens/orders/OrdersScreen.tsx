@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
 
 /* eslint-disable react-native/no-unused-styles */
@@ -17,8 +18,6 @@ import {
   RefreshControl,
   _ActivityIndicator, // Will be replaced by LoadingView
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import ComingSoon from '../../components/feedback/ComingSoon'; // Added

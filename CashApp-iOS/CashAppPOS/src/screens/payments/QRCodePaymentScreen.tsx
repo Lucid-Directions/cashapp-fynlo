@@ -1,7 +1,6 @@
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
 import React, { useState, useEffect, useRef } from 'react';
-
-import { logger } from '../../utils/logger';
-
 import {
   StyleSheet,
   Text,
@@ -12,17 +11,14 @@ import {
   Dimensions,
   ActivityIndicator,
 } from 'react-native';
-
-import { useNavigation, useRoute } from '@react-navigation/native';
 import QRCode from 'react-native-qrcode-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import QRPaymentErrorBoundary from '../../components/payment/QRPaymentErrorBoundary';
 import { useTheme } from '../../design-system/ThemeProvider';
 import SumUpService from '../../services/SumUpService';
-
 import type { SumUpQRPayment } from '../../services/SumUpService';
-import type { RouteProp } from '@react-navigation/native';
+import { logger } from '../../utils/logger';
 
 const { width: _screenWidth } = Dimensions.get('window');
 

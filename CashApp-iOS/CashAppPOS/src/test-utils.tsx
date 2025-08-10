@@ -3,17 +3,15 @@
  * Provides helpers for rendering components with all necessary providers
  */
 
-import type { ReactElement } from 'react';
-import React from 'react';
-
 import { NavigationContainer } from '@react-navigation/native';
 import { render } from '@testing-library/react-native';
+import type { RenderOptions } from '@testing-library/react-native';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './design-system/ThemeProvider';
-
-import type { RenderOptions } from '@testing-library/react-native';
 
 // Mock navigation
 export const createMockNavigation = () => ({

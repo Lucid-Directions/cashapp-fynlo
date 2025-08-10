@@ -1,6 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert, Platform } from 'react-native';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logger } from './logger';
 export interface ErrorInfo {
   id: string;

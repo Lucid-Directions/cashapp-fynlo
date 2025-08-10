@@ -6,7 +6,7 @@
 export class DataPrefetcher {
   private cache: Map<string, any> = new Map();
   private pendingFetches: Map<string, Promise<any>> = new Map();
-  
+
   /**
    * Prefetch data and cache it
    */
@@ -15,43 +15,43 @@ export class DataPrefetcher {
     if (this.cache.has(key)) {
       return;
     }
-    
+
     // Check if fetch is already in progress
     if (this.pendingFetches.has(key)) {
       await this.pendingFetches.get(key);
       return;
     }
-    
+
     // Start new fetch
     const fetchPromise = fetcher()
-      .then(data => {
+      .then((data) => {
         this.cache.set(key, data);
         this.pendingFetches.delete(key);
         return data;
       })
-      .catch(error => {
+      .catch((error) => {
         this.pendingFetches.delete(key);
         throw error;
       });
-    
+
     this.pendingFetches.set(key, fetchPromise);
     await fetchPromise;
   }
-  
+
   /**
    * Get cached data
    */
   get(key: string): any {
     return this.cache.get(key);
   }
-  
+
   /**
    * Check if data is cached
    */
   has(key: string): boolean {
     return this.cache.has(key);
   }
-  
+
   /**
    * Clear specific cache entry
    */
@@ -59,7 +59,7 @@ export class DataPrefetcher {
     this.cache.delete(key);
     this.pendingFetches.delete(key);
   }
-  
+
   /**
    * Clear all cached data
    */
@@ -67,7 +67,7 @@ export class DataPrefetcher {
     this.cache.clear();
     this.pendingFetches.clear();
   }
-  
+
   /**
    * Get cache size
    */

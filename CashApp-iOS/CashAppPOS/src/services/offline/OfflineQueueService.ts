@@ -1,6 +1,6 @@
 /**
  * OfflineQueueService - Production-ready offline queue management
- * 
+ *
  * Features:
  * - Priority-based queue management
  * - Automatic retry with exponential backoff
@@ -19,8 +19,8 @@ import API_CONFIG from '../../config/api';
 import { errorHandler, ErrorType, ErrorSeverity } from '../../utils/errorHandler';
 import { logger } from '../../utils/logger';
 import NetworkUtils from '../../utils/NetworkUtils';
-import tokenManager from '../../utils/tokenManager';
 import { offlineHandler, OfflineAction, OfflineFeature } from '../../utils/offlineHandler';
+import tokenManager from '../../utils/tokenManager';
 
 // Types and Interfaces
 export interface QueuedRequest {
@@ -76,11 +76,11 @@ export enum ActionType {
 }
 
 export enum Priority {
-  CRITICAL = 0,  // Payment, order completion
-  HIGH = 1,      // Order creation, inventory updates
-  MEDIUM = 2,    // Customer updates, settings
-  LOW = 3,       // Analytics, reports
-  BACKGROUND = 4 // Logs, telemetry
+  CRITICAL = 0, // Payment, order completion
+  HIGH = 1, // Order creation, inventory updates
+  MEDIUM = 2, // Customer updates, settings
+  LOW = 3, // Analytics, reports
+  BACKGROUND = 4, // Logs, telemetry
 }
 
 export enum QueueStatus {
@@ -158,11 +158,11 @@ class OfflineQueueService {
   private isSyncing: boolean = false;
   private syncTimer?: NodeJS.Timeout;
   private unsubscribeNetInfo?: () => void;
-  
+
   private readonly STORAGE_KEY = 'offline_queue_v2';
   private readonly CHECKPOINT_KEY = 'offline_queue_checkpoint';
   private readonly CONFLICT_KEY = 'offline_conflicts';
-  
+
   private config: QueueConfig = {
     maxQueueSize: 500,
     maxRetries: 5,
@@ -205,21 +205,21 @@ class OfflineQueueService {
     try {
       // Load persisted queue
       await this.loadQueue();
-      
+
       // Subscribe to network changes
       this.unsubscribeNetInfo = NetInfo.addEventListener((state) => {
         this.handleNetworkChange(state.isConnected === true && state.isInternetReachable === true);
       });
-      
+
       // Get initial network state
       const netState = await NetInfo.fetch();
       this.isOnline = netState.isConnected === true && netState.isInternetReachable === true;
-      
+
       // Start sync timer if online
       if (this.isOnline) {
         this.startSyncTimer();
       }
-      
+
       logger.info('OfflineQueueService initialized', {
         queueSize: this.queue.size,
         isOnline: this.isOnline,
@@ -252,7 +252,7 @@ class OfflineQueueService {
     } = {}
   ): Promise<string> {
     const requestId = this.generateRequestId();
-    
+
     try {
       // Create the queued request
       const request: QueuedRequest = {
@@ -272,33 +272,34 @@ class OfflineQueueService {
         maxRetries: this.config.maxRetries,
         priority: options.priority ?? this.getDefaultPriority(entityType, action),
         status: QueueStatus.PENDING,
-        conflictResolution: options.conflictResolution ?? this.config.conflictResolutionDefaults[entityType],
+        conflictResolution:
+          options.conflictResolution ?? this.config.conflictResolutionDefaults[entityType],
         dependencies: options.dependencies,
         checksum: this.config.enableChecksum ? this.generateChecksum(payload) : undefined,
       };
-      
+
       // Check queue size limit
       if (this.queue.size >= this.config.maxQueueSize) {
         await this.evictOldestLowPriorityItems();
       }
-      
+
       // Add to queue
       this.queue.set(requestId, request);
-      
+
       // Persist queue
       await this.saveQueue();
-      
+
       // If immediate and online, try to sync now
       if (options.immediate && this.isOnline && !this.isSyncing) {
         this.syncQueue();
       }
-      
+
       logger.info(`Request queued: ${requestId}`, {
         entityType,
         action,
         priority: request.priority,
       });
-      
+
       return requestId;
     } catch (error) {
       await errorHandler.handleError(
@@ -332,31 +333,31 @@ class OfflineQueueService {
     if (this.isOnline) {
       try {
         const response = await this.executeRequest<T>(method, endpoint, payload);
-        
+
         // Cache successful response if cacheKey provided
         if (options.cacheKey) {
           await this.cacheResponse(options.cacheKey, response, options.cacheDuration);
         }
-        
+
         return response;
       } catch (error) {
         logger.warn('Online execution failed, queuing for offline', { endpoint, error });
-        
+
         // Queue for later sync
         await this.queueRequest(entityType, action, method, endpoint, payload, {
           priority: options.priority,
         });
-        
+
         // Return offline response or cached data
         if (options.offlineResponse !== undefined) {
           return options.offlineResponse;
         }
-        
+
         if (options.cacheKey) {
           const cached = await this.getCachedResponse<T>(options.cacheKey);
           if (cached) return cached;
         }
-        
+
         throw error;
       }
     } else {
@@ -364,16 +365,16 @@ class OfflineQueueService {
       await this.queueRequest(entityType, action, method, endpoint, payload, {
         priority: options.priority,
       });
-      
+
       if (options.offlineResponse !== undefined) {
         return options.offlineResponse;
       }
-      
+
       if (options.cacheKey) {
         const cached = await this.getCachedResponse<T>(options.cacheKey);
         if (cached) return cached;
       }
-      
+
       throw new Error('Offline and no fallback available');
     }
   }
@@ -392,7 +393,7 @@ class OfflineQueueService {
         conflicts: [],
       };
     }
-    
+
     this.isSyncing = true;
     const result: SyncResult = {
       success: true,
@@ -402,29 +403,29 @@ class OfflineQueueService {
       errors: [],
       conflicts: [],
     };
-    
+
     try {
       logger.info('Starting queue sync', { queueSize: this.queue.size });
-      
+
       // Get pending requests sorted by priority and dependencies
       const pendingRequests = await this.getPendingRequestsSorted();
-      
+
       // Process in batches
       for (let i = 0; i < pendingRequests.length; i += this.config.batchSize) {
         const batch = pendingRequests.slice(i, i + this.config.batchSize);
-        
+
         // Process batch in parallel with error handling for each
         const batchResults = await Promise.allSettled(
-          batch.map(request => this.syncSingleRequest(request))
+          batch.map((request) => this.syncSingleRequest(request))
         );
-        
+
         // Collect results
         for (const [index, batchResult] of batchResults.entries()) {
           const request = batch[index];
-          
+
           if (batchResult.status === 'fulfilled') {
             const syncResult = batchResult.value;
-            
+
             if (syncResult.success) {
               result.syncedCount++;
               request.status = QueueStatus.SUCCESS;
@@ -455,17 +456,17 @@ class OfflineQueueService {
             });
           }
         }
-        
+
         // Save queue state after each batch
         await this.saveQueue();
-        
+
         // Check if still online
         if (!this.isOnline) {
           logger.info('Lost connection during sync, stopping');
           break;
         }
       }
-      
+
       logger.info('Queue sync completed', result);
     } catch (error) {
       await errorHandler.handleError(
@@ -478,7 +479,7 @@ class OfflineQueueService {
     } finally {
       this.isSyncing = false;
     }
-    
+
     return result;
   }
 
@@ -493,7 +494,7 @@ class OfflineQueueService {
     try {
       // Update status
       request.status = QueueStatus.IN_PROGRESS;
-      
+
       // Check for conflicts before syncing
       const conflict = await this.detectConflict(request);
       if (conflict) {
@@ -502,25 +503,21 @@ class OfflineQueueService {
           return { success: false, conflict };
         }
       }
-      
+
       // Execute the request
-      const response = await this.executeRequest(
-        request.method,
-        request.endpoint,
-        request.payload
-      );
-      
+      const response = await this.executeRequest(request.method, request.endpoint, request.payload);
+
       // Handle entity-specific post-sync logic
       await this.handlePostSync(request, response);
-      
+
       return { success: true };
     } catch (error) {
       const errorMessage = (error as Error).message;
-      
+
       // Handle specific error cases
       if (this.isRetryableError(error as Error)) {
         request.retryCount++;
-        
+
         if (request.retryCount < request.maxRetries) {
           // Schedule retry with exponential backoff
           const delay = this.calculateRetryDelay(request.retryCount);
@@ -529,11 +526,14 @@ class OfflineQueueService {
               this.syncSingleRequest(request);
             }
           }, delay);
-          
-          return { success: false, error: `Retrying (${request.retryCount}/${request.maxRetries})` };
+
+          return {
+            success: false,
+            error: `Retrying (${request.retryCount}/${request.maxRetries})`,
+          };
         }
       }
-      
+
       return { success: false, error: errorMessage };
     }
   }
@@ -548,18 +548,18 @@ class OfflineQueueService {
   ): Promise<T> {
     const url = `${API_CONFIG.FULL_API_URL}${endpoint}`;
     const headers = await NetworkUtils.createAuthHeaders();
-    
+
     const response = await fetch(url, {
       method,
       headers,
       body: payload ? JSON.stringify(payload) : undefined,
     });
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
-    
+
     return response.json();
   }
 
@@ -571,14 +571,14 @@ class OfflineQueueService {
     if (request.action === ActionType.CREATE) {
       return null;
     }
-    
+
     try {
       // Get server version
       const serverVersion = await this.getServerVersion(request);
-      
+
       // Get local version
       const localVersion = await this.getLocalVersion(request);
-      
+
       // Compare versions
       if (this.hasConflict(localVersion, serverVersion, request)) {
         return {
@@ -591,7 +591,7 @@ class OfflineQueueService {
     } catch (error) {
       logger.warn('Conflict detection failed', { request: request.id, error });
     }
-    
+
     return null;
   }
 
@@ -600,22 +600,22 @@ class OfflineQueueService {
    */
   private async resolveConflict(request: QueuedRequest, conflict: ConflictInfo): Promise<boolean> {
     logger.info(`Resolving conflict for ${request.id}`, { strategy: conflict.resolution });
-    
+
     switch (conflict.resolution) {
       case ConflictResolutionStrategy.SERVER_WINS:
         // Skip this request, server version wins
         return false;
-        
+
       case ConflictResolutionStrategy.CLIENT_WINS:
         // Proceed with the request, client wins
         return true;
-        
+
       case ConflictResolutionStrategy.LAST_WRITE_WINS:
         // Compare timestamps
         const localTimestamp = request.metadata.originalTimestamp || request.timestamp;
         const serverTimestamp = this.extractTimestamp(conflict.serverVersion);
         return localTimestamp > serverTimestamp;
-        
+
       case ConflictResolutionStrategy.MERGE:
         // Merge the changes
         const merged = await this.mergeChanges(
@@ -628,12 +628,12 @@ class OfflineQueueService {
           return true;
         }
         return false;
-        
+
       case ConflictResolutionStrategy.MANUAL:
         // Store for manual resolution
         await this.storeConflictForManualResolution(request, conflict);
         return false;
-        
+
       default:
         return false;
     }
@@ -646,11 +646,16 @@ class OfflineQueueService {
     switch (request.entityType) {
       case EntityType.ORDER:
         // Update local order ID mapping if needed
-        if (request.action === ActionType.CREATE && response && typeof response === 'object' && 'id' in response) {
+        if (
+          request.action === ActionType.CREATE &&
+          response &&
+          typeof response === 'object' &&
+          'id' in response
+        ) {
           await this.updateLocalIdMapping('order', request.payload?.localId, response.id);
         }
         break;
-        
+
       case EntityType.PAYMENT:
         // Log payment sync for audit
         logger.info('Payment synced', {
@@ -658,14 +663,14 @@ class OfflineQueueService {
           amount: request.payload?.amount,
         });
         break;
-        
+
       case EntityType.INVENTORY:
         // Trigger inventory recalculation
         if (request.action === ActionType.UPDATE) {
           await this.triggerInventoryRecalculation();
         }
         break;
-        
+
       default:
         // No special handling needed
         break;
@@ -677,9 +682,9 @@ class OfflineQueueService {
    */
   private async getPendingRequestsSorted(): Promise<QueuedRequest[]> {
     const pending = Array.from(this.queue.values()).filter(
-      r => r.status === QueueStatus.PENDING || r.status === QueueStatus.FAILED
+      (r) => r.status === QueueStatus.PENDING || r.status === QueueStatus.FAILED
     );
-    
+
     // Sort by priority and timestamp
     pending.sort((a, b) => {
       if (a.priority !== b.priority) {
@@ -687,7 +692,7 @@ class OfflineQueueService {
       }
       return a.timestamp - b.timestamp; // Earlier timestamp first
     });
-    
+
     // Resolve dependencies
     return this.resolveDependencies(pending);
   }
@@ -697,25 +702,26 @@ class OfflineQueueService {
    */
   private resolveDependencies(requests: QueuedRequest[]): QueuedRequest[] {
     const resolved: QueuedRequest[] = [];
-    const remaining = new Map(requests.map(r => [r.id, r]));
-    
+    const remaining = new Map(requests.map((r) => [r.id, r]));
+
     while (remaining.size > 0) {
       let added = false;
-      
+
       for (const [id, request] of remaining) {
         // Check if all dependencies are resolved
-        const depsResolved = !request.dependencies || 
-          request.dependencies.every(dep => 
-            resolved.some(r => r.id === dep) || !remaining.has(dep)
+        const depsResolved =
+          !request.dependencies ||
+          request.dependencies.every(
+            (dep) => resolved.some((r) => r.id === dep) || !remaining.has(dep)
           );
-        
+
         if (depsResolved) {
           resolved.push(request);
           remaining.delete(id);
           added = true;
         }
       }
-      
+
       // If nothing was added, there's a circular dependency
       if (!added && remaining.size > 0) {
         logger.warn('Circular dependency detected, adding remaining requests');
@@ -723,7 +729,7 @@ class OfflineQueueService {
         break;
       }
     }
-    
+
     return resolved;
   }
 
@@ -733,9 +739,9 @@ class OfflineQueueService {
   private handleNetworkChange(isOnline: boolean): void {
     const wasOffline = !this.isOnline;
     this.isOnline = isOnline;
-    
+
     logger.info(`Network state changed: ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
-    
+
     if (isOnline && wasOffline) {
       // Coming back online
       this.startSyncTimer();
@@ -751,7 +757,7 @@ class OfflineQueueService {
    */
   private startSyncTimer(): void {
     this.stopSyncTimer();
-    
+
     this.syncTimer = setInterval(() => {
       if (this.isOnline && !this.isSyncing && this.queue.size > 0) {
         this.syncQueue();
@@ -777,10 +783,10 @@ class OfflineQueueService {
       this.config.retryBaseDelay * Math.pow(2, retryCount),
       this.config.retryMaxDelay
     );
-    
+
     // Add jitter to prevent thundering herd
     const jitter = Math.random() * 0.3 * delay;
-    
+
     return delay + jitter;
   }
 
@@ -789,7 +795,7 @@ class OfflineQueueService {
    */
   private isRetryableError(error: Error): boolean {
     const message = error.message.toLowerCase();
-    
+
     return (
       message.includes('network') ||
       message.includes('timeout') ||
@@ -807,26 +813,26 @@ class OfflineQueueService {
     if (entityType === EntityType.PAYMENT) {
       return Priority.CRITICAL;
     }
-    
+
     if (entityType === EntityType.ORDER && action === ActionType.CREATE) {
       return Priority.HIGH;
     }
-    
+
     // High priority for inventory updates
     if (entityType === EntityType.INVENTORY) {
       return Priority.HIGH;
     }
-    
+
     // Medium priority for customer and employee data
     if (entityType === EntityType.CUSTOMER || entityType === EntityType.EMPLOYEE) {
       return Priority.MEDIUM;
     }
-    
+
     // Low priority for reports and analytics
     if (entityType === EntityType.REPORT) {
       return Priority.LOW;
     }
-    
+
     return Priority.MEDIUM;
   }
 
@@ -837,16 +843,14 @@ class OfflineQueueService {
     try {
       const stored = await AsyncStorage.getItem(this.STORAGE_KEY);
       if (stored) {
-        const data = this.config.enableCompression 
-          ? this.decompress(stored) 
-          : JSON.parse(stored);
-        
+        const data = this.config.enableCompression ? this.decompress(stored) : JSON.parse(stored);
+
         // Reconstruct queue
         this.queue.clear();
         for (const request of data) {
           this.queue.set(request.id, request);
         }
-        
+
         logger.info(`Loaded ${this.queue.size} queued requests from storage`);
       }
     } catch (error) {
@@ -869,9 +873,9 @@ class OfflineQueueService {
       const serialized = this.config.enableCompression
         ? this.compress(JSON.stringify(data))
         : JSON.stringify(data);
-      
+
       await AsyncStorage.setItem(this.STORAGE_KEY, serialized);
-      
+
       // Save checkpoint for recovery
       await this.saveCheckpoint();
     } catch (error) {
@@ -894,7 +898,7 @@ class OfflineQueueService {
       queueSize: this.queue.size,
       stats: this.getStatistics(),
     };
-    
+
     await AsyncStorage.setItem(this.CHECKPOINT_KEY, JSON.stringify(checkpoint));
   }
 
@@ -909,7 +913,7 @@ class OfflineQueueService {
       }
       return a.timestamp - b.timestamp;
     });
-    
+
     // Remove 10% of lowest priority items
     const toRemove = Math.ceil(this.config.maxQueueSize * 0.1);
     for (let i = 0; i < toRemove && i < sorted.length; i++) {
@@ -968,7 +972,7 @@ class OfflineQueueService {
       timestamp: Date.now(),
       expiry: duration ? Date.now() + duration : undefined,
     };
-    
+
     await AsyncStorage.setItem(`cache_${key}`, JSON.stringify(cacheData));
   }
 
@@ -979,15 +983,15 @@ class OfflineQueueService {
     try {
       const stored = await AsyncStorage.getItem(`cache_${key}`);
       if (!stored) return null;
-      
+
       const cacheData = JSON.parse(stored);
-      
+
       // Check expiry
       if (cacheData.expiry && Date.now() > cacheData.expiry) {
         await AsyncStorage.removeItem(`cache_${key}`);
         return null;
       }
-      
+
       return cacheData.data as T;
     } catch {
       return null;
@@ -1020,25 +1024,29 @@ class OfflineQueueService {
   /**
    * Check if there's a conflict between versions
    */
-  private hasConflict(localVersion: unknown, serverVersion: unknown, request: QueuedRequest): boolean {
+  private hasConflict(
+    localVersion: unknown,
+    serverVersion: unknown,
+    request: QueuedRequest
+  ): boolean {
     if (!localVersion || !serverVersion) return false;
-    
+
     // Compare version numbers or timestamps
     if (typeof localVersion === 'object' && typeof serverVersion === 'object') {
       const localVer = localVersion as any;
       const serverVer = serverVersion as any;
-      
+
       // Check version field
       if ('version' in localVer && 'version' in serverVer) {
         return localVer.version !== serverVer.version;
       }
-      
+
       // Check updated_at timestamp
       if ('updated_at' in localVer && 'updated_at' in serverVer) {
         return localVer.updated_at !== serverVer.updated_at;
       }
     }
-    
+
     return false;
   }
 
@@ -1047,7 +1055,7 @@ class OfflineQueueService {
    */
   private extractTimestamp(version: unknown): number {
     if (!version || typeof version !== 'object') return 0;
-    
+
     const ver = version as any;
     if ('updated_at' in ver) {
       return new Date(ver.updated_at).getTime();
@@ -1055,7 +1063,7 @@ class OfflineQueueService {
     if ('timestamp' in ver) {
       return ver.timestamp;
     }
-    
+
     return 0;
   }
 
@@ -1069,20 +1077,20 @@ class OfflineQueueService {
   ): Promise<unknown | null> {
     // Simple merge strategy - combine non-conflicting fields
     if (typeof localVersion === 'object' && typeof serverVersion === 'object') {
-      const merged = { ...serverVersion as any };
+      const merged = { ...(serverVersion as any) };
       const local = localVersion as any;
       const updates = request.payload as any;
-      
+
       // Apply only the changed fields from the update
       for (const key in updates) {
         if (key !== 'id' && key !== 'version' && key !== 'updated_at') {
           merged[key] = updates[key];
         }
       }
-      
+
       return merged;
     }
-    
+
     return null;
   }
 
@@ -1100,7 +1108,7 @@ class OfflineQueueService {
       conflict,
       timestamp: Date.now(),
     });
-    
+
     await AsyncStorage.setItem(this.CONFLICT_KEY, JSON.stringify(conflicts));
   }
 
@@ -1121,7 +1129,7 @@ class OfflineQueueService {
    */
   private getVersionEndpoint(request: QueuedRequest): string {
     const id = request.payload?.id || request.payload?.localId;
-    
+
     switch (request.entityType) {
       case EntityType.ORDER:
         return `/orders/${id}/version`;
@@ -1181,38 +1189,38 @@ class OfflineQueueService {
       oldestItemAge: 0,
       estimatedSyncTime: 0,
     };
-    
+
     let totalRetries = 0;
     let oldestTimestamp = Date.now();
-    
+
     for (const request of this.queue.values()) {
       // Count by status
       stats.byStatus[request.status] = (stats.byStatus[request.status] || 0) + 1;
-      
+
       // Count by priority
       stats.byPriority[request.priority] = (stats.byPriority[request.priority] || 0) + 1;
-      
+
       // Count by entity type
       stats.byEntityType[request.entityType] = (stats.byEntityType[request.entityType] || 0) + 1;
-      
+
       // Track retries
       totalRetries += request.retryCount;
-      
+
       // Track oldest item
       if (request.timestamp < oldestTimestamp) {
         oldestTimestamp = request.timestamp;
       }
     }
-    
+
     // Calculate averages
     if (this.queue.size > 0) {
       stats.averageRetryCount = totalRetries / this.queue.size;
       stats.oldestItemAge = Date.now() - oldestTimestamp;
-      
+
       // Estimate sync time (2 seconds per request average)
       stats.estimatedSyncTime = this.queue.size * 2000;
     }
-    
+
     return stats;
   }
 
@@ -1263,14 +1271,14 @@ class OfflineQueueService {
     customData?: unknown
   ): Promise<void> {
     const conflicts = await this.getStoredConflicts();
-    const conflictIndex = conflicts.findIndex(c => c.id === conflictId);
-    
+    const conflictIndex = conflicts.findIndex((c) => c.id === conflictId);
+
     if (conflictIndex === -1) {
       throw new Error('Conflict not found');
     }
-    
+
     const conflict = conflicts[conflictIndex];
-    
+
     switch (resolution) {
       case 'local':
         // Re-queue the original request
@@ -1283,11 +1291,11 @@ class OfflineQueueService {
           { immediate: true }
         );
         break;
-        
+
       case 'server':
         // Do nothing, server version is already in place
         break;
-        
+
       case 'custom':
         // Queue with custom data
         if (customData) {
@@ -1302,7 +1310,7 @@ class OfflineQueueService {
         }
         break;
     }
-    
+
     // Remove from conflicts
     conflicts.splice(conflictIndex, 1);
     await AsyncStorage.setItem(this.CONFLICT_KEY, JSON.stringify(conflicts));
@@ -1318,7 +1326,7 @@ class OfflineQueueService {
       queue: Array.from(this.queue.values()),
       conflicts: await this.getStoredConflicts(),
     };
-    
+
     return JSON.stringify(data, null, 2);
   }
 
@@ -1344,17 +1352,17 @@ class OfflineQueueService {
    */
   public async retryFailedRequests(): Promise<void> {
     const failedRequests = Array.from(this.queue.values()).filter(
-      request => request.status === QueueStatus.FAILED
+      (request) => request.status === QueueStatus.FAILED
     );
-    
+
     logger.info(`Retrying ${failedRequests.length} failed requests`);
-    
+
     for (const request of failedRequests) {
       request.status = QueueStatus.PENDING;
       request.retryCount = 0;
       this.queue.set(request.id, request);
     }
-    
+
     await this.saveQueue();
     await this.syncQueue();
   }
@@ -1363,17 +1371,15 @@ class OfflineQueueService {
    * Get queue size by status
    */
   public getQueueSizeByStatus(status: QueueStatus): number {
-    return Array.from(this.queue.values()).filter(
-      request => request.status === status
-    ).length;
+    return Array.from(this.queue.values()).filter((request) => request.status === status).length;
   }
   public destroy(): void {
     this.stopSyncTimer();
-    
+
     if (this.unsubscribeNetInfo) {
       this.unsubscribeNetInfo();
     }
-    
+
     this.queue.clear();
     logger.info('OfflineQueueService destroyed');
   }
@@ -1384,15 +1390,16 @@ class OfflineQueueService {
   private simpleHash(str: string): string {
     let hash = 0;
     if (str.length === 0) return hash.toString();
-    
+
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
-    
+
     return Math.abs(hash).toString(36);
-  }}
+  }
+}
 
 // Export singleton instance
 export const offlineQueueService = OfflineQueueService.getInstance();
@@ -1417,27 +1424,27 @@ import { useState, useEffect } from 'react';
 export const useOfflineQueue = () => {
   const [stats, setStats] = useState(offlineQueueService.getStatistics());
   const [isOnline, setIsOnline] = useState(true);
-  
+
   useEffect(() => {
     const updateStats = () => {
       setStats(offlineQueueService.getStatistics());
     };
-    
+
     // Update stats every 5 seconds
     const interval = setInterval(updateStats, 5000);
-    
+
     // Listen to network changes
     const unsubscribe = NetInfo.addEventListener((state) => {
       setIsOnline(state.isConnected === true && state.isInternetReachable === true);
       updateStats();
     });
-    
+
     return () => {
       clearInterval(interval);
       unsubscribe();
     };
   }, []);
-  
+
   return {
     stats,
     isOnline,

@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
-
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native';
-
 import { useNavigation } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Clover POS Color Scheme

@@ -1,5 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect, useCallback } from 'react';
-
 import {
   View,
   Text,
@@ -11,8 +11,6 @@ import {
   Linking,
   RefreshControl,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { Colors } from '../../design-system/theme';

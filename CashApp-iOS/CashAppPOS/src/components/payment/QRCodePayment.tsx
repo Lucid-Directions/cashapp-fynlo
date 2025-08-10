@@ -1,17 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-
 import QRCode from 'react-native-qrcode-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { Colors } from '../../constants/Colors';
 import PaymentService from '../../services/PaymentService';
+import type { PaymentRequest, QRPaymentData } from '../../services/PaymentService';
 import { logger } from '../../utils/logger';
 
 import QRPaymentErrorBoundary from './QRPaymentErrorBoundary';
-
-import type { PaymentRequest, QRPaymentData } from '../../services/PaymentService';
 
 // Error-safe QR Code Wrapper Component
 const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {

@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react';
-
 import type { KeyboardTypeOptions } from 'react-native';
 import { View, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface SimpleTextInputProps {

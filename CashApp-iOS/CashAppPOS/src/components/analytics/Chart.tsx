@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 
 // Fynlo POS Color Scheme

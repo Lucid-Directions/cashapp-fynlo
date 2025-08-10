@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import {

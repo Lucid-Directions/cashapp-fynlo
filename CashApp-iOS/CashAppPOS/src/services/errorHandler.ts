@@ -4,10 +4,10 @@
  * Ensures no sensitive information is exposed to users
  */
 
-import { Alert } from 'react-native';
-import { logger } from '../utils/logger';
-
 import type { NavigationProp } from '@react-navigation/native';
+import { Alert } from 'react-native';
+
+import { logger } from '../utils/logger';
 
 // Error codes from backend
 export const ErrorCodes = {

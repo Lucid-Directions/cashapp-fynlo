@@ -3,13 +3,14 @@
  * Provides real-time updates on queue size, sync progress, and network state
  */
 
-import { useEffect, useState, useCallback } from 'react';
 import NetInfo from '@react-native-community/netinfo';
-import { 
+import { useEffect, useState, useCallback } from 'react';
+
+import {
   offlineQueueService,
   type QueueStatistics,
   type SyncResult,
-  type QueueStatus
+  type QueueStatus,
 } from '../services/offline';
 import { logger } from '../utils/logger';
 
@@ -55,13 +56,13 @@ export const useSyncStatus = (): UseSyncStatusReturn => {
   const updateStatus = useCallback(() => {
     try {
       const stats = offlineQueueService.getStatistics();
-      
+
       // Get network and sync state - these methods might not exist yet
       // so we provide fallbacks
       const isOnline = offlineQueueService.getNetworkState?.()?.isOnline ?? status.isOnline;
       const isSyncing = offlineQueueService.getSyncState?.()?.isSyncing ?? false;
-      
-      setStatus(prev => ({
+
+      setStatus((prev) => ({
         ...prev,
         isOnline,
         isSyncing,
@@ -82,24 +83,24 @@ export const useSyncStatus = (): UseSyncStatusReturn => {
   const triggerSync = useCallback(async () => {
     try {
       logger.info('Manual sync triggered');
-      setStatus(prev => ({ ...prev, isSyncing: true }));
-      
+      setStatus((prev) => ({ ...prev, isSyncing: true }));
+
       const result = await offlineQueueService.syncQueue();
-      
-      setStatus(prev => ({
+
+      setStatus((prev) => ({
         ...prev,
         isSyncing: false,
         lastSyncTime: new Date(),
         lastSyncResult: result,
       }));
-      
+
       // Update stats after sync
       updateStatus();
-      
+
       logger.info('Manual sync completed', result);
     } catch (error) {
       logger.error('Manual sync failed', error);
-      setStatus(prev => ({ ...prev, isSyncing: false }));
+      setStatus((prev) => ({ ...prev, isSyncing: false }));
     }
   }, [updateStatus]);
 
@@ -148,18 +149,18 @@ export const useSyncStatus = (): UseSyncStatusReturn => {
 
     // Listen to network state changes
     const unsubscribe = NetInfo.addEventListener((state) => {
-      setStatus(prev => ({ ...prev, isOnline: state.isConnected ?? false }));
+      setStatus((prev) => ({ ...prev, isOnline: state.isConnected ?? false }));
       updateStatus();
     });
 
     // Event listeners - these may not exist in the current implementation
     // so we use optional chaining
     const syncStartListener = offlineQueueService.on?.('syncStart', () => {
-      setStatus(prev => ({ ...prev, isSyncing: true }));
+      setStatus((prev) => ({ ...prev, isSyncing: true }));
     });
 
     const syncCompleteListener = offlineQueueService.on?.('syncComplete', (result: SyncResult) => {
-      setStatus(prev => ({
+      setStatus((prev) => ({
         ...prev,
         isSyncing: false,
         lastSyncTime: new Date(),
@@ -220,4 +221,4 @@ export const useNetworkStatus = () => {
 
   return { isOnline, networkType };
 };
-EOF < /dev/null
+EOF < /dev/llnu;

@@ -1,5 +1,4 @@
 import { fireEvent, waitFor } from '@testing-library/react-native';
-
 import type { ReactTestInstance } from 'react-test-renderer';
 
 // Validation interfaces

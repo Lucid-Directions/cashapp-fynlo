@@ -1,7 +1,6 @@
 // TODO: Unused import - import React, { useState, useEffect, useCallback } from 'react';
 
-import { logger } from '../../utils/logger';
-
+import { useNavigation } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -12,13 +11,12 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // import { Icon } from 'react-native-elements'; // Or your preferred icon library
 
 import { fetchRecipes, deleteRecipe } from '../../services/ApiService'; // Assuming ApiService will be updated
 import useAppStore from '../../store/useAppStore'; // For user/auth state if needed
+import { logger } from '../../utils/logger';
 // import { Recipe, RecipeIngredient } from '../../types'; // Assuming these types exist or will be created
 
 // Placeholder types, replace with actual types from '../../types'

@@ -42,10 +42,7 @@ export class ExponentialBackoff {
     const delayWithJitter = exponentialDelay + randomJitter;
 
     // Ensure delay is within bounds
-    const finalDelay = Math.max(
-      this.baseDelay,
-      Math.min(delayWithJitter, this.maxDelay)
-    );
+    const finalDelay = Math.max(this.baseDelay, Math.min(delayWithJitter, this.maxDelay));
 
     this.attemptCount++;
     return Math.round(finalDelay);

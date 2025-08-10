@@ -1,6 +1,5 @@
-import React from 'react';
-
 import { createStackNavigator } from '@react-navigation/stack';
+import React from 'react';
 
 import RestaurantSetupScreen from '../screens/onboarding/RestaurantSetupScreen';
 import BackupRestoreScreen from '../screens/settings/app/BackupRestoreScreen';

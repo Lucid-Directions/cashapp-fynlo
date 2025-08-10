@@ -1,15 +1,12 @@
 import React, { useState, useCallback, useMemo } from 'react';
-
 import type { ViewStyle } from 'react-native';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import { useTheme, _ColorTheme, colorThemeOptions } from '../../design-system/ThemeProvider';
-import { logger } from '../../utils/logger';
-
 import type { Theme } from '../../design-system/theme';
+import { useTheme, _ColorTheme, colorThemeOptions } from '../../design-system/ThemeProvider';
 import type { ThemeMode, ColorThemeOption } from '../../design-system/ThemeProvider';
+import { logger } from '../../utils/logger';
 
 // Remove duplicate interface since it's imported from ThemeProvider
 

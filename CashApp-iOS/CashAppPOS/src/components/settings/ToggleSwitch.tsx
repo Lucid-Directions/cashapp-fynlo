@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { StyleSheet, _View, TouchableOpacity, Animated, Easing } from 'react-native';
 
 // Clover POS Color Scheme

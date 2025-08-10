@@ -8,9 +8,7 @@ export const PaymentContext = React.createContext({
 });
 
 export const PaymentProvider = ({ children, value }: any) => (
-  <PaymentContext.Provider value={value || {}}>
-    {children}
-  </PaymentContext.Provider>
+  <PaymentContext.Provider value={value || {}}>{children}</PaymentContext.Provider>
 );
 
 export const usePayment = () => React.useContext(PaymentContext);

@@ -6,7 +6,6 @@
  */
 
 import React, { _useEffect, useState } from 'react';
-
 import {
   View,
   Text,
@@ -17,7 +16,6 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
-
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { SettingsCard } from '../../components/settings/SettingsCard';

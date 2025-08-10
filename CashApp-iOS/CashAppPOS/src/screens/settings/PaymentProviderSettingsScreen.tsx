@@ -1,5 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -10,15 +10,11 @@ import {
   Alert,
   Switch,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import { logger } from '../../utils/logger';
-
 import PaymentService from '../../services/PaymentService';
-
 import type { PaymentProviderConfig } from '../../services/PaymentService';
+import { logger } from '../../utils/logger';
 
 const Colors = {
   primary: '#00A651',

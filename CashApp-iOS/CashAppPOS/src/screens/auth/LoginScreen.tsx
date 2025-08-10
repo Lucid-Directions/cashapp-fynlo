@@ -1,7 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-
-import { logger } from '../../utils/logger';
-
 import {
   StyleSheet,
   Text,
@@ -16,12 +14,11 @@ import {
   Dimensions,
   _Image,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import Logo from '../../components/Logo';
 import { useAuthStore } from '../../store/useAuthStore';
+import { logger } from '../../utils/logger';
 
 const { _width, _height } = Dimensions.get('window');
 

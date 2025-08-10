@@ -1,10 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
-
-import { logger } from '../../../utils/logger';
-
 /* eslint-disable react-native/no-unused-styles */
 // This file uses useThemedStyles pattern which ESLint cannot statically analyze
 
+import { useNavigation } from '@react-navigation/native';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -16,12 +14,11 @@ import {
   _TextInput,
   Image,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { useTheme, useThemedStyles } from '../../../design-system/ThemeProvider';
+import { logger } from '../../../utils/logger';
 
 const UserProfileScreen: React.FC = () => {
   const navigation = useNavigation();

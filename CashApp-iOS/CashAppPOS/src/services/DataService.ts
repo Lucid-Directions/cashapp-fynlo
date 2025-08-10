@@ -10,16 +10,16 @@ import { logger } from '../utils/logger';
 import tokenManager from '../utils/tokenManager';
 
 import APITestingService from './APITestingService';
-import { 
-  offlineQueueService, 
-  EntityType, 
-  ActionType, 
-  Priority,
-  ConflictResolutionStrategy 
-} from './offline';
 import authInterceptor from './auth/AuthInterceptor';
 import BackendCompatibilityService from './BackendCompatibilityService';
 import DatabaseService from './DatabaseService';
+import {
+  offlineQueueService,
+  EntityType,
+  ActionType,
+  Priority,
+  ConflictResolutionStrategy,
+} from './offline';
 
 // Feature flags for controlling data sources
 export interface FeatureFlags {
@@ -63,8 +63,6 @@ const CACHE_DURATIONS: CacheConfig = {
   orders: 1000 * 60 * 5, // 5 minutes
   floorPlan: 1000 * 60 * 60, // 1 hour
 };
-
-
 
 /**
  * DataService - Unified service with mock/real data switching and offline support
@@ -304,21 +302,23 @@ class DataService {
     try {
       // Use offline queue service for menu items if enabled
       if (this.featureFlags.USE_REAL_API && this.featureFlags.ENABLE_OFFLINE_MODE) {
-        const menuItems = await offlineQueueService.executeWithFallback<any[]>(
-          EntityType.PRODUCT,
-          ActionType.SYNC,
-          'GET',
-          '/api/v1/menu/items',
-          undefined,
-          {
-            cacheKey: 'menu_items',
-            cacheDuration: CACHE_DURATIONS.menuItems,
-            offlineResponse: [],
-          }
-        ).catch(async () => {
-          // Fallback to direct database call if offline service fails
-          return this.db.getMenuItems();
-        });
+        const menuItems = await offlineQueueService
+          .executeWithFallback<any[]>(
+            EntityType.PRODUCT,
+            ActionType.SYNC,
+            'GET',
+            '/api/v1/menu/items',
+            undefined,
+            {
+              cacheKey: 'menu_items',
+              cacheDuration: CACHE_DURATIONS.menuItems,
+              offlineResponse: [],
+            }
+          )
+          .catch(async () => {
+            // Fallback to direct database call if offline service fails
+            return this.db.getMenuItems();
+          });
 
         // Apply transformation if needed
         if (this.isBackendAvailable && menuItems && menuItems.length > 0) {
@@ -332,15 +332,20 @@ class DataService {
 
       // Original logic for non-offline mode
       const menuItems = await this.db.getMenuItems();
-      
+
       // Only apply transformation if we have real API data
-      if (this.featureFlags.USE_REAL_API && this.isBackendAvailable && menuItems && menuItems.length > 0) {
+      if (
+        this.featureFlags.USE_REAL_API &&
+        this.isBackendAvailable &&
+        menuItems &&
+        menuItems.length > 0
+      ) {
         if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
           logger.info('🔄 Applying menu compatibility transformation');
           return BackendCompatibilityService.transformMenuItems(menuItems);
         }
       }
-      
+
       // Always return array to satisfy return type
       return menuItems || [];
     } catch (error) {
@@ -368,22 +373,24 @@ class DataService {
     try {
       // Use offline queue service for menu categories if enabled
       if (this.featureFlags.USE_REAL_API && this.featureFlags.ENABLE_OFFLINE_MODE) {
-        const categories = await offlineQueueService.executeWithFallback<any[]>(
-          EntityType.CATEGORY,
-          ActionType.SYNC,
-          'GET',
-          '/api/v1/menu/categories',
-          undefined,
-          {
-            cacheKey: 'menu_categories',
-            cacheDuration: CACHE_DURATIONS.menuCategories,
-            offlineResponse: [],
-          }
-        ).catch(async () => {
-          // Fallback to direct database call if offline service fails
-          return this.db.getMenuCategories();
-        });
-        
+        const categories = await offlineQueueService
+          .executeWithFallback<any[]>(
+            EntityType.CATEGORY,
+            ActionType.SYNC,
+            'GET',
+            '/api/v1/menu/categories',
+            undefined,
+            {
+              cacheKey: 'menu_categories',
+              cacheDuration: CACHE_DURATIONS.menuCategories,
+              offlineResponse: [],
+            }
+          )
+          .catch(async () => {
+            // Fallback to direct database call if offline service fails
+            return this.db.getMenuCategories();
+          });
+
         return categories || [];
       }
 
@@ -566,8 +573,8 @@ class DataService {
       // Orders are critical - always queue if offline
       if (!this.isBackendAvailable) {
         const tempId = `temp_order_${Date.now()}`;
-        const orderWithTempId = { ...order as any, localId: tempId };
-        
+        const orderWithTempId = { ...(order as any), localId: tempId };
+
         await offlineQueueService.queueRequest(
           EntityType.ORDER,
           ActionType.CREATE,
@@ -582,7 +589,7 @@ class DataService {
             },
           }
         );
-        
+
         logger.info('Order queued for offline sync:', tempId);
         return { ...orderWithTempId, id: tempId, is_temp: true, offline_pending: true };
       }
@@ -843,13 +850,13 @@ class DataService {
     if (this.featureFlags.ENABLE_OFFLINE_MODE) {
       logger.info('Starting offline data sync');
       const result = await offlineQueueService.syncQueue();
-      
+
       logger.info('Offline sync result:', {
         syncedCount: result.syncedCount,
         failedCount: result.failedCount,
         conflictCount: result.conflictCount,
       });
-      
+
       // Handle conflicts if any
       if (result.conflictCount > 0) {
         logger.warn('Conflicts detected during sync:', result.conflicts);
@@ -880,9 +887,9 @@ class DataService {
     logger.info('Enabled real API mode with offline support');
   }
 
-  getConnectionStatus(): { 
-    mode: string; 
-    backend: boolean; 
+  getConnectionStatus(): {
+    mode: string;
+    backend: boolean;
     flags: FeatureFlags;
     offlineQueue?: {
       pending: number;

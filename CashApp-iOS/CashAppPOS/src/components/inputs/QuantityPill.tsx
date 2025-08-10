@@ -9,12 +9,10 @@
  * - Theme-aware styling
  */
 
+import { Plus, Minus } from 'lucide-react-native';
 import React from 'react';
-
 import type { ViewStyle } from 'react-native';
 import { View, Text, TouchableOpacity, StyleSheet, _TextStyle } from 'react-native';
-
-import { Plus, Minus } from 'lucide-react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,

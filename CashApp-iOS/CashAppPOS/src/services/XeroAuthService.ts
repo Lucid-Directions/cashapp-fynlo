@@ -1,7 +1,6 @@
-import { Linking } from 'react-native';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CryptoJS from 'crypto-js';
+import { Linking } from 'react-native';
 import * as Keychain from 'react-native-keychain';
 
 export interface XeroTokens {

@@ -1,5 +1,6 @@
 // TODO: Unused import - import React, { useState, useEffect } from 'react';
 
+import { useNavigation } from '@react-navigation/native';
 import {
   StyleSheet,
   Text,
@@ -12,8 +13,6 @@ import {
   _ActivityIndicator, // Will be replaced by LoadingView
   _Alert,
 } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // import { generateEmployees, generateSalesHistory, EmployeeData } from '../../utils/mockDataGenerator'; // Removed

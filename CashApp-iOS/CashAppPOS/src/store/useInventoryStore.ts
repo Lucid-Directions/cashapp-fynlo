@@ -1,9 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logger } from '../utils/logger';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 import type { InventoryState, InventoryItem, InventoryLedgerEntry } from '../types';
+import { logger } from '../utils/logger';
 // import { fetchAllInventoryItems, fetchInventoryLedger } from '../services/ApiService'; // To be created or updated
 
 // Define the store interface including actions

@@ -14,8 +14,6 @@ const mockOrderContext = {
 
 export const OrderContext = React.createContext(mockOrderContext);
 export const OrderProvider = ({ children, value }: any) => (
-  <OrderContext.Provider value={value || mockOrderContext}>
-    {children}
-  </OrderContext.Provider>
+  <OrderContext.Provider value={value || mockOrderContext}>{children}</OrderContext.Provider>
 );
 export const useOrder = () => mockOrderContext;

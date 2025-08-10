@@ -9,11 +9,10 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logger } from '../utils/logger';
 
 import API_CONFIG from '../config/api';
-
 import type { Order, OrderItem } from '../types';
+import { logger } from '../utils/logger';
 // TEMPORARY: WebSocketService import commented out until file is created
 // import { webSocketService } from './websocket/WebSocketService';
 

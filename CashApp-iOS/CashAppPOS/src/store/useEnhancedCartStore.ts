@@ -8,7 +8,16 @@ import { create } from 'zustand';
 import { createJSONStorage, persist, subscribeWithSelector } from 'zustand/middleware';
 
 import ErrorTrackingService from '../services/ErrorTrackingService';
-import { calculateItemTotal, calculateSum } from '../utils/priceValidation';
+import type { AppState, User, PosSession, OrderItem, Order } from '../types';
+import type {
+  EnhancedOrderItem,
+  CartTemplate,
+  SplitBillConfig,
+  CartHistoryEntry,
+  EnhancedCartState,
+  CartItemModification,
+  SplitBillGroup,
+} from '../types/cart';
 import {
   migrateCart,
   recalculateItemPricing,
@@ -20,17 +29,7 @@ import {
   cartNeedsMigration,
   validateCartIntegrity,
 } from '../utils/cartTypeGuards';
-
-import type { AppState, User, PosSession, OrderItem, Order } from '../types';
-import type {
-  EnhancedOrderItem,
-  CartTemplate,
-  SplitBillConfig,
-  CartHistoryEntry,
-  EnhancedCartState,
-  CartItemModification,
-  SplitBillGroup,
-} from '../types/cart';
+import { calculateItemTotal, calculateSum } from '../utils/priceValidation';
 
 // Extend the base AppStore interface with enhanced cart features
 interface EnhancedAppStore extends Omit<AppState, 'cart'>, EnhancedCartState {

@@ -1,6 +1,7 @@
 // Using simple error tracking for immediate deployment
-import SimpleErrorTrackingService from './SimpleErrorTrackingService';
 import { logger } from '../utils/logger';
+
+import SimpleErrorTrackingService from './SimpleErrorTrackingService';
 
 export interface ErrorContext {
   userId?: string;
