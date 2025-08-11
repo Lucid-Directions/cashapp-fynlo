@@ -184,18 +184,19 @@ const PaymentScreen: React.FC = () => {
       // Load configuration from storage or use defaults
       const config = await PaymentService.loadConfig();
       if (!config) {
-        // Initialize with default config
+        // Initialize with production config
+        // NEVER use localhost - always use production infrastructure
         const defaultConfig = {
           square: {
             applicationId: 'sandbox-sq0idb-...', // Would come from settings
             locationId: 'location-id',
           },
           sumup: {
-            affiliateKey: 'affiliate-key', // Would come from settings
+            affiliateKey: '7ca84f17-84a5-4140-8df6-6ebeed8540fc', // SumUp production affiliate key
           },
           backend: {
-            baseUrl: 'http://localhost:8000', // Would come from settings
-            apiKey: 'your-api-key', // Would come from auth
+            baseUrl: 'https://fynlopos-9eg2c.ondigitalocean.app', // Production API
+            apiKey: 'production-api-key', // Would come from auth
           },
         };
         await PaymentService.initialize(defaultConfig);

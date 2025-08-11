@@ -14,6 +14,7 @@ import POSScreen from '../screens/main/POSScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
 import { TableSelectionScreen } from '../screens/main/TableSelectionScreen';
 import OrdersScreen from '../screens/orders/OrdersScreen';
+import PaymentScreen from '../screens/payment/PaymentScreen';
 import EnhancedPaymentScreen from '../screens/payment/EnhancedPaymentScreen';
 import ServiceChargeSelectionScreen from '../screens/payment/ServiceChargeSelectionScreen';
 import QRCodePaymentScreen from '../screens/payments/QRCodePaymentScreen';
@@ -246,6 +247,13 @@ const MainNavigator: React.FC = () => {
       <Stack.Screen
         name="ServiceChargeSelection"
         component={ServiceChargeSelectionScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Payment"
+        component={PaymentScreen}
         options={{
           headerShown: false,
         }}

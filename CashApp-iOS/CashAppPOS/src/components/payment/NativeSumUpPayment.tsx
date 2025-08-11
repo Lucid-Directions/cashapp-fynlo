@@ -72,8 +72,11 @@ const NativeSumUpPayment: React.FC<NativeSumUpPaymentProps> = ({
       const apiKey = config.affiliateKey;
 
       if (!apiKey) {
+        logger.error('❌ No SumUp API key in config:', config);
         throw new Error('SumUp API key not configured');
       }
+      
+      logger.info('🔑 Using SumUp API key:', apiKey.substring(0, 8) + '...');
 
       // Setup SDK if needed
       if (!NativeSumUpService.isSDKSetup()) {

@@ -126,9 +126,9 @@ const ServiceChargeSelectionScreen: React.FC = () => {
     setServiceChargePercentage(selectedOption);
     setAddTransactionFee(localAddTransactionFee);
 
-    // Navigate to payment method selection
+    // Navigate to payment method selection (using PaymentScreen with proper SumUp integration)
     // @ts-expect-error
-    navigation.navigate('EnhancedPayment');
+    navigation.navigate('Payment');
   };
 
   const totals = calculateTotals(

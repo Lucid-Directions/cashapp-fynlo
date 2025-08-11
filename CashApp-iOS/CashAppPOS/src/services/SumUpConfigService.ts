@@ -9,6 +9,7 @@ export interface SumUpConfig {
   environment: 'sandbox' | 'production';
   merchantCode?: string;
   currency: string;
+  affiliateKey?: string;
 }
 
 export interface SumUpInitResponse {
@@ -212,6 +213,44 @@ class SumUpConfigService {
       this.cachedConfig = config;
     } catch (error) {
       logger.error('Failed to cache config:', error);
+    }
+  }
+
+  /**
+   * Get current configuration (with fallback to production defaults)
+   * This method is used by NativeSumUpPayment component
+   */
+  getConfig(): SumUpConfig {
+    // Return cached config if available
+    if (this.cachedConfig) {
+      return this.cachedConfig;
+    }
+
+    // Return production defaults - SumUp sandbox affiliate key
+    // In production, this will be fetched from backend
+    logger.info('📦 Using default SumUp configuration');
+    return {
+      appId: 'com.fynlo.pos',
+      environment: 'production',
+      affiliateKey: '7ca84f17-84a5-4140-8df6-6ebeed8540fc', // SumUp production affiliate key
+      currency: 'GBP',
+      merchantCode: undefined,
+    };
+  }
+
+  /**
+   * Initialize and get configuration
+   * Fetches from backend if not cached, with fallback to defaults
+   */
+  async initializeAndGetConfig(): Promise<SumUpConfig> {
+    try {
+      // Try to fetch from backend
+      const config = await this.fetchConfiguration();
+      return config;
+    } catch (error) {
+      logger.warn('⚠️ Could not fetch SumUp config from backend, using defaults:', error);
+      // Return default config as fallback
+      return this.getConfig();
     }
   }
 }
