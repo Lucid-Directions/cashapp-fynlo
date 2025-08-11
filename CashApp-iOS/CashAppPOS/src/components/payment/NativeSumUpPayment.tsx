@@ -263,7 +263,27 @@ const NativeSumUpPayment: React.FC<NativeSumUpPaymentProps> = ({
         {Platform.OS === 'ios' && !isLoggedIn && (
           <TouchableOpacity
             style={[styles.loginHint, { backgroundColor: theme.colors.info[100] }]}
-            onPress={() => NativeSumUpService.presentLogin()}
+            onPress={async () => {
+              try {
+                logger.info('🔐 User tapped login hint');
+                const loginSuccess = await NativeSumUpService.presentLogin();
+                if (loginSuccess) {
+                  logger.info('✅ Login successful from hint');
+                  setIsLoggedIn(true);
+                  // Retry payment initialization after successful login
+                  initializePayment();
+                } else {
+                  logger.warn('⚠️ Login was cancelled or failed');
+                }
+              } catch (error) {
+                logger.error('❌ Login error from hint:', error);
+                Alert.alert(
+                  'Login Failed',
+                  'Unable to complete login. Please try again.',
+                  [{ text: 'OK' }]
+                );
+              }
+            }}
           >
             <Icon name="info" size={20} color={theme.colors.info[700]} />
             <Text style={[styles.loginHintText, { color: theme.colors.info[700] }]}>
