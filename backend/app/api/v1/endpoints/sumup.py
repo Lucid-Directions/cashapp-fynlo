@@ -40,6 +40,9 @@ class SumUpConfigData(BaseModel):
     merchantCode: Optional[str] = Field(
         None, description="SumUp merchant code if available"
     )
+    affiliateKey: Optional[str] = Field(
+        None, description="SumUp affiliate key for SDK initialization"
+    )
     currency: str = Field(default="GBP", description="Currency code")
 
 
@@ -104,19 +107,26 @@ async def initialize_sumup(
 
         # Get SumUp configuration from environment
         sumup_environment = os.getenv("SUMUP_ENVIRONMENT", "production")
-        sumup_app_id = os.getenv("SUMUP_APP_ID", "com.fynlo.pos")
+        sumup_app_id = os.getenv("SUMUP_APPLICATION_ID", "com.fynlo.pos")
+        sumup_affiliate_key = os.getenv("SUMUP_AFFILIATE_KEY")
 
         # Check if SumUp is properly configured
         sumup_api_key = os.getenv("SUMUP_API_KEY")
-        if not sumup_api_key:
+        if not sumup_api_key or not sumup_affiliate_key:
             logger.warning(
-                f"SumUp API key not configured for restaurant {restaurant_id}"
+                f"SumUp API key or affiliate key not configured for "
+                f"restaurant {restaurant_id}"
             )
             return APIResponseHelper.success(
                 data={
-                    "merchant_code": None,
-                    "environment": sumup_environment,
-                    "app_id": sumup_app_id,
+                    "config": {
+                        "appId": sumup_app_id,
+                        "environment": sumup_environment,
+                        "merchantCode": None,
+                        "affiliateKey": None,
+                        "currency": "GBP"
+                    },
+                    "sdkInitialized": False,
                     "enabled": False,
                     "features": {
                         "card_reader": False,
@@ -127,8 +137,7 @@ async def initialize_sumup(
                 message="SumUp is not configured for this restaurant",
             )
 
-        # TODO: Fetch merchant code from database if stored per restaurant
-        # For now, use a placeholder or environment variable
+        # Get merchant code from environment
         merchant_code = os.getenv("SUMUP_MERCHANT_CODE")
 
         # Determine feature availability based on subscription plan
@@ -156,6 +165,7 @@ async def initialize_sumup(
             appId=sumup_app_id,
             environment=environment,
             merchantCode=merchant_code,
+            affiliateKey=sumup_affiliate_key,
             currency="GBP",  # Using GBP to match application standard
         )
 
