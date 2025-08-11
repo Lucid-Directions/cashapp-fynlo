@@ -39,7 +39,7 @@ if os.getenv("ENVIRONMENT", "production").lower() == "development":
 app.add_middleware(
     CORSMiddleware,
     allow_origins=secure_origins,
-    allow_credentials=True,
+    allow_credentials=False,  # Security: Disabled for emergency fallback
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
     expose_headers=["*"],

@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 # Try to import settings, but don't fail if configuration is missing
 try:
     from app.core.config import settings
+
     settings_available = True
 except Exception as e:
     logger.warning(f"Could not load settings (this is expected in minimal mode): {e}")
@@ -43,24 +44,34 @@ else:
     ]
     # Add development origins if explicitly in development
     if os.getenv("ENVIRONMENT", "production").lower() == "development":
-        origins.extend([
-            "http://localhost:3000",
-            "http://localhost:8080",
-            "http://localhost:8081",
-        ])
+        origins.extend(
+            [
+                "http://localhost:3000",
+                "http://localhost:8080",
+                "http://localhost:8081",
+            ]
+        )
     logger.info(f"Using hardcoded secure CORS origins (settings not available)")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=settings.CORS_ALLOW_CREDENTIALS if (settings_available and hasattr(settings, "CORS_ALLOW_CREDENTIALS")) else True,
+    allow_credentials=settings.CORS_ALLOW_CREDENTIALS
+    if (settings_available and hasattr(settings, "CORS_ALLOW_CREDENTIALS"))
+    else False,  # Security: Default to False
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
     expose_headers=["*"],
 )
 
-environment = settings.ENVIRONMENT if (settings_available and hasattr(settings, 'ENVIRONMENT')) else os.getenv("ENVIRONMENT", "unknown")
-logger.info(f"CORS configured for {environment} environment with {len(origins)} allowed origins")
+environment = (
+    settings.ENVIRONMENT
+    if (settings_available and hasattr(settings, "ENVIRONMENT"))
+    else os.getenv("ENVIRONMENT", "unknown")
+)
+logger.info(
+    f"CORS configured for {environment} environment with {len(origins)} allowed origins"
+)
 
 
 @app.get("/")

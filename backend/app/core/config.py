@@ -120,7 +120,9 @@ class Settings(BaseSettings):
 
     # Extended CORS Configuration
     CORS_ALLOWED_ORIGINS: Optional[str] = None  # Comma-separated list from env
-    CORS_ALLOW_CREDENTIALS: bool = True
+    CORS_ALLOW_CREDENTIALS: bool = (
+        False  # Security: Set to False by default, only enable if cookies needed
+    )
     CORS_ALLOW_VERCEL_PREVIEWS: bool = False
     CORS_ALLOW_ALL_ORIGINS: bool = (
         False  # NEVER true in production - security validation below
