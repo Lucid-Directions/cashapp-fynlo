@@ -2,22 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- 
-	Tap to Pay on iPhone entitlement (SUMUP provider)
-	NOTE: This requires manual provisioning profile configuration.
-	Automatic signing will fail with this entitlement.
-	
-	To enable:
-	1. Create a manual provisioning profile in Apple Developer portal
-	2. Include the Tap to Pay entitlement in the profile
-	3. Switch Xcode to manual signing and select the profile
-	
-	To temporarily disable for development (comment out these lines):
-	-->
+	<!-- Tap to Pay on iPhone entitlement -->
 	<key>com.apple.developer.proximity-reader.payment.acceptance</key>
-	<array>
-		<string>SUMUP</string>
-	</array>
+	<true/>
 	
 	<!-- Apple Pay / In-App Payments entitlement -->
 	<key>com.apple.developer.in-app-payments</key>
