@@ -119,7 +119,7 @@ def validate_restaurant_access(
     return False
 
 
-@router.get("/employees/", response_model=List[EmployeeResponse])
+@router.get("/employees/")
 async def get_employees(
     request: Request,
     db: Session = Depends(get_db),
@@ -178,7 +178,7 @@ async def get_employees(
         )
 
 
-@router.post("/employees/", response_model=EmployeeResponse)
+@router.post("/employees/")
 async def create_employee(
     request: Request,
     employee_data: EmployeeCreate,
@@ -269,7 +269,7 @@ async def create_employee(
         )
 
 
-@router.put("/employees/{employee_id}", response_model=EmployeeResponse)
+@router.put("/employees/{employee_id}")
 async def update_employee(
     request: Request,
     employee_id: int,

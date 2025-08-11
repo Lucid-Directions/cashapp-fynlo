@@ -13,6 +13,8 @@ from typing import Optional, Dict, Any
 from fastapi import WebSocket
 from app.core.auth import decode_token
 from app.models.user import User
+import asyncio
+import base64
 import logging
 
 logger = logging.getLogger(__name__)
@@ -48,7 +50,6 @@ class FixedWebSocketManager:
                 # Format: "token, base64_encoded_token"
                 parts = protocols.split(", ")
                 if len(parts) == 2 and parts[0] == "token":
-                    import base64
                     try:
                         token = base64.b64decode(parts[1]).decode('utf-8')
                         logger.info("Token found in Sec-WebSocket-Protocol header")
@@ -63,7 +64,6 @@ class FixedWebSocketManager:
                 await websocket.accept()
                 
                 # Wait for auth message (with timeout)
-                import asyncio
                 auth_message = await asyncio.wait_for(
                     websocket.receive_json(), 
                     timeout=5.0

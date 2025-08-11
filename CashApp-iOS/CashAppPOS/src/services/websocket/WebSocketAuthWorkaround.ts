@@ -61,7 +61,8 @@ export class WebSocketAuthWorkaround extends EnhancedWebSocketService {
       }
 
       // Encode token in base64 for protocol header
-      const encodedToken = btoa(token);
+      // React Native doesn't have btoa, use Buffer or base64 library
+      const encodedToken = this.encodeBase64(token);
       
       // Build WebSocket URL
       const baseUrl = API_CONFIG.WS_URL || 'wss://fynlopos-9eg2c.ondigitalocean.app';
@@ -112,6 +113,36 @@ export class WebSocketAuthWorkaround extends EnhancedWebSocketService {
       logger.error('❌ Protocol header connection failed:', error);
       this.handleConnectionFailure();
     }
+  }
+
+  /**
+   * Encode string to base64 (React Native compatible)
+   */
+  private encodeBase64(str: string): string {
+    // Use Buffer if available (Node.js environment)
+    if (typeof Buffer !== 'undefined') {
+      return Buffer.from(str).toString('base64');
+    }
+    
+    // Fallback to manual base64 encoding for React Native
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    let result = '';
+    let i = 0;
+    
+    while (i < str.length) {
+      const a = str.charCodeAt(i++);
+      const b = i < str.length ? str.charCodeAt(i++) : 0;
+      const c = i < str.length ? str.charCodeAt(i++) : 0;
+      
+      const bitmap = (a << 16) | (b << 8) | c;
+      
+      result += chars.charAt((bitmap >> 18) & 63);
+      result += chars.charAt((bitmap >> 12) & 63);
+      result += i - 2 < str.length ? chars.charAt((bitmap >> 6) & 63) : '=';
+      result += i - 1 < str.length ? chars.charAt(bitmap & 63) : '=';
+    }
+    
+    return result;
   }
 
   /**
