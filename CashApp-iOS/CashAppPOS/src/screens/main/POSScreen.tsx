@@ -266,9 +266,8 @@ const POSScreen: React.FC = () => {
           usingDemoData: usingDemo,
         });
         
-        if (usingDemo) {
-          setMenuError('Using demo menu (API unavailable)');
-        }
+        // Don't set error when using demo data - it's working fine
+        // The demo indicator will show the status
       } catch (error) {
         logger.error('❌ Failed to load dynamic menu:', error);
         setMenuError('Failed to load menu. Please check your connection.');
@@ -297,44 +296,15 @@ const POSScreen: React.FC = () => {
           logger.warn('📡 Network connection issue detected');
         }
 
-        // Show user-friendly error message
-        if (Platform.OS === 'ios' || Platform.OS === 'android') {
-          Alert.alert('Menu Loading Issue', `${errorMessage}\n\nUsing cached menu data.`, [
-            { text: 'OK' },
-          ]);
-        }
-
-        // Use local Chucho menu data as fallback
-        try {
-          // Import the local menu data directly to avoid API calls
-          const { CHUCHO_MENU_ITEMS, CHUCHO_CATEGORIES } = await import('../../data/chuchoMenu');
-
-          logger.info('🍮 Using local Chucho menu data as fallback');
-
-          // Transform menu items to match expected format
-          const fallbackItems = CHUCHO_MENU_ITEMS.map((item) => ({
-            ...item,
-            emoji: item.image, // Map image to emoji field for compatibility
-          }));
-
-          setDynamicMenuItems(fallbackItems);
-
-          // Set categories
-          const categoryNames = [
-            'All',
-            ...CHUCHO_CATEGORIES.map((cat) => cat.name).filter((name) => name !== 'All'),
-          ];
-          setDynamicCategories(categoryNames);
-
-          logger.info('✅ Loaded fallback menu:', {
-            itemCount: fallbackItems.length,
-            categories: categoryNames,
-          });
-        } catch (fallbackError) {
-          logger.error('❌ Fallback import failed:', fallbackError);
-          setDynamicMenuItems([]);
-          setDynamicCategories(['All']);
-        }
+        // DataService already handles fallback, but if we get here it means
+        // even the fallback failed. This shouldn't happen with FallbackMenuService
+        // but we'll handle it gracefully
+        logger.error('Menu loading failed completely - DataService should have provided fallback');
+        
+        // The error is already set, and the UI will show retry button
+        // Don't show alert as it's annoying - the UI already shows the error
+        setDynamicMenuItems([]);
+        setDynamicCategories(['All']);
       } finally {
         setMenuLoading(false);
       }
