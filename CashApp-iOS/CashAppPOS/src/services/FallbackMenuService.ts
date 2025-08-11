@@ -196,36 +196,43 @@ class FallbackMenuService {
    * Check if we should use demo data based on API availability
    */
   shouldUseDemoData(apiError: any): boolean {
-    // Use demo data if:
-    // 1. API returned 500 error
+    // Use demo data ONLY if:
+    // 1. API returned 500+ server error
     // 2. Network timeout
     // 3. Network unavailable
-    // 4. Any other API failure
+    // DO NOT use demo data for database errors or other local failures
     
     if (!apiError) return false;
     
     const errorMessage = apiError.message || '';
     const statusCode = apiError.status || apiError.statusCode;
     
-    // Check for specific error conditions
+    // Check for specific API/network error conditions
     if (statusCode >= 500) {
-      logger.warn('🔄 API server error, falling back to demo data');
+      logger.warn('🔄 API server error, should try database before demo data');
       return true;
     }
     
     if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
-      logger.warn('⏱️ API timeout, falling back to demo data');
+      logger.warn('⏱️ API timeout, should try database before demo data');
       return true;
     }
     
     if (errorMessage.includes('Network') || errorMessage.includes('network')) {
-      logger.warn('📡 Network error, falling back to demo data');
+      logger.warn('📡 Network error, should try database before demo data');
       return true;
     }
     
-    // Default to using demo data for any error
-    logger.warn('⚠️ API error, falling back to demo data:', errorMessage);
-    return true;
+    // For database errors or other local failures, return false to allow database fallback
+    if (errorMessage.includes('database') || errorMessage.includes('Database') || 
+        errorMessage.includes('sqlite') || errorMessage.includes('SQLite')) {
+      logger.warn('💾 Database error, will not use demo data to allow fallback');
+      return false;
+    }
+    
+    // Default to NOT using demo data for unknown errors to allow database fallback
+    logger.warn('⚠️ Unknown error type, allowing database fallback:', errorMessage);
+    return false;
   }
 }
 
