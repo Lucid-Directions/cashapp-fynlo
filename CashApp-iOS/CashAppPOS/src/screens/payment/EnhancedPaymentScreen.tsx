@@ -91,8 +91,8 @@ const EnhancedPaymentScreen: React.FC = () => {
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  // Validation state - now optional
-  // Allow either both fields empty OR both fields filled correctly
+  // Validation state - truly optional fields
+  // Each field is independently optional
   const hasName = customerName.trim().length > 0;
   const hasEmail = customerEmail.trim().length > 0;
   
@@ -101,13 +101,10 @@ const EnhancedPaymentScreen: React.FC = () => {
   const isEmailValid = !hasEmail || emailRegex.test(customerEmail);
   
   // Form is valid if:
-  // 1. Both fields empty (anonymous) - OK
-  // 2. Both fields filled and valid - OK
-  // 3. Only one field filled - NOT OK (to ensure we have complete info if any is provided)
-  const isFormValid = (
-    (!hasName && !hasEmail) || // Both empty - OK
-    (hasName && hasEmail && isNameValid && isEmailValid) // Both filled and valid - OK
-  );
+  // 1. Name is empty OR valid (if provided)
+  // 2. Email is empty OR valid (if provided)
+  // Both fields are independently optional
+  const isFormValid = isNameValid && isEmailValid;
 
   // Platform service charge configuration (real-time from platform owner)
   const [platformServiceCharge, setPlatformServiceCharge] = useState({
@@ -331,13 +328,13 @@ const EnhancedPaymentScreen: React.FC = () => {
   const handleCardPayment = async () => {
     // Validate customer info if provided
     if (!isFormValid) {
-      const message = hasName && !hasEmail 
-        ? 'Please provide an email address along with the name, or clear both fields for anonymous payment.'
-        : hasEmail && !hasName
-        ? 'Please provide a name along with the email address, or clear both fields for anonymous payment.'
-        : 'Please enter both name and email, or leave both empty for anonymous payment.';
+      const message = !isNameValid 
+        ? 'Customer name is too long (maximum 60 characters).'
+        : !isEmailValid
+        ? 'Please enter a valid email address.'
+        : 'Please check the customer information.';
       
-      Alert.alert('Customer Information Required', message);
+      Alert.alert('Invalid Information', message);
       return;
     }
 
@@ -386,13 +383,13 @@ const EnhancedPaymentScreen: React.FC = () => {
   const handleApplePayPayment = async () => {
     // Validate customer info if provided
     if (!isFormValid) {
-      const message = hasName && !hasEmail 
-        ? 'Please provide an email address along with the name, or clear both fields for anonymous payment.'
-        : hasEmail && !hasName
-        ? 'Please provide a name along with the email address, or clear both fields for anonymous payment.'
-        : 'Please enter both name and email, or leave both empty for anonymous payment.';
+      const message = !isNameValid 
+        ? 'Customer name is too long (maximum 60 characters).'
+        : !isEmailValid
+        ? 'Please enter a valid email address.'
+        : 'Please check the customer information.';
       
-      Alert.alert('Customer Information Required', message);
+      Alert.alert('Invalid Information', message);
       return;
     }
 
@@ -539,13 +536,13 @@ const EnhancedPaymentScreen: React.FC = () => {
     }
 
     if (!isFormValid) {
-      const message = hasName && !hasEmail 
-        ? 'Please provide an email address along with the name, or clear both fields for anonymous payment.'
-        : hasEmail && !hasName
-        ? 'Please provide a name along with the email address, or clear both fields for anonymous payment.'
-        : 'Please enter both name and email, or leave both empty for anonymous payment.';
+      const message = !isNameValid 
+        ? 'Customer name is too long (maximum 60 characters).'
+        : !isEmailValid
+        ? 'Please enter a valid email address.'
+        : 'Please check the customer information.';
       
-      Alert.alert('Customer Information Required', message);
+      Alert.alert('Invalid Information', message);
       return;
     }
 
@@ -572,12 +569,15 @@ const EnhancedPaymentScreen: React.FC = () => {
         notes: undefined,
       };
       
-      // Only add customerMetadata if customer info was provided
-      if (hasName && hasEmail) {
-        orderData.customerMetadata = {
-          name: customerName.trim(),
-          email: customerEmail.trim().toLowerCase(),
-        };
+      // Add customerMetadata if ANY customer info was provided
+      if (hasName || hasEmail) {
+        orderData.customerMetadata = {};
+        if (hasName) {
+          orderData.customerMetadata.name = customerName.trim();
+        }
+        if (hasEmail) {
+          orderData.customerMetadata.email = customerEmail.trim().toLowerCase();
+        }
       }
 
       logger.info('💳 Processing payment and saving order...', {

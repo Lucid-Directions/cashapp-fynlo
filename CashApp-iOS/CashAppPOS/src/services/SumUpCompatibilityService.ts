@@ -122,7 +122,7 @@ class SumUpCompatibilityService {
               '• Approval from Apple\n' +
               '• Special entitlements\n' +
               '• App Store review\n\n' +
-              'For now, you can use alternative payment methods like QR codes or external card readers.',
+              'For now, you can use alternative payment methods like QR codes or Tap to Pay.',
             [{ text: 'OK' }]
           );
         },
@@ -155,13 +155,13 @@ class SumUpCompatibilityService {
       {
         id: 'stripe',
         name: 'Stripe Terminal',
-        description: 'Use Stripe card reader hardware',
+        description: 'Use Stripe Tap to Pay on iPhone',
         available: true,
       },
       {
         id: 'square',
         name: 'Square Reader',
-        description: 'Use Square card reader hardware',
+        description: 'Use Square Tap to Pay on iPhone',
         available: false, // Temporarily disabled
       },
     ];

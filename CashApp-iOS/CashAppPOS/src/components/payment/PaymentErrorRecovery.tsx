@@ -137,7 +137,7 @@ const PaymentErrorRecovery: React.FC<PaymentErrorRecoveryProps> = ({
           return {
             title: 'Device Error',
             message:
-              'There was an issue with the card reader. Please check the device and try again.',
+              'There was an issue with Tap to Pay. Please check the device and try again.',
             icon: 'devices-other',
             color: colors.danger[600],
           };
