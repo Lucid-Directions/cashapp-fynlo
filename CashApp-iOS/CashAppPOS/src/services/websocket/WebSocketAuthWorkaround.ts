@@ -44,9 +44,15 @@ export class WebSocketAuthWorkaround extends EnhancedWebSocketService {
    */
   async connect(): Promise<void> {
     if (this.workaroundConfig.enableProtocolHeader) {
-      return this.connectWithProtocolHeader();
+      try {
+        await this.connectWithProtocolHeader();
+      } catch (error) {
+        // Re-throw to ensure caller knows connection failed
+        throw error;
+      }
+    } else {
+      return super.connect();
     }
-    return super.connect();
   }
 
   /**
@@ -132,6 +138,8 @@ export class WebSocketAuthWorkaround extends EnhancedWebSocketService {
     } catch (error) {
       logger.error('❌ Protocol header connection failed:', error);
       this.handleConnectionFailure();
+      // Re-throw error so connect() promise rejects properly
+      throw error;
     }
   }
 
@@ -154,6 +162,7 @@ export class WebSocketAuthWorkaround extends EnhancedWebSocketService {
     let result = '';
     let i = 0;
     
+    // Process string in groups of 3 bytes
     while (i < str.length) {
       const a = str.charCodeAt(i++);
       const b = i < str.length ? str.charCodeAt(i++) : 0;
@@ -161,11 +170,22 @@ export class WebSocketAuthWorkaround extends EnhancedWebSocketService {
       
       const bitmap = (a << 16) | (b << 8) | c;
       
+      // Always output first two characters
       result += chars.charAt((bitmap >> 18) & 63);
       result += chars.charAt((bitmap >> 12) & 63);
-      // No padding for URL-safe base64
-      if (i - 2 < str.length) result += chars.charAt((bitmap >> 6) & 63);
-      if (i - 1 < str.length) result += chars.charAt(bitmap & 63);
+      
+      // Only output 3rd character if we had at least 2 input bytes
+      if (i > str.length + 1) {
+        // We only had 1 byte of input, stop here
+      } else {
+        result += chars.charAt((bitmap >> 6) & 63);
+        // Only output 4th character if we had 3 input bytes
+        if (i > str.length) {
+          // We only had 2 bytes of input, stop here
+        } else {
+          result += chars.charAt(bitmap & 63);
+        }
+      }
     }
     
     return result;
@@ -357,14 +377,45 @@ export class WebSocketAuthWorkaround extends EnhancedWebSocketService {
   }
 }
 
-// Export singleton instance
-let instance: WebSocketAuthWorkaround | null = null;
+// Manage multiple instances by connection key
+const instances: Map<string, WebSocketAuthWorkaround> = new Map();
 
 export function getWebSocketWithWorkaround(config: any): WebSocketAuthWorkaround {
-  if (!instance) {
-    instance = new WebSocketAuthWorkaround(config);
+  // Create a unique key based on critical config values
+  const key = `${config.userId || 'default'}_${config.restaurantId || 'default'}_${config.token ? config.token.substring(0, 10) : 'notoken'}`;
+  
+  // Check if we need to create a new instance or update existing one
+  const existingInstance = instances.get(key);
+  
+  if (existingInstance) {
+    // Check if config has changed significantly
+    const configChanged = (
+      existingInstance.config.token !== config.token ||
+      existingInstance.config.userId !== config.userId ||
+      existingInstance.config.restaurantId !== config.restaurantId
+    );
+    
+    if (configChanged) {
+      // Disconnect old instance and create new one
+      existingInstance.disconnect();
+      instances.delete(key);
+      const newInstance = new WebSocketAuthWorkaround(config);
+      instances.set(key, newInstance);
+      return newInstance;
+    }
+    
+    return existingInstance;
   }
-  return instance;
+  
+  // Create new instance
+  const newInstance = new WebSocketAuthWorkaround(config);
+  instances.set(key, newInstance);
+  return newInstance;
+}
+
+export function disconnectAllWebSockets(): void {
+  instances.forEach(instance => instance.disconnect());
+  instances.clear();
 }
 
 export default WebSocketAuthWorkaround;
