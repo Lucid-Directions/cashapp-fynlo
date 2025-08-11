@@ -89,10 +89,20 @@ const EnhancedPaymentScreen: React.FC = () => {
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  // Validation state
-  const isNameValid = customerName.trim().length > 0 && customerName.length <= 60;
-  const isEmailValid = emailRegex.test(customerEmail);
-  const isFormValid = isNameValid && isEmailValid;
+  // Validation state - now optional
+  // Only validate if user has entered something
+  const hasCustomerInfo = customerName.trim().length > 0 || customerEmail.trim().length > 0;
+  const isNameValid = !hasCustomerInfo || (customerName.trim().length > 0 && customerName.length <= 60);
+  const isEmailValid = !hasCustomerInfo || (customerEmail.trim().length === 0 || emailRegex.test(customerEmail));
+  
+  // Form is valid if:
+  // 1. No info entered (both fields empty) - OK
+  // 2. If entering info, both must be valid
+  const isFormValid = !hasCustomerInfo || (
+    customerName.trim().length > 0 && 
+    customerName.length <= 60 && 
+    emailRegex.test(customerEmail)
+  );
 
   // Platform service charge configuration (real-time from platform owner)
   const [platformServiceCharge, setPlatformServiceCharge] = useState({
@@ -304,9 +314,12 @@ const EnhancedPaymentScreen: React.FC = () => {
   };
 
   const handleCardPayment = async () => {
-    // First validate customer info
+    // Validate customer info if provided
     if (!isFormValid) {
-      Alert.alert('Required Information', 'Please enter valid customer name and email address.');
+      Alert.alert(
+        'Invalid Customer Information', 
+        'If providing customer details, please enter both a valid name and email address.\n\nYou can also leave both fields empty to skip customer information.'
+      );
       return;
     }
 
@@ -353,9 +366,12 @@ const EnhancedPaymentScreen: React.FC = () => {
   };
 
   const handleApplePayPayment = async () => {
-    // First validate customer info
+    // Validate customer info if provided
     if (!isFormValid) {
-      Alert.alert('Required Information', 'Please enter valid customer name and email address.');
+      Alert.alert(
+        'Invalid Customer Information', 
+        'If providing customer details, please enter both a valid name and email address.\n\nYou can also leave both fields empty to skip customer information.'
+      );
       return;
     }
 
@@ -502,7 +518,10 @@ const EnhancedPaymentScreen: React.FC = () => {
     }
 
     if (!isFormValid) {
-      Alert.alert('Required Information', 'Please enter valid customer name and email address.');
+      Alert.alert(
+        'Invalid Customer Information', 
+        'If providing customer details, please enter both a valid name and email address.\n\nYou can also leave both fields empty to skip customer information.'
+      );
       return;
     }
 
@@ -1004,15 +1023,21 @@ const EnhancedPaymentScreen: React.FC = () => {
           )}
         </View>
 
-        {/* Customer Information - Required for Email Receipt */}
+        {/* Customer Information - Optional */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Customer Information</Text>
+          <Text style={styles.sectionTitle}>Customer Information (Optional)</Text>
+          <View style={styles.skipInfoContainer}>
+            <Icon name="info-outline" size={14} color={Colors.primary} />
+            <Text style={styles.skipInfoText}>
+              Skip this section for anonymous payment or fill in for email receipt
+            </Text>
+          </View>
           <View style={styles.customerForm}>
             <View style={styles.customerField}>
               <SimpleTextInput
                 value={customerName}
                 onValueChange={setCustomerName}
-                placeholder="Customer Name (required)"
+                placeholder="Customer Name (optional)"
                 maxLength={60}
                 style={[
                   styles.customerInput,
@@ -1026,7 +1051,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                 <Text style={styles.validationError}>
                   {customerName.length > 60
                     ? 'Name too long (max 60 characters)'
-                    : 'Name is required'}
+                    : 'Please enter a valid name'}
                 </Text>
               )}
             </View>
@@ -1035,7 +1060,7 @@ const EnhancedPaymentScreen: React.FC = () => {
               <SimpleTextInput
                 value={customerEmail}
                 onValueChange={setCustomerEmail}
-                placeholder="Email Address (required for receipt)"
+                placeholder="Email Address (optional - for receipt)"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="email"
@@ -1052,8 +1077,8 @@ const EnhancedPaymentScreen: React.FC = () => {
             </View>
 
             <View style={styles.receiptNote}>
-              <Icon name="mail" size={16} color={Colors.lightText} />
-              <Text style={styles.receiptNoteText}>Receipt will be sent via email only</Text>
+              <Icon name="info" size={16} color={Colors.lightText} />
+              <Text style={styles.receiptNoteText}>You can skip this section or provide details for a receipt</Text>
             </View>
           </View>
         </View>
@@ -1710,6 +1735,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.lightText,
     marginLeft: 8,
+  },
+  skipInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 166, 81, 0.05)',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 166, 81, 0.2)',
+  },
+  skipInfoText: {
+    fontSize: 13,
+    color: Colors.primary,
+    marginLeft: 8,
+    flex: 1,
   },
   customTipInput: {
     marginVertical: 8,
