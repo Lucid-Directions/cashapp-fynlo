@@ -19,6 +19,7 @@ import SimpleDecimalInput from '../../components/inputs/SimpleDecimalInput';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
 import { useAuth } from '../../contexts/AuthContext';
+import ApplePayService from '../../services/ApplePayService';
 import OrderService from '../../services/OrderService';
 import SharedDataStore from '../../services/SharedDataStore';
 import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
@@ -351,6 +352,83 @@ const EnhancedPaymentScreen: React.FC = () => {
     }
   };
 
+  const handleApplePayPayment = async () => {
+    // First validate customer info
+    if (!isFormValid) {
+      Alert.alert('Required Information', 'Please enter valid customer name and email address.');
+      return;
+    }
+
+    try {
+      setProcessing(true);
+      
+      // Check if Apple Pay is available
+      const isAvailable = await ApplePayService.isAvailable();
+      
+      if (!isAvailable) {
+        // Apple Pay not set up, show instructions
+        Alert.alert(
+          'Apple Pay Not Available',
+          'Apple Pay is not set up on this device. Would you like to use an alternative payment method?',
+          [
+            { text: 'Use Card', onPress: () => handleCardPayment() },
+            { text: 'Use QR Code', onPress: () => {
+              setSelectedPaymentMethod('qrCode');
+              setShowQRModal(true);
+              generateQRCode();
+            }},
+            { text: 'Cancel', style: 'cancel' }
+          ]
+        );
+        return;
+      }
+
+      // Calculate final total
+      const subtotal = calculateSubtotal();
+      const serviceCharge = calculateServiceCharge(subtotal);
+      const tax = calculateTax(subtotal + serviceCharge);
+      const transactionFee = calculateTransactionFee('applePay', subtotal + serviceCharge + tax + tipAmount);
+      const finalTotal = subtotal + serviceCharge + tax + tipAmount + transactionFee;
+
+      // Create Apple Pay request
+      const applePayRequest = {
+        amount: finalTotal,
+        currency: 'GBP',
+        merchantIdentifier: 'merchant.com.fynlo.cashappposlucid',
+        countryCode: 'GB',
+        merchantName: 'Fynlo POS',
+        items: [
+          { label: 'Subtotal', amount: subtotal },
+          ...(serviceCharge > 0 ? [{ label: 'Service Charge', amount: serviceCharge }] : []),
+          ...(tax > 0 ? [{ label: 'VAT', amount: tax }] : []),
+          ...(tipAmount > 0 ? [{ label: 'Tip', amount: tipAmount }] : []),
+          ...(transactionFee > 0 ? [{ label: 'Processing Fee', amount: transactionFee }] : []),
+        ],
+      };
+
+      // Present Apple Pay sheet
+      const result = await ApplePayService.presentPaymentSheet(applePayRequest);
+
+      if (result.success) {
+        // Payment successful
+        await processSuccessfulPayment('applePay', result.transactionId || '');
+        Alert.alert(
+          'Payment Successful',
+          `Transaction completed via Apple Pay\nReference: ${result.transactionId}`,
+          [{ text: 'OK', onPress: () => navigation.goBack() }]
+        );
+      } else if (result.error) {
+        // Payment failed or cancelled
+        logger.warn('Apple Pay payment failed:', result.error);
+      }
+    } catch (error) {
+      logger.error('Apple Pay error:', error);
+      Alert.alert('Payment Error', 'Failed to process Apple Pay payment. Please try another method.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const handlePaymentMethodSelect = (methodId: string) => {
     const method = availablePaymentMethods.find((m) => m.id === methodId);
     if (method?.requiresAuth) {
@@ -373,7 +451,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                 // Check SumUp availability before payment
                 handleCardPayment();
               } else if (methodId === 'applePay') {
-                Alert.alert('Apple Pay', 'Hold near reader and confirm with Touch ID or Face ID.');
+                handleApplePayPayment();
               } else if (methodId === 'googlePay') {
                 Alert.alert('Google Pay', 'Hold near reader and confirm payment.');
               }
@@ -393,7 +471,7 @@ const EnhancedPaymentScreen: React.FC = () => {
         handleCardPayment();
       } else if (methodId === 'applePay') {
         // Apple Pay handling
-        Alert.alert('Apple Pay', 'Hold near reader and confirm with Touch ID or Face ID.');
+        handleApplePayPayment();
       } else if (methodId === 'googlePay') {
         // Google Pay handling
         Alert.alert('Google Pay', 'Hold near reader and confirm payment.');
