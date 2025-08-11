@@ -9,6 +9,7 @@ export interface SumUpConfig {
   environment: 'sandbox' | 'production';
   merchantCode?: string;
   currency: string;
+  affiliateKey?: string;
 }
 
 export interface SumUpInitResponse {
@@ -212,6 +213,87 @@ class SumUpConfigService {
       this.cachedConfig = config;
     } catch (error) {
       logger.error('Failed to cache config:', error);
+    }
+  }
+
+  /**
+   * Get current configuration (with fallback to production defaults)
+   * This method is used by NativeSumUpPayment component
+   */
+  getConfig(): SumUpConfig {
+    // Return cached config if available - ensure it has affiliateKey
+    if (this.cachedConfig) {
+      // If cached config is missing affiliateKey, add default one
+      if (!this.cachedConfig.affiliateKey) {
+        logger.warn('⚠️ Cached config missing affiliateKey, adding default');
+        this.cachedConfig.affiliateKey = this.getDefaultAffiliateKey();
+      }
+      return this.cachedConfig;
+    }
+
+    // Return production defaults - fetched from backend in production
+    logger.info('📦 Using default SumUp configuration');
+    return {
+      appId: 'com.fynlo.pos',
+      environment: 'production',
+      affiliateKey: this.getDefaultAffiliateKey(),
+      currency: 'GBP',
+      merchantCode: undefined,
+    };
+  }
+
+  /**
+   * Get default affiliate key - must be fetched from backend
+   * NEVER hardcode production keys in source code
+   */
+  private async getDefaultAffiliateKeyAsync(): Promise<string> {
+    try {
+      // Try to fetch from backend
+      const config = await this.fetchConfiguration();
+      if (config.affiliateKey) {
+        return config.affiliateKey;
+      }
+    } catch (error) {
+      logger.error('Failed to fetch affiliate key from backend:', error);
+    }
+    
+    // Production keys should ALWAYS come from backend
+    // Never hardcode sensitive credentials
+    // If backend is unavailable, payment will fail gracefully
+    logger.warn('⚠️ No affiliate key available - payment will require backend configuration');
+    return ''; // Empty string - backend must provide the key
+  }
+  
+  /**
+   * Synchronous version for compatibility - returns empty if not available
+   */
+  private getDefaultAffiliateKey(): string {
+    // For synchronous calls, we can't fetch from backend
+    // Payment initialization should use initializeAndGetConfig() instead
+    logger.warn('⚠️ Synchronous config access - use initializeAndGetConfig() for proper backend fetch');
+    return ''; // Empty string - backend must provide the key
+  }
+
+  /**
+   * Initialize and get configuration
+   * Fetches from backend if not cached, with fallback to defaults
+   */
+  async initializeAndGetConfig(): Promise<SumUpConfig> {
+    try {
+      // Try to fetch from backend
+      const config = await this.fetchConfiguration();
+      
+      // Ensure the fetched config has affiliateKey
+      if (!config.affiliateKey) {
+        logger.warn('⚠️ Backend config missing affiliateKey');
+        config.affiliateKey = this.getDefaultAffiliateKey();
+      }
+      
+      return config;
+    } catch (error) {
+      logger.warn('⚠️ Could not fetch SumUp config from backend, using defaults:', error);
+      // Return default config as fallback
+      return this.getConfig();
     }
   }
 }
