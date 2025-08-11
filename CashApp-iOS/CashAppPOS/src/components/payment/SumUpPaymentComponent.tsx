@@ -133,14 +133,34 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
         setPaymentStatus('failed');
         setErrorMessage('Payment system not available');
 
-        // Don't show the misleading alert - instead, log the issue and try to continue
-        logger.warn('⚠️ SumUp React Native hooks not initialized properly, attempting recovery...');
+        // SumUp React Native hooks not available - show proper fallback options
+        logger.warn('⚠️ SumUp React Native hooks not initialized, showing fallback options');
         
-        // Try to continue with a simulated payment for testing
-        // In production, the native module should handle this
         runOnMainThread(() => {
-          logger.info('🔄 Attempting to use native SumUp module directly...');
-          onPaymentComplete(false, undefined, 'Switching to native SumUp module');
+          Alert.alert(
+            'Payment System Initializing',
+            'The payment system is still initializing. Please choose an option:',
+            [
+              {
+                text: 'Try Native Tap to Pay',
+                onPress: () => {
+                  // Signal to parent to try native module directly
+                  onPaymentComplete(false, undefined, 'USE_NATIVE_MODULE');
+                },
+              },
+              {
+                text: 'Use QR Payment',
+                onPress: () => {
+                  onPaymentComplete(false, undefined, 'USE_QR_PAYMENT');
+                },
+              },
+              { 
+                text: 'Cancel', 
+                onPress: () => onPaymentCancel(),
+                style: 'cancel'
+              },
+            ]
+          );
         });
         return;
       }

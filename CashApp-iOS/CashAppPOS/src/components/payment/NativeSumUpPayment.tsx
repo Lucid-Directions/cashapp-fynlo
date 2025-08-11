@@ -67,16 +67,23 @@ const NativeSumUpPayment: React.FC<NativeSumUpPaymentProps> = ({
         throw new Error('SumUp native module not available on this device');
       }
 
-      // Get API key from config
-      const config = sumUpConfigService.getConfig();
-      const apiKey = config.affiliateKey;
+      // Get API key from config - try to fetch from backend first
+      let config = await sumUpConfigService.initializeAndGetConfig();
+      let apiKey = config.affiliateKey;
+      
+      // If no key from backend, try cached config
+      if (!apiKey) {
+        config = sumUpConfigService.getConfig();
+        apiKey = config.affiliateKey;
+      }
 
       if (!apiKey) {
-        logger.error('❌ No SumUp API key in config:', config);
-        throw new Error('SumUp API key not configured');
+        logger.error('❌ No SumUp API key available - backend configuration required');
+        throw new Error('SumUp configuration not available. Please ensure backend is accessible and properly configured.');
       }
       
-      logger.info('🔑 Using SumUp API key:', apiKey.substring(0, 8) + '...');
+      // Never log API keys, even partially - security vulnerability
+      logger.info('🔑 SumUp API key loaded from configuration');
 
       // Setup SDK if needed
       if (!NativeSumUpService.isSDKSetup()) {

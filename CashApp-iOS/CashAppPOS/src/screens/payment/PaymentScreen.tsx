@@ -186,17 +186,18 @@ const PaymentScreen: React.FC = () => {
       if (!config) {
         // Initialize with production config
         // NEVER use localhost - always use production infrastructure
+        // NEVER hardcode API keys - they must come from backend
         const defaultConfig = {
           square: {
-            applicationId: 'sandbox-sq0idb-...', // Would come from settings
-            locationId: 'location-id',
+            applicationId: '', // Must be provided by backend
+            locationId: '',
           },
           sumup: {
-            affiliateKey: '7ca84f17-84a5-4140-8df6-6ebeed8540fc', // SumUp production affiliate key
+            affiliateKey: '', // Must be provided by backend - NEVER hardcode
           },
           backend: {
             baseUrl: 'https://fynlopos-9eg2c.ondigitalocean.app', // Production API
-            apiKey: 'production-api-key', // Would come from auth
+            apiKey: '', // Must come from auth token
           },
         };
         await PaymentService.initialize(defaultConfig);
@@ -430,12 +431,22 @@ const PaymentScreen: React.FC = () => {
 
       setPaymentResult(paymentResult);
       showPaymentSuccess(paymentResult);
+    } else if (error === 'USE_NATIVE_MODULE' && currentPaymentRequest) {
+      // Fallback to native module when React Native hooks fail
+      logger.info('🔄 Switching to native SumUp module');
+      setShowNativeSumUpPayment(true);
+      // Don't clear currentPaymentRequest here - needed for native module
+      return;
+    } else if (error === 'USE_QR_PAYMENT') {
+      // Fallback to QR payment
+      logger.info('🔄 Switching to QR payment');
+      setShowQRModal(true);
+      setCurrentPaymentRequest(null);
     } else {
       logger.error('❌ SumUp payment failed:', error);
       Alert.alert('Payment Failed', error || 'Payment was not completed');
+      setCurrentPaymentRequest(null);
     }
-
-    setCurrentPaymentRequest(null);
   };
 
   // Handle SumUp payment cancellation
@@ -473,12 +484,12 @@ const PaymentScreen: React.FC = () => {
 
       setPaymentResult(paymentResult);
       showPaymentSuccess(paymentResult);
+      setCurrentPaymentRequest(null);
     } else {
       logger.error('❌ Native SumUp Tap to Pay failed:', error);
       Alert.alert('Payment Failed', error || 'Tap to Pay was not completed');
+      setCurrentPaymentRequest(null);
     }
-
-    setCurrentPaymentRequest(null);
   };
 
   // Handle Native SumUp payment cancellation
