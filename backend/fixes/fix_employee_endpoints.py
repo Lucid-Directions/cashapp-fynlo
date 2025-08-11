@@ -9,9 +9,10 @@ This fix addresses:
 4. Clear error messages
 """
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 from app.db.session import get_db
 from app.models.user import User
 from app.models.employee import Employee
@@ -25,6 +26,14 @@ import logging
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+
+# Response wrapper model to match APIResponseHelper structure
+class APIResponse(BaseModel):
+    success: bool
+    data: Any
+    message: Optional[str] = None
+    error: Optional[str] = None
+    
 
 def get_restaurant_context(
     request: Request,
@@ -119,7 +128,7 @@ def validate_restaurant_access(
     return False
 
 
-@router.get("/employees/")
+@router.get("/employees/", response_model=APIResponse)
 async def get_employees(
     request: Request,
     db: Session = Depends(get_db),
@@ -178,7 +187,7 @@ async def get_employees(
         )
 
 
-@router.post("/employees/")
+@router.post("/employees/", response_model=APIResponse)
 async def create_employee(
     request: Request,
     employee_data: EmployeeCreate,
@@ -269,7 +278,7 @@ async def create_employee(
         )
 
 
-@router.put("/employees/{employee_id}")
+@router.put("/employees/{employee_id}", response_model=APIResponse)
 async def update_employee(
     request: Request,
     employee_id: int,
