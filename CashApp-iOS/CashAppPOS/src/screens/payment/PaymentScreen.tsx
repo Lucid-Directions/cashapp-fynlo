@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import QRCodePayment from '../../components/payment/QRCodePayment';
 import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
+import NativeSumUpPayment from '../../components/payment/NativeSumUpPayment';
 import PaymentService from '../../services/PaymentService';
 // TODO: Unused import - import SquarePaymentProvider from '../../services/providers/SquarePaymentProvider';
 // TODO: Unused import - import SumUpPaymentProvider from '../../services/providers/SumUpPaymentProvider';
@@ -63,6 +64,7 @@ const PaymentScreen: React.FC = () => {
   const [_paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
   const [optimalProvider, setOptimalProvider] = useState<string>('');
   const [showSumUpPayment, setShowSumUpPayment] = useState(false);
+  const [showNativeSumUpPayment, setShowNativeSumUpPayment] = useState(false);
   const [currentPaymentRequest, setCurrentPaymentRequest] = useState<PaymentRequest | null>(null);
 
   // Calculate totals
@@ -328,25 +330,41 @@ const PaymentScreen: React.FC = () => {
     }
   };
 
-  // SumUp Payment Function - React Hook Based Integration
+  // SumUp Payment Function - Native SDK Integration for Tap to Pay
+  // Following SumUp SDK v6.0+ best practices
   const processSumUpPayment = async (
     request: PaymentRequest,
-    _paymentMethod: string = 'tapToPay'
+    paymentMethod: string = 'tapToPay'
   ) => {
     try {
-      logger.info('🏦 Starting SumUp payment flow with React hooks...');
+      logger.info('🏦 Starting SumUp payment flow...');
 
-      // Initialize SumUp service (configuration will be fetched from backend)
-      const initSuccess = await sumUpService.initialize();
-      if (!initSuccess) {
-        throw new Error('Failed to initialize SumUp service');
+      // Check if native module is available (preferred for Tap to Pay)
+      if (sumUpService.isAvailable()) {
+        logger.info('📱 Using native SumUp SDK for Tap to Pay on iPhone');
+        
+        // Set the current payment request and show the native SumUp component
+        setCurrentPaymentRequest(request);
+        setShowNativeSumUpPayment(true);
+        
+        logger.info('💳 Native Tap to Pay modal will handle the payment flow');
+      } else {
+        // Fallback to sumup-react-native-alpha package (less reliable for Tap to Pay)
+        logger.warn('⚠️ Native SumUp not available, falling back to React Native package');
+        logger.warn('⚠️ Note: This may show card reader prompt instead of Tap to Pay');
+        
+        // Initialize SumUp service (configuration will be fetched from backend)
+        const initSuccess = await sumUpService.initialize();
+        if (!initSuccess) {
+          throw new Error('Failed to initialize SumUp service');
+        }
+
+        // Set the current payment request and show the SumUp component
+        setCurrentPaymentRequest(request);
+        setShowSumUpPayment(true);
+
+        logger.info('💳 SumUp payment component will handle the payment flow (fallback)');
       }
-
-      // Set the current payment request and show the SumUp component
-      setCurrentPaymentRequest(request);
-      setShowSumUpPayment(true);
-
-      logger.info('💳 SumUp payment component will handle the payment flow');
     } catch (error) {
       logger.error('❌ SumUp payment error:', error);
       Alert.alert('Payment Error', 'Failed to initialize SumUp payment');
@@ -395,6 +413,49 @@ const PaymentScreen: React.FC = () => {
     setProcessing(false);
     setCurrentPaymentRequest(null);
     logger.info('❌ SumUp payment cancelled by user');
+  };
+
+  // Handle Native SumUp payment completion (Tap to Pay)
+  const handleNativeSumUpPaymentComplete = (
+    success: boolean,
+    transactionCode?: string,
+    error?: string
+  ) => {
+    setShowNativeSumUpPayment(false);
+    setProcessing(false);
+
+    if (success && transactionCode && currentPaymentRequest) {
+      logger.info('🎉 Native SumUp Tap to Pay completed successfully!', transactionCode);
+
+      // Calculate SumUp fee (0.69% for Tap to Pay as per pricing)
+      const fee = currentPaymentRequest.amount * 0.0069;
+
+      // Create a successful payment result
+      const paymentResult: PaymentResult = {
+        success: true,
+        transactionId: transactionCode,
+        amount: currentPaymentRequest.amount,
+        fee,
+        provider: 'sumup',
+        error: undefined,
+      };
+
+      setPaymentResult(paymentResult);
+      showPaymentSuccess(paymentResult);
+    } else {
+      logger.error('❌ Native SumUp Tap to Pay failed:', error);
+      Alert.alert('Payment Failed', error || 'Tap to Pay was not completed');
+    }
+
+    setCurrentPaymentRequest(null);
+  };
+
+  // Handle Native SumUp payment cancellation
+  const handleNativeSumUpPaymentCancel = () => {
+    setShowNativeSumUpPayment(false);
+    setProcessing(false);
+    setCurrentPaymentRequest(null);
+    logger.info('❌ Native SumUp Tap to Pay cancelled by user');
   };
 
   const processCardPayment = async (provider: string) => {
@@ -631,7 +692,7 @@ const PaymentScreen: React.FC = () => {
         </View>
       </Modal>
 
-      {/* SumUp Payment Component */}
+      {/* SumUp Payment Component (Fallback - may show card reader) */}
       {showSumUpPayment && currentPaymentRequest && (
         <SumUpPaymentComponent
           amount={currentPaymentRequest.amount}
@@ -639,6 +700,19 @@ const PaymentScreen: React.FC = () => {
           title={currentPaymentRequest.description || 'Order Payment'}
           onPaymentComplete={handleSumUpPaymentComplete}
           onPaymentCancel={handleSumUpPaymentCancel}
+        />
+      )}
+
+      {/* Native SumUp Tap to Pay Component (Preferred - uses iPhone Tap to Pay) */}
+      {showNativeSumUpPayment && currentPaymentRequest && (
+        <NativeSumUpPayment
+          amount={currentPaymentRequest.amount}
+          currency={currentPaymentRequest.currency}
+          title={currentPaymentRequest.description || 'Order Payment'}
+          visible={showNativeSumUpPayment}
+          onPaymentComplete={handleNativeSumUpPaymentComplete}
+          onPaymentCancel={handleNativeSumUpPaymentCancel}
+          useTapToPay={true}
         />
       )}
 

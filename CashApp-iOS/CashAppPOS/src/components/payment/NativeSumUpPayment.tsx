@@ -94,19 +94,28 @@ const NativeSumUpPayment: React.FC<NativeSumUpPaymentProps> = ({
         setIsLoggedIn(true);
       }
 
-      // Check Tap to Pay availability if requested
+      // Check Tap to Pay availability if requested (SumUp SDK v6.0 best practice)
       if (useTapToPay) {
         const tapToPayStatus = await NativeSumUpService.checkTapToPayAvailability();
         logger.info('📱 Tap to Pay status:', tapToPayStatus);
         
-        if (tapToPayStatus.isAvailable && !tapToPayStatus.isActivated) {
+        if (!tapToPayStatus.isAvailable) {
+          // Tap to Pay not available on this device/merchant
+          throw new Error('Tap to Pay on iPhone is not available. This device may not support it or it may not be enabled for your merchant account.');
+        }
+        
+        if (!tapToPayStatus.isActivated) {
           logger.info('📱 Tap to Pay available but not activated, presenting activation');
+          setStatusMessage('Please complete Tap to Pay activation...');
           const activationSuccess = await NativeSumUpService.presentTapToPayActivation();
-          if (activationSuccess) {
-            setTapToPayAvailable(true);
+          if (!activationSuccess) {
+            throw new Error('Tap to Pay activation was cancelled or failed. Please try again.');
           }
-        } else if (tapToPayStatus.isAvailable && tapToPayStatus.isActivated) {
           setTapToPayAvailable(true);
+        } else {
+          // Tap to Pay is available and activated
+          setTapToPayAvailable(true);
+          logger.info('✅ Tap to Pay is ready to use');
         }
       }
 
@@ -125,9 +134,11 @@ const NativeSumUpPayment: React.FC<NativeSumUpPaymentProps> = ({
 
   const processPayment = async () => {
     try {
-      logger.info('💳 Processing payment:', { amount, currency, title, useTapToPay });
+      logger.info('💳 Processing Tap to Pay payment:', { amount, currency, title, useTapToPay });
       setPaymentStatus('processing');
-      setStatusMessage(useTapToPay && tapToPayAvailable ? 'Tap card on phone...' : 'Processing payment...');
+      setStatusMessage(useTapToPay && tapToPayAvailable 
+        ? 'Hold card or device near the top of your iPhone...' 
+        : 'Processing payment...');
 
       const result = await NativeSumUpService.performCheckout(
         amount,
@@ -232,10 +243,15 @@ const NativeSumUpPayment: React.FC<NativeSumUpPaymentProps> = ({
 
           {paymentStatus === 'processing' && useTapToPay && tapToPayAvailable && (
             <View style={styles.tapInstructions}>
-              <Icon name="contactless" size={48} color={theme.colors.primary} />
+              <Icon name="contactless-payment" size={48} color={theme.colors.primary} />
               <Text style={[styles.instructionText, { color: theme.colors.textSecondary }]}>
-                Hold card near the top of your iPhone
+                Hold customer's card or device near the top of your iPhone
               </Text>
+              <View style={styles.paymentAnimation}>
+                <Icon name="credit-card" size={32} color={theme.colors.primary} />
+                <Icon name="arrow-downward" size={20} color={theme.colors.textSecondary} />
+                <Icon name="phone-iphone" size={32} color={theme.colors.text} />
+              </View>
             </View>
           )}
         </View>
@@ -382,6 +398,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 8,
     flex: 1,
+  },
+  paymentAnimation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    gap: 10,
   },
 });
 

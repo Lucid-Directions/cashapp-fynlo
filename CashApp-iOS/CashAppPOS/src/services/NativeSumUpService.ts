@@ -232,12 +232,15 @@ class NativeSumUpService {
 
   /**
    * Perform checkout (card reader or Tap to Pay)
+   * @param useTapToPay - IMPORTANT: Set to true for iPhone Tap to Pay, false for card reader
+   * According to SumUp SDK v6.0+, the paymentMethod property on SMPCheckoutRequest
+   * defaults to cardReader but should be set to tapToPay for contactless payments
    */
   async performCheckout(
     amount: number,
     currency: string = 'GBP',
     title: string = 'Payment',
-    useTapToPay: boolean = false,
+    useTapToPay: boolean = true, // DEFAULT TO TAP TO PAY as per user requirements
     foreignTransactionID?: string
   ): Promise<TransactionResult> {
     if (!this.isAvailable()) {
