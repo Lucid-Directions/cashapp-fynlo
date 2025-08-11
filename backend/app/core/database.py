@@ -323,6 +323,7 @@ class Order(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     restaurant_id = Column(UUID(as_uuid=True), nullable=False)
     customer_id = Column(UUID(as_uuid=True), nullable=True)
+    customer_email = Column(String(255), nullable=True)
     order_number = Column(String(50), nullable=False)
     table_number = Column(String(20))  # Legacy field - kept for backward compatibility
     table_id = Column(
@@ -384,6 +385,32 @@ class QRPayment(Base):
     fee_amount = Column(DECIMAL(10, 2), default=0.0)
     net_amount = Column(DECIMAL(10, 2), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class ReceiptLog(Base):
+    """Receipt delivery tracking and audit trail"""
+    
+    __tablename__ = "receipt_logs"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    order_id = Column(UUID(as_uuid=True), ForeignKey("orders.id"), nullable=False)
+    restaurant_id = Column(UUID(as_uuid=True), ForeignKey("restaurants.id"), nullable=False)
+    receipt_number = Column(String(50), unique=True, nullable=True)
+    receipt_type = Column(String(20), nullable=False)  # 'sale', 'refund', 'void'
+    delivery_method = Column(String(20), nullable=False)  # 'email', 'sms', 'print', 'pdf'
+    recipient = Column(String(255), nullable=False)  # email address or phone number
+    sent_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    delivered = Column(Boolean, default=False, nullable=False)
+    delivery_status = Column(String(50), nullable=True)  # 'sent', 'delivered', 'failed', 'bounced'
+    error_message = Column(Text, nullable=True)
+    pdf_url = Column(String(500), nullable=True)  # S3 URL if PDF generated
+    metadata = Column(JSONB, nullable=True, default={})  # Additional tracking data
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    order = relationship("Order", backref="receipt_logs")
+    restaurant = relationship("Restaurant", backref="receipt_logs")
 
 
 class Section(Base):

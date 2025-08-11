@@ -3,7 +3,7 @@ Orders Management API endpoints for Fynlo POS
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, desc
 from pydantic import BaseModel, EmailStr
@@ -13,7 +13,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from app.core.database import get_db, Order, Product, Customer, User
+from app.core.database import get_db, Order, Product, Customer, User, Payment
 from app.core.auth import get_current_user
 from app.api.v1.endpoints.customers import (
     CustomerCreate as CustomerCreateSchema,
@@ -537,6 +537,7 @@ async def create_order(
             payment_status="pending",
             special_instructions=order_data.special_instructions,
             created_by=str(current_user.id),
+            customer_email=order_data.customer_email,
         )
 
         db.add(new_order)
@@ -1274,3 +1275,92 @@ async def refund_order(
         gateway_refund_id=gateway_refund_id,
         created_at=new_refund.created_at.isoformat(),
     )
+
+
+@router.post("/{order_id}/email_receipt")
+async def send_email_receipt(
+    order_id: str,
+    background_tasks: BackgroundTasks,
+    current_restaurant_id: Optional[str] = Query(
+        None, description="Restaurant ID for multi-location owners"
+    ),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Send or resend email receipt for an order.
+    This endpoint is called by the frontend after payment completion or for manual resending.
+    """
+    # Validate restaurant access for multi-tenant
+    await TenantSecurity.validate_restaurant_access(
+        current_user, current_restaurant_id or current_user.restaurant_id, db=db
+    )
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
+    
+    # Get the order
+    order = (
+        db.query(Order)
+        .filter(
+            Order.id == order_id,
+            Order.restaurant_id == restaurant_id
+        )
+        .first()
+    )
+    
+    if not order:
+        raise ResourceNotFoundException(
+            message=f"Order {order_id} not found"
+        )
+    
+    # Check if order has been paid
+    if order.payment_status != "completed":
+        raise ValidationException(
+            message="Cannot send receipt for unpaid order"
+        )
+    
+    # Check if customer email exists
+    if not order.customer_email:
+        raise ValidationException(
+            message="No customer email available for this order"
+        )
+    
+    # Get the payment amount
+    payment = (
+        db.query(Payment)
+        .filter(
+            Payment.order_id == order_id,
+            Payment.status == "completed"
+        )
+        .first()
+    )
+    
+    if not payment:
+        raise ValidationException(
+            message="No completed payment found for this order"
+        )
+    
+    # Send receipt asynchronously
+    try:
+        background_tasks.add_task(
+            email_service.send_receipt,
+            order=order,
+            type_="sale",
+            amount=float(payment.amount),
+            db=db  # Pass db session for logging
+        )
+        
+        logger.info(f"Receipt email queued for order {order.id} to {order.customer_email}")
+        
+        return APIResponseHelper.success(
+            data={
+                "message": f"Receipt will be sent to {order.customer_email}",
+                "order_id": str(order.id),
+                "email": order.customer_email
+            }
+        )
+    except Exception as e:
+        logger.error(f"Failed to queue receipt email for order {order.id}: {str(e)}")
+        raise FynloException(
+            message="Failed to send receipt email",
+            status_code=500
+        )

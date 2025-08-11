@@ -6,9 +6,12 @@ Handles transactional emails including receipt delivery
 import logging
 from typing import Literal, Optional, Dict, Any
 from pathlib import Path
+from datetime import datetime
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import resend
+from sqlalchemy.orm import Session
 from app.core.config import settings
+from app.core.database import ReceiptLog
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +66,7 @@ class EmailService:
             self.sg = None
             self.env = None
 
-    def send_receipt(self, *, order: Any, type_: TYPES, amount: float) -> bool:
+    def send_receipt(self, *, order: Any, type_: TYPES, amount: float, db: Optional[Session] = None) -> bool:
         """
         Send receipt email for sale or refund
 
@@ -119,11 +122,60 @@ class EmailService:
                 logger.info(
                     f"Receipt email sent for order #{order_number} to {order.customer_email}. Type: {type_}. Resend ID: {response['id']}"
                 )
+                
+                # Log receipt delivery to database if session provided
+                if db:
+                    try:
+                        receipt_log = ReceiptLog(
+                            order_id=order.id,
+                            restaurant_id=order.restaurant_id,
+                            receipt_type=type_,
+                            delivery_method="email",
+                            recipient=order.customer_email,
+                            sent_at=datetime.utcnow(),
+                            delivered=True,  # Resend confirmed sending
+                            delivery_status="sent",
+                            metadata={
+                                "resend_id": response.get("id"),
+                                "amount": amount,
+                                "order_number": order_number
+                            }
+                        )
+                        db.add(receipt_log)
+                        db.commit()
+                        logger.info(f"Receipt logged in database for order {order.id}")
+                    except Exception as log_error:
+                        logger.error(f"Failed to log receipt in database: {log_error}")
+                        # Don't fail the email send if logging fails
+                        db.rollback()
+                
                 return True
             else:
                 logger.error(
                     f"Failed to send receipt email - Invalid response: {response}"
                 )
+                
+                # Log failed attempt if database provided
+                if db:
+                    try:
+                        receipt_log = ReceiptLog(
+                            order_id=order.id,
+                            restaurant_id=order.restaurant_id,
+                            receipt_type=type_,
+                            delivery_method="email",
+                            recipient=order.customer_email,
+                            sent_at=datetime.utcnow(),
+                            delivered=False,
+                            delivery_status="failed",
+                            error_message=str(response),
+                            metadata={"amount": amount, "order_number": order_number}
+                        )
+                        db.add(receipt_log)
+                        db.commit()
+                    except Exception as log_error:
+                        logger.error(f"Failed to log failed receipt attempt: {log_error}")
+                        db.rollback()
+                
                 return False
 
         except Exception as e:

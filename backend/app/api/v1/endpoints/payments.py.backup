@@ -32,7 +32,6 @@ from app.services.audit_logger import AuditLoggerService
 from app.services.email_service import EmailService
 from app.models.audit_log import AuditEventType, AuditEventStatus
 from app.middleware.rate_limit_middleware import limiter, PAYMENT_RATE
-from app.integration.websocket_events import emit_payment_completed
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -432,24 +431,6 @@ async def confirm_qr_payment(
         order.payment_status = "completed"
         order.status = "confirmed" if order.status == "pending" else order.status
 
-        # Send WebSocket notification for QR payment completion
-        try:
-            payment_data = {
-                "id": str(payment_record.id),
-                "order_id": str(order.id),
-                "order_number": order.order_number if hasattr(order, 'order_number') else None,
-                "restaurant_id": str(restaurant_id),
-                "amount": float(payment_record.amount),
-                "payment_method": "qr_code",
-                "transaction_id": str(qr_payment_id),
-            }
-            background_tasks.add_task(emit_payment_completed, payment_data)
-            logger.info(f"WebSocket notification queued for QR payment {payment_data['id']}")
-        except Exception as e:
-            logger.error(f"Failed to queue WebSocket notification for QR payment: {str(e)}")
-            # Don't fail the payment if WebSocket notification fails
-
-
         # Log success (commit=False due to @transactional)
         # The flush() within create_audit_log will assign an ID to payment_record
         await audit_service.create_audit_log(
@@ -649,24 +630,6 @@ async def process_stripe_payment(
             payment_db_record.processed_at = datetime.utcnow()
             order.payment_status = "completed"
             order.status = "confirmed" if order.status == "pending" else order.status
-
-            # Send WebSocket notification for Stripe payment completion
-            try:
-                payment_data = {
-                    "id": str(payment_db_record.id),
-                    "order_id": str(order.id),
-                    "order_number": order.order_number if hasattr(order, 'order_number') else None,
-                    "restaurant_id": str(restaurant_id),
-                    "amount": float(payment_db_record.amount),
-                    "payment_method": "stripe",
-                    "transaction_id": payment_db_record.external_id,
-                }
-                background_tasks.add_task(emit_payment_completed, payment_data)
-                logger.info(f"WebSocket notification queued for Stripe payment {payment_data['id']}")
-            except Exception as e:
-                logger.error(f"Failed to queue WebSocket notification for Stripe payment: {str(e)}")
-                # Don't fail the payment if WebSocket notification fails
-
 
             await audit_service.create_audit_log(
                 event_type=AuditEventType.PAYMENT_SUCCESS,
@@ -879,24 +842,6 @@ async def process_cash_payment(
     logger.info(
         f"Cash payment processed: {payment_db_record.id} for order {payment_request_data.order_id}"
     )
-
-    # Send WebSocket notification for cash payment completion
-    try:
-        payment_data = {
-            "id": str(payment_db_record.id),
-            "order_id": str(order.id),
-            "order_number": order.order_number if hasattr(order, 'order_number') else None,
-            "restaurant_id": str(restaurant_id),
-            "amount": float(payment_db_record.amount),
-            "payment_method": "cash",
-            "transaction_id": None,
-        }
-        background_tasks.add_task(emit_payment_completed, payment_data)
-        logger.info(f"WebSocket notification queued for cash payment {payment_data['id']}")
-    except Exception as e:
-        logger.error(f"Failed to queue WebSocket notification for cash payment: {str(e)}")
-        # Don't fail the payment if WebSocket notification fails
-
 
     # Send receipt email asynchronously if customer email is available
     if order.customer_email:
@@ -1177,24 +1122,6 @@ async def process_payment(
             db.refresh(payment_db_record)
             if result["status"] == "success":
                 db.refresh(order)
-
-            # Send WebSocket notification for payment completion
-            try:
-                payment_data = {
-                    "id": str(payment_db_record.id),
-                    "order_id": str(order.id),
-                    "order_number": order.order_number if hasattr(order, 'order_number') else None,
-                    "restaurant_id": str(restaurant_id),
-                    "amount": float(payment_db_record.amount),
-                    "payment_method": payment_db_record.payment_method,
-                    "transaction_id": payment_db_record.external_id,
-                }
-                background_tasks.add_task(emit_payment_completed, payment_data)
-                logger.info(f"WebSocket notification queued for payment {payment_data['id']}")
-            except Exception as e:
-                logger.error(f"Failed to queue WebSocket notification: {str(e)}")
-                # Don't fail the payment if WebSocket notification fails
-
 
             return APIResponseHelper.success(
                 message=f"Payment processed successfully with {result['provider']}",
