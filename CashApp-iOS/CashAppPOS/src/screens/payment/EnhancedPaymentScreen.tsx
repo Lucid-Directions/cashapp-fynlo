@@ -17,9 +17,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import DecimalInput from '../../components/inputs/DecimalInput';
 import SimpleDecimalInput from '../../components/inputs/SimpleDecimalInput';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
+import NativeSumUpPayment from '../../components/payment/NativeSumUpPayment';
 import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
 import { useAuth } from '../../contexts/AuthContext';
 import ApplePayService from '../../services/ApplePayService';
+import NativeSumUpService from '../../services/NativeSumUpService';
 import OrderService from '../../services/OrderService';
 import SharedDataStore from '../../services/SharedDataStore';
 import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
@@ -130,14 +132,24 @@ const EnhancedPaymentScreen: React.FC = () => {
     return subtotal * (platformServiceCharge.rate / 100);
   };
 
-  // Check SumUp availability on mount
+  // Check SumUp availability on mount - prefer native module
   useEffect(() => {
     const checkSumUpAvailability = async () => {
       try {
-        const compatibilityService = SumUpCompatibilityService.getInstance();
-        const shouldAttempt = await compatibilityService.shouldAttemptSumUp();
-        setSumUpAvailable(shouldAttempt);
-        logger.info('🔍 SumUp availability check:', { available: shouldAttempt });
+        // First check if native module is available
+        const nativeAvailable = NativeSumUpService.isAvailable();
+        logger.info('📱 Native SumUp module available:', nativeAvailable);
+        
+        if (nativeAvailable) {
+          // Use native module
+          setSumUpAvailable(true);
+        } else {
+          // Fallback to compatibility service check
+          const compatibilityService = SumUpCompatibilityService.getInstance();
+          const shouldAttempt = await compatibilityService.shouldAttemptSumUp();
+          setSumUpAvailable(shouldAttempt);
+          logger.info('🔍 SumUp compatibility check:', { available: shouldAttempt });
+        }
       } catch (error) {
         logger.error('Failed to check SumUp availability:', error);
         setSumUpAvailable(false);
@@ -1141,8 +1153,32 @@ const EnhancedPaymentScreen: React.FC = () => {
       {/* QR Payment Modal */}
       <QRPaymentModal />
 
-      {/* SumUp Payment Component */}
-      {showSumUpModal && (
+      {/* SumUp Payment Component - Use native if available */}
+      {showSumUpModal && NativeSumUpService.isAvailable() ? (
+        <NativeSumUpPayment
+          amount={calculateGrandTotal()}
+          currency="GBP"
+          title={`Order #${Date.now()}`}
+          visible={showSumUpModal}
+          onPaymentComplete={(success, transactionCode, error) => {
+            if (success) {
+              // Process successful payment
+              logger.info('✅ Native SumUp payment successful', { transactionCode });
+              handleProcessPayment();
+            } else {
+              // Handle error
+              logger.error('❌ Native SumUp payment failed:', error);
+              Alert.alert('Payment Failed', error || 'Unable to process payment');
+            }
+            setShowSumUpModal(false);
+          }}
+          onPaymentCancel={() => {
+            logger.info('Payment cancelled by user');
+            setShowSumUpModal(false);
+          }}
+          useTapToPay={true}
+        />
+      ) : showSumUpModal ? (
         <SumUpPaymentComponent
           amount={calculateGrandTotal()}
           currency="GBP"
@@ -1164,7 +1200,7 @@ const EnhancedPaymentScreen: React.FC = () => {
             setShowSumUpModal(false);
           }}
         />
-      )}
+      ) : null}
     </View>
   );
 };
