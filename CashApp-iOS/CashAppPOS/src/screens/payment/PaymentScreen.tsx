@@ -20,7 +20,7 @@ import PaymentService from '../../services/PaymentService';
 // TODO: Unused import - import SumUpPaymentProvider from '../../services/providers/SumUpPaymentProvider';
 
 import type { PaymentRequest, PaymentResult } from '../../services/PaymentService';
-import SumUpNativeService from '../../services/SumUpNativeService';
+import NativeSumUpService from '../../services/NativeSumUpService';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import { logger } from '../../utils/logger';
@@ -56,7 +56,7 @@ const PaymentScreen: React.FC = () => {
   const navigation = useNavigation();
   const { cart, clearCart } = useAppStore();
   const { paymentMethods, taxConfiguration } = useSettingsStore();
-  const sumUpService = SumUpNativeService.getInstance();
+  const nativeSumUpService = NativeSumUpService.getInstance();
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [showQRModal, setShowQRModal] = useState(false);
@@ -242,9 +242,12 @@ const PaymentScreen: React.FC = () => {
         processCashPayment();
         break;
       case 'tapToPay':
+        // Use native Tap to Pay when available
+        processSumUpPaymentMethod(methodId);
+        break;
       case 'applePaySumUp':
       case 'cardEntry':
-        // All SumUp payment methods
+        // Other SumUp payment methods use React Native package
         processSumUpPaymentMethod(methodId);
         break;
       // Backup providers (hidden from UI)
@@ -321,6 +324,7 @@ const PaymentScreen: React.FC = () => {
       };
 
       logger.info(`🏦 Processing SumUp ${methodId} payment for £${request.amount.toFixed(2)}`);
+      // Pass the payment method to respect user's selection
       await processSumUpPayment(request, methodId);
     } catch (error) {
       logger.error(`❌ ${methodId} payment error:`, error);
@@ -337,39 +341,65 @@ const PaymentScreen: React.FC = () => {
     paymentMethod: string = 'tapToPay'
   ) => {
     try {
-      logger.info('🏦 Starting SumUp payment flow...');
+      logger.info('🏦 Starting SumUp payment flow for method:', paymentMethod);
 
-      // Check if native module is available (preferred for Tap to Pay)
-      if (sumUpService.isAvailable()) {
-        logger.info('📱 Using native SumUp SDK for Tap to Pay on iPhone');
-        
-        // Set the current payment request and show the native SumUp component
-        setCurrentPaymentRequest(request);
-        setShowNativeSumUpPayment(true);
-        
-        logger.info('💳 Native Tap to Pay modal will handle the payment flow');
-      } else {
-        // Fallback to sumup-react-native-alpha package (less reliable for Tap to Pay)
-        logger.warn('⚠️ Native SumUp not available, falling back to React Native package');
-        logger.warn('⚠️ Note: This may show card reader prompt instead of Tap to Pay');
-        
-        // Initialize SumUp service (configuration will be fetched from backend)
-        const initSuccess = await sumUpService.initialize();
-        if (!initSuccess) {
-          throw new Error('Failed to initialize SumUp service');
+      // Only use native Tap to Pay for tapToPay method
+      // Respect user's payment method selection
+      const shouldUseNativeTapToPay = paymentMethod === 'tapToPay' && nativeSumUpService.isAvailable();
+
+      if (shouldUseNativeTapToPay) {
+        // Check if Tap to Pay is actually available and activated
+        try {
+          const tapToPayStatus = await nativeSumUpService.checkTapToPayAvailability();
+          
+          if (!tapToPayStatus.isAvailable) {
+            logger.warn('⚠️ Tap to Pay not available on this device/merchant, falling back');
+            throw new Error('Tap to Pay not available');
+          }
+
+          logger.info('📱 Using native SumUp SDK for Tap to Pay on iPhone');
+          
+          // Set the current payment request and show the native SumUp component
+          setCurrentPaymentRequest(request);
+          setShowNativeSumUpPayment(true);
+          
+          logger.info('💳 Native Tap to Pay modal will handle the payment flow');
+        } catch (tapToPayError) {
+          logger.warn('⚠️ Tap to Pay check failed, falling back to React Native package:', tapToPayError);
+          // Fall through to use React Native package
+          await useFallbackSumUpPayment(request);
         }
-
-        // Set the current payment request and show the SumUp component
-        setCurrentPaymentRequest(request);
-        setShowSumUpPayment(true);
-
-        logger.info('💳 SumUp payment component will handle the payment flow (fallback)');
+      } else {
+        // Use React Native package for other payment methods or when native not available
+        await useFallbackSumUpPayment(request);
       }
     } catch (error) {
       logger.error('❌ SumUp payment error:', error);
       Alert.alert('Payment Error', 'Failed to initialize SumUp payment');
       setProcessing(false);
     }
+  };
+
+  // Helper function for fallback to React Native SumUp package
+  const useFallbackSumUpPayment = async (request: PaymentRequest) => {
+    logger.info('📦 Using React Native SumUp package');
+    
+    // Note: This may show card reader prompt for Tap to Pay
+    if (request.metadata?.method === 'tapToPay') {
+      logger.warn('⚠️ Note: Fallback may show card reader prompt instead of Tap to Pay');
+    }
+    
+    // Initialize SumUp service (configuration will be fetched from backend)
+    const initSuccess = await nativeSumUpService.initialize();
+    if (!initSuccess) {
+      throw new Error('Failed to initialize SumUp service');
+    }
+
+    // Set the current payment request and show the SumUp component
+    setCurrentPaymentRequest(request);
+    setShowSumUpPayment(true);
+
+    logger.info('💳 SumUp payment component will handle the payment flow (fallback)');
   };
 
   // Handle SumUp payment completion from the React component
