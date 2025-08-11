@@ -204,7 +204,14 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
-    allow_methods=["*"],  # Could be restricted to specific methods if needed
+    allow_methods=[
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "OPTIONS",
+        "PATCH",
+    ],  # Restricted to specific methods for security
     allow_headers=["*"],  # Could be restricted to specific headers if needed
     allow_origin_regex=vercel_preview_regex,  # None if not enabled
 )

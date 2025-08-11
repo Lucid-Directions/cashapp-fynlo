@@ -151,7 +151,7 @@ class TestCORSSecurityConfiguration:
         
         assert settings.CORS_ALLOW_CREDENTIALS is False
         
-        # Test default (should be True)
+        # Test default (should be False for security)
         settings2 = Settings(
             ENVIRONMENT="development",
             DATABASE_URL="postgresql://test",
@@ -161,7 +161,7 @@ class TestCORSSecurityConfiguration:
             SUPABASE_ANON_KEY="test-key",
         )
         
-        assert settings2.CORS_ALLOW_CREDENTIALS is True
+        assert settings2.CORS_ALLOW_CREDENTIALS is False  # Changed to False for security
 
     def test_cors_empty_allowed_origins(self):
         """Test behavior with empty CORS_ALLOWED_ORIGINS"""
