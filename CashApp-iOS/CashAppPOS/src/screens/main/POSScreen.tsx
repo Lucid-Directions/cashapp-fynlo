@@ -165,6 +165,8 @@ const POSScreen: React.FC = () => {
   const [dynamicMenuItems, setDynamicMenuItems] = useState<MenuItem[]>([]);
   const [dynamicCategories, setDynamicCategories] = useState<string[]>([]);
   const [menuLoading, setMenuLoading] = useState(true);
+  const [menuError, setMenuError] = useState<string | null>(null);
+  const [isUsingDemoData, setIsUsingDemoData] = useState(false);
 
   // Debug showSumUpPayment state changes
   useEffect(() => {
@@ -227,6 +229,9 @@ const POSScreen: React.FC = () => {
     const loadMenuData = async () => {
       try {
         setMenuLoading(true);
+        setMenuError(null);
+        setIsUsingDemoData(false);
+        
         const dataService = DataService.getInstance();
 
         // Increase timeout to 15 seconds to allow for slower API responses and retries
@@ -242,19 +247,31 @@ const POSScreen: React.FC = () => {
 
         setDynamicMenuItems(menuItems);
 
+        // Check if we're using demo data (items have 'demo-' prefix in ID)
+        const usingDemo = menuItems.some(item => item.id?.toString().startsWith('demo-'));
+        setIsUsingDemoData(usingDemo);
+
         // Extract category names for the UI
         const categoryNames = [
           'All',
-          ...categories.map((cat) => cat.name).filter((name) => name !== 'All'),
+          ...categories.map((cat) => 
+            typeof cat === 'string' ? cat : cat.name
+          ).filter((name) => name !== 'All'),
         ];
         setDynamicCategories(categoryNames);
 
         logger.info('✅ Dynamic menu loaded:', {
           itemCount: menuItems.length,
           categories: categoryNames,
+          usingDemoData: usingDemo,
         });
+        
+        if (usingDemo) {
+          setMenuError('Using demo menu (API unavailable)');
+        }
       } catch (error) {
         logger.error('❌ Failed to load dynamic menu:', error);
+        setMenuError('Failed to load menu. Please check your connection.');
 
         // Log detailed error information
         logger.info(`
@@ -982,6 +999,16 @@ const POSScreen: React.FC = () => {
           ))}
         </ScrollView>
 
+        {/* Demo Data Indicator */}
+        {isUsingDemoData && !menuLoading && (
+          <View style={styles.demoIndicator}>
+            <Icon name="info-outline" size={16} color={theme.colors.warning} />
+            <Text style={styles.demoText}>
+              Demo Mode - Backend API unavailable
+            </Text>
+          </View>
+        )}
+
         {/* Menu Grid */}
         {menuLoading ? (
           <View style={styles.loadingContainer}>
@@ -999,16 +1026,16 @@ const POSScreen: React.FC = () => {
         ) : dynamicMenuItems.length === 0 ? (
           <View style={styles.loadingContainer}>
             <Icon
-              name="restaurant-menu"
+              name="error-outline"
               size={48}
-              color={theme.colors.mediumGray}
+              color={theme.colors.danger}
               style={dynamicStyles.categorySearchWrapper}
             />
             <Text style={[styles.loadingText, dynamicStyles.loadingTextColored]}>
-              No menu items available
+              {menuError || 'No menu items available'}
             </Text>
             <Text style={[styles.loadingText, styles.loadingSubtext]}>
-              Please contact support to set up your menu
+              {menuError ? 'Tap retry to try again' : 'Please contact support to set up your menu'}
             </Text>
             <TouchableOpacity
               style={[styles.retryButton, dynamicStyles.retryButtonPrimary]}
@@ -2119,6 +2146,24 @@ const createStyles = (theme: any) =>
       fontSize: 16,
       color: theme.colors.lightGray,
       textAlign: 'center',
+    },
+    demoIndicator: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255, 152, 0, 0.1)',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      marginHorizontal: 16,
+      marginBottom: 8,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 152, 0, 0.3)',
+    },
+    demoText: {
+      fontSize: 13,
+      color: theme.colors.warning || '#FF9800',
+      marginLeft: 8,
+      fontWeight: '500',
     },
     retryButton: {
       marginTop: 20,

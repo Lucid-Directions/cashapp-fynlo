@@ -13,6 +13,7 @@ import APITestingService from './APITestingService';
 import authInterceptor from './auth/AuthInterceptor';
 import BackendCompatibilityService from './BackendCompatibilityService';
 import DatabaseService from './DatabaseService';
+import FallbackMenuService from './FallbackMenuService';
 import {
   offlineQueueService,
   EntityType,
@@ -315,7 +316,13 @@ class DataService {
               offlineResponse: [],
             }
           )
-          .catch(async () => {
+          .catch(async (error) => {
+            logger.error('Offline queue service failed:', error);
+            // Check if we should use demo data
+            const fallbackService = FallbackMenuService.getInstance();
+            if (fallbackService.shouldUseDemoData(error)) {
+              return fallbackService.getDemoMenuItems();
+            }
             // Fallback to direct database call if offline service fails
             return this.db.getMenuItems();
           });
@@ -350,6 +357,13 @@ class DataService {
       return menuItems || [];
     } catch (error) {
       logger.error('Failed to fetch menu items:', error);
+      
+      // Use fallback service for any error
+      const fallbackService = FallbackMenuService.getInstance();
+      if (fallbackService.shouldUseDemoData(error)) {
+        return fallbackService.getDemoMenuItems();
+      }
+      
       // When error occurs, still try to get fallback data
       if (!this.featureFlags.USE_REAL_API || !this.isBackendAvailable) {
         logger.info('Attempting to load fallback menu data');
@@ -358,6 +372,8 @@ class DataService {
           return fallbackItems || [];
         } catch (fallbackError) {
           logger.error('Failed to load fallback menu data:', fallbackError);
+          // Last resort - return demo data
+          return fallbackService.getDemoMenuItems();
         }
       }
       return [];
@@ -400,6 +416,13 @@ class DataService {
       return categories || [];
     } catch (error) {
       logger.error('Failed to fetch menu categories:', error);
+      
+      // Use fallback service for any error
+      const fallbackService = FallbackMenuService.getInstance();
+      if (fallbackService.shouldUseDemoData(error)) {
+        return fallbackService.getDemoCategories();
+      }
+      
       // When error occurs, still try to get fallback data
       if (!this.featureFlags.USE_REAL_API || !this.isBackendAvailable) {
         logger.info('Attempting to load fallback category data');
@@ -408,6 +431,8 @@ class DataService {
           return fallbackCategories || [];
         } catch (fallbackError) {
           logger.error('Failed to load fallback category data:', fallbackError);
+          // Last resort - return demo categories
+          return fallbackService.getDemoCategories();
         }
       }
       return [];
