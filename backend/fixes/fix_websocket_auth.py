@@ -47,11 +47,21 @@ class FixedWebSocketManager:
         if not token:
             protocols = websocket.headers.get("sec-websocket-protocol", "")
             if protocols:
-                # Format: "token, base64_encoded_token"
-                parts = protocols.split(", ")
+                # Format: "token,base64_encoded_token" or "token, base64_encoded_token"
+                # Split on comma and strip whitespace
+                parts = [p.strip() for p in protocols.split(",")]
                 if len(parts) == 2 and parts[0] == "token":
                     try:
-                        token = base64.b64decode(parts[1]).decode('utf-8')
+                        # Handle URL-safe base64 (replace -_ with +/ and add padding)
+                        encoded_token = parts[1]
+                        # Convert URL-safe base64 back to standard base64
+                        encoded_token = encoded_token.replace('-', '+').replace('_', '/')
+                        # Add padding if needed
+                        padding = 4 - (len(encoded_token) % 4)
+                        if padding != 4:
+                            encoded_token += '=' * padding
+                        
+                        token = base64.b64decode(encoded_token).decode('utf-8')
                         logger.info("Token found in Sec-WebSocket-Protocol header")
                     except Exception as e:
                         logger.error(f"Failed to decode token from protocol: {e}")

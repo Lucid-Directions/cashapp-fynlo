@@ -77,18 +77,21 @@ export class WebSocketAuthWorkaround extends EnhancedWebSocketService {
       
       this.setupEventHandlers();
       
-      // Set connection timeout
-      const connectionTimeout = setTimeout(() => {
-        if (this.state !== 'CONNECTED') {
-          logger.warn('⏱️ Connection timeout, trying fallback');
-          this.handleConnectionFailure();
-        }
-      }, 10000);
-      
-      // Wait for connection
+      // Wait for connection with proper timeout handling
       await new Promise<void>((resolve, reject) => {
-        const handleOpen = () => {
+        let connectionTimeout: NodeJS.Timeout;
+        
+        const cleanup = () => {
           clearTimeout(connectionTimeout);
+          if (this.ws) {
+            this.ws.removeEventListener('open', handleOpen);
+            this.ws.removeEventListener('error', handleError);
+            this.ws.removeEventListener('close', handleClose);
+          }
+        };
+        
+        const handleOpen = () => {
+          cleanup();
           logger.info('✅ WebSocket connected (protocol header method)');
           this.state = 'AUTHENTICATING';
           
@@ -98,14 +101,31 @@ export class WebSocketAuthWorkaround extends EnhancedWebSocketService {
         };
         
         const handleError = (error: Event) => {
-          clearTimeout(connectionTimeout);
+          cleanup();
           logger.error('❌ WebSocket error:', error);
           reject(error);
         };
         
+        const handleClose = (event: CloseEvent) => {
+          cleanup();
+          logger.error('❌ WebSocket closed unexpectedly:', event.code, event.reason);
+          reject(new Error(`WebSocket closed: ${event.code} ${event.reason}`));
+        };
+        
+        // Set connection timeout
+        connectionTimeout = setTimeout(() => {
+          cleanup();
+          logger.warn('⏱️ Connection timeout, trying fallback');
+          reject(new Error('WebSocket connection timeout'));
+        }, 10000);
+        
         if (this.ws) {
           this.ws.addEventListener('open', handleOpen, { once: true });
           this.ws.addEventListener('error', handleError, { once: true });
+          this.ws.addEventListener('close', handleClose, { once: true });
+        } else {
+          cleanup();
+          reject(new Error('WebSocket not initialized'));
         }
       });
       
@@ -116,16 +136,21 @@ export class WebSocketAuthWorkaround extends EnhancedWebSocketService {
   }
 
   /**
-   * Encode string to base64 (React Native compatible)
+   * Encode string to URL-safe base64 (React Native compatible)
+   * Uses URL-safe characters to comply with RFC 6455 WebSocket subprotocol requirements
    */
   private encodeBase64(str: string): string {
     // Use Buffer if available (Node.js environment)
     if (typeof Buffer !== 'undefined') {
-      return Buffer.from(str).toString('base64');
+      // Use URL-safe base64 encoding (replaces +/ with -_)
+      return Buffer.from(str).toString('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');  // Remove padding
     }
     
-    // Fallback to manual base64 encoding for React Native
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    // Fallback to manual URL-safe base64 encoding for React Native
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
     let result = '';
     let i = 0;
     
@@ -138,8 +163,9 @@ export class WebSocketAuthWorkaround extends EnhancedWebSocketService {
       
       result += chars.charAt((bitmap >> 18) & 63);
       result += chars.charAt((bitmap >> 12) & 63);
-      result += i - 2 < str.length ? chars.charAt((bitmap >> 6) & 63) : '=';
-      result += i - 1 < str.length ? chars.charAt(bitmap & 63) : '=';
+      // No padding for URL-safe base64
+      if (i - 2 < str.length) result += chars.charAt((bitmap >> 6) & 63);
+      if (i - 1 < str.length) result += chars.charAt(bitmap & 63);
     }
     
     return result;

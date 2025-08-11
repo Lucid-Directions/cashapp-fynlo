@@ -84,14 +84,23 @@ def get_restaurant_context(
             detail="Restaurant context required. Please provide X-Restaurant-Id header"
         )
     
-    # Validate user has access to this restaurant
-    if not validate_restaurant_access(current_user, int(restaurant_id), db):
+    # Validate restaurant_id is a valid integer
+    try:
+        restaurant_id_int = int(restaurant_id)
+    except (ValueError, TypeError):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"You don't have access to restaurant {restaurant_id}"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid restaurant ID format: {restaurant_id}. Must be a valid integer."
         )
     
-    return int(restaurant_id)
+    # Validate user has access to this restaurant
+    if not validate_restaurant_access(current_user, restaurant_id_int, db):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"You don't have access to restaurant {restaurant_id_int}"
+        )
+    
+    return restaurant_id_int
 
 
 def validate_restaurant_access(
@@ -235,7 +244,7 @@ async def create_employee(
                 email=employee_data.email,
                 full_name=employee_data.full_name,
                 hashed_password=get_password_hash(employee_data.password),
-                role=employee_data.role,
+                role="employee",  # Always set to employee for new users created via this endpoint
                 is_active=True
             )
             db.add(user)
@@ -324,8 +333,8 @@ async def update_employee(
         if user:
             if employee_data.full_name is not None:
                 user.full_name = employee_data.full_name
-            if employee_data.role is not None:
-                user.role = employee_data.role
+            # Do NOT update global user.role from employee management
+            # Restaurant-specific roles are managed in Employee table only
         
         db.commit()
         
