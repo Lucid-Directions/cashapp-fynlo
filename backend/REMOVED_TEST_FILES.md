@@ -68,4 +68,3 @@ For local development, the application automatically adds localhost origins when
 
 ## Contact
 For questions about this change or assistance with development setup, please contact the security team or refer to the main README.md for proper development environment setup.
-EOF < /dev/null
