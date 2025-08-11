@@ -29,14 +29,13 @@ from app.core.transaction_manager import transactional
 from app.core.tenant_security import TenantSecurity
 from app.services.payment_factory import payment_factory
 from app.services.audit_logger import AuditLoggerService
-from app.services.email_service import EmailService
+from app.services.receipt_helper import send_receipt_with_logging, serialize_order_for_background
 from app.models.audit_log import AuditEventType, AuditEventStatus
 from app.middleware.rate_limit_middleware import limiter, PAYMENT_RATE
 from app.integration.websocket_events import emit_payment_completed
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
-email_service = EmailService()
 
 # Configure Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -473,9 +472,11 @@ async def confirm_qr_payment(
         # Send receipt email asynchronously if customer email is available
         if order.customer_email:
             try:
+                # Serialize order data for background task
+                order_data = serialize_order_for_background(order)
                 background_tasks.add_task(
-                    email_service.send_receipt,
-                    order=order,
+                    send_receipt_with_logging,
+                    order_dict=order_data,
                     type_="sale",
                     amount=float(payment_record.amount)
                 )
@@ -689,9 +690,11 @@ async def process_stripe_payment(
             # Send receipt email asynchronously if customer email is available
             if order.customer_email:
                 try:
+                    # Serialize order data for background task
+                    order_data = serialize_order_for_background(order)
                     background_tasks.add_task(
-                        email_service.send_receipt,
-                        order=order,
+                        send_receipt_with_logging,
+                        order_dict=order_data,
                         type_="sale",
                         amount=float(payment_db_record.amount)
                     )
@@ -901,9 +904,11 @@ async def process_cash_payment(
     # Send receipt email asynchronously if customer email is available
     if order.customer_email:
         try:
+            # Serialize order data for background task
+            order_data = serialize_order_for_background(order)
             background_tasks.add_task(
-                email_service.send_receipt,
-                order=order,
+                send_receipt_with_logging,
+                order_dict=order_data,
                 type_="sale",
                 amount=float(payment_db_record.amount)
             )

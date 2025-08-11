@@ -45,7 +45,8 @@ from app.services.payment_factory import get_payment_provider  # Assuming you ha
 # from app.services.sumup_provider import SumUpProvider
 from app.models.refund import Refund, RefundLedger  # SQLAlchemy models
 from app.core.database import User as UserModel
-from app.services.email_service import EmailService  # Import the new EmailService
+from app.services.email_service import EmailService
+from app.services.receipt_helper import send_receipt_with_logging, serialize_order_for_background  # Import the new EmailService
 from decimal import Decimal  # Ensure Decimal is imported if used for amounts
 
 router = APIRouter()
@@ -1339,14 +1340,15 @@ async def send_email_receipt(
             message="No completed payment found for this order"
         )
     
-    # Send receipt asynchronously
+    # Send receipt asynchronously with proper session handling
     try:
+        # Serialize order data for background task
+        order_data = serialize_order_for_background(order)
         background_tasks.add_task(
-            email_service.send_receipt,
-            order=order,
+            send_receipt_with_logging,
+            order_dict=order_data,
             type_="sale",
-            amount=float(payment.amount),
-            db=db  # Pass db session for logging
+            amount=float(payment.amount)
         )
         
         logger.info(f"Receipt email queued for order {order.id} to {order.customer_email}")
