@@ -5,7 +5,7 @@
 	<!-- Tap to Pay on iPhone entitlement -->
 	<key>com.apple.developer.proximity-reader.payment.acceptance</key>
 	<array>
-		<string>SUMUP</string>
+		<string>com.fynlo.cashappposlucid</string>
 	</array>
 	
 	<!-- Apple Pay / In-App Payments entitlement -->
