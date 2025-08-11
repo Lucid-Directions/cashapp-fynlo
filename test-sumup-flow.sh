@@ -62,7 +62,13 @@ echo ""
 
 echo "5. Check backend logs for errors..."
 echo "-------------------------------------------"
-doctl apps logs 04073e70-e799-4d27-873a-dadea0503858 --tail 20 | grep -E "(sumup|SumUp|SUMUP|affiliate|tap.to.pay)" 2>&1 || echo "No recent SumUp logs found"
+# Note: Replace APP_ID with your DigitalOcean app ID or set DO_APP_ID environment variable
+APP_ID="${DO_APP_ID:-YOUR_APP_ID_HERE}"
+if [ "$APP_ID" != "YOUR_APP_ID_HERE" ] && command -v doctl &> /dev/null; then
+    doctl apps logs "$APP_ID" --tail 20 | grep -E "(sumup|SumUp|SUMUP|affiliate|tap.to.pay)" 2>&1 || echo "No recent SumUp logs found"
+else
+    echo "Skipping log check - set DO_APP_ID environment variable or update APP_ID in script"
+fi
 
 echo ""
 echo "Test complete. Please verify the mobile app shows the proper SumUp modal."
