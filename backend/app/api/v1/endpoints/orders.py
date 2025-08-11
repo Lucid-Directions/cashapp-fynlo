@@ -3,7 +3,7 @@ Orders Management API endpoints for Fynlo POS
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, status, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, desc
 from pydantic import BaseModel, EmailStr
@@ -992,9 +992,9 @@ async def refund_order(
         "Manager",
         "Admin",
     ]:  # TODO: Confirm role names
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to perform refunds.",
+        raise FynloException(
+            message="Not authorized to perform refunds",
+            status_code=status.HTTP_403_FORBIDDEN
         )
 
     order = db.query(Order).filter(Order.id == order_id).first()
