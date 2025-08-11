@@ -104,18 +104,14 @@ async def get_or_create_cleanup_task() -> Optional[asyncio.Task[None]]:
     return cleanup_task
 
 
-# CORS configuration
-ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:8081",
-    "https://fynlo.com",
-    "https://www.fynlo.com",
-    "https://api.fynlo.com",
-    "https://fynlo.co.uk",
-    "https://www.fynlo.co.uk",
-    "https://api.fynlo.co.uk",
-    "fynlo://",  # Mobile app scheme
-]
+# CORS configuration - Use centralized settings
+from app.core.config import settings
+
+# Get allowed origins from centralized configuration
+ALLOWED_ORIGINS = settings.get_cors_origins()
+# Add mobile app scheme if not already included
+if "fynlo://" not in ALLOWED_ORIGINS:
+    ALLOWED_ORIGINS = ALLOWED_ORIGINS + ["fynlo://"]
 
 
 def validate_uuid(value: str) -> bool:

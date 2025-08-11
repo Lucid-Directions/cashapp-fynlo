@@ -1,16 +1,24 @@
 """
+⚠️ WARNING: TEST/DEVELOPMENT FILE ONLY - NEVER USE IN PRODUCTION ⚠️
 Test script for Supabase authentication integration
 Run this after setting up your .env file with Supabase credentials
+This file contains hardcoded test passwords and is for development only.
 """
 
 import asyncio
 import httpx
 import os
+import sys
 from dotenv import load_dotenv
 import logging
 
 logger = logging.getLogger(__name__)
 
+# Security check - prevent production execution
+if os.getenv('ENVIRONMENT') == 'production':
+    print("SECURITY ERROR: test_supabase_auth.py cannot run in production!")
+    print("This file contains hardcoded test passwords and is for development only.")
+    sys.exit(1)
 
 # Load environment variables
 load_dotenv()

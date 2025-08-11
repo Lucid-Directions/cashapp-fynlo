@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
+⚠️ WARNING: TEST/DEVELOPMENT FILE ONLY - NEVER USE IN PRODUCTION ⚠️
 Database Setup Script for Fynlo POS
 Automatically sets up PostgreSQL database with proper schema and sample data
+This file contains hardcoded test passwords and is for development only.
 """
 
 import asyncio
@@ -17,6 +19,13 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 from app.core.config import settings
+
+# Security check - prevent production execution
+if settings.ENVIRONMENT == 'production':
+    print("SECURITY ERROR: setup_database.py cannot run in production!")
+    print("This file contains hardcoded test passwords and is for development only.")
+    print("Use proper database migrations and secure user creation in production.")
+    sys.exit(1)
 from app.core.database import init_db, engine, SessionLocal
 from sqlalchemy import text, create_engine
 from sqlalchemy.exc import OperationalError, ProgrammingError

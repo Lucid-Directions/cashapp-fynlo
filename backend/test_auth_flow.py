@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
+⚠️ WARNING: TEST/DEVELOPMENT FILE ONLY - NEVER USE IN PRODUCTION ⚠️
 Test Authentication Flow for Fynlo POS
 This script tests the complete authentication flow to identify issues
+This file contains hardcoded test passwords and is for development only.
 """
 
 import asyncio
@@ -11,6 +13,12 @@ import sys
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+
+# Security check - prevent production execution
+if os.getenv('ENVIRONMENT') == 'production':
+    print("SECURITY ERROR: test_auth_flow.py cannot run in production!")
+    print("This file contains hardcoded test passwords and is for development only.")
+    sys.exit(1)
 
 # Load environment variables
 load_dotenv()
