@@ -108,7 +108,7 @@ async def get_or_create_cleanup_task() -> Optional[asyncio.Task[None]]:
 from app.core.config import settings
 
 # Get allowed origins from centralized configuration
-ALLOWED_ORIGINS = settings.get_cors_origins()
+ALLOWED_ORIGINS = settings.get_cors_origins
 # Add mobile app scheme if not already included
 if "fynlo://" not in ALLOWED_ORIGINS:
     ALLOWED_ORIGINS = ALLOWED_ORIGINS + ["fynlo://"]
