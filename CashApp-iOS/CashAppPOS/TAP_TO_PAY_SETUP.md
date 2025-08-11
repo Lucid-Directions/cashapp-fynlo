@@ -31,6 +31,17 @@ Xcode's automatic signing fails with Tap to Pay entitlements because they requir
 ### Step 4: Build and Run
 The app should now build successfully with Tap to Pay entitlements.
 
+## Correct Entitlement Format
+
+**IMPORTANT**: According to [Apple's official documentation](https://developer.apple.com/documentation/proximityreader/setting-up-the-entitlement-for-tap-to-pay-on-iphone), the Tap to Pay entitlement MUST be a **Boolean value**, not an array:
+
+```xml
+<key>com.apple.developer.proximity-reader.payment.acceptance</key>
+<true/>
+```
+
+This is different from the Apple Pay entitlement which uses an array with merchant IDs.
+
 ## Alternative: Temporary Development Without Tap to Pay
 
 If you need to build quickly without setting up manual provisioning:
@@ -39,9 +50,7 @@ If you need to build quickly without setting up manual provisioning:
 ```xml
 <!-- Temporarily disabled for automatic signing
 <key>com.apple.developer.proximity-reader.payment.acceptance</key>
-<array>
-    <string>SUMUP</string>
-</array>
+<true/>
 -->
 ```
 
@@ -50,10 +59,11 @@ If you need to build quickly without setting up manual provisioning:
 
 ## Important Notes
 
-- **SUMUP** is the correct payment provider identifier for the SumUp SDK
+- The Tap to Pay entitlement is a **Boolean** `<true/>`, NOT an array (confirmed by Apple docs)
 - The bundle ID must be exactly `com.fynlo.cashappposlucid`
 - Apple Pay uses `merchant.com.fynlo.cashappposlucid` (with merchant prefix)
-- Tap to Pay uses `SUMUP` (payment provider identifier)
+- Tap to Pay entitlement: `com.apple.developer.proximity-reader.payment.acceptance`
+- In-App Payments entitlement: `com.apple.developer.in-app-payments` (this one IS an array)
 
 ## Troubleshooting
 
