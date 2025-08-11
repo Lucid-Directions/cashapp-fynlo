@@ -40,7 +40,8 @@ logs/
 # Security: Exclude test files with insecure configs or hardcoded passwords
 setup_database.py
 test_*.py
-*test*.py
+*_test.py
+tests/
 # Already removed but listed for documentation:
 # minimal_app.py
 # minimal_server.py
