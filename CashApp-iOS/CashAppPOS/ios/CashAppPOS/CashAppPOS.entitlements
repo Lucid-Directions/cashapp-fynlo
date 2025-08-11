@@ -3,10 +3,13 @@
 <plist version="1.0">
 <dict>
 	<!-- Tap to Pay on iPhone entitlement -->
+	<!-- IMPORTANT: This MUST be a Boolean value (<true/>), NOT an array -->
+	<!-- Confirmed by Apple documentation: https://developer.apple.com/documentation/proximityreader/setting-up-the-entitlement-for-tap-to-pay-on-iphone -->
 	<key>com.apple.developer.proximity-reader.payment.acceptance</key>
 	<true/>
 	
 	<!-- Apple Pay / In-App Payments entitlement -->
+	<!-- This entitlement uses an array with merchant identifiers -->
 	<key>com.apple.developer.in-app-payments</key>
 	<array>
 		<string>merchant.com.fynlo.cashappposlucid</string>
