@@ -154,7 +154,7 @@ export function usePaymentMethods(): UsePaymentMethodsReturn {
 
     try {
       logger.info(`💳 Processing ${selectedMethod} payment for ${currency} ${amount}`);
-      setIsProcessing(true);
+      // Don't manually set isProcessing - orchestrator handles it via onStateChange
       
       const result = await PaymentOrchestrator.startPayment(
         selectedMethod,
@@ -207,8 +207,6 @@ export function usePaymentMethods(): UsePaymentMethodsReturn {
           recoverable: true,
         },
       };
-    } finally {
-      setIsProcessing(false);
     }
   }, [selectedMethod, isProcessing]);
 
@@ -217,9 +215,8 @@ export function usePaymentMethods(): UsePaymentMethodsReturn {
    */
   const cancelPayment = useCallback(async () => {
     logger.info('🚫 Cancelling payment');
+    // Don't manually update state - orchestrator handles it via onStateChange
     await PaymentOrchestrator.cancelPayment();
-    setIsProcessing(false);
-    setPaymentState('cancelled');
   }, []);
 
   /**
