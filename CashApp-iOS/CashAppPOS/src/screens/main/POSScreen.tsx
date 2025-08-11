@@ -248,15 +248,26 @@ const POSScreen: React.FC = () => {
         setDynamicMenuItems(menuItems);
 
         // Check if we're using demo data (items have 'demo-' prefix in ID)
-        const usingDemo = menuItems.some(item => item.id?.toString().startsWith('demo-'));
+        // Safely handle null/undefined IDs
+        const usingDemo = menuItems.some(item => {
+          if (!item?.id) return false;
+          const idStr = item.id.toString();
+          return idStr.startsWith('demo-');
+        });
         setIsUsingDemoData(usingDemo);
 
         // Extract category names for the UI
+        // Filter out undefined/null values and duplicates
         const categoryNames = [
           'All',
-          ...categories.map((cat) => 
-            typeof cat === 'string' ? cat : cat.name
-          ).filter((name) => name !== 'All'),
+          ...categories
+            .map((cat) => typeof cat === 'string' ? cat : cat?.name)
+            .filter((name): name is string => 
+              name !== undefined && 
+              name !== null && 
+              name !== 'All' && 
+              name.trim() !== ''
+            ),
         ];
         setDynamicCategories(categoryNames);
 
@@ -1025,7 +1036,14 @@ const POSScreen: React.FC = () => {
                   setDynamicMenuItems(menuItems || []);
                   const categoryNames = [
                     'All',
-                    ...(categories || []).map((cat) => cat.name).filter((name) => name !== 'All'),
+                    ...(categories || [])
+                      .map((cat) => typeof cat === 'string' ? cat : cat?.name)
+                      .filter((name): name is string => 
+                        name !== undefined && 
+                        name !== null && 
+                        name !== 'All' && 
+                        name.trim() !== ''
+                      ),
                   ];
                   setDynamicCategories(categoryNames);
                 } catch (error) {
