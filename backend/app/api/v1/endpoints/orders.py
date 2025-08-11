@@ -11,8 +11,6 @@ from datetime import datetime, timedelta
 import uuid
 import logging
 
-logger = logging.getLogger(__name__)
-
 from app.core.database import get_db, Order, Product, Customer, User, Payment
 from app.core.auth import get_current_user
 from app.api.v1.endpoints.customers import (
@@ -49,6 +47,7 @@ from app.services.email_service import EmailService
 from app.services.receipt_helper import send_receipt_with_logging, serialize_order_for_background  # Import the new EmailService
 from decimal import Decimal  # Ensure Decimal is imported if used for amounts
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 email_service = EmailService()  # Instantiate EmailService globally or per request
 

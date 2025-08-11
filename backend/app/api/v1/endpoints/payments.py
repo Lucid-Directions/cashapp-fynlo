@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Optional
 from decimal import Decimal
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Request, BackgroundTasks
+from fastapi import APIRouter, Depends, status, Query, Request, BackgroundTasks
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import qrcode
@@ -184,7 +184,7 @@ async def generate_qr_payment(
         #     commit=True
         # )
         raise ResourceNotFoundException(
-            resource="Order", resource_id=payment_request_data.order_id
+            resource="Order", resource_id=payment_request.order_id
         )
     # Calculate fees
     fee_amount = calculate_payment_fee(payment_request.amount, "qr_code")
@@ -571,7 +571,7 @@ async def process_stripe_payment(
             commit=True,
         )
         raise ResourceNotFoundException(
-            resource="Order", resource_id=payment_request_data.order_id
+            resource="Order", resource_id=payment_request.order_id
         )
     if order.payment_status == "completed":
         await audit_service.create_audit_log(
@@ -816,7 +816,7 @@ async def process_cash_payment(
     if not order:
         # No audit log here as it's a basic validation, not a payment process failure yet.
         raise ResourceNotFoundException(
-            resource="Order", resource_id=payment_request_data.order_id
+            resource="Order", resource_id=payment_request.order_id
         )
     if order.payment_status == "completed":
         await audit_service.create_audit_log(
@@ -998,6 +998,7 @@ async def check_qr_payment_status(qr_payment_id: str, db: Session = Depends(get_
 async def process_payment(
     payment_data_req: PaymentRequest,  # Renamed from payment_data to avoid confusion
     request: Request,
+    background_tasks: BackgroundTasks,
     provider_query: Optional[str] = Query(
         None, alias="provider", description="Force specific provider"
     ),  # Renamed provider
@@ -1200,6 +1201,21 @@ async def process_payment(
                 logger.error(f"Failed to queue WebSocket notification: {str(e)}")
                 # Don't fail the payment if WebSocket notification fails
 
+            # Send receipt email asynchronously if payment was successful and customer has email
+            if result["status"] == "success" and order.customer_email:
+                try:
+                    # Serialize order data for background task
+                    order_data = serialize_order_for_background(order)
+                    background_tasks.add_task(
+                        send_receipt_with_logging,
+                        order_dict=order_data,
+                        type_="sale",
+                        amount=float(payment_db_record.amount)
+                    )
+                    logger.info(f"Receipt email queued for order {order.id} to {order.customer_email}")
+                except Exception as e:
+                    logger.error(f"Failed to queue receipt email for order {order.id}: {str(e)}")
+                    # Don't fail the payment if email fails
 
             return APIResponseHelper.success(
                 message=f"Payment processed successfully with {result['provider']}",
