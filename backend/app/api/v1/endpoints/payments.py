@@ -184,7 +184,7 @@ async def generate_qr_payment(
         #     commit=True
         # )
         raise ResourceNotFoundException(
-            resource="Order", resource_id=payment_request.order_id
+            resource="Order", resource_id=payment_request_data.order_id
         )
     # Calculate fees
     fee_amount = calculate_payment_fee(payment_request.amount, "qr_code")
@@ -571,7 +571,7 @@ async def process_stripe_payment(
             commit=True,
         )
         raise ResourceNotFoundException(
-            resource="Order", resource_id=payment_request.order_id
+            resource="Order", resource_id=payment_request_data.order_id
         )
     if order.payment_status == "completed":
         await audit_service.create_audit_log(
@@ -816,7 +816,7 @@ async def process_cash_payment(
     if not order:
         # No audit log here as it's a basic validation, not a payment process failure yet.
         raise ResourceNotFoundException(
-            resource="Order", resource_id=payment_request.order_id
+            resource="Order", resource_id=payment_request_data.order_id
         )
     if order.payment_status == "completed":
         await audit_service.create_audit_log(

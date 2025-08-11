@@ -24,6 +24,7 @@ from app.core.exceptions import (
     FynloException,
 )
 from app.core.onboarding_helper import OnboardingHelper
+from app.core.tenant_security import TenantSecurity
 from app.core.websocket import (
     websocket_manager,
     notify_order_created,
@@ -1293,7 +1294,12 @@ async def send_email_receipt(
     """
     # Validate restaurant access for multi-tenant
     await TenantSecurity.validate_restaurant_access(
-        current_user, current_restaurant_id or current_user.restaurant_id, db=db
+        user=current_user,
+        restaurant_id=current_restaurant_id or current_user.restaurant_id,
+        operation="send_receipt",
+        resource_type="order",
+        resource_id=order_id,
+        db=db
     )
     restaurant_id = current_restaurant_id or current_user.restaurant_id
     

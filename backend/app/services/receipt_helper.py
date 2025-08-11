@@ -4,7 +4,7 @@ Helper functions for receipt sending with proper database session handling
 
 import logging
 from typing import Any
-from app.core.database import get_db, ReceiptLog
+from app.core.database import SessionLocal, ReceiptLog
 from app.services.email_service import EmailService
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -25,7 +25,8 @@ def send_receipt_with_logging(order_dict: dict, type_: str, amount: float) -> No
     email_service = EmailService()
     
     # Create a new database session for this background task
-    db: Session = next(get_db())
+    # Using SessionLocal directly to ensure proper cleanup
+    db: Session = SessionLocal()
     
     try:
         # Create a mock order object with required attributes for email template
