@@ -61,8 +61,8 @@ export function usePaymentMethods(): UsePaymentMethodsReturn {
   const stateUnsubscribe = useRef<(() => void) | null>(null);
   const methodsUnsubscribe = useRef<(() => void) | null>(null);
 
+  // Subscribe to payment state changes (doesn't depend on any state)
   useEffect(() => {
-    // Subscribe to payment state changes
     stateUnsubscribe.current = PaymentOrchestrator.onStateChange((state) => {
       logger.info('💳 Payment state changed:', state);
       setPaymentState(state);
@@ -73,7 +73,15 @@ export function usePaymentMethods(): UsePaymentMethodsReturn {
       );
     });
 
-    // Subscribe to method availability changes
+    return () => {
+      if (stateUnsubscribe.current) {
+        stateUnsubscribe.current();
+      }
+    };
+  }, []);
+
+  // Subscribe to method availability changes (depends on selectedMethod)
+  useEffect(() => {
     methodsUnsubscribe.current = PaymentOrchestrator.onMethodsChange((methods) => {
       logger.info('📱 Available payment methods updated:', methods.map(m => m.id));
       setAvailableMethods(methods);
@@ -87,18 +95,16 @@ export function usePaymentMethods(): UsePaymentMethodsReturn {
       }
     });
 
-    // Initial refresh
-    PaymentOrchestrator.refreshAvailability();
-
-    // Cleanup
     return () => {
-      if (stateUnsubscribe.current) {
-        stateUnsubscribe.current();
-      }
       if (methodsUnsubscribe.current) {
         methodsUnsubscribe.current();
       }
     };
+  }, [selectedMethod]);
+
+  // Initial refresh on mount
+  useEffect(() => {
+    PaymentOrchestrator.refreshAvailability();
   }, []);
 
   /**

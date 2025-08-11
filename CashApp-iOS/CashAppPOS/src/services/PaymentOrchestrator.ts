@@ -130,18 +130,22 @@ class PaymentOrchestrator {
       const compatible = await compatibilityService.shouldAttemptSumUp();
       
       if (compatible) {
-        logger.info('✅ SumUp compatibility check passed');
+        logger.info('✅ SumUp compatibility check passed (fallback UI needed)');
+        // Mark as available but note that it requires special handling
         this.availableMethods.set('sumup', {
           id: 'sumup',
           name: 'Card Payment',
           icon: 'credit-card',
           color: '#00B3E6',
           enabled: true,
-          available: true,
+          available: false, // Set to false since orchestrator can't handle it directly
           requiresAuth: true,
           requiresHardware: true,
           processingFee: 1.69,
         });
+        
+        // Store compatibility flag for UI to check
+        (this.availableMethods.get('sumup') as any).requiresFallbackUI = true;
       } else {
         logger.warn('⚠️ SumUp not available on this device');
       }
@@ -428,9 +432,29 @@ class PaymentOrchestrator {
         };
       }
       
-      // Fallback to compatibility service
-      throw new Error('SumUp fallback not implemented');
+      // Fallback to compatibility service (sumup-react-native-alpha)
+      // This would require the SumUpPaymentComponent to be rendered
+      // For now, return an error indicating manual UI is needed
+      logger.warn('⚠️ Native SumUp not available, fallback UI required');
+      
+      return {
+        success: false,
+        method: 'sumup',
+        amount,
+        currency,
+        timestamp: new Date(),
+        error: {
+          code: 'SUMUP_FALLBACK_REQUIRED',
+          message: 'Please use the SumUp payment screen for this transaction',
+          recoverable: true,
+          suggestedAction: 'Use alternative payment UI',
+        },
+        metadata: {
+          requiresFallbackUI: true,
+        },
+      };
     } catch (error) {
+      logger.error('❌ SumUp payment error:', error);
       throw error;
     }
   }
