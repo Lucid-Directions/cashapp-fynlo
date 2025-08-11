@@ -547,7 +547,8 @@ const EnhancedPaymentScreen: React.FC = () => {
       const transactionFee = calculateTransactionFee();
       const total = calculateGrandTotal();
 
-      const orderData = {
+      // Only include customer metadata if provided
+      const orderData: any = {
         items: cart,
         subtotal,
         tax,
@@ -555,17 +556,21 @@ const EnhancedPaymentScreen: React.FC = () => {
         serviceCharge,
         transactionFee,
         tipAmount,
-        customerMetadata: {
-          name: customerName.trim(),
-          email: customerEmail.trim().toLowerCase(),
-        },
         paymentMethod: selectedPaymentMethod,
         notes: undefined,
       };
+      
+      // Only add customerMetadata if customer info was provided
+      if (hasName && hasEmail) {
+        orderData.customerMetadata = {
+          name: customerName.trim(),
+          email: customerEmail.trim().toLowerCase(),
+        };
+      }
 
       logger.info('💳 Processing payment and saving order...', {
         total,
-        customer: customerEmail,
+        customer: hasEmail ? customerEmail : 'anonymous',
         method: selectedPaymentMethod,
       });
 
@@ -573,11 +578,14 @@ const EnhancedPaymentScreen: React.FC = () => {
 
       setProcessing(false);
 
+      // Build success message based on whether email was provided
+      const successMessage = hasEmail 
+        ? `Payment of £${total.toFixed(2)} processed successfully!\n\nReceipt will be sent to ${customerEmail}`
+        : `Payment of £${total.toFixed(2)} processed successfully!`;
+      
       Alert.alert(
         'Payment Successful',
-        `Payment of £${total.toFixed(
-          2
-        )} processed successfully!\n\nReceipt will be sent to ${customerEmail}`,
+        successMessage,
         [
           {
             text: 'OK',
