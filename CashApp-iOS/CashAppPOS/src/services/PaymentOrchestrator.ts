@@ -33,6 +33,8 @@ class PaymentOrchestrator {
   private providers: Map<PaymentMethodType, PaymentProvider> = new Map();
   private currentSession: PaymentSession | null = null;
   private isProcessing: boolean = false;
+  private isInitialized: boolean = false;
+  private initializationPromise: Promise<void> | null = null;
   
   // Configuration
   private config: PaymentConfig = {
@@ -51,8 +53,8 @@ class PaymentOrchestrator {
   private methodChangeListeners: Set<(methods: PaymentMethod[]) => void> = new Set();
 
   private constructor() {
-    logger.info('💳 PaymentOrchestrator initialized');
-    this.initializeProviders();
+    logger.info('💳 PaymentOrchestrator created');
+    // Don't initialize providers in constructor
   }
 
   static getInstance(): PaymentOrchestrator {
@@ -60,6 +62,35 @@ class PaymentOrchestrator {
       PaymentOrchestrator.instance = new PaymentOrchestrator();
     }
     return PaymentOrchestrator.instance;
+  }
+
+  /**
+   * Initialize the orchestrator (must be called before using)
+   */
+  async initialize(): Promise<void> {
+    // If already initialized, return immediately
+    if (this.isInitialized) {
+      return;
+    }
+
+    // If initialization is in progress, wait for it
+    if (this.initializationPromise) {
+      return this.initializationPromise;
+    }
+
+    // Start initialization
+    this.initializationPromise = this.initializeProviders();
+    
+    try {
+      await this.initializationPromise;
+      this.isInitialized = true;
+      logger.info('✅ PaymentOrchestrator initialized successfully');
+    } catch (error) {
+      logger.error('❌ PaymentOrchestrator initialization failed:', error);
+      throw error;
+    } finally {
+      this.initializationPromise = null;
+    }
   }
 
   /**
@@ -188,9 +219,26 @@ class PaymentOrchestrator {
   }
 
   /**
+   * Ensure initialization before accessing methods
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (!this.isInitialized && !this.initializationPromise) {
+      await this.initialize();
+    } else if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+  }
+
+  /**
    * Get all available payment methods
    */
   getAvailableMethods(): PaymentMethod[] {
+    // Note: This is synchronous for backward compatibility
+    // Callers should ensure initialize() was called first
+    if (!this.isInitialized) {
+      logger.warn('⚠️ PaymentOrchestrator accessed before initialization');
+      return [];
+    }
     return Array.from(this.availableMethods.values()).filter(method => 
       method.available && this.config.enabledMethods.includes(method.id)
     );
@@ -200,6 +248,10 @@ class PaymentOrchestrator {
    * Get a specific payment method
    */
   getMethod(methodId: PaymentMethodType): PaymentMethod | null {
+    if (!this.isInitialized) {
+      logger.warn('⚠️ PaymentOrchestrator accessed before initialization');
+      return null;
+    }
     return this.availableMethods.get(methodId) || null;
   }
 
@@ -207,6 +259,10 @@ class PaymentOrchestrator {
    * Check if a payment method is available
    */
   isMethodAvailable(methodId: PaymentMethodType): boolean {
+    if (!this.isInitialized) {
+      logger.warn('⚠️ PaymentOrchestrator accessed before initialization');
+      return false;
+    }
     const method = this.availableMethods.get(methodId);
     return method ? method.available && method.enabled : false;
   }
@@ -235,6 +291,9 @@ class PaymentOrchestrator {
     reference?: string,
     customerInfo?: CustomerInfo
   ): Promise<PaymentResult> {
+    // Ensure orchestrator is initialized
+    await this.ensureInitialized();
+
     // Check if payment is already in progress
     if (this.isProcessing) {
       logger.warn('⚠️ Payment already in progress');
@@ -576,7 +635,9 @@ class PaymentOrchestrator {
    */
   async refreshAvailability() {
     logger.info('🔄 Refreshing payment methods availability');
-    await this.initializeProviders();
+    // Reset initialization state to force refresh
+    this.isInitialized = false;
+    await this.initialize();
   }
 }
 

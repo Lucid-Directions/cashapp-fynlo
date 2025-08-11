@@ -102,9 +102,18 @@ export function usePaymentMethods(): UsePaymentMethodsReturn {
     };
   }, [selectedMethod]);
 
-  // Initial refresh on mount
+  // Initial initialization on mount
   useEffect(() => {
-    PaymentOrchestrator.refreshAvailability();
+    const initializeOrchestrator = async () => {
+      try {
+        await PaymentOrchestrator.initialize();
+        // After initialization, methods will be updated via onMethodsChange
+      } catch (error) {
+        logger.error('❌ Failed to initialize PaymentOrchestrator:', error);
+      }
+    };
+    
+    initializeOrchestrator();
   }, []);
 
   /**
