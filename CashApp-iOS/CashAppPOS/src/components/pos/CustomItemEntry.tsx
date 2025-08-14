@@ -116,13 +116,18 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
       return;
     }
 
-    const customItem: OrderItem = {
+    // Create enhanced item to preserve modifications and pricing
+    const customItem = {
       id: Date.now(), // Generate unique ID
       name: itemName,
       price,
       quantity,
       emoji: selectedEmoji,
       notes: notes || undefined,
+      // Add enhanced properties for the enhanced cart
+      originalPrice: price,
+      modifications: [],
+      specialInstructions: notes || '',
     };
 
     addToCart(customItem);
