@@ -55,7 +55,7 @@ interface PaymentMethod {
 const PaymentScreen: React.FC = () => {
   const navigation = useNavigation();
   const cartStore = useCartStore(isEnhancedCartEnabled());
-  const { cart, clearCart } = cartStore;
+  const { cart, clearCart, serviceChargePercentage, addTransactionFee } = cartStore;
   const { paymentMethods, taxConfiguration } = useSettingsStore();
   const nativeSumUpService = NativeSumUpService.getInstance();
 
@@ -79,15 +79,27 @@ const PaymentScreen: React.FC = () => {
   };
 
   const calculateServiceCharge = (subtotal: number) => {
-    if (!taxConfiguration.serviceTaxEnabled) return 0;
-    return subtotal * (taxConfiguration.serviceTaxRate / 100);
+    // Use the service charge percentage from the cart store, which may have been set in ServiceChargeSelectionScreen
+    const chargePercentage = serviceChargePercentage ?? 0;
+    return subtotal * (chargePercentage / 100);
+  };
+
+  const calculateTransactionFee = (total: number) => {
+    // Only apply transaction fee for card payments when enabled
+    if (!addTransactionFee) return 0;
+    // Standard card processing fee: 2.9% + $0.30
+    return total * 0.029 + 0.3;
   };
 
   const calculateGrandTotal = () => {
     const subtotal = calculateSubtotal();
     const tax = calculateTax(subtotal);
     const service = calculateServiceCharge(subtotal);
-    return subtotal + tax + service;
+    const baseTotal = subtotal + tax + service;
+    
+    // Add transaction fee if enabled (typically for card payments)
+    const transactionFee = calculateTransactionFee(baseTotal);
+    return baseTotal + transactionFee;
   };
 
   // Payment methods with fee information - SumUp focused (Stripe/Square hidden as backups)
@@ -594,13 +606,22 @@ const PaymentScreen: React.FC = () => {
               </View>
             )}
 
-            {taxConfiguration.serviceTaxEnabled && (
+            {serviceChargePercentage > 0 && (
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>
-                  Service Charge ({taxConfiguration.serviceTaxRate}%)
+                  Service Charge ({serviceChargePercentage}%)
                 </Text>
                 <Text style={styles.summaryValue}>
                   £{calculateServiceCharge(calculateSubtotal()).toFixed(2)}
+                </Text>
+              </View>
+            )}
+
+            {addTransactionFee && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Transaction Fee (2.9% + £0.30)</Text>
+                <Text style={styles.summaryValue}>
+                  £{calculateTransactionFee(calculateSubtotal() + calculateTax(calculateSubtotal()) + calculateServiceCharge(calculateSubtotal())).toFixed(2)}
                 </Text>
               </View>
             )}
