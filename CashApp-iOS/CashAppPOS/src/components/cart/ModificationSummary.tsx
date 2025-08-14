@@ -15,6 +15,7 @@ interface ModificationSummaryProps {
   specialInstructions?: string;
   modificationPrice?: number;
   originalPrice?: number;
+  quantity?: number;
   showPriceBreakdown?: boolean;
   onCustomizePress?: () => void;
   compact?: boolean;
@@ -25,6 +26,7 @@ export default function ModificationSummary({
   specialInstructions,
   modificationPrice = 0,
   originalPrice = 0,
+  quantity = 1,
   showPriceBreakdown = false,
   onCustomizePress,
   compact = false,
@@ -33,7 +35,7 @@ export default function ModificationSummary({
 
   // Filter selected modifications
   const selectedModifications = modifications.filter((mod) => mod.selected);
-  
+
   if (selectedModifications.length === 0 && !specialInstructions && !showPriceBreakdown) {
     return null;
   }
@@ -55,21 +57,19 @@ export default function ModificationSummary({
   };
 
   const formatPrice = (price: number): string => {
-    return `$${Math.abs(price).toFixed(2)}`;
+    return `£${Math.abs(price).toFixed(2)}`;
   };
 
   if (compact) {
     // Compact view for cart list
-    const modificationText = selectedModifications
-      .map(formatModificationText)
-      .join(', ');
+    const modificationText = selectedModifications.map(formatModificationText).join(', ');
 
     return (
       <View style={styles.compactContainer}>
         {modificationText.length > 0 && (
           <View style={styles.compactRow}>
             <Icon name="tune" size={12} color={theme.colors.textSecondary} />
-            <Text 
+            <Text
               style={[styles.compactText, { color: theme.colors.textSecondary }]}
               numberOfLines={1}
             >
@@ -80,7 +80,7 @@ export default function ModificationSummary({
         {specialInstructions && (
           <View style={styles.compactRow}>
             <Icon name="note" size={12} color={theme.colors.textSecondary} />
-            <Text 
+            <Text
               style={[styles.compactText, { color: theme.colors.textSecondary }]}
               numberOfLines={1}
             >
@@ -109,7 +109,8 @@ export default function ModificationSummary({
                 </Text>
                 {mod.price !== 0 && (
                   <Text style={[styles.modificationPrice, { color: theme.colors.textSecondary }]}>
-                    {mod.price > 0 ? '+' : ''}{formatPrice(mod.price)}
+                    {mod.price > 0 ? '+' : ''}
+                    {formatPrice(mod.price)}
                   </Text>
                 )}
               </View>
@@ -148,21 +149,36 @@ export default function ModificationSummary({
             <Text style={[styles.priceLabel, { color: theme.colors.textSecondary }]}>
               Modifications
             </Text>
-            <Text style={[
-              styles.priceValue, 
-              { color: modificationPrice > 0 ? theme.colors.success : theme.colors.text }
-            ]}>
-              {modificationPrice > 0 ? '+' : ''}{formatPrice(modificationPrice)}
+            <Text
+              style={[
+                styles.priceValue,
+                { color: modificationPrice > 0 ? theme.colors.success : theme.colors.text },
+              ]}
+            >
+              {modificationPrice > 0 ? '+' : ''}
+              {formatPrice(modificationPrice)}
             </Text>
           </View>
           <View style={[styles.priceRow, styles.totalRow]}>
             <Text style={[styles.totalLabel, { color: theme.colors.text }]}>
-              Item Total
+              Item Total (per unit)
             </Text>
             <Text style={[styles.totalValue, { color: theme.colors.primary }]}>
               {formatPrice(originalPrice + modificationPrice)}
             </Text>
           </View>
+          {quantity > 1 && (
+            <View style={[styles.priceRow, styles.totalRow]}>
+              <Text style={[styles.totalLabel, styles.lineTotalLabel, { color: theme.colors.text }]}>
+                Line Total ({quantity}x)
+              </Text>
+              <Text
+                style={[styles.totalValue, styles.lineTotalValue, { color: theme.colors.primary }]}
+              >
+                {formatPrice((originalPrice + modificationPrice) * quantity)}
+              </Text>
+            </View>
+          )}
         </View>
       )}
 
@@ -290,5 +306,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 6,
+  },
+  lineTotalLabel: {
+    fontWeight: 'bold',
+  },
+  lineTotalValue: {
+    fontWeight: 'bold',
   },
 });

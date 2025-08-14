@@ -51,6 +51,7 @@ import useSettingsStore from '../../store/useSettingsStore';
 import useUIStore from '../../store/useUIStore';
 import type { MenuItem, OrderItem } from '../../types';
 import type { EnhancedOrderItem } from '../../types/cart';
+import { generateCartItemId } from '../../utils/cartItemHash';
 import { logger } from '../../utils/logger';
 import {
   validatePrice,
@@ -114,8 +115,8 @@ const ExportedMenuItemCard = ({
         <View style={propStyles.quantityPillContainer}>
           <QuantityPill
             quantity={existingItem.quantity}
-            onIncrease={() => handleUpdateQuantity(item.id, existingItem.quantity + 1)}
-            onDecrease={() => handleUpdateQuantity(item.id, existingItem.quantity - 1)}
+            onIncrease={() => handleUpdateQuantity(existingItem.id, existingItem.quantity + 1)}
+            onDecrease={() => handleUpdateQuantity(existingItem.id, existingItem.quantity - 1)}
             size="medium"
             colorScheme="accent"
             minValue={0}
@@ -155,9 +156,8 @@ const POSScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
   const [showModificationModal, setShowModificationModal] = useState(false);
   const [showSplitBillModal, setShowSplitBillModal] = useState(false);
-  const [selectedItemForModification, setSelectedItemForModification] = useState<EnhancedOrderItem | null>(
-    null
-  );
+  const [selectedItemForModification, setSelectedItemForModification] =
+    useState<EnhancedOrderItem | null>(null);
 
   // Dynamic styles that depend on state
   const dynamicStyles = createDynamicStyles(theme, serviceChargeConfig);
@@ -179,11 +179,9 @@ const POSScreen: React.FC = () => {
 
   // Create themed styles
 
-  // Zustand stores
+  // Zustand stores - Use enhanced cart store for modifications support
   const { cart, addToCart, removeFromCart, updateCartItem, clearCart, cartTotal, cartItemCount } =
-    useAppStore();
-  
-  const enhancedCartStore = useEnhancedCartStore();
+    useEnhancedCartStore();
 
   const { selectedCategory, setSelectedCategory, showPaymentModal, setShowPaymentModal } =
     useUIStore();
@@ -237,7 +235,7 @@ const POSScreen: React.FC = () => {
         setMenuLoading(true);
         setMenuError(null);
         setIsUsingDemoData(false);
-        
+
         const dataService = DataService.getInstance();
 
         // Increase timeout to 15 seconds to allow for slower API responses and retries
@@ -255,7 +253,7 @@ const POSScreen: React.FC = () => {
 
         // Check if we're using demo data (items have 'demo-' prefix in ID)
         // Safely handle null/undefined IDs
-        const usingDemo = menuItems.some(item => {
+        const usingDemo = menuItems.some((item) => {
           if (!item?.id) return false;
           const idStr = item.id.toString();
           return idStr.startsWith('demo-');
@@ -267,12 +265,10 @@ const POSScreen: React.FC = () => {
         const categoryNames = [
           'All',
           ...categories
-            .map((cat) => typeof cat === 'string' ? cat : cat?.name)
-            .filter((name): name is string => 
-              name !== undefined && 
-              name !== null && 
-              name !== 'All' && 
-              name.trim() !== ''
+            .map((cat) => (typeof cat === 'string' ? cat : cat?.name))
+            .filter(
+              (name): name is string =>
+                name !== undefined && name !== null && name !== 'All' && name.trim() !== ''
             ),
         ];
         setDynamicCategories(categoryNames);
@@ -282,7 +278,7 @@ const POSScreen: React.FC = () => {
           categories: categoryNames,
           usingDemoData: usingDemo,
         });
-        
+
         // Don't set error when using demo data - it's working fine
         // The demo indicator will show the status
       } catch (error) {
@@ -317,7 +313,7 @@ const POSScreen: React.FC = () => {
         // even the fallback failed. This shouldn't happen with FallbackMenuService
         // but we'll handle it gracefully
         logger.error('Menu loading failed completely - DataService should have provided fallback');
-        
+
         // The error is already set, and the UI will show retry button
         // Don't show alert as it's annoying - the UI already shows the error
         setDynamicMenuItems([]);
@@ -444,39 +440,43 @@ const POSScreen: React.FC = () => {
   const checkIfItemHasModifiers = (item: MenuItem): boolean => {
     const category = item.category?.toLowerCase() || '';
     const modifiableCategories = ['coffee', 'tea', 'beverages', 'drinks', 'hot drinks'];
-    const hasModifiableCategory = modifiableCategories.some(cat => category.includes(cat));
-    
+    const hasModifiableCategory = modifiableCategories.some((cat) => category.includes(cat));
+
     const itemName = item.name?.toLowerCase() || '';
-    const hasModifiableKeywords = 
-      itemName.includes('coffee') || 
-      itemName.includes('latte') || 
-      itemName.includes('cappuccino') || 
-      itemName.includes('espresso') || 
-      itemName.includes('americano') || 
-      itemName.includes('macchiato') || 
-      itemName.includes('mocha') || 
-      itemName.includes('tea') || 
+    const hasModifiableKeywords =
+      itemName.includes('coffee') ||
+      itemName.includes('latte') ||
+      itemName.includes('cappuccino') ||
+      itemName.includes('espresso') ||
+      itemName.includes('americano') ||
+      itemName.includes('macchiato') ||
+      itemName.includes('mocha') ||
+      itemName.includes('tea') ||
       itemName.includes('chai');
-    
+
     return hasModifiableCategory || hasModifiableKeywords;
   };
 
   const handleAddToCart = (item: MenuItem) => {
-    const orderItem: OrderItem = {
-      id: item.id,
+    const enhancedItem: EnhancedOrderItem = {
+      id: item.id.toString(),
+      productId: item.id.toString(),
       name: item.name,
       price: item.price,
       quantity: 1,
       emoji: item.emoji,
+      modifications: [],
+      originalPrice: item.price,
     };
-    addToCart(orderItem);
+    addToCart(enhancedItem);
   };
 
-  const handleUpdateQuantity = (id: number, quantity: number) => {
+  const handleUpdateQuantity = (id: number | string, quantity: number) => {
+    const idStr = id.toString();
     if (quantity <= 0) {
-      removeFromCart(id);
+      removeFromCart(idStr);
     } else {
-      updateCartItem(id, { quantity });
+      updateCartItem(idStr, { quantity });
     }
   };
 
@@ -707,20 +707,18 @@ const POSScreen: React.FC = () => {
   };
 
   const MenuItemCard = ({ item }: { item: MenuItem }) => {
-    const existingItem = cart.find((cartItem) => cartItem.id === item.id);
+    const existingItem = cart.find(
+      (cartItem) => cartItem.productId === item.id.toString() || cartItem.id === item.id.toString()
+    );
     const hasModifiers = checkIfItemHasModifiers(item);
 
     return (
       <View style={[styles.menuCard, !item.available && styles.menuCardDisabled]}>
         {/* Show modification badge for customizable items */}
         {hasModifiers && item.available && (
-          <ModificationBadge 
-            position="top-right"
-            size="small"
-            compact
-          />
+          <ModificationBadge position="top-right" size="small" compact />
         )}
-        
+
         <TouchableOpacity
           style={styles.menuCardContent}
           onPress={() => item.available && handleAddToCart(item)}
@@ -750,14 +748,14 @@ const POSScreen: React.FC = () => {
           <View style={styles.menuItemQuantityControls}>
             <TouchableOpacity
               style={styles.menuQuantityButton}
-              onPress={() => handleUpdateQuantity(item.id, existingItem.quantity - 1)}
+              onPress={() => handleUpdateQuantity(existingItem.id, existingItem.quantity - 1)}
             >
               <Icon name="remove" size={20} color={theme.colors.white} />
             </TouchableOpacity>
             <Text style={styles.menuQuantityText}>{existingItem.quantity}</Text>
             <TouchableOpacity
               style={styles.menuQuantityButton}
-              onPress={() => handleUpdateQuantity(item.id, existingItem.quantity + 1)}
+              onPress={() => handleUpdateQuantity(existingItem.id, existingItem.quantity + 1)}
             >
               <Icon name="add" size={20} color={theme.colors.white} />
             </TouchableOpacity>
@@ -767,8 +765,10 @@ const POSScreen: React.FC = () => {
     );
   };
 
-  const CartItem = ({ item }: { item: OrderItem }) => {
-    const menuItem = dynamicMenuItems.find((mi) => mi.id === item.id);
+  const CartItem = ({ item }: { item: EnhancedOrderItem }) => {
+    const menuItem = dynamicMenuItems.find(
+      (mi) => mi.id.toString() === item.productId || mi.id.toString() === item.id
+    );
     const hasModifiers = checkIfItemHasModifiers(menuItem || item);
 
     // Check for existing modifications
@@ -829,7 +829,7 @@ const POSScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            
+
             {/* Enhanced modification display */}
             {hasModifications && (
               <ModificationSummary
@@ -837,6 +837,7 @@ const POSScreen: React.FC = () => {
                 specialInstructions={item.specialInstructions}
                 modificationPrice={item.modificationPrice}
                 originalPrice={item.originalPrice || item.price}
+                quantity={item.quantity}
                 showPriceBreakdown={item.modificationPrice && item.modificationPrice !== 0}
                 onCustomizePress={() => {
                   // Convert OrderItem to EnhancedOrderItem for modification
@@ -856,7 +857,7 @@ const POSScreen: React.FC = () => {
                 compact
               />
             )}
-            
+
             {/* Show customize button for items that support modifications */}
             {hasModifiers && !hasModifications && (
               <TouchableOpacity
@@ -882,7 +883,7 @@ const POSScreen: React.FC = () => {
                 </Text>
               </TouchableOpacity>
             )}
-            
+
             {menuItem?.description && (
               <Text style={styles.cartItemDescription} numberOfLines={2}>
                 {menuItem.description}
@@ -1025,9 +1026,7 @@ const POSScreen: React.FC = () => {
         {isUsingDemoData && !menuLoading && (
           <View style={styles.demoIndicator}>
             <Icon name="info-outline" size={16} color={theme.colors.warning} />
-            <Text style={styles.demoText}>
-              Demo Mode - Backend API unavailable
-            </Text>
+            <Text style={styles.demoText}>Demo Mode - Backend API unavailable</Text>
           </View>
         )}
 
@@ -1078,12 +1077,13 @@ const POSScreen: React.FC = () => {
                   const categoryNames = [
                     'All',
                     ...(categories || [])
-                      .map((cat) => typeof cat === 'string' ? cat : cat?.name)
-                      .filter((name): name is string => 
-                        name !== undefined && 
-                        name !== null && 
-                        name !== 'All' && 
-                        name.trim() !== ''
+                      .map((cat) => (typeof cat === 'string' ? cat : cat?.name))
+                      .filter(
+                        (name): name is string =>
+                          name !== undefined &&
+                          name !== null &&
+                          name !== 'All' &&
+                          name.trim() !== ''
                       ),
                   ];
                   setDynamicCategories(categoryNames);
@@ -1455,23 +1455,26 @@ const POSScreen: React.FC = () => {
         }}
         onSave={(modifiedItem) => {
           // Generate unique ID for modified items to prevent incorrect merging
-          const { generateCartItemId } = require('../../utils/cartItemHash');
           const uniqueId = generateCartItemId(
             modifiedItem.productId || modifiedItem.id,
             modifiedItem.modifications,
             modifiedItem.specialInstructions
           );
-          
+
           // Update the item with the unique ID
           const itemWithUniqueId = {
             ...modifiedItem,
             id: uniqueId,
             productId: modifiedItem.productId || modifiedItem.id,
           };
-          
+
           // If this is a new item being added (not from cart)
-          if (selectedItemForModification && !enhancedCartStore.cart.find(item => item.productId === selectedItemForModification.id)) {
-            enhancedCartStore.addToCart(itemWithUniqueId);
+          const cartStore = useEnhancedCartStore.getState();
+          if (
+            selectedItemForModification &&
+            !cartStore.cart.find((item) => item.productId === selectedItemForModification.id)
+          ) {
+            cartStore.addToCart(itemWithUniqueId);
           }
           // Otherwise the modal has already updated the cart via applyModifications
           setShowModificationModal(false);

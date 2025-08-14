@@ -67,7 +67,7 @@ export default function ItemModificationModal({
     if (isValid && item) {
       // Apply modifications to the store
       applyModifications();
-      
+
       // Create the modified item object to pass back
       const modifiedItem: EnhancedOrderItem = {
         ...item,
@@ -76,7 +76,7 @@ export default function ItemModificationModal({
         modificationPrice,
         totalPrice,
       };
-      
+
       onSave(modifiedItem);
       onClose();
     }
@@ -115,7 +115,7 @@ export default function ItemModificationModal({
                 {item.name}
               </Text>
               <Text style={[styles.basePrice, { color: theme.colors.textSecondary }]}>
-                Base price: ${item.originalPrice.toFixed(2)}
+                Base price: £{item.originalPrice.toFixed(2)}
               </Text>
             </View>
             <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
@@ -174,7 +174,7 @@ export default function ItemModificationModal({
                             },
                           ]}
                         >
-                          {mod.price > 0 ? '+' : ''}${Math.abs(mod.price).toFixed(2)}
+                          {mod.price > 0 ? '+' : ''}£{Math.abs(mod.price).toFixed(2)}
                         </Text>
                       )}
                     </View>
@@ -275,7 +275,7 @@ export default function ItemModificationModal({
             <View style={styles.pricingSummary}>
               <Text style={[styles.totalLabel, { color: theme.colors.text }]}>Total Price:</Text>
               <Text style={[styles.totalValue, { color: theme.colors.primary }]}>
-                ${totalPrice.toFixed(2)}
+                £{totalPrice.toFixed(2)}
                 <Text style={[styles.quantityNote, { color: theme.colors.textSecondary }]}>
                   {' '}
                   ({item.quantity}x)
