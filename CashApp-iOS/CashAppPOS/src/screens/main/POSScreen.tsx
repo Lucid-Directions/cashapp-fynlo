@@ -32,7 +32,7 @@ import SplitBillModal from '../../components/cart/SplitBillModal';
 import { QuantityPill } from '../../components/inputs';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
-import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
+import NativeSumUpPayment from '../../components/payment/NativeSumUpPayment';
 import SumUpTestComponent from '../../components/payment/SumUpTestComponent';
 import CategorySearchBubble from '../../components/search/CategorySearchBubble';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
@@ -45,13 +45,11 @@ import ErrorTrackingService from '../../services/ErrorTrackingService';
 import PlatformService from '../../services/PlatformService';
 import SharedDataStore from '../../services/SharedDataStore';
 import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
-import useAppStore from '../../store/useAppStore';
-import useEnhancedCartStore from '../../store/useEnhancedCartStore';
+import { useCartStore, isEnhancedCartEnabled } from '../../store/cartStoreAdapter';
 import useSettingsStore from '../../store/useSettingsStore';
 import useUIStore from '../../store/useUIStore';
 import type { MenuItem, OrderItem } from '../../types';
 import type { EnhancedOrderItem } from '../../types/cart';
-import { generateCartItemId } from '../../utils/cartItemHash';
 import { logger } from '../../utils/logger';
 import {
   validatePrice,
@@ -156,14 +154,12 @@ const POSScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
   const [showModificationModal, setShowModificationModal] = useState(false);
   const [showSplitBillModal, setShowSplitBillModal] = useState(false);
-  const [selectedItemForModification, setSelectedItemForModification] =
-    useState<EnhancedOrderItem | null>(null);
+  const [selectedItemForModification, setSelectedItemForModification] = useState<EnhancedOrderItem | null>(
+    null
+  );
 
   // Dynamic styles that depend on state
   const dynamicStyles = createDynamicStyles(theme, serviceChargeConfig);
-
-  // Using regular cart for now
-  const useEnhancedCart = false;
 
   // Dynamic menu state
   const [dynamicMenuItems, setDynamicMenuItems] = useState<MenuItem[]>([]);
@@ -174,17 +170,31 @@ const POSScreen: React.FC = () => {
 
   // Debug showSumUpPayment state changes
   useEffect(() => {
+    if (showSumUpPayment) {
+      logger.info('🎯 POSScreen: Mounting NativeSumUpPayment component');
+    }
     logger.info('🔄 showSumUpPayment state changed to:', showSumUpPayment);
   }, [showSumUpPayment]);
 
   // Create themed styles
 
-  // Zustand stores - Use enhanced cart store for modifications support
+  // Zustand stores - Use enhanced cart store for persistence and modifications
+  const cartStore = useCartStore(isEnhancedCartEnabled());
   const { cart, addToCart, removeFromCart, updateCartItem, clearCart, cartTotal, cartItemCount } =
-    useEnhancedCartStore();
+    cartStore;
 
   const { selectedCategory, setSelectedCategory, showPaymentModal, setShowPaymentModal } =
     useUIStore();
+
+  // Migrate cart if using enhanced store
+  useEffect(() => {
+    if (isEnhancedCartEnabled() && cartStore.migrateCartIfNeeded) {
+      cartStore.migrateCartIfNeeded();
+      // Also sync stores periodically for consistency during rollout
+      const { syncCartStores } = require('../../store/cartStoreAdapter');
+      syncCartStores();
+    }
+  }, [cartStore]);
 
   // For split bill integration - convert cart items to enhanced format
   // This MUST come after cart is defined from useAppStore()
@@ -354,6 +364,12 @@ const POSScreen: React.FC = () => {
   };
 
   const calculateServiceFee = (subtotal: number) => {
+    // Use enhanced cart store's service charge if enabled
+    if (isEnhancedCartEnabled() && cartStore.calculateServiceCharge) {
+      return cartStore.calculateServiceCharge();
+    }
+    
+    // Fall back to local config for old cart
     if (!serviceChargeConfig.enabled) return 0;
 
     const serviceFeeCalculation = calculatePercentageFee(subtotal, serviceChargeConfig.rate, {
@@ -458,6 +474,7 @@ const POSScreen: React.FC = () => {
   };
 
   const handleAddToCart = (item: MenuItem) => {
+<<<<<<< HEAD
     const enhancedItem: EnhancedOrderItem = {
       id: item.id.toString(),
       productId: item.id.toString(),
@@ -467,8 +484,51 @@ const POSScreen: React.FC = () => {
       emoji: item.emoji,
       modifications: [],
       originalPrice: item.price,
+      modificationPrice: 0,
+      totalPrice: item.price,
+      addedAt: new Date().toISOString(),
     };
-    addToCart(enhancedItem);
+    
+    // Check if item has modifiers (coffee, tea, etc.)
+    const hasModifiers = checkIfItemHasModifiers(item);
+    
+    if (hasModifiers) {
+      // Open modification modal for items with modifiers
+      setSelectedItemForModification(enhancedItem);
+      setShowModificationModal(true);
+    } else {
+      // Direct add to cart for items without modifiers
+      addToCart(enhancedItem);
+    }
+  };
+
+  // Helper function to check if an item should show modification options
+  const checkIfItemHasModifiers = (item: MenuItem): boolean => {
+    // Check by category name (case-insensitive)
+    const category = item.category?.toLowerCase() || '';
+    
+    // Categories that typically have modifiers
+    const modifiableCategories = ['coffee', 'tea', 'beverages', 'drinks', 'hot drinks'];
+    
+    // Check if category matches any modifiable category
+    const hasModifiableCategory = modifiableCategories.some(cat => 
+      category.includes(cat)
+    );
+    
+    // Also check item name for coffee/tea keywords
+    const itemName = item.name?.toLowerCase() || '';
+    const hasModifiableKeywords = 
+      itemName.includes('coffee') || 
+      itemName.includes('latte') || 
+      itemName.includes('cappuccino') || 
+      itemName.includes('espresso') || 
+      itemName.includes('americano') || 
+      itemName.includes('macchiato') || 
+      itemName.includes('mocha') || 
+      itemName.includes('tea') || 
+      itemName.includes('chai');
+    
+    return hasModifiableCategory || hasModifiableKeywords;
   };
 
   const handleUpdateQuantity = (id: number | string, quantity: number) => {
@@ -1214,10 +1274,10 @@ const POSScreen: React.FC = () => {
                           </Text>
                         </View>
                       )}
-                      {serviceChargeConfig.enabled && (
+                      {(isEnhancedCartEnabled() ? cartStore.serviceChargePercentage > 0 : serviceChargeConfig.enabled) && (
                         <View style={styles.summaryRow}>
                           <Text style={styles.summaryLabel}>
-                            Service Fee ({serviceChargeConfig.rate}%)
+                            Service Fee ({isEnhancedCartEnabled() ? cartStore.serviceChargePercentage : serviceChargeConfig.rate}%)
                           </Text>
                           <Text style={styles.summaryValue}>
                             {formatPrice(calculateServiceFee(cartTotal()), '£', {
@@ -1430,19 +1490,15 @@ const POSScreen: React.FC = () => {
 
       {/* SumUp Payment Component */}
       {showSumUpPayment && (
-        <>
-          {logger.info(
-            '🔄 Rendering SumUpPaymentComponent with showSumUpPayment:',
-            showSumUpPayment
-          )}
-          <SumUpPaymentComponent
+        <NativeSumUpPayment
             amount={calculateCartTotal()}
             currency="GBP"
             title={`Order for ${customerName || 'Customer'}`}
+            visible={showSumUpPayment}
             onPaymentComplete={handleSumUpPaymentComplete}
             onPaymentCancel={handleSumUpPaymentCancel}
+            useTapToPay={true}
           />
-        </>
       )}
 
       {/* Item Modification Modal */}
@@ -1453,34 +1509,23 @@ const POSScreen: React.FC = () => {
           setShowModificationModal(false);
           setSelectedItemForModification(null);
         }}
-        onSave={(modifiedItem) => {
-          // Generate unique ID for modified items to prevent incorrect merging
-          const uniqueId = generateCartItemId(
-            modifiedItem.productId || modifiedItem.id,
-            modifiedItem.modifications,
-            modifiedItem.specialInstructions
-          );
-
-          // Update the item with the unique ID
-          const itemWithUniqueId = {
+        onSave={(modifiedItem: EnhancedOrderItem) => {
+          // Calculate the final price per unit (including modifications)
+          const pricePerUnit = modifiedItem.originalPrice + (modifiedItem.modificationPrice || 0);
+          
+          // Update the item with the calculated price
+          const enhancedItemToAdd = {
             ...modifiedItem,
-            id: uniqueId,
-            productId: modifiedItem.productId || modifiedItem.id,
+            price: pricePerUnit, // Price per unit with modifications
+            totalPrice: pricePerUnit * modifiedItem.quantity,
           };
-
-          // If this is a new item being added (not from cart)
-          const cartStore = useEnhancedCartStore.getState();
-          if (
-            selectedItemForModification &&
-            !cartStore.cart.find((item) => item.productId === selectedItemForModification.id)
-          ) {
-            cartStore.addToCart(itemWithUniqueId);
-          }
-          // Otherwise the modal has already updated the cart via applyModifications
+          
+          // Add to cart with the modified item
+          addToCart(enhancedItemToAdd);
           setShowModificationModal(false);
           setSelectedItemForModification(null);
         }}
-        useEnhancedCart={true} // Switch to enhanced cart for modifications
+        useEnhancedCart={isEnhancedCartEnabled()}
       />
 
       {/* Split Bill Modal */}
@@ -1500,7 +1545,7 @@ const POSScreen: React.FC = () => {
           );
           setShowSplitBillModal(false);
         }}
-        useEnhancedCart={useEnhancedCart}
+        useEnhancedCart={isEnhancedCartEnabled()}
       />
     </SafeAreaView>
   );

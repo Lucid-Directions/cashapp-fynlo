@@ -528,13 +528,13 @@ const EmployeesScreen: React.FC = () => {
                   <View style={styles.detailRow}>
                     <Icon name="calendar-today" size={20} color={Colors.darkGray} />
                     <Text style={styles.detailText}>
-                      Hired {selectedEmployee.hireDate.toLocaleDateString('en-GB')}
+                      Hired {selectedEmployee.hireDate ? selectedEmployee.hireDate.toLocaleDateString('en-GB') : 'N/A'}
                     </Text>
                   </View>
                   <View style={styles.detailRow}>
                     <Icon name="attach-money" size={20} color={Colors.darkGray} />
                     <Text style={styles.detailText}>
-                      £{selectedEmployee.hourlyRate.toFixed(2)} per hour
+                      £{selectedEmployee.hourlyRate ? selectedEmployee.hourlyRate.toFixed(2) : '0.00'} per hour
                     </Text>
                   </View>
                 </View>

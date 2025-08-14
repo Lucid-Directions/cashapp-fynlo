@@ -491,10 +491,8 @@ class PaymentOrchestrator {
         };
       }
       
-      // Fallback to compatibility service (sumup-react-native-alpha)
-      // This would require the SumUpPaymentComponent to be rendered
-      // For now, return an error indicating manual UI is needed
-      logger.warn('⚠️ Native SumUp not available, fallback UI required');
+      // Native SumUp not available - show error
+      logger.error('❌ Native SumUp module not available');
       
       return {
         success: false,
@@ -503,13 +501,9 @@ class PaymentOrchestrator {
         currency,
         timestamp: new Date(),
         error: {
-          code: 'SUMUP_FALLBACK_REQUIRED',
-          message: 'Please use the SumUp payment screen for this transaction',
-          recoverable: true,
-          suggestedAction: 'Use alternative payment UI',
-        },
-        metadata: {
-          requiresFallbackUI: true,
+          code: 'SUMUP_NOT_AVAILABLE',
+          message: 'SumUp payment is not available on this device',
+          recoverable: false,
         },
       };
     } catch (error) {

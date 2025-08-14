@@ -51,7 +51,6 @@ export default function ItemModificationModal({
     updateModificationQuantity,
     setSpecialInstructions,
     resetModifications,
-    applyModifications,
     getModificationSummary,
     getPriceImpactSummary,
   } = useItemModifications({ item, useEnhancedCart });
@@ -65,18 +64,17 @@ export default function ItemModificationModal({
 
   const handleSave = () => {
     if (isValid && item) {
-      // Apply modifications to the store
-      applyModifications();
-
-      // Create the modified item object to pass back
+      // Create the modified item with all updates (pure function - no store mutation)
       const modifiedItem: EnhancedOrderItem = {
         ...item,
         modifications,
-        specialInstructions: specialInstructions || undefined,
         modificationPrice,
         totalPrice,
+        specialInstructions: specialInstructions || undefined,
+        lastModified: new Date().toISOString(),
       };
-
+      
+      // Pass the modified item to the parent
       onSave(modifiedItem);
       onClose();
     }
@@ -228,6 +226,7 @@ export default function ItemModificationModal({
                 Special Instructions
               </Text>
               <TextInput
+                testID="special-instructions-input"
                 style={[
                   styles.instructionsInput,
                   {
