@@ -60,14 +60,14 @@ export function useCartStore(useEnhanced: boolean = false) {
  * Can be controlled by environment variable or remote config
  */
 export function isEnhancedCartEnabled(): boolean {
-  // Start with it disabled, can be enabled per component
-  return false;
-
-  // Future implementation could check:
-  // - Environment variable
-  // - User preference
-  // - A/B test group
-  // - Remote config
+  // Enhanced cart is now enabled by default
+  // Can be disabled via environment variable if needed
+  if (typeof process !== 'undefined' && process.env?.DISABLE_ENHANCED_CART === 'true') {
+    return false;
+  }
+  
+  // Enable enhanced cart features
+  return true;
 }
 
 /**

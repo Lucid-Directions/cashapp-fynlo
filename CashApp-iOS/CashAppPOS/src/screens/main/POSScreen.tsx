@@ -43,7 +43,7 @@ import ErrorTrackingService from '../../services/ErrorTrackingService';
 import PlatformService from '../../services/PlatformService';
 import SharedDataStore from '../../services/SharedDataStore';
 import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
-import useAppStore from '../../store/useAppStore';
+import { useCartStore, isEnhancedCartEnabled } from '../../store/cartStoreAdapter';
 import useSettingsStore from '../../store/useSettingsStore';
 import useUIStore from '../../store/useUIStore';
 import type { MenuItem, OrderItem } from '../../types';
@@ -175,12 +175,20 @@ const POSScreen: React.FC = () => {
 
   // Create themed styles
 
-  // Zustand stores
+  // Zustand stores - Use enhanced cart store for persistence
+  const cartStore = useCartStore(isEnhancedCartEnabled());
   const { cart, addToCart, removeFromCart, updateCartItem, clearCart, cartTotal, cartItemCount } =
-    useAppStore();
+    cartStore;
 
   const { selectedCategory, setSelectedCategory, showPaymentModal, setShowPaymentModal } =
     useUIStore();
+  
+  // Migrate cart if using enhanced store
+  useEffect(() => {
+    if (isEnhancedCartEnabled() && cartStore.migrateCartIfNeeded) {
+      cartStore.migrateCartIfNeeded();
+    }
+  }, []);
 
   // For split bill integration - convert cart items to enhanced format
   // This MUST come after cart is defined from useAppStore()

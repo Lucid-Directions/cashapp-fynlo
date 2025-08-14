@@ -16,7 +16,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme } from '../../design-system/ThemeProvider';
-import useAppStore from '../../store/useAppStore';
+import { useCartStore, isEnhancedCartEnabled } from '../../store/cartStoreAdapter';
 import { formatPrice } from '../../utils/priceValidation';
 
 interface ServiceChargeOption {
@@ -58,14 +58,15 @@ const serviceChargeOptions: ServiceChargeOption[] = [
 const ServiceChargeSelectionScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const cartStore = useCartStore(isEnhancedCartEnabled());
   const {
-    _cart,
+    cart: _cart,
     cartTotal,
     setServiceChargePercentage,
     setAddTransactionFee,
     serviceChargePercentage,
     addTransactionFee,
-  } = useAppStore();
+  } = cartStore;
 
   const [selectedOption, setSelectedOption] = useState<number>(serviceChargePercentage);
   const [showTransactionFeeToggle, setShowTransactionFeeToggle] = useState(false);

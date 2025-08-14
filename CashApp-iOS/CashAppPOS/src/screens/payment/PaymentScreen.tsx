@@ -21,7 +21,7 @@ import PaymentService from '../../services/PaymentService';
 
 import type { PaymentRequest, PaymentResult } from '../../services/PaymentService';
 import NativeSumUpService from '../../services/NativeSumUpService';
-import useAppStore from '../../store/useAppStore';
+import { useCartStore, isEnhancedCartEnabled } from '../../store/cartStoreAdapter';
 import useSettingsStore from '../../store/useSettingsStore';
 import { logger } from '../../utils/logger';
 
@@ -54,7 +54,8 @@ interface PaymentMethod {
 
 const PaymentScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { cart, clearCart } = useAppStore();
+  const cartStore = useCartStore(isEnhancedCartEnabled());
+  const { cart, clearCart } = cartStore;
   const { paymentMethods, taxConfiguration } = useSettingsStore();
   const nativeSumUpService = NativeSumUpService.getInstance();
 
