@@ -79,9 +79,12 @@ const ExportedMenuItemCard = ({
   styles: unknown;
   cart: OrderItem[];
   handleAddToCart: (item: MenuItem) => void;
-  handleUpdateQuantity: (id: number, quantity: number) => void;
+  handleUpdateQuantity: (id: number | string, quantity: number) => void;
 }) => {
-  const existingItem = cart.find((cartItem) => cartItem.id === item.id);
+  const existingItem = cart.find((cartItem) => 
+    // Handle both string and number IDs for compatibility
+    cartItem.id.toString() === item.id.toString()
+  );
 
   return (
     <View style={[propStyles.menuCard, !item.available && propStyles.menuCardDisabled]}>
@@ -474,30 +477,56 @@ const POSScreen: React.FC = () => {
   };
 
   const handleAddToCart = (item: MenuItem) => {
-    const enhancedItem: EnhancedOrderItem = {
-      id: item.id.toString(),
-      productId: item.id.toString(),
-      name: item.name,
-      price: item.price,
-      quantity: 1,
-      emoji: item.emoji,
-      modifications: [],
-      originalPrice: item.price,
-      modificationPrice: 0,
-      totalPrice: item.price,
-      addedAt: new Date().toISOString(),
-    };
-    
     // Check if item has modifiers (coffee, tea, etc.)
     const hasModifiers = checkIfItemHasModifiers(item);
     
     if (hasModifiers) {
+      // Create enhanced item for modification modal
+      const enhancedItem: EnhancedOrderItem = {
+        id: item.id.toString(),
+        productId: item.id.toString(),
+        name: item.name,
+        price: item.price,
+        quantity: 1,
+        emoji: item.emoji,
+        modifications: [],
+        originalPrice: item.price,
+        modificationPrice: 0,
+        totalPrice: item.price,
+        addedAt: new Date().toISOString(),
+      };
+      
       // Open modification modal for items with modifiers
       setSelectedItemForModification(enhancedItem);
       setShowModificationModal(true);
     } else {
-      // Direct add to cart for items without modifiers
-      addToCart(enhancedItem);
+      // Direct add to cart - format depends on whether enhanced cart is enabled
+      if (isEnhancedCartEnabled()) {
+        const enhancedItem: EnhancedOrderItem = {
+          id: item.id.toString(),
+          productId: item.id.toString(),
+          name: item.name,
+          price: item.price,
+          quantity: 1,
+          emoji: item.emoji,
+          modifications: [],
+          originalPrice: item.price,
+          modificationPrice: 0,
+          totalPrice: item.price,
+          addedAt: new Date().toISOString(),
+        };
+        addToCart(enhancedItem);
+      } else {
+        // Regular OrderItem for non-enhanced cart
+        const orderItem: OrderItem = {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: 1,
+          emoji: item.emoji,
+        };
+        addToCart(orderItem);
+      }
     }
   };
 
@@ -1483,15 +1512,26 @@ const POSScreen: React.FC = () => {
           // Calculate the final price per unit (including modifications)
           const pricePerUnit = modifiedItem.originalPrice + (modifiedItem.modificationPrice || 0);
           
-          // Update the item with the calculated price
-          const enhancedItemToAdd = {
-            ...modifiedItem,
-            price: pricePerUnit, // Price per unit with modifications
-            totalPrice: pricePerUnit * modifiedItem.quantity,
-          };
+          if (isEnhancedCartEnabled()) {
+            // Update the item with the calculated price for enhanced cart
+            const enhancedItemToAdd = {
+              ...modifiedItem,
+              price: pricePerUnit, // Price per unit with modifications
+              totalPrice: pricePerUnit * modifiedItem.quantity,
+            };
+            addToCart(enhancedItemToAdd);
+          } else {
+            // For regular cart, create OrderItem with updated price
+            const orderItem: OrderItem = {
+              id: parseInt(modifiedItem.id) || Date.now(), // Convert string ID back to number
+              name: modifiedItem.name,
+              price: pricePerUnit, // Price per unit with modifications
+              quantity: modifiedItem.quantity,
+              emoji: modifiedItem.emoji,
+            };
+            addToCart(orderItem);
+          }
           
-          // Add to cart with the modified item
-          addToCart(enhancedItemToAdd);
           setShowModificationModal(false);
           setSelectedItemForModification(null);
         }}
