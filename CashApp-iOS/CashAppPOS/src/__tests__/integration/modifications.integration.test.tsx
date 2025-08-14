@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator } from '@react-navigation/stack';
 
 import POSScreen from '../../screens/main/POSScreen';
 import { ThemeProvider } from '../../design-system/ThemeProvider';
@@ -25,7 +25,7 @@ jest.mock('../../store/useEnhancedCartStore');
 jest.mock('../../store/useSettingsStore');
 jest.mock('../../store/useUIStore');
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <ThemeProvider>
@@ -235,7 +235,7 @@ describe('Item Modifications Integration', () => {
     );
 
     // Open cart modal
-    fireEvent.press(getByTestId('cart-button'));
+    fireEvent.press(getByTestId('shopping-cart-button'));
 
     // Check modifications are displayed
     await waitFor(() => {

@@ -227,6 +227,7 @@ export default function ItemModificationModal({
                 Special Instructions
               </Text>
               <TextInput
+                testID="special-instructions-input"
                 style={[
                   styles.instructionsInput,
                   {
