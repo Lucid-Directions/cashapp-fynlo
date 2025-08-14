@@ -275,7 +275,7 @@ export interface EmployeeData {
   role: 'Manager' | 'Cashier' | 'Server' | 'Cook' | string; // Allow string for future roles
   email: string;
   phone: string;
-  hireDate: Date;
+  hireDate: Date | null; // Made nullable to handle employees without hire dates
   hourlyRate: number;
   totalSales: number;
   averageSalesPerDay: number;
