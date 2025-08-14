@@ -26,6 +26,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import CartIcon from '../../components/cart/CartIcon';
 import ItemModificationModal from '../../components/cart/ItemModificationModal';
+import ModificationBadge from '../../components/cart/ModificationBadge';
+import ModificationSummary from '../../components/cart/ModificationSummary';
 import SplitBillModal from '../../components/cart/SplitBillModal';
 import { QuantityPill } from '../../components/inputs';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
@@ -44,9 +46,11 @@ import PlatformService from '../../services/PlatformService';
 import SharedDataStore from '../../services/SharedDataStore';
 import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
 import useAppStore from '../../store/useAppStore';
+import useEnhancedCartStore from '../../store/useEnhancedCartStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import useUIStore from '../../store/useUIStore';
 import type { MenuItem, OrderItem } from '../../types';
+import type { EnhancedOrderItem } from '../../types/cart';
 import { logger } from '../../utils/logger';
 import {
   validatePrice,
@@ -151,7 +155,7 @@ const POSScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
   const [showModificationModal, setShowModificationModal] = useState(false);
   const [showSplitBillModal, setShowSplitBillModal] = useState(false);
-  const [selectedItemForModification, setSelectedItemForModification] = useState<OrderItem | null>(
+  const [selectedItemForModification, setSelectedItemForModification] = useState<EnhancedOrderItem | null>(
     null
   );
 
@@ -178,6 +182,8 @@ const POSScreen: React.FC = () => {
   // Zustand stores
   const { cart, addToCart, removeFromCart, updateCartItem, clearCart, cartTotal, cartItemCount } =
     useAppStore();
+  
+  const enhancedCartStore = useEnhancedCartStore();
 
   const { selectedCategory, setSelectedCategory, showPaymentModal, setShowPaymentModal } =
     useUIStore();
@@ -434,6 +440,27 @@ const POSScreen: React.FC = () => {
       searchQuery ? item.name.toLowerCase().includes(searchQuery.toLowerCase()) : true
     );
 
+  // Helper function to check if an item supports modifications
+  const checkIfItemHasModifiers = (item: MenuItem): boolean => {
+    const category = item.category?.toLowerCase() || '';
+    const modifiableCategories = ['coffee', 'tea', 'beverages', 'drinks', 'hot drinks'];
+    const hasModifiableCategory = modifiableCategories.some(cat => category.includes(cat));
+    
+    const itemName = item.name?.toLowerCase() || '';
+    const hasModifiableKeywords = 
+      itemName.includes('coffee') || 
+      itemName.includes('latte') || 
+      itemName.includes('cappuccino') || 
+      itemName.includes('espresso') || 
+      itemName.includes('americano') || 
+      itemName.includes('macchiato') || 
+      itemName.includes('mocha') || 
+      itemName.includes('tea') || 
+      itemName.includes('chai');
+    
+    return hasModifiableCategory || hasModifiableKeywords;
+  };
+
   const handleAddToCart = (item: MenuItem) => {
     const orderItem: OrderItem = {
       id: item.id,
@@ -681,13 +708,19 @@ const POSScreen: React.FC = () => {
 
   const MenuItemCard = ({ item }: { item: MenuItem }) => {
     const existingItem = cart.find((cartItem) => cartItem.id === item.id);
-    // Check if item category supports modifications
-    const supportsModifications = ['coffee', 'tea', 'hot drinks', 'beverages'].includes(
-      item.category?.toLowerCase() || ''
-    );
+    const hasModifiers = checkIfItemHasModifiers(item);
 
     return (
       <View style={[styles.menuCard, !item.available && styles.menuCardDisabled]}>
+        {/* Show modification badge for customizable items */}
+        {hasModifiers && item.available && (
+          <ModificationBadge 
+            position="top-right"
+            size="small"
+            compact
+          />
+        )}
+        
         <TouchableOpacity
           style={styles.menuCardContent}
           onPress={() => item.available && handleAddToCart(item)}
@@ -711,13 +744,6 @@ const POSScreen: React.FC = () => {
             })}
           </Text>
         </TouchableOpacity>
-
-        {/* Modifications Available Badge */}
-        {supportsModifications && (
-          <View style={styles.modificationBadge}>
-            <Icon name="tune" size={14} color={theme.colors.primary} />
-          </View>
-        )}
 
         {/* Quick Quantity Controls */}
         {existingItem && (
@@ -743,58 +769,13 @@ const POSScreen: React.FC = () => {
 
   const CartItem = ({ item }: { item: OrderItem }) => {
     const menuItem = dynamicMenuItems.find((mi) => mi.id === item.id);
+    const hasModifiers = checkIfItemHasModifiers(menuItem || item);
 
-    // Check for modifications or modifiers
+    // Check for existing modifications
     const hasModifications =
       (item.modifiers && item.modifiers.length > 0) ||
-      (item.modifications && item.modifications.some((mod) => mod.selected));
-
-    const renderModificationSummary = () => {
-      if (!hasModifications) return null;
-
-      // Handle both old modifiers and new modifications format
-      let modificationText = '';
-
-      if (item.modifiers && item.modifiers.length > 0) {
-        // Old format with modifiers array
-        modificationText = item.modifiers
-          .map((mod) => {
-            if (mod.quantity && mod.quantity > 1) {
-              return `${mod.quantity}x ${mod.name}`;
-            }
-            return mod.name;
-          })
-          .join(', ');
-      } else if (item.modifications) {
-        // New format with modifications
-        const selected = item.modifications.filter((mod) => mod.selected);
-        if (selected.length > 0) {
-          modificationText = selected
-            .map((mod) => {
-              if (mod.quantity && mod.quantity > 1) {
-                return `${mod.quantity}x ${mod.name}`;
-              }
-              return mod.name;
-            })
-            .join(', ');
-        }
-      }
-
-      if (!modificationText && item.specialInstructions) {
-        modificationText = 'Special instructions';
-      }
-
-      if (!modificationText) return null;
-
-      return (
-        <View style={styles.cartItemModifications}>
-          <Icon name="tune" size={12} color={theme.colors.textSecondary} />
-          <Text style={styles.cartItemModificationText} numberOfLines={1}>
-            {modificationText}
-          </Text>
-        </View>
-      );
-    };
+      (item.modifications && item.modifications.some((mod) => mod.selected)) ||
+      item.specialInstructions;
 
     const renderRightActions = (
       progress: Animated.AnimatedInterpolation<number>,
@@ -821,7 +802,14 @@ const POSScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.cartItem}
           onPress={() => {
-            setSelectedItemForModification(item);
+            // Convert OrderItem to EnhancedOrderItem
+            const enhancedItem: EnhancedOrderItem = {
+              ...item,
+              id: item.id.toString(),
+              modifications: item.modifications || [],
+              originalPrice: item.price,
+            };
+            setSelectedItemForModification(enhancedItem);
             setShowModificationModal(true);
           }}
           activeOpacity={0.7}
@@ -841,7 +829,60 @@ const POSScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            {renderModificationSummary()}
+            
+            {/* Enhanced modification display */}
+            {hasModifications && (
+              <ModificationSummary
+                modifications={item.modifications}
+                specialInstructions={item.specialInstructions}
+                modificationPrice={item.modificationPrice}
+                originalPrice={item.originalPrice || item.price}
+                showPriceBreakdown={item.modificationPrice && item.modificationPrice !== 0}
+                onCustomizePress={() => {
+                  // Convert OrderItem to EnhancedOrderItem for modification
+                  const enhancedItem: EnhancedOrderItem = {
+                    ...item,
+                    id: item.id.toString(),
+                    productId: item.id.toString(),
+                    modifications: item.modifications || [],
+                    originalPrice: item.originalPrice || item.price,
+                    modificationPrice: item.modificationPrice || 0,
+                    totalPrice: item.totalPrice || item.price * item.quantity,
+                    specialInstructions: item.specialInstructions,
+                  };
+                  setSelectedItemForModification(enhancedItem);
+                  setShowModificationModal(true);
+                }}
+                compact
+              />
+            )}
+            
+            {/* Show customize button for items that support modifications */}
+            {hasModifiers && !hasModifications && (
+              <TouchableOpacity
+                style={styles.customizePrompt}
+                onPress={() => {
+                  // Convert OrderItem to EnhancedOrderItem for modification
+                  const enhancedItem: EnhancedOrderItem = {
+                    ...item,
+                    id: item.id.toString(),
+                    productId: item.id.toString(),
+                    modifications: item.modifications || [],
+                    originalPrice: item.price,
+                    modificationPrice: 0,
+                    totalPrice: item.price * item.quantity,
+                  };
+                  setSelectedItemForModification(enhancedItem);
+                  setShowModificationModal(true);
+                }}
+              >
+                <Icon name="tune" size={14} color={theme.colors.primary} />
+                <Text style={[styles.customizePromptText, { color: theme.colors.primary }]}>
+                  Tap to customize
+                </Text>
+              </TouchableOpacity>
+            )}
+            
             {menuItem?.description && (
               <Text style={styles.cartItemDescription} numberOfLines={2}>
                 {menuItem.description}
@@ -1412,12 +1453,16 @@ const POSScreen: React.FC = () => {
           setShowModificationModal(false);
           setSelectedItemForModification(null);
         }}
-        onSave={() => {
+        onSave={(modifiedItem) => {
+          // If this is a new item being added (not from cart)
+          if (selectedItemForModification && !enhancedCartStore.cart.find(item => item.id === selectedItemForModification.id)) {
+            enhancedCartStore.addToCart(modifiedItem);
+          }
+          // Otherwise the modal has already updated the cart via applyModifications
           setShowModificationModal(false);
           setSelectedItemForModification(null);
-          // The cart will be automatically updated by the modal
         }}
-        useEnhancedCart={false} // Using regular cart for now
+        useEnhancedCart={true} // Switch to enhanced cart for modifications
       />
 
       {/* Split Bill Modal */}
@@ -1478,6 +1523,18 @@ const createDynamicStyles = (theme: unknown, serviceChargeConfig: { enabled: boo
     retryButtonText: {
       color: theme.colors.white,
       fontWeight: '600',
+    },
+    customizePrompt: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginLeft: 36,
+      marginTop: 4,
+      marginBottom: 4,
+    },
+    customizePromptText: {
+      fontSize: 12,
+      fontStyle: 'italic',
+      marginLeft: 4,
     },
   });
 
