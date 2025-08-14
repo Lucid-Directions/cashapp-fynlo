@@ -26,7 +26,7 @@ interface ItemModificationModalProps {
   visible: boolean;
   item: EnhancedOrderItem | null;
   onClose: () => void;
-  onSave: () => void;
+  onSave: (modifiedItem: EnhancedOrderItem) => void;
   useEnhancedCart?: boolean;
 }
 
@@ -46,6 +46,7 @@ export default function ItemModificationModal({
     isValid,
     errors,
     hasChanges,
+    specialInstructions,
     toggleModification,
     updateModificationQuantity,
     setSpecialInstructions,
@@ -63,9 +64,19 @@ export default function ItemModificationModal({
   }, [visible, item?.id]);
 
   const handleSave = () => {
-    if (isValid) {
-      applyModifications();
-      onSave();
+    if (isValid && item) {
+      // Create the modified item with all updates
+      const modifiedItem: EnhancedOrderItem = {
+        ...item,
+        modifications,
+        modificationPrice,
+        totalPrice,
+        specialInstructions,
+        lastModified: new Date().toISOString(),
+      };
+      
+      // Pass the modified item to the parent
+      onSave(modifiedItem);
       onClose();
     }
   };
@@ -228,7 +239,7 @@ export default function ItemModificationModal({
                 placeholderTextColor={theme.colors.textSecondary}
                 multiline
                 numberOfLines={3}
-                value={item.specialInstructions || ''}
+                value={specialInstructions}
                 onChangeText={setSpecialInstructions}
               />
             </View>

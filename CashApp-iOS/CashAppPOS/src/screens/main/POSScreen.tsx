@@ -47,6 +47,7 @@ import { useCartStore, isEnhancedCartEnabled } from '../../store/cartStoreAdapte
 import useSettingsStore from '../../store/useSettingsStore';
 import useUIStore from '../../store/useUIStore';
 import type { MenuItem, OrderItem } from '../../types';
+import type { EnhancedOrderItem } from '../../types/cart';
 import { logger } from '../../utils/logger';
 import {
   validatePrice,
@@ -151,7 +152,7 @@ const POSScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
   const [showModificationModal, setShowModificationModal] = useState(false);
   const [showSplitBillModal, setShowSplitBillModal] = useState(false);
-  const [selectedItemForModification, setSelectedItemForModification] = useState<OrderItem | null>(
+  const [selectedItemForModification, setSelectedItemForModification] = useState<EnhancedOrderItem | null>(
     null
   );
 
@@ -443,14 +444,69 @@ const POSScreen: React.FC = () => {
     );
 
   const handleAddToCart = (item: MenuItem) => {
-    const orderItem: OrderItem = {
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      quantity: 1,
-      emoji: item.emoji,
-    };
-    addToCart(orderItem);
+    // Check if item has modifiers (coffee, tea, etc.)
+    const hasModifiers = checkIfItemHasModifiers(item);
+    
+    if (hasModifiers) {
+      // Open modification modal for items with modifiers
+      const enhancedItem: EnhancedOrderItem = {
+        id: item.id.toString(),
+        productId: item.id.toString(),
+        name: item.name,
+        price: item.price,
+        originalPrice: item.price,
+        quantity: 1,
+        emoji: item.emoji,
+        category: item.category,
+        categoryName: item.category,
+        modifications: [],
+        modificationPrice: 0,
+        totalPrice: item.price,
+        addedAt: new Date().toISOString(),
+      };
+      
+      setSelectedItemForModification(enhancedItem);
+      setShowModificationModal(true);
+    } else {
+      // Direct add to cart for items without modifiers
+      const orderItem: OrderItem = {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: 1,
+        emoji: item.emoji,
+      };
+      addToCart(orderItem);
+    }
+  };
+
+  // Helper function to check if an item should show modification options
+  const checkIfItemHasModifiers = (item: MenuItem): boolean => {
+    // Check by category name (case-insensitive)
+    const category = item.category?.toLowerCase() || '';
+    
+    // Categories that typically have modifiers
+    const modifiableCategories = ['coffee', 'tea', 'beverages', 'drinks', 'hot drinks'];
+    
+    // Check if category matches any modifiable category
+    const hasModifiableCategory = modifiableCategories.some(cat => 
+      category.includes(cat)
+    );
+    
+    // Also check item name for coffee/tea keywords
+    const itemName = item.name?.toLowerCase() || '';
+    const hasModifiableKeywords = 
+      itemName.includes('coffee') || 
+      itemName.includes('latte') || 
+      itemName.includes('cappuccino') || 
+      itemName.includes('espresso') || 
+      itemName.includes('americano') || 
+      itemName.includes('macchiato') || 
+      itemName.includes('mocha') || 
+      itemName.includes('tea') || 
+      itemName.includes('chai');
+    
+    return hasModifiableCategory || hasModifiableKeywords;
   };
 
   const handleUpdateQuantity = (id: number, quantity: number) => {
@@ -1420,12 +1476,29 @@ const POSScreen: React.FC = () => {
           setShowModificationModal(false);
           setSelectedItemForModification(null);
         }}
-        onSave={() => {
+        onSave={(modifiedItem: EnhancedOrderItem) => {
+          // Calculate the final price per unit (including modifications)
+          const pricePerUnit = modifiedItem.originalPrice + (modifiedItem.modificationPrice || 0);
+          
+          // Create an OrderItem with modification data
+          const orderItem: OrderItem = {
+            id: modifiedItem.id,
+            name: modifiedItem.name,
+            price: pricePerUnit, // Price per unit with modifications
+            quantity: modifiedItem.quantity,
+            emoji: modifiedItem.emoji,
+            // Store modifications for display
+            modifications: modifiedItem.modifications,
+            specialInstructions: modifiedItem.specialInstructions,
+            modificationPrice: modifiedItem.modificationPrice,
+            originalPrice: modifiedItem.originalPrice,
+          };
+          
+          addToCart(orderItem);
           setShowModificationModal(false);
           setSelectedItemForModification(null);
-          // The cart will be automatically updated by the modal
         }}
-        useEnhancedCart={false} // Using regular cart for now
+        useEnhancedCart={isEnhancedCartEnabled()}
       />
 
       {/* Split Bill Modal */}
