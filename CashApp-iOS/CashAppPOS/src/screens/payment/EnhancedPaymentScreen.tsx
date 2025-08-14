@@ -1142,6 +1142,9 @@ const EnhancedPaymentScreen: React.FC = () => {
               generateQRCode();
             } else if (selectedPaymentMethod === 'applePay') {
               handleApplePayPayment();
+            } else if (selectedPaymentMethod === 'googlePay') {
+              // Google Pay handler - not yet implemented
+              Alert.alert('Google Pay', 'Google Pay integration coming soon.');
             } else if (splitPayment) {
               handleProcessPayment(); // For split payments
             } else {
@@ -1834,13 +1837,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.primary,
     marginLeft: 8,
-    flex: 1,
-  },
-  customTipInput: {
-    marginVertical: 8,
-  },
-  splitAmountInput: {
-    marginVertical: 4,
     flex: 1,
   },
 });
