@@ -182,13 +182,13 @@ const POSScreen: React.FC = () => {
 
   const { selectedCategory, setSelectedCategory, showPaymentModal, setShowPaymentModal } =
     useUIStore();
-  
+
   // Migrate cart if using enhanced store
   useEffect(() => {
     if (isEnhancedCartEnabled() && cartStore.migrateCartIfNeeded) {
       cartStore.migrateCartIfNeeded();
     }
-  }, []);
+  }, [cartStore]);
 
   // For split bill integration - convert cart items to enhanced format
   // This MUST come after cart is defined from useAppStore()

@@ -43,9 +43,9 @@ export function useCartStore(useEnhanced: boolean = false) {
         // Use a hash of the string ID to generate a stable numeric ID
         // This avoids collisions while maintaining consistency
         id:
-          typeof item.id === 'string' && isNaN(parseInt(item.id))
+          typeof item.id === 'string' && isNaN(parseInt(item.id, 10))
             ? item.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), index)
-            : parseInt(item.id) || index,
+            : parseInt(item.id, 10) || index,
         name: item.name,
         price: item.price,
         quantity: item.quantity,
@@ -60,13 +60,13 @@ export function useCartStore(useEnhanced: boolean = false) {
  * Can be controlled by environment variable or remote config
  */
 export function isEnhancedCartEnabled(): boolean {
-  // Enhanced cart is now enabled by default
+  // Enhanced cart is now enabled by default for cart persistence
   // Can be disabled via environment variable if needed
   if (typeof process !== 'undefined' && process.env?.DISABLE_ENHANCED_CART === 'true') {
     return false;
   }
-  
-  // Enable enhanced cart features
+
+  // Enable enhanced cart features for persistence
   return true;
 }
 
@@ -116,9 +116,9 @@ export function syncCartStores() {
     const simplifiedCart = enhancedStore.cart.map((item, index) => ({
       // Use same hash logic as getOldFormatCart for consistency
       id:
-        typeof item.id === 'string' && isNaN(parseInt(item.id))
+        typeof item.id === 'string' && isNaN(parseInt(item.id, 10))
           ? item.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), index)
-          : parseInt(item.id) || index,
+          : parseInt(item.id, 10) || index,
       name: item.name,
       price: item.price,
       quantity: item.quantity,
