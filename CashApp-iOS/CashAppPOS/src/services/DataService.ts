@@ -183,6 +183,7 @@ class DataService {
         headers: {
           'Content-Type': 'application/json',
         },
+        redirect: 'follow', // Follow 307 redirects from DigitalOcean
       });
 
       clearTimeout(timeoutId);
