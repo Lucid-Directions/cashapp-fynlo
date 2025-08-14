@@ -26,7 +26,7 @@ import QRCodePayment from '../../components/payment/QRCodePayment';
 // Services
 import PaymentService from '../../services/PaymentService';
 import OrderService from '../../services/OrderService';
-import SumUpNativeService from '../../services/SumUpNativeService';
+import NativeSumUpService from '../../services/NativeSumUpService';
 import { logger } from '../../utils/logger';
 
 // Stores
@@ -81,7 +81,8 @@ const PaymentProcessingScreen: React.FC = () => {
   const { user } = useAuth();
   const paymentService = PaymentService;
   const orderService = OrderService;
-  const sumUpService = SumUpNativeService.getInstance();
+  // NativeSumUpService is already a singleton instance
+  const sumUpService = NativeSumUpService;
   const { clearCart, addTransactionFee } = useAppStore();
   const { taxConfiguration, paymentMethods } = useSettingsStore();
 

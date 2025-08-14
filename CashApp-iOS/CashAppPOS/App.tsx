@@ -16,7 +16,7 @@ import { ThemeProvider } from './src/design-system/ThemeProvider';
 import { supabase } from './src/lib/supabase';
 import AppNavigator from './src/navigation/AppNavigator';
 import ErrorTrackingService from './src/services/ErrorTrackingService';
-import SumUpNativeService from './src/services/SumUpNativeService';
+import NativeSumUpService from './src/services/NativeSumUpService';
 import { useAuthStore } from './src/store/useAuthStore';
 import { ensureComponentsLoaded } from './src/utils/componentRegistry';
 import tokenManager from './src/utils/tokenManager';
@@ -63,8 +63,8 @@ const App: React.FC = () => {
 
         // Initialize SumUp Native SDK (configuration will be fetched from backend when needed)
         console.log('🔧 Initializing SumUp Native SDK...');
-        const sumUpService = SumUpNativeService.getInstance();
-        const sumUpInitialized = await sumUpService.initialize();
+        // NativeSumUpService is already a singleton instance
+        const sumUpInitialized = await NativeSumUpService.initialize();
 
         if (sumUpInitialized) {
           console.log('✅ SumUp Native SDK initialized successfully');

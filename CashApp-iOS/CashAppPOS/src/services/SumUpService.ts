@@ -10,7 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logger } from '../utils/logger';
 
 import type { PaymentRequest, PaymentResult } from './PaymentService';
-import SumUpNativeService from './SumUpNativeService';
+import NativeSumUpService from './NativeSumUpService';
 
 export interface SumUpConfig {
   apiKey: string;
@@ -149,15 +149,15 @@ class SumUpServiceClass {
       logger.info('Processing SumUp payment via native SDK:', request);
 
       // Use the native SumUp service for real payment processing
-      const nativeService = SumUpNativeService.getInstance();
+      // NativeSumUpService is already a singleton instance
       
       // Check if native module is available
-      if (!nativeService.isAvailable()) {
+      if (!NativeSumUpService.isAvailable()) {
         throw new Error('SumUp native module not available on this device');
       }
 
       // Process the payment through native SDK
-      const result = await nativeService.performCheckout(
+      const result = await NativeSumUpService.performCheckout(
         request.amount,
         request.currency || 'GBP',
         request.description || 'Payment',
@@ -214,8 +214,7 @@ class SumUpServiceClass {
       logger.info('🔄 Using Native SumUp SDK for contactless payment');
 
       // Use native SumUp SDK for contactless payment
-      const nativeService = SumUpNativeService.getInstance();
-      const result = await nativeService.performCheckout(
+      const result = await NativeSumUpService.performCheckout(
         amount,
         currency,
         description || 'Fynlo POS Contactless Payment',
