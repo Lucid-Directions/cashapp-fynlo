@@ -554,13 +554,10 @@ class DatabaseService {
         return this.menuCache.items;
       }
 
-      logger.warn('🍮 TEMPORARY: Using Chucho menu data while API is being fixed');
-      // TEMPORARY: Return Chucho menu while we fix the API timeout issue
-      const fallbackData = this.getChuchoMenuData();
-      // Cache the fallback data too with current timestamp
-      this.menuCache.items = fallbackData;
-      this.menuCache.itemsTimestamp = Date.now();
-      return fallbackData;
+      logger.error('❌ No menu data available - API failed and no cache exists');
+      // Return empty array instead of fallback data
+      // This ensures we don't show mock/demo data in production
+      return [];
     }
   }
 
@@ -604,11 +601,10 @@ class DatabaseService {
         return this.menuCache.categories;
       }
 
-      // Return Mexican categories as fallback
-      const fallback = this.getMexicanCategoriesFallback();
-      this.menuCache.categories = fallback;
-      this.menuCache.categoriesTimestamp = Date.now();
-      return fallback;
+      logger.error('❌ No categories available - API failed and no cache exists');
+      // Return empty array instead of fallback data
+      // This ensures we don't show mock/demo data in production
+      return [];
     }
   }
 

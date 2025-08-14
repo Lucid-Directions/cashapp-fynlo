@@ -111,8 +111,9 @@ interface EnhancedAppStore extends Omit<AppState, 'cart'>, EnhancedCartState {
   getSelectedItems: () => EnhancedOrderItem[];
   getSplitGroupTotal: (groupId: string) => number;
 
-  // Migration helper
+  // Migration helpers
   migrateCartIfNeeded: () => void;
+  migrateFromOldStorage: () => Promise<void>;
 }
 
 // Helper to convert old OrderItem to EnhancedOrderItem
@@ -853,6 +854,74 @@ const useEnhancedCartStore = create<EnhancedAppStore>()(
               cart: migrationResult.migratedItems,
             };
           }),
+
+        // One-time migration from old storage
+        migrateFromOldStorage: async () => {
+          const state = get();
+          
+          // Only migrate if enhanced cart is empty
+          if (state.cart.length > 0) {
+            return;
+          }
+
+          try {
+            // Check if we've already migrated
+            const migrationFlag = await AsyncStorage.getItem('enhanced-cart-migrated');
+            if (migrationFlag === 'true') {
+              return;
+            }
+
+            // Try to read from old storage
+            const oldStorageData = await AsyncStorage.getItem('cashapp-pos-storage');
+            if (!oldStorageData) {
+              // Mark as migrated even if no old data exists
+              await AsyncStorage.setItem('enhanced-cart-migrated', 'true');
+              return;
+            }
+
+            const oldState = JSON.parse(oldStorageData);
+            if (!oldState?.state?.cart || oldState.state.cart.length === 0) {
+              // Mark as migrated even if cart was empty
+              await AsyncStorage.setItem('enhanced-cart-migrated', 'true');
+              return;
+            }
+
+            // Migrate the old cart items
+            const migrationResult = migrateCart(oldState.state.cart, state.user?.id);
+            
+            if (migrationResult.warnings.length > 0) {
+              console.warn('Old storage migration warnings:', migrationResult.warnings);
+            }
+
+            if (migrationResult.errors.length > 0) {
+              console.error('Old storage migration errors:', migrationResult.errors);
+              ErrorTrackingService.getInstance().trackError(new Error('Old storage migration failed'), {
+                errors: migrationResult.errors,
+                stats: migrationResult.stats,
+              });
+            }
+
+            // Update the enhanced cart with migrated items
+            set({
+              cart: migrationResult.migratedItems,
+              serviceChargePercentage: oldState.state.serviceChargePercentage || 0,
+              addTransactionFee: oldState.state.addTransactionFee || false,
+            });
+
+            // Mark migration as complete
+            await AsyncStorage.setItem('enhanced-cart-migrated', 'true');
+            
+            // Optionally clear old storage to save space
+            // await AsyncStorage.removeItem('cashapp-pos-storage');
+            
+            console.log(`Successfully migrated ${migrationResult.migratedItems.length} items from old storage`);
+          } catch (error) {
+            console.error('Failed to migrate from old storage:', error);
+            ErrorTrackingService.getInstance().trackError(error as Error, {
+              context: 'old_storage_migration',
+            });
+          }
+        },
       }),
       {
         name: 'enhanced-cart-storage',
@@ -870,6 +939,8 @@ const useEnhancedCartStore = create<EnhancedAppStore>()(
           // Run migration after rehydration
           if (state) {
             state.migrateCartIfNeeded();
+            // Also attempt to migrate from old storage if this is first run
+            state.migrateFromOldStorage();
           }
         },
       }

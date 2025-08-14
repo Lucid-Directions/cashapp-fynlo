@@ -30,7 +30,7 @@ import SplitBillModal from '../../components/cart/SplitBillModal';
 import { QuantityPill } from '../../components/inputs';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
-import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
+import NativeSumUpPayment from '../../components/payment/NativeSumUpPayment';
 import SumUpTestComponent from '../../components/payment/SumUpTestComponent';
 import CategorySearchBubble from '../../components/search/CategorySearchBubble';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
@@ -171,6 +171,9 @@ const POSScreen: React.FC = () => {
 
   // Debug showSumUpPayment state changes
   useEffect(() => {
+    if (showSumUpPayment) {
+      logger.info('🎯 POSScreen: Mounting NativeSumUpPayment component');
+    }
     logger.info('🔄 showSumUpPayment state changed to:', showSumUpPayment);
   }, [showSumUpPayment]);
 
@@ -188,6 +191,9 @@ const POSScreen: React.FC = () => {
   useEffect(() => {
     if (isEnhancedCartEnabled() && cartStore.migrateCartIfNeeded) {
       cartStore.migrateCartIfNeeded();
+      // Also sync stores periodically for consistency during rollout
+      const { syncCartStores } = require('../../store/cartStoreAdapter');
+      syncCartStores();
     }
   }, [cartStore]);
 
@@ -361,6 +367,12 @@ const POSScreen: React.FC = () => {
   };
 
   const calculateServiceFee = (subtotal: number) => {
+    // Use enhanced cart store's service charge if enabled
+    if (isEnhancedCartEnabled() && cartStore.calculateServiceCharge) {
+      return cartStore.calculateServiceCharge();
+    }
+    
+    // Fall back to local config for old cart
     if (!serviceChargeConfig.enabled) return 0;
 
     const serviceFeeCalculation = calculatePercentageFee(subtotal, serviceChargeConfig.rate, {
@@ -1237,10 +1249,10 @@ const POSScreen: React.FC = () => {
                           </Text>
                         </View>
                       )}
-                      {serviceChargeConfig.enabled && (
+                      {(isEnhancedCartEnabled() ? cartStore.serviceChargePercentage > 0 : serviceChargeConfig.enabled) && (
                         <View style={styles.summaryRow}>
                           <Text style={styles.summaryLabel}>
-                            Service Fee ({serviceChargeConfig.rate}%)
+                            Service Fee ({isEnhancedCartEnabled() ? cartStore.serviceChargePercentage : serviceChargeConfig.rate}%)
                           </Text>
                           <Text style={styles.summaryValue}>
                             {formatPrice(calculateServiceFee(cartTotal()), '£', {
@@ -1453,19 +1465,15 @@ const POSScreen: React.FC = () => {
 
       {/* SumUp Payment Component */}
       {showSumUpPayment && (
-        <>
-          {logger.info(
-            '🔄 Rendering SumUpPaymentComponent with showSumUpPayment:',
-            showSumUpPayment
-          )}
-          <SumUpPaymentComponent
+        <NativeSumUpPayment
             amount={calculateCartTotal()}
             currency="GBP"
             title={`Order for ${customerName || 'Customer'}`}
+            visible={showSumUpPayment}
             onPaymentComplete={handleSumUpPaymentComplete}
             onPaymentCancel={handleSumUpPaymentCancel}
+            useTapToPay={true}
           />
-        </>
       )}
 
       {/* Item Modification Modal */}
