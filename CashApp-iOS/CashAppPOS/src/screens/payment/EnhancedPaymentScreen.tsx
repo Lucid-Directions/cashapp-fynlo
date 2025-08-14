@@ -529,21 +529,24 @@ const EnhancedPaymentScreen: React.FC = () => {
     ]);
   };
 
-  const handleProcessPayment = async () => {
-    if (!selectedPaymentMethod && !splitPayment) {
-      Alert.alert('Select Payment Method', 'Please select a payment method to continue.');
-      return;
-    }
+  const handleProcessPayment = async (skipValidation = false) => {
+    // Skip validation when called from successful payment handlers
+    if (!skipValidation) {
+      if (!selectedPaymentMethod && !splitPayment) {
+        Alert.alert('Select Payment Method', 'Please select a payment method to continue.');
+        return;
+      }
 
-    if (!isFormValid) {
-      const message = !isNameValid 
-        ? 'Customer name is too long (maximum 60 characters).'
-        : !isEmailValid
-        ? 'Please enter a valid email address.'
-        : 'Please check the customer information.';
-      
-      Alert.alert('Invalid Information', message);
-      return;
+      if (!isFormValid) {
+        const message = !isNameValid 
+          ? 'Customer name is too long (maximum 60 characters).'
+          : !isEmailValid
+          ? 'Please enter a valid email address.'
+          : 'Please check the customer information.';
+        
+        Alert.alert('Invalid Information', message);
+        return;
+      }
     }
 
     setProcessing(true);
@@ -696,7 +699,7 @@ const EnhancedPaymentScreen: React.FC = () => {
             onPress={() => {
               if (parseFloat(cashReceived) >= calculateGrandTotal()) {
                 setShowCashModal(false);
-                handleProcessPayment();
+                handleProcessPayment(true); // Skip validation for successful cash payment
               }
             }}
             disabled={!cashReceived || parseFloat(cashReceived) < calculateGrandTotal()}
@@ -826,7 +829,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                   setQRPaymentStatus('completed');
                   setTimeout(() => {
                     setShowQRModal(false);
-                    handleProcessPayment();
+                    handleProcessPayment(true); // Skip validation for successful QR payment
                   }, 2000);
                 }}
               >
@@ -1128,7 +1131,26 @@ const EnhancedPaymentScreen: React.FC = () => {
       <View style={styles.footer}>
         <TouchableOpacity
           style={[styles.processButton, processing && styles.processingButton]}
-          onPress={handleProcessPayment}
+          onPress={() => {
+            // Route to the correct payment handler based on selected method
+            if (selectedPaymentMethod === 'card') {
+              handleCardPayment(); // This will show the SumUp modal
+            } else if (selectedPaymentMethod === 'cash') {
+              setShowCashModal(true);
+            } else if (selectedPaymentMethod === 'qrCode') {
+              setShowQRModal(true);
+              generateQRCode();
+            } else if (selectedPaymentMethod === 'applePay') {
+              handleApplePayPayment();
+            } else if (selectedPaymentMethod === 'googlePay') {
+              // Google Pay handler - not yet implemented
+              Alert.alert('Google Pay', 'Google Pay integration coming soon.');
+            } else if (splitPayment) {
+              handleProcessPayment(); // For split payments
+            } else {
+              Alert.alert('Select Payment Method', 'Please select a payment method to continue.');
+            }
+          }}
           disabled={processing || (!selectedPaymentMethod && !splitPayment) || !isFormValid || showSumUpModal}
         >
           {processing ? (
@@ -1164,7 +1186,7 @@ const EnhancedPaymentScreen: React.FC = () => {
             if (success) {
               // Process successful payment
               logger.info('✅ Native SumUp payment successful', { transactionCode });
-              handleProcessPayment();
+              handleProcessPayment(true); // Skip validation since payment already succeeded
             } else {
               // Handle error
               logger.error('❌ Native SumUp payment failed:', error);
@@ -1815,13 +1837,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: EnhancedColors.primary,
     marginLeft: 8,
-    flex: 1,
-  },
-  customTipInput: {
-    marginVertical: 8,
-  },
-  splitAmountInput: {
-    marginVertical: 4,
     flex: 1,
   },
 });
