@@ -1408,7 +1408,7 @@ const POSScreen: React.FC = () => {
       {showSumUpPayment && (
         <>
           {logger.info(
-            '🔄 Rendering SumUpPaymentComponent with showSumUpPayment:',
+            '🎯 POSScreen: Mounting NativeSumUpPayment component with showSumUpPayment:',
             showSumUpPayment
           )}
           <NativeSumUpPayment

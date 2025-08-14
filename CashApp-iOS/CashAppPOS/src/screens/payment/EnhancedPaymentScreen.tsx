@@ -18,7 +18,6 @@ import DecimalInput from '../../components/inputs/DecimalInput';
 import SimpleDecimalInput from '../../components/inputs/SimpleDecimalInput';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import NativeSumUpPayment from '../../components/payment/NativeSumUpPayment';
-import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
 import { useAuth } from '../../contexts/AuthContext';
 import ApplePayService from '../../services/ApplePayService';
 import NativeSumUpService from '../../services/NativeSumUpService';
@@ -1175,9 +1174,11 @@ const EnhancedPaymentScreen: React.FC = () => {
       {/* QR Payment Modal */}
       <QRPaymentModal />
 
-      {/* SumUp Payment Component - Use native if available */}
-      {showSumUpModal && NativeSumUpService.isAvailable() ? (
-        <NativeSumUpPayment
+      {/* SumUp Payment Component - ALWAYS use native SDK */}
+      {showSumUpModal && (
+        <>
+          {logger.info('🎯 EnhancedPaymentScreen: Mounting NativeSumUpPayment component')}
+          <NativeSumUpPayment
           amount={calculateGrandTotal()}
           currency="GBP"
           title={`Order #${Date.now()}`}
@@ -1200,29 +1201,8 @@ const EnhancedPaymentScreen: React.FC = () => {
           }}
           useTapToPay={true}
         />
-      ) : showSumUpModal ? (
-        <SumUpPaymentComponent
-          amount={calculateGrandTotal()}
-          currency="GBP"
-          title={`Order #${Date.now()}`}
-          onPaymentComplete={(success, transactionCode, error) => {
-            if (success) {
-              // Process successful payment
-              logger.info('✅ SumUp payment successful', { transactionCode });
-              handleProcessPayment();
-            } else {
-              // Handle error
-              logger.error('❌ SumUp payment failed', { error });
-              Alert.alert('Payment Failed', error || 'Unable to process payment');
-            }
-            setShowSumUpModal(false);
-          }}
-          onPaymentCancel={() => {
-            logger.info('⚠️ SumUp payment cancelled by user');
-            setShowSumUpModal(false);
-          }}
-        />
-      ) : null}
+        </>
+      )}
     </View>
   );
 };

@@ -1,3 +1,13 @@
+/**
+ * @deprecated This component uses the problematic sumup-react-native-alpha package
+ * which shows mock data and doesn't trigger real payments.
+ * 
+ * USE NativeSumUpPayment INSTEAD - it uses the real native iOS SDK
+ * 
+ * This file is kept only for emergency fallback and should NOT be used in production.
+ * All payment screens should use NativeSumUpPayment component.
+ */
+
 import React, { useEffect, useState } from 'react';
 import type { TextStyle, ViewStyle } from 'react-native';
 import { View, Text, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
@@ -419,6 +429,8 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = (props) => {
   const { theme } = useTheme();
 
+  logger.warn('⚠️⚠️⚠️ DEPRECATED: SumUpPaymentComponent is being used - this uses MOCK DATA!');
+  logger.warn('⚠️⚠️⚠️ USE NativeSumUpPayment INSTEAD for real payments');
   logger.info('🔧 SumUpPaymentComponent rendered with props:', {
     amount: props.amount,
     currency: props.currency,
