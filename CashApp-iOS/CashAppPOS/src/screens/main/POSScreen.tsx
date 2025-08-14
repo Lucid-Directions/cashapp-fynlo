@@ -26,6 +26,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import CartIcon from '../../components/cart/CartIcon';
 import ItemModificationModal from '../../components/cart/ItemModificationModal';
+import ModificationBadge from '../../components/cart/ModificationBadge';
+import ModificationSummary from '../../components/cart/ModificationSummary';
 import SplitBillModal from '../../components/cart/SplitBillModal';
 import { QuantityPill } from '../../components/inputs';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
@@ -77,9 +79,12 @@ const ExportedMenuItemCard = ({
   styles: unknown;
   cart: OrderItem[];
   handleAddToCart: (item: MenuItem) => void;
-  handleUpdateQuantity: (id: number, quantity: number) => void;
+  handleUpdateQuantity: (id: number | string, quantity: number) => void;
 }) => {
-  const existingItem = cart.find((cartItem) => cartItem.id === item.id);
+  const existingItem = cart.find((cartItem) => 
+    // Handle both string and number IDs for compatibility
+    cartItem.id.toString() === item.id.toString()
+  );
 
   return (
     <View style={[propStyles.menuCard, !item.available && propStyles.menuCardDisabled]}>
@@ -111,8 +116,8 @@ const ExportedMenuItemCard = ({
         <View style={propStyles.quantityPillContainer}>
           <QuantityPill
             quantity={existingItem.quantity}
-            onIncrease={() => handleUpdateQuantity(item.id, existingItem.quantity + 1)}
-            onDecrease={() => handleUpdateQuantity(item.id, existingItem.quantity - 1)}
+            onIncrease={() => handleUpdateQuantity(existingItem.id, existingItem.quantity + 1)}
+            onDecrease={() => handleUpdateQuantity(existingItem.id, existingItem.quantity - 1)}
             size="medium"
             colorScheme="accent"
             minValue={0}
@@ -159,9 +164,6 @@ const POSScreen: React.FC = () => {
   // Dynamic styles that depend on state
   const dynamicStyles = createDynamicStyles(theme, serviceChargeConfig);
 
-  // Using regular cart for now
-  const useEnhancedCart = false;
-
   // Dynamic menu state
   const [dynamicMenuItems, setDynamicMenuItems] = useState<MenuItem[]>([]);
   const [dynamicCategories, setDynamicCategories] = useState<string[]>([]);
@@ -179,7 +181,7 @@ const POSScreen: React.FC = () => {
 
   // Create themed styles
 
-  // Zustand stores - Use enhanced cart store for persistence
+  // Zustand stores - Use enhanced cart store for persistence and modifications
   const cartStore = useCartStore(isEnhancedCartEnabled());
   const { cart, addToCart, removeFromCart, updateCartItem, clearCart, cartTotal, cartItemCount } =
     cartStore;
@@ -246,7 +248,7 @@ const POSScreen: React.FC = () => {
         setMenuLoading(true);
         setMenuError(null);
         setIsUsingDemoData(false);
-        
+
         const dataService = DataService.getInstance();
 
         // Increase timeout to 15 seconds to allow for slower API responses and retries
@@ -264,7 +266,7 @@ const POSScreen: React.FC = () => {
 
         // Check if we're using demo data (items have 'demo-' prefix in ID)
         // Safely handle null/undefined IDs
-        const usingDemo = menuItems.some(item => {
+        const usingDemo = menuItems.some((item) => {
           if (!item?.id) return false;
           const idStr = item.id.toString();
           return idStr.startsWith('demo-');
@@ -276,12 +278,10 @@ const POSScreen: React.FC = () => {
         const categoryNames = [
           'All',
           ...categories
-            .map((cat) => typeof cat === 'string' ? cat : cat?.name)
-            .filter((name): name is string => 
-              name !== undefined && 
-              name !== null && 
-              name !== 'All' && 
-              name.trim() !== ''
+            .map((cat) => (typeof cat === 'string' ? cat : cat?.name))
+            .filter(
+              (name): name is string =>
+                name !== undefined && name !== null && name !== 'All' && name.trim() !== ''
             ),
         ];
         setDynamicCategories(categoryNames);
@@ -291,7 +291,7 @@ const POSScreen: React.FC = () => {
           categories: categoryNames,
           usingDemoData: usingDemo,
         });
-        
+
         // Don't set error when using demo data - it's working fine
         // The demo indicator will show the status
       } catch (error) {
@@ -326,7 +326,7 @@ const POSScreen: React.FC = () => {
         // even the fallback failed. This shouldn't happen with FallbackMenuService
         // but we'll handle it gracefully
         logger.error('Menu loading failed completely - DataService should have provided fallback');
-        
+
         // The error is already set, and the UI will show retry button
         // Don't show alert as it's annoying - the UI already shows the error
         setDynamicMenuItems([]);
@@ -455,77 +455,87 @@ const POSScreen: React.FC = () => {
       searchQuery ? item.name.toLowerCase().includes(searchQuery.toLowerCase()) : true
     );
 
+  // Helper function to check if an item supports modifications
+  const checkIfItemHasModifiers = (item: MenuItem): boolean => {
+    const category = item.category?.toLowerCase() || '';
+    const modifiableCategories = ['coffee', 'tea', 'beverages', 'drinks', 'hot drinks'];
+    const hasModifiableCategory = modifiableCategories.some((cat) => category.includes(cat));
+
+    const itemName = item.name?.toLowerCase() || '';
+    const hasModifiableKeywords =
+      itemName.includes('coffee') ||
+      itemName.includes('latte') ||
+      itemName.includes('cappuccino') ||
+      itemName.includes('espresso') ||
+      itemName.includes('americano') ||
+      itemName.includes('macchiato') ||
+      itemName.includes('mocha') ||
+      itemName.includes('tea') ||
+      itemName.includes('chai');
+
+    return hasModifiableCategory || hasModifiableKeywords;
+  };
+
   const handleAddToCart = (item: MenuItem) => {
     // Check if item has modifiers (coffee, tea, etc.)
     const hasModifiers = checkIfItemHasModifiers(item);
     
     if (hasModifiers) {
-      // Open modification modal for items with modifiers
+      // Create enhanced item for modification modal
       const enhancedItem: EnhancedOrderItem = {
         id: item.id.toString(),
         productId: item.id.toString(),
         name: item.name,
         price: item.price,
-        originalPrice: item.price,
         quantity: 1,
         emoji: item.emoji,
-        category: item.category,
-        categoryName: item.category,
         modifications: [],
+        originalPrice: item.price,
         modificationPrice: 0,
         totalPrice: item.price,
         addedAt: new Date().toISOString(),
       };
       
+      // Open modification modal for items with modifiers
       setSelectedItemForModification(enhancedItem);
       setShowModificationModal(true);
     } else {
-      // Direct add to cart for items without modifiers
-      const orderItem: OrderItem = {
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: 1,
-        emoji: item.emoji,
-      };
-      addToCart(orderItem);
+      // Direct add to cart - format depends on whether enhanced cart is enabled
+      if (isEnhancedCartEnabled()) {
+        const enhancedItem: EnhancedOrderItem = {
+          id: item.id.toString(),
+          productId: item.id.toString(),
+          name: item.name,
+          price: item.price,
+          quantity: 1,
+          emoji: item.emoji,
+          modifications: [],
+          originalPrice: item.price,
+          modificationPrice: 0,
+          totalPrice: item.price,
+          addedAt: new Date().toISOString(),
+        };
+        addToCart(enhancedItem);
+      } else {
+        // Regular OrderItem for non-enhanced cart
+        const orderItem: OrderItem = {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: 1,
+          emoji: item.emoji,
+        };
+        addToCart(orderItem);
+      }
     }
   };
 
-  // Helper function to check if an item should show modification options
-  const checkIfItemHasModifiers = (item: MenuItem): boolean => {
-    // Check by category name (case-insensitive)
-    const category = item.category?.toLowerCase() || '';
-    
-    // Categories that typically have modifiers
-    const modifiableCategories = ['coffee', 'tea', 'beverages', 'drinks', 'hot drinks'];
-    
-    // Check if category matches any modifiable category
-    const hasModifiableCategory = modifiableCategories.some(cat => 
-      category.includes(cat)
-    );
-    
-    // Also check item name for coffee/tea keywords
-    const itemName = item.name?.toLowerCase() || '';
-    const hasModifiableKeywords = 
-      itemName.includes('coffee') || 
-      itemName.includes('latte') || 
-      itemName.includes('cappuccino') || 
-      itemName.includes('espresso') || 
-      itemName.includes('americano') || 
-      itemName.includes('macchiato') || 
-      itemName.includes('mocha') || 
-      itemName.includes('tea') || 
-      itemName.includes('chai');
-    
-    return hasModifiableCategory || hasModifiableKeywords;
-  };
-
-  const handleUpdateQuantity = (id: number, quantity: number) => {
+  const handleUpdateQuantity = (id: number | string, quantity: number) => {
+    const idStr = id.toString();
     if (quantity <= 0) {
-      removeFromCart(id);
+      removeFromCart(idStr);
     } else {
-      updateCartItem(id, { quantity });
+      updateCartItem(idStr, { quantity });
     }
   };
 
@@ -756,14 +766,18 @@ const POSScreen: React.FC = () => {
   };
 
   const MenuItemCard = ({ item }: { item: MenuItem }) => {
-    const existingItem = cart.find((cartItem) => cartItem.id === item.id);
-    // Check if item category supports modifications
-    const supportsModifications = ['coffee', 'tea', 'hot drinks', 'beverages'].includes(
-      item.category?.toLowerCase() || ''
+    const existingItem = cart.find(
+      (cartItem) => cartItem.productId === item.id.toString() || cartItem.id === item.id.toString()
     );
+    const hasModifiers = checkIfItemHasModifiers(item);
 
     return (
       <View style={[styles.menuCard, !item.available && styles.menuCardDisabled]}>
+        {/* Show modification badge for customizable items */}
+        {hasModifiers && item.available && (
+          <ModificationBadge position="top-right" size="small" compact />
+        )}
+
         <TouchableOpacity
           style={styles.menuCardContent}
           onPress={() => item.available && handleAddToCart(item)}
@@ -788,26 +802,19 @@ const POSScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
 
-        {/* Modifications Available Badge */}
-        {supportsModifications && (
-          <View style={styles.modificationBadge}>
-            <Icon name="tune" size={14} color={theme.colors.primary} />
-          </View>
-        )}
-
         {/* Quick Quantity Controls */}
         {existingItem && (
           <View style={styles.menuItemQuantityControls}>
             <TouchableOpacity
               style={styles.menuQuantityButton}
-              onPress={() => handleUpdateQuantity(item.id, existingItem.quantity - 1)}
+              onPress={() => handleUpdateQuantity(existingItem.id, existingItem.quantity - 1)}
             >
               <Icon name="remove" size={20} color={theme.colors.white} />
             </TouchableOpacity>
             <Text style={styles.menuQuantityText}>{existingItem.quantity}</Text>
             <TouchableOpacity
               style={styles.menuQuantityButton}
-              onPress={() => handleUpdateQuantity(item.id, existingItem.quantity + 1)}
+              onPress={() => handleUpdateQuantity(existingItem.id, existingItem.quantity + 1)}
             >
               <Icon name="add" size={20} color={theme.colors.white} />
             </TouchableOpacity>
@@ -817,60 +824,17 @@ const POSScreen: React.FC = () => {
     );
   };
 
-  const CartItem = ({ item }: { item: OrderItem }) => {
-    const menuItem = dynamicMenuItems.find((mi) => mi.id === item.id);
+  const CartItem = ({ item }: { item: EnhancedOrderItem }) => {
+    const menuItem = dynamicMenuItems.find(
+      (mi) => mi.id.toString() === item.productId || mi.id.toString() === item.id
+    );
+    const hasModifiers = checkIfItemHasModifiers(menuItem || item);
 
-    // Check for modifications or modifiers
+    // Check for existing modifications
     const hasModifications =
       (item.modifiers && item.modifiers.length > 0) ||
-      (item.modifications && item.modifications.some((mod) => mod.selected));
-
-    const renderModificationSummary = () => {
-      if (!hasModifications) return null;
-
-      // Handle both old modifiers and new modifications format
-      let modificationText = '';
-
-      if (item.modifiers && item.modifiers.length > 0) {
-        // Old format with modifiers array
-        modificationText = item.modifiers
-          .map((mod) => {
-            if (mod.quantity && mod.quantity > 1) {
-              return `${mod.quantity}x ${mod.name}`;
-            }
-            return mod.name;
-          })
-          .join(', ');
-      } else if (item.modifications) {
-        // New format with modifications
-        const selected = item.modifications.filter((mod) => mod.selected);
-        if (selected.length > 0) {
-          modificationText = selected
-            .map((mod) => {
-              if (mod.quantity && mod.quantity > 1) {
-                return `${mod.quantity}x ${mod.name}`;
-              }
-              return mod.name;
-            })
-            .join(', ');
-        }
-      }
-
-      if (!modificationText && item.specialInstructions) {
-        modificationText = 'Special instructions';
-      }
-
-      if (!modificationText) return null;
-
-      return (
-        <View style={styles.cartItemModifications}>
-          <Icon name="tune" size={12} color={theme.colors.textSecondary} />
-          <Text style={styles.cartItemModificationText} numberOfLines={1}>
-            {modificationText}
-          </Text>
-        </View>
-      );
-    };
+      (item.modifications && item.modifications.some((mod) => mod.selected)) ||
+      item.specialInstructions;
 
     const renderRightActions = (
       progress: Animated.AnimatedInterpolation<number>,
@@ -897,7 +861,14 @@ const POSScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.cartItem}
           onPress={() => {
-            setSelectedItemForModification(item);
+            // Convert OrderItem to EnhancedOrderItem
+            const enhancedItem: EnhancedOrderItem = {
+              ...item,
+              id: item.id.toString(),
+              modifications: item.modifications || [],
+              originalPrice: item.price,
+            };
+            setSelectedItemForModification(enhancedItem);
             setShowModificationModal(true);
           }}
           activeOpacity={0.7}
@@ -917,7 +888,61 @@ const POSScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            {renderModificationSummary()}
+
+            {/* Enhanced modification display */}
+            {hasModifications && (
+              <ModificationSummary
+                modifications={item.modifications}
+                specialInstructions={item.specialInstructions}
+                modificationPrice={item.modificationPrice}
+                originalPrice={item.originalPrice || item.price}
+                quantity={item.quantity}
+                showPriceBreakdown={item.modificationPrice && item.modificationPrice !== 0}
+                onCustomizePress={() => {
+                  // Convert OrderItem to EnhancedOrderItem for modification
+                  const enhancedItem: EnhancedOrderItem = {
+                    ...item,
+                    id: item.id.toString(),
+                    productId: item.id.toString(),
+                    modifications: item.modifications || [],
+                    originalPrice: item.originalPrice || item.price,
+                    modificationPrice: item.modificationPrice || 0,
+                    totalPrice: item.totalPrice || item.price * item.quantity,
+                    specialInstructions: item.specialInstructions,
+                  };
+                  setSelectedItemForModification(enhancedItem);
+                  setShowModificationModal(true);
+                }}
+                compact
+              />
+            )}
+
+            {/* Show customize button for items that support modifications */}
+            {hasModifiers && !hasModifications && (
+              <TouchableOpacity
+                style={styles.customizePrompt}
+                onPress={() => {
+                  // Convert OrderItem to EnhancedOrderItem for modification
+                  const enhancedItem: EnhancedOrderItem = {
+                    ...item,
+                    id: item.id.toString(),
+                    productId: item.id.toString(),
+                    modifications: item.modifications || [],
+                    originalPrice: item.price,
+                    modificationPrice: 0,
+                    totalPrice: item.price * item.quantity,
+                  };
+                  setSelectedItemForModification(enhancedItem);
+                  setShowModificationModal(true);
+                }}
+              >
+                <Icon name="tune" size={14} color={theme.colors.primary} />
+                <Text style={[styles.customizePromptText, { color: theme.colors.primary }]}>
+                  Tap to customize
+                </Text>
+              </TouchableOpacity>
+            )}
+
             {menuItem?.description && (
               <Text style={styles.cartItemDescription} numberOfLines={2}>
                 {menuItem.description}
@@ -1060,9 +1085,7 @@ const POSScreen: React.FC = () => {
         {isUsingDemoData && !menuLoading && (
           <View style={styles.demoIndicator}>
             <Icon name="info-outline" size={16} color={theme.colors.warning} />
-            <Text style={styles.demoText}>
-              Demo Mode - Backend API unavailable
-            </Text>
+            <Text style={styles.demoText}>Demo Mode - Backend API unavailable</Text>
           </View>
         )}
 
@@ -1113,12 +1136,13 @@ const POSScreen: React.FC = () => {
                   const categoryNames = [
                     'All',
                     ...(categories || [])
-                      .map((cat) => typeof cat === 'string' ? cat : cat?.name)
-                      .filter((name): name is string => 
-                        name !== undefined && 
-                        name !== null && 
-                        name !== 'All' && 
-                        name.trim() !== ''
+                      .map((cat) => (typeof cat === 'string' ? cat : cat?.name))
+                      .filter(
+                        (name): name is string =>
+                          name !== undefined &&
+                          name !== null &&
+                          name !== 'All' &&
+                          name.trim() !== ''
                       ),
                   ];
                   setDynamicCategories(categoryNames);
@@ -1488,21 +1512,26 @@ const POSScreen: React.FC = () => {
           // Calculate the final price per unit (including modifications)
           const pricePerUnit = modifiedItem.originalPrice + (modifiedItem.modificationPrice || 0);
           
-          // Create an OrderItem with modification data
-          const orderItem: OrderItem = {
-            id: modifiedItem.id,
-            name: modifiedItem.name,
-            price: pricePerUnit, // Price per unit with modifications
-            quantity: modifiedItem.quantity,
-            emoji: modifiedItem.emoji,
-            // Store modifications for display
-            modifications: modifiedItem.modifications,
-            specialInstructions: modifiedItem.specialInstructions,
-            modificationPrice: modifiedItem.modificationPrice,
-            originalPrice: modifiedItem.originalPrice,
-          };
+          if (isEnhancedCartEnabled()) {
+            // Update the item with the calculated price for enhanced cart
+            const enhancedItemToAdd = {
+              ...modifiedItem,
+              price: pricePerUnit, // Price per unit with modifications
+              totalPrice: pricePerUnit * modifiedItem.quantity,
+            };
+            addToCart(enhancedItemToAdd);
+          } else {
+            // For regular cart, create OrderItem with updated price
+            const orderItem: OrderItem = {
+              id: parseInt(modifiedItem.id) || Date.now(), // Convert string ID back to number
+              name: modifiedItem.name,
+              price: pricePerUnit, // Price per unit with modifications
+              quantity: modifiedItem.quantity,
+              emoji: modifiedItem.emoji,
+            };
+            addToCart(orderItem);
+          }
           
-          addToCart(orderItem);
           setShowModificationModal(false);
           setSelectedItemForModification(null);
         }}
@@ -1526,7 +1555,7 @@ const POSScreen: React.FC = () => {
           );
           setShowSplitBillModal(false);
         }}
-        useEnhancedCart={useEnhancedCart}
+        useEnhancedCart={isEnhancedCartEnabled()}
       />
     </SafeAreaView>
   );
@@ -1567,6 +1596,18 @@ const createDynamicStyles = (theme: unknown, serviceChargeConfig: { enabled: boo
     retryButtonText: {
       color: theme.colors.white,
       fontWeight: '600',
+    },
+    customizePrompt: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginLeft: 36,
+      marginTop: 4,
+      marginBottom: 4,
+    },
+    customizePromptText: {
+      fontSize: 12,
+      fontStyle: 'italic',
+      marginLeft: 4,
     },
   });
 

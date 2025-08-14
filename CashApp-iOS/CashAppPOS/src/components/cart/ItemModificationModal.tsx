@@ -51,7 +51,6 @@ export default function ItemModificationModal({
     updateModificationQuantity,
     setSpecialInstructions,
     resetModifications,
-    applyModifications,
     getModificationSummary,
     getPriceImpactSummary,
   } = useItemModifications({ item, useEnhancedCart });
@@ -65,13 +64,13 @@ export default function ItemModificationModal({
 
   const handleSave = () => {
     if (isValid && item) {
-      // Create the modified item with all updates
+      // Create the modified item with all updates (pure function - no store mutation)
       const modifiedItem: EnhancedOrderItem = {
         ...item,
         modifications,
         modificationPrice,
         totalPrice,
-        specialInstructions,
+        specialInstructions: specialInstructions || undefined,
         lastModified: new Date().toISOString(),
       };
       
@@ -114,7 +113,7 @@ export default function ItemModificationModal({
                 {item.name}
               </Text>
               <Text style={[styles.basePrice, { color: theme.colors.textSecondary }]}>
-                Base price: ${item.originalPrice.toFixed(2)}
+                Base price: £{item.originalPrice.toFixed(2)}
               </Text>
             </View>
             <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
@@ -173,7 +172,7 @@ export default function ItemModificationModal({
                             },
                           ]}
                         >
-                          {mod.price > 0 ? '+' : ''}${Math.abs(mod.price).toFixed(2)}
+                          {mod.price > 0 ? '+' : ''}£{Math.abs(mod.price).toFixed(2)}
                         </Text>
                       )}
                     </View>
@@ -275,7 +274,7 @@ export default function ItemModificationModal({
             <View style={styles.pricingSummary}>
               <Text style={[styles.totalLabel, { color: theme.colors.text }]}>Total Price:</Text>
               <Text style={[styles.totalValue, { color: theme.colors.primary }]}>
-                ${totalPrice.toFixed(2)}
+                £{totalPrice.toFixed(2)}
                 <Text style={[styles.quantityNote, { color: theme.colors.textSecondary }]}>
                   {' '}
                   ({item.quantity}x)
