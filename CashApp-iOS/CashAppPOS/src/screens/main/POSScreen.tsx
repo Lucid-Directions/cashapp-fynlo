@@ -474,7 +474,6 @@ const POSScreen: React.FC = () => {
   };
 
   const handleAddToCart = (item: MenuItem) => {
-<<<<<<< HEAD
     const enhancedItem: EnhancedOrderItem = {
       id: item.id.toString(),
       productId: item.id.toString(),
@@ -500,35 +499,6 @@ const POSScreen: React.FC = () => {
       // Direct add to cart for items without modifiers
       addToCart(enhancedItem);
     }
-  };
-
-  // Helper function to check if an item should show modification options
-  const checkIfItemHasModifiers = (item: MenuItem): boolean => {
-    // Check by category name (case-insensitive)
-    const category = item.category?.toLowerCase() || '';
-    
-    // Categories that typically have modifiers
-    const modifiableCategories = ['coffee', 'tea', 'beverages', 'drinks', 'hot drinks'];
-    
-    // Check if category matches any modifiable category
-    const hasModifiableCategory = modifiableCategories.some(cat => 
-      category.includes(cat)
-    );
-    
-    // Also check item name for coffee/tea keywords
-    const itemName = item.name?.toLowerCase() || '';
-    const hasModifiableKeywords = 
-      itemName.includes('coffee') || 
-      itemName.includes('latte') || 
-      itemName.includes('cappuccino') || 
-      itemName.includes('espresso') || 
-      itemName.includes('americano') || 
-      itemName.includes('macchiato') || 
-      itemName.includes('mocha') || 
-      itemName.includes('tea') || 
-      itemName.includes('chai');
-    
-    return hasModifiableCategory || hasModifiableKeywords;
   };
 
   const handleUpdateQuantity = (id: number | string, quantity: number) => {
