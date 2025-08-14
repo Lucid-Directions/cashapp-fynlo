@@ -62,7 +62,6 @@ const PaymentScreen: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [_paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
   const [optimalProvider, setOptimalProvider] = useState<string>('');
-  // Removed showSumUpPayment - always using native module
   const [showNativeSumUpPayment, setShowNativeSumUpPayment] = useState(false);
   const [currentPaymentRequest, setCurrentPaymentRequest] = useState<PaymentRequest | null>(null);
 
@@ -665,16 +664,7 @@ const PaymentScreen: React.FC = () => {
         </View>
       </Modal>
 
-      {/* SumUp Payment Component (Fallback - may show card reader) */}
-      {showSumUpPayment && currentPaymentRequest && (
-        <SumUpPaymentComponent
-          amount={currentPaymentRequest.amount}
-          currency={currentPaymentRequest.currency}
-          title={currentPaymentRequest.description || 'Order Payment'}
-          onPaymentComplete={handleSumUpPaymentComplete}
-          onPaymentCancel={handleSumUpPaymentCancel}
-        />
-      )}
+      {/* Removed old SumUp React Native package component - now using native module only */}
 
       {/* Native SumUp Tap to Pay Component (Preferred - uses iPhone Tap to Pay) */}
       {showNativeSumUpPayment && currentPaymentRequest && (
