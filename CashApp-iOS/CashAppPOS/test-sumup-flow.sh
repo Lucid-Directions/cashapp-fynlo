@@ -44,15 +44,15 @@ run_test() {
 echo "1️⃣ Checking native module registration..."
 echo "-------------------------------------------"
 
-# Test 1: Check if SumUpTapToPay module exists in native code
+# Test 1: Check if SumUpTapToPayModule exists in native code
 run_test "Swift module exists" \
-    "grep -r 'class SumUpTapToPay' ios/*.swift 2>/dev/null | head -1" \
-    "SumUpTapToPay"
+    "grep -r 'class SumUpTapToPayModule' ios/CashAppPOS/*.swift 2>/dev/null | head -1" \
+    "SumUpTapToPayModule"
 
 # Test 2: Check if module is exported to React Native
 run_test "Module exported to RN" \
-    "grep -r 'RCT_EXPORT_MODULE' ios/*.m 2>/dev/null | head -1" \
-    "RCT_EXPORT_MODULE"
+    "grep -r 'RCT_EXTERN_MODULE' ios/CashAppPOS/*.m 2>/dev/null | head -1" \
+    "RCT_EXTERN_MODULE"
 
 echo ""
 echo "2️⃣ Checking TypeScript service layer..."
@@ -68,10 +68,10 @@ run_test "Native module imported" \
     "grep 'NativeModules' src/services/SumUpNativeService.ts | head -1" \
     "NativeModules"
 
-# Test 5: Verify SumUpTapToPay usage
-run_test "SumUpTapToPay used" \
-    "grep 'SumUpTapToPay' src/services/SumUpNativeService.ts | head -1" \
-    "SumUpTapToPay"
+# Test 5: Verify SumUpTapToPayModule usage
+run_test "SumUpTapToPayModule used" \
+    "grep 'SumUpTapToPayModule' src/services/SumUpNativeService.ts | head -1" \
+    "SumUpTapToPayModule"
 
 echo ""
 echo "3️⃣ Checking payment flow integration..."
@@ -93,12 +93,12 @@ echo "--------------------------------------"
 
 # Test 8: Check backend has SumUp endpoint
 run_test "Backend SumUp endpoint" \
-    "grep '@router.post(\"/initialize\")' ../../../backend/app/api/v1/endpoints/sumup.py | head -1" \
+    "grep '@router.post(\"/initialize\")' ../../backend/app/api/v1/endpoints/sumup.py | head -1" \
     "/initialize"
 
 # Test 9: Check for environment variables
 run_test "SumUp env vars check" \
-    "grep 'SUMUP_API_KEY' ../../../backend/app/api/v1/endpoints/sumup.py | head -1" \
+    "grep 'SUMUP_API_KEY' ../../backend/app/api/v1/endpoints/sumup.py | head -1" \
     "SUMUP_API_KEY"
 
 echo ""

@@ -5,14 +5,14 @@
 
 import { NativeModules } from 'react-native';
 
-const { SumUpTapToPay } = NativeModules;
+const { SumUpTapToPayModule } = NativeModules;
 
 async function testSumUpBridge() {
   console.log('🧪 Testing SumUp Native Bridge...\n');
   
   // Check if module exists
-  if (!SumUpTapToPay) {
-    console.error('❌ SumUpTapToPay native module not found!');
+  if (!SumUpTapToPayModule) {
+    console.error('❌ SumUpTapToPayModule native module not found!');
     console.log('Make sure:');
     console.log('1. The iOS project is properly linked');
     console.log('2. You\'ve run pod install');
@@ -20,11 +20,11 @@ async function testSumUpBridge() {
     return;
   }
   
-  console.log('✅ SumUpTapToPay module found!\n');
+  console.log('✅ SumUpTapToPayModule found!\n');
   console.log('Available methods:');
   
   // List all available methods
-  const methods = Object.keys(SumUpTapToPay).filter(key => typeof SumUpTapToPay[key] === 'function');
+  const methods = Object.keys(SumUpTapToPayModule).filter(key => typeof SumUpTapToPayModule[key] === 'function');
   methods.forEach(method => {
     console.log(`  - ${method}`);
   });

@@ -2,8 +2,8 @@ import { Platform, NativeModules } from 'react-native';
 
 import { logger } from '../utils/logger';
 
-// Get the native iOS module
-const { SumUpTapToPay } = NativeModules;
+// Get the native iOS module - exact name must match RCT_EXTERN_MODULE
+const { SumUpTapToPayModule } = NativeModules;
 
 // This service provides a direct bridge to the native iOS SumUp module
 // No more mock data - all calls go directly to the Swift implementation
@@ -52,7 +52,7 @@ export class SumUpNativeService {
         return false;
       }
 
-      if (!SumUpTapToPay) {
+      if (!SumUpTapToPayModule) {
         logger.error('❌ SumUp native module not found. Make sure the iOS project is properly linked.');
         return false;
       }
@@ -69,8 +69,8 @@ export class SumUpNativeService {
         return false;
       }
 
-      // Call native module setupSDK
-      const result = await SumUpTapToPay.setupSDK(config.apiKey);
+      // Call native module setupSDK with affiliate key (not API key)
+      const result = await SumUpTapToPayModule.setupSDK(config.affiliateKey || config.apiKey);
       
       if (result.success) {
         logger.info('✅ SumUp SDK initialized successfully');
@@ -94,7 +94,7 @@ export class SumUpNativeService {
       if (!this.checkInitialized()) return false;
       
       logger.info('🔐 Presenting SumUp login screen...');
-      const result = await SumUpTapToPay.login();
+      const result = await SumUpTapToPayModule.presentLogin();
       
       if (result.success) {
         logger.info('✅ SumUp login successful');
@@ -117,7 +117,7 @@ export class SumUpNativeService {
       if (!this.checkInitialized()) return false;
       
       logger.info('🔑 Logging in with SumUp token...');
-      const result = await SumUpTapToPay.loginWithToken(token);
+      const result = await SumUpTapToPayModule.loginWithToken(token);
       
       if (result.success) {
         logger.info('✅ SumUp token login successful');
@@ -138,7 +138,7 @@ export class SumUpNativeService {
   async logout(): Promise<boolean> {
     try {
       logger.info('🚪 Logging out from SumUp...');
-      const result = await SumUpTapToPay.logout();
+      const result = await SumUpTapToPayModule.logout();
       
       if (result.success) {
         logger.info('✅ SumUp logout successful');
@@ -159,7 +159,7 @@ export class SumUpNativeService {
   async isLoggedIn(): Promise<boolean> {
     try {
       logger.info('🔍 Checking SumUp login status...');
-      const result = await SumUpTapToPay.isLoggedIn();
+      const result = await SumUpTapToPayModule.isLoggedIn();
       logger.info(`SumUp logged in: ${result.isLoggedIn}`);
       return result.isLoggedIn;
     } catch (error) {
@@ -178,7 +178,7 @@ export class SumUpNativeService {
       }
       
       logger.info('📱 Checking Tap to Pay availability...');
-      const result = await SumUpTapToPay.checkTapToPayAvailability();
+      const result = await SumUpTapToPayModule.checkTapToPayAvailability();
       
       logger.info(`Tap to Pay - Available: ${result.isAvailable}, Activated: ${result.isActivated}`);
       return {
@@ -199,7 +199,7 @@ export class SumUpNativeService {
       if (!this.checkInitialized()) return false;
       
       logger.info('🚀 Presenting Tap to Pay activation...');
-      const result = await SumUpTapToPay.presentTapToPayActivation();
+      const result = await SumUpTapToPayModule.presentTapToPayActivation();
       
       if (result.success) {
         logger.info('✅ Tap to Pay activation successful');
@@ -231,7 +231,7 @@ export class SumUpNativeService {
       });
 
       // Call native module checkout
-      const result = await SumUpTapToPay.checkout(
+      const result = await SumUpTapToPayModule.checkout(
         request.amount,
         request.title || 'Payment',
         request.currencyCode || 'GBP',
@@ -271,7 +271,7 @@ export class SumUpNativeService {
       if (!this.checkInitialized()) return false;
       
       logger.info('⚙️ Presenting SumUp preferences...');
-      const result = await SumUpTapToPay.presentCheckoutPreferences();
+      const result = await SumUpTapToPayModule.presentCheckoutPreferences();
       
       if (result.success) {
         logger.info('✅ SumUp preferences updated');
@@ -294,14 +294,14 @@ export class SumUpNativeService {
       if (!this.checkInitialized()) return null;
       
       logger.info('🏪 Getting merchant information...');
-      const result = await SumUpTapToPay.getCurrentMerchant();
+      const merchant = await SumUpTapToPayModule.getCurrentMerchant();
       
-      if (result.success && result.merchant) {
-        logger.info('✅ Merchant info retrieved:', result.merchant.companyName);
+      if (merchant && merchant.merchantCode) {
+        logger.info('✅ Merchant info retrieved:', merchant.companyName);
         return {
-          currencyCode: result.merchant.currencyCode || 'GBP',
-          merchantCode: result.merchant.merchantCode || '',
-          companyName: result.merchant.companyName || 'Unknown Merchant',
+          currencyCode: merchant.currencyCode || 'GBP',
+          merchantCode: merchant.merchantCode || '',
+          companyName: merchant.companyName || 'Unknown Merchant',
         };
       } else {
         logger.warn('⚠️ No merchant information available');
