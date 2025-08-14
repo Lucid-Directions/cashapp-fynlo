@@ -142,28 +142,48 @@ class SumUpServiceClass {
   }
 
   /**
-   * Process SumUp payment
+   * Process SumUp payment using native SDK
    */
   async processPayment(request: PaymentRequest): Promise<PaymentResult> {
     try {
-      // For SumUp, we typically create a checkout and redirect
-      const checkout = await this.createCheckout(
-        request.amount,
-        request.currency,
-        request.description
-      );
+      logger.info('Processing SumUp payment via native SDK:', request);
 
-      // This would typically open the SumUp checkout URL
-      // For now, we'll simulate a successful payment
+      // Use the native SumUp service for real payment processing
+      const nativeService = SumUpNativeService.getInstance();
+      
+      // Check if native module is available
+      if (!nativeService.isAvailable()) {
+        throw new Error('SumUp native module not available on this device');
+      }
+
+      // Process the payment through native SDK
+      const result = await nativeService.checkout({
+        amount: request.amount,
+        title: request.description || 'Payment',
+        currencyCode: request.currency || 'GBP',
+        foreignTransactionID: request.orderId,
+        useTapToPay: true, // Enable Tap to Pay by default
+      });
+
       const fee = this.calculateFee(request.amount);
 
-      return {
-        success: true,
-        transactionId: checkout.checkoutId,
-        provider: 'sumup',
-        amount: request.amount,
-        fee,
-      };
+      if (result.success) {
+        return {
+          success: true,
+          transactionId: result.transactionCode || '',
+          provider: 'sumup',
+          amount: request.amount,
+          fee,
+        };
+      } else {
+        return {
+          success: false,
+          provider: 'sumup',
+          amount: request.amount,
+          fee: 0,
+          error: result.error || 'Payment failed',
+        };
+      }
     } catch (error) {
       logger.error('SumUp payment processing failed:', error);
       return {
