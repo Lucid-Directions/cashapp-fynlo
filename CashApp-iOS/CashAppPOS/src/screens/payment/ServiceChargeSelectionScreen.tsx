@@ -18,7 +18,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { useCartStore, isEnhancedCartEnabled } from '../../store/cartStoreAdapter';
 import { formatPrice } from '../../utils/priceValidation';
-import { useSettingsStore } from '../../store/settingsStore';
+import useSettingsStore from '../../store/useSettingsStore';
 
 interface ServiceChargeOption {
   percentage: number;
