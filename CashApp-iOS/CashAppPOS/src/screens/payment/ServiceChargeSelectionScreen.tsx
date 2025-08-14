@@ -18,6 +18,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { useCartStore, isEnhancedCartEnabled } from '../../store/cartStoreAdapter';
 import { formatPrice } from '../../utils/priceValidation';
+import { useSettingsStore } from '../../store/settingsStore';
 
 interface ServiceChargeOption {
   percentage: number;
@@ -67,6 +68,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
     serviceChargePercentage,
     addTransactionFee,
   } = cartStore;
+  const { taxConfiguration } = useSettingsStore();
 
   const [selectedOption, setSelectedOption] = useState<number>(serviceChargePercentage);
   const [showTransactionFeeToggle, setShowTransactionFeeToggle] = useState(false);
@@ -79,13 +81,16 @@ const ServiceChargeSelectionScreen: React.FC = () => {
   const calculateTotals = (servicePercent: number, includeTransactionFee: boolean = false) => {
     const subtotal = cartTotal();
     const serviceCharge = subtotal * (servicePercent / 100);
-    // Match the calculation in PaymentScreen and store: 2.9% + £0.30 on subtotal + service
-    const transactionFee = includeTransactionFee ? (subtotal + serviceCharge) * 0.029 + 0.3 : 0;
-    const total = subtotal + serviceCharge + transactionFee;
+    const tax = taxConfiguration.vatEnabled ? subtotal * (taxConfiguration.vatRate / 100) : 0;
+    // Match the calculation in PaymentScreen: 2.9% + £0.30 on (subtotal + tax + service)
+    const baseTotal = subtotal + tax + serviceCharge;
+    const transactionFee = includeTransactionFee ? baseTotal * 0.029 + 0.3 : 0;
+    const total = baseTotal + transactionFee;
 
     return {
       subtotal,
       serviceCharge,
+      tax,
       transactionFee,
       total,
     };
@@ -255,6 +260,13 @@ const ServiceChargeSelectionScreen: React.FC = () => {
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Service Charge ({selectedOption}%)</Text>
               <Text style={styles.summaryValue}>{formatPrice(totals.serviceCharge, '£')}</Text>
+            </View>
+          )}
+
+          {totals.tax > 0 && (
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>VAT ({taxConfiguration.vatRate}%)</Text>
+              <Text style={styles.summaryValue}>{formatPrice(totals.tax, '£')}</Text>
             </View>
           )}
 

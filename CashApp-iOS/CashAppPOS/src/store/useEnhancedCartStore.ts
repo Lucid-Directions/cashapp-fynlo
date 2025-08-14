@@ -935,12 +935,12 @@ const useEnhancedCartStore = create<EnhancedAppStore>()(
           templates: state.templates,
           recentTemplates: state.recentTemplates,
         }),
-        onRehydrateStorage: () => (state) => {
+        onRehydrateStorage: () => async (state) => {
           // Run migration after rehydration
           if (state) {
             state.migrateCartIfNeeded();
             // Also attempt to migrate from old storage if this is first run
-            state.migrateFromOldStorage();
+            await state.migrateFromOldStorage();
           }
         },
       }
