@@ -23,7 +23,7 @@ const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
     if (hasError) {
       return (
         <View style={wrapperStyles.errorContainer}>
-          <Icon name="error" size={60} color={Colors.danger} />
+          <Icon name="error" size={60} color={QRColors.danger} />
           <Text style={wrapperStyles.errorText}>QR Error</Text>
         </View>
       );
@@ -33,8 +33,8 @@ const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
       <QRCode
         value={qrCodeData}
         size={180}
-        color={Colors.text}
-        backgroundColor={Colors.white}
+        color={QRColors.text}
+        backgroundColor={QRColors.white}
         onError={() => setHasError(true)}
       />
     );
@@ -42,7 +42,7 @@ const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
     logger.error('QR Code generation error:', error);
     return (
       <View style={wrapperStyles.unavailableContainer}>
-        <Icon name="qr-code" size={60} color={Colors.lightText} />
+        <Icon name="qr-code" size={60} color={QRColors.lightText} />
         <Text style={wrapperStyles.unavailableText}>QR Unavailable</Text>
       </View>
     );
@@ -55,7 +55,7 @@ interface QRCodePaymentProps {
   onCancel: () => void;
 }
 
-const Colors = {
+const QRColors = {
   primary: '#00A651',
   secondary: '#0066CC',
   success: '#00A651',
@@ -252,7 +252,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
       case 'generating':
         return (
           <View style={styles.statusContainer}>
-            <ActivityIndicator size="large" color={Colors.primary} />
+            <ActivityIndicator size="large" color={QRColors.primary} />
             <Text style={styles.statusText}>Generating QR Code...</Text>
           </View>
         );
@@ -267,7 +267,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
             <Text style={styles.qrInstructions}>Scan this QR code with your banking app</Text>
 
             <View style={styles.timeContainer}>
-              <Icon name="access-time" size={16} color={Colors.warning} />
+              <Icon name="access-time" size={16} color={QRColors.warning} />
               <Text style={styles.timeText}>Expires in {formatTime(remainingTime)}</Text>
             </View>
 
@@ -291,15 +291,15 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
             <View style={styles.benefits}>
               <Text style={styles.benefitsTitle}>Why QR Payment?</Text>
               <View style={styles.benefitRow}>
-                <Icon name="security" size={16} color={Colors.success} />
+                <Icon name="security" size={16} color={QRColors.success} />
                 <Text style={styles.benefitText}>Secure & Safe</Text>
               </View>
               <View style={styles.benefitRow}>
-                <Icon name="speed" size={16} color={Colors.success} />
+                <Icon name="speed" size={16} color={QRColors.success} />
                 <Text style={styles.benefitText}>Instant Payment</Text>
               </View>
               <View style={styles.benefitRow}>
-                <Icon name="money-off" size={16} color={Colors.success} />
+                <Icon name="money-off" size={16} color={QRColors.success} />
                 <Text style={styles.benefitText}>Lowest Fees (1.2%)</Text>
               </View>
             </View>
@@ -309,7 +309,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
       case 'completed':
         return (
           <View style={styles.statusContainer}>
-            <Icon name="check-circle" size={64} color={Colors.success} />
+            <Icon name="check-circle" size={64} color={QRColors.success} />
             <Text style={styles.statusText}>Payment Received!</Text>
             <Text style={styles.subText}>Processing your order...</Text>
           </View>
@@ -318,7 +318,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
       case 'expired':
         return (
           <View style={styles.statusContainer}>
-            <Icon name="access-time" size={64} color={Colors.warning} />
+            <Icon name="access-time" size={64} color={QRColors.warning} />
             <Text style={styles.statusText}>QR Code Expired</Text>
             <Text style={styles.subText}>Please generate a new QR code</Text>
             <TouchableOpacity style={styles.retryButton} onPress={generateQRPayment}>
@@ -330,7 +330,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
       case 'error':
         return (
           <View style={styles.statusContainer}>
-            <Icon name="error" size={64} color={Colors.danger} />
+            <Icon name="error" size={64} color={QRColors.danger} />
             <Text style={styles.statusText}>Error</Text>
             <Text style={styles.subText}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={generateQRPayment}>
@@ -358,7 +358,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
         <View style={styles.header}>
           <Text style={styles.title}>QR Code Payment</Text>
           <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
-            <Icon name="close" size={24} color={Colors.darkGray} />
+            <Icon name="close" size={24} color={QRColors.darkGray} />
           </TouchableOpacity>
         </View>
 
@@ -398,7 +398,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.white,
+    backgroundColor: QRColors.white,
     borderRadius: 16,
     maxHeight: '90%',
     width: '95%',
@@ -409,12 +409,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: QRColors.border,
   },
   title: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.text,
+    color: QRColors.text,
   },
   closeButton: {
     padding: 4,
@@ -423,17 +423,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: QRColors.border,
   },
   amountLabel: {
     fontSize: 16,
-    color: Colors.lightText,
+    color: QRColors.lightText,
     marginBottom: 8,
   },
   amountValue: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: QRColors.primary,
   },
   statusContainer: {
     alignItems: 'center',
@@ -442,13 +442,13 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: QRColors.text,
     marginTop: 16,
     textAlign: 'center',
   },
   subText: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: QRColors.lightText,
     marginTop: 8,
     textAlign: 'center',
   },
@@ -460,11 +460,11 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
-    ...require('../../utils/ShadowUtils').createOptimizedShadow('medium', Colors.white),
+    ...require('../../utils/ShadowUtils').createOptimizedShadow('medium', QRColors.white),
   },
   qrInstructions: {
     fontSize: 16,
-    color: Colors.text,
+    color: QRColors.text,
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -475,13 +475,13 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 14,
-    color: Colors.warning,
+    color: QRColors.warning,
     marginLeft: 4,
     fontWeight: '500',
   },
   paymentDetails: {
     width: '100%',
-    backgroundColor: Colors.background,
+    backgroundColor: QRColors.background,
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
@@ -493,27 +493,27 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: QRColors.lightText,
   },
   detailValue: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: QRColors.text,
   },
   netAmount: {
-    color: Colors.primary,
+    color: QRColors.primary,
     fontWeight: '600',
   },
   benefits: {
     width: '100%',
-    backgroundColor: Colors.background,
+    backgroundColor: QRColors.background,
     borderRadius: 8,
     padding: 16,
   },
   benefitsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: QRColors.text,
     marginBottom: 12,
   },
   benefitRow: {
@@ -523,11 +523,11 @@ const styles = StyleSheet.create({
   },
   benefitText: {
     fontSize: 14,
-    color: Colors.text,
+    color: QRColors.text,
     marginLeft: 8,
   },
   retryButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: QRColors.primary,
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 24,
@@ -536,15 +536,15 @@ const styles = StyleSheet.create({
   retryButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.white,
+    color: QRColors.white,
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: QRColors.border,
   },
   simulateButton: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: QRColors.secondary,
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
@@ -552,7 +552,7 @@ const styles = StyleSheet.create({
   simulateButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.white,
+    color: QRColors.white,
   },
 });
 
@@ -565,7 +565,7 @@ const createQRWrapperStyles = () =>
       height: 180,
     },
     errorText: {
-      color: Colors.danger,
+      color: QRColors.danger,
       fontSize: 12,
       marginTop: 8,
     },
@@ -576,7 +576,7 @@ const createQRWrapperStyles = () =>
       height: 180,
     },
     unavailableText: {
-      color: Colors.lightText,
+      color: QRColors.lightText,
       fontSize: 12,
       marginTop: 8,
     },

@@ -30,7 +30,7 @@ import useSettingsStore from '../../store/useSettingsStore';
 import { logger } from '../../utils/logger';
 
 // Clover POS Color Scheme
-const Colors = {
+const EnhancedColors = {
   primary: '#00A651',
   secondary: '#0066CC',
   success: '#00A651',
@@ -251,7 +251,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       id: 'qrCode',
       name: 'QR Payment',
       icon: 'qr-code-scanner',
-      color: Colors.primary,
+      color: EnhancedColors.primary,
       enabled: paymentMethods?.qrCode?.enabled ?? true,
       requiresAuth: paymentMethods?.qrCode?.requiresAuth ?? false,
     },
@@ -259,7 +259,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       id: 'cash',
       name: 'Cash',
       icon: 'payments',
-      color: Colors.success,
+      color: EnhancedColors.success,
       enabled: paymentMethods?.cash?.enabled ?? true,
       requiresAuth: paymentMethods?.cash?.requiresAuth ?? false,
     },
@@ -267,7 +267,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       id: 'card',
       name: 'Card',
       icon: 'credit-card',
-      color: Colors.secondary,
+      color: EnhancedColors.secondary,
       enabled: paymentMethods?.card?.enabled ?? true,
       requiresAuth: paymentMethods?.card?.requiresAuth ?? false,
     },
@@ -275,7 +275,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       id: 'applePay',
       name: 'Apple Pay',
       icon: 'contactless-payment',
-      color: Colors.text,
+      color: EnhancedColors.text,
       enabled: paymentMethods?.applePay?.enabled ?? true,
       requiresAuth: paymentMethods?.applePay?.requiresAuth ?? false,
     },
@@ -283,7 +283,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       id: 'googlePay',
       name: 'Google Pay',
       icon: 'contactless-payment',
-      color: Colors.warning,
+      color: EnhancedColors.warning,
       enabled: paymentMethods?.googlePay?.enabled ?? false,
       requiresAuth: paymentMethods?.googlePay?.requiresAuth ?? false,
     },
@@ -643,7 +643,7 @@ const EnhancedPaymentScreen: React.FC = () => {
           <View style={styles.cashModalHeader}>
             <Text style={styles.cashModalTitle}>Cash Payment</Text>
             <TouchableOpacity onPress={() => setShowCashModal(false)}>
-              <Icon name="close" size={24} color={Colors.darkGray} />
+              <Icon name="close" size={24} color={EnhancedColors.darkGray} />
             </TouchableOpacity>
           </View>
 
@@ -721,7 +721,7 @@ const EnhancedPaymentScreen: React.FC = () => {
           <View style={styles.qrModalHeader}>
             <Text style={styles.qrModalTitle}>QR Code Payment</Text>
             <TouchableOpacity onPress={() => setShowQRModal(false)}>
-              <Icon name="close" size={24} color={Colors.darkGray} />
+              <Icon name="close" size={24} color={EnhancedColors.darkGray} />
             </TouchableOpacity>
           </View>
 
@@ -734,7 +734,7 @@ const EnhancedPaymentScreen: React.FC = () => {
             {qrPaymentStatus === 'generating' && (
               <View style={styles.qrSection}>
                 <View style={styles.qrLoadingContainer}>
-                  <Icon name="hourglass-empty" size={48} color={Colors.lightText} />
+                  <Icon name="hourglass-empty" size={48} color={EnhancedColors.lightText} />
                   <Text style={styles.qrStatusText}>Generating QR Code...</Text>
                 </View>
               </View>
@@ -746,9 +746,9 @@ const EnhancedPaymentScreen: React.FC = () => {
                   {/* QR Code with Error Boundary */}
                   <View style={styles.qrCodePlaceholder}>
                     {qrCode ? (
-                      <Icon name="qr-code" size={120} color={Colors.primary} />
+                      <Icon name="qr-code" size={120} color={EnhancedColors.primary} />
                     ) : (
-                      <Icon name="error" size={120} color={Colors.danger} />
+                      <Icon name="error" size={120} color={EnhancedColors.danger} />
                     )}
                   </View>
                   <Text style={styles.qrCodeText}>
@@ -774,15 +774,15 @@ const EnhancedPaymentScreen: React.FC = () => {
                 <View style={styles.paymentBenefits}>
                   <Text style={styles.benefitsTitle}>Why QR Payment?</Text>
                   <View style={styles.benefitRow}>
-                    <Icon name="security" size={16} color={Colors.success} />
+                    <Icon name="security" size={16} color={EnhancedColors.success} />
                     <Text style={styles.benefitText}>Secure & Safe</Text>
                   </View>
                   <View style={styles.benefitRow}>
-                    <Icon name="speed" size={16} color={Colors.success} />
+                    <Icon name="speed" size={16} color={EnhancedColors.success} />
                     <Text style={styles.benefitText}>Instant Payment</Text>
                   </View>
                   <View style={styles.benefitRow}>
-                    <Icon name="money-off" size={16} color={Colors.success} />
+                    <Icon name="money-off" size={16} color={EnhancedColors.success} />
                     <Text style={styles.benefitText}>Lowest Fees (1.2%)</Text>
                   </View>
                 </View>
@@ -792,7 +792,7 @@ const EnhancedPaymentScreen: React.FC = () => {
             {qrPaymentStatus === 'expired' && (
               <View style={styles.qrSection}>
                 <View style={styles.qrErrorContainer}>
-                  <Icon name="access-time" size={48} color={Colors.warning} />
+                  <Icon name="access-time" size={48} color={EnhancedColors.warning} />
                   <Text style={styles.qrStatusText}>QR Code Expired</Text>
                   <Text style={styles.qrSubText}>Please generate a new QR code</Text>
                   <TouchableOpacity style={styles.regenerateButton} onPress={generateQRCode}>
@@ -805,7 +805,7 @@ const EnhancedPaymentScreen: React.FC = () => {
             {qrPaymentStatus === 'completed' && (
               <View style={styles.qrSection}>
                 <View style={styles.qrSuccessContainer}>
-                  <Icon name="check-circle" size={48} color={Colors.success} />
+                  <Icon name="check-circle" size={48} color={EnhancedColors.success} />
                   <Text style={styles.qrStatusText}>Payment Received!</Text>
                   <Text style={styles.qrSubText}>Processing your order...</Text>
                 </View>
@@ -844,7 +844,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={24} color={Colors.white} />
+          <Icon name="arrow-back" size={24} color={EnhancedColors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Payment</Text>
         <View style={styles.headerSpacer} />
@@ -937,7 +937,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                 style={styles.customTipButton}
                 onPress={() => setShowCustomTip(!showCustomTip)}
               >
-                <Icon name="edit" size={20} color={Colors.primary} />
+                <Icon name="edit" size={20} color={EnhancedColors.primary} />
                 <Text style={styles.customTipButtonText}>Custom Amount</Text>
               </TouchableOpacity>
 
@@ -974,7 +974,7 @@ const EnhancedPaymentScreen: React.FC = () => {
             <Text style={styles.sectionTitle}>Payment Method</Text>
             {enabledPaymentMethods.length > 1 && user?.subscription_plan !== 'alpha' && (
               <TouchableOpacity style={styles.splitPaymentButton} onPress={handleSplitPayment}>
-                <Icon name="call-split" size={20} color={Colors.secondary} />
+                <Icon name="call-split" size={20} color={EnhancedColors.secondary} />
                 <Text style={styles.splitPaymentText}>Split Payment</Text>
               </TouchableOpacity>
             )}
@@ -994,7 +994,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                   <Icon
                     name={method.icon}
                     size={32}
-                    color={selectedPaymentMethod === method.id ? Colors.white : method.color}
+                    color={selectedPaymentMethod === method.id ? EnhancedColors.white : method.color}
                   />
 
                   <Text
@@ -1009,7 +1009,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                     <Icon
                       name="lock"
                       size={16}
-                      color={selectedPaymentMethod === method.id ? Colors.white : Colors.warning}
+                      color={selectedPaymentMethod === method.id ? EnhancedColors.white : EnhancedColors.warning}
                       style={styles.authIcon}
                     />
                   )}
@@ -1059,7 +1059,7 @@ const EnhancedPaymentScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Customer Information (Optional)</Text>
           <View style={styles.skipInfoContainer}>
-            <Icon name="info-outline" size={14} color={Colors.primary} />
+            <Icon name="info-outline" size={14} color={EnhancedColors.primary} />
             <Text style={styles.skipInfoText}>
               Skip this section for anonymous payment or fill in for email receipt
             </Text>
@@ -1117,7 +1117,7 @@ const EnhancedPaymentScreen: React.FC = () => {
             </View>
 
             <View style={styles.receiptNote}>
-              <Icon name="info" size={16} color={Colors.lightText} />
+              <Icon name="info" size={16} color={EnhancedColors.lightText} />
               <Text style={styles.receiptNoteText}>You can skip this section or provide details for a receipt</Text>
             </View>
           </View>
@@ -1133,12 +1133,12 @@ const EnhancedPaymentScreen: React.FC = () => {
         >
           {processing ? (
             <>
-              <Icon name="hourglass-empty" size={24} color={Colors.white} />
+              <Icon name="hourglass-empty" size={24} color={EnhancedColors.white} />
               <Text style={styles.processButtonText}>Processing...</Text>
             </>
           ) : (
             <>
-              <Icon name="payment" size={24} color={Colors.white} />
+              <Icon name="payment" size={24} color={EnhancedColors.white} />
               <Text style={styles.processButtonText}>
                 Process Payment - £{calculateGrandTotal().toFixed(2)}
               </Text>
@@ -1208,10 +1208,10 @@ const EnhancedPaymentScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: EnhancedColors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
+    backgroundColor: EnhancedColors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1225,7 +1225,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: EnhancedColors.white,
   },
   headerSpacer: {
     width: 40,
@@ -1237,7 +1237,7 @@ const styles = StyleSheet.create({
     paddingBottom: 140, // Add bottom padding to account for absolute positioned footer (16+16+32+padding)
   },
   section: {
-    backgroundColor: Colors.white,
+    backgroundColor: EnhancedColors.white,
     marginVertical: 8,
     paddingVertical: 16,
   },
@@ -1251,7 +1251,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: EnhancedColors.text,
     paddingHorizontal: 16,
     marginBottom: 16,
   },
@@ -1265,28 +1265,28 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: EnhancedColors.lightText,
   },
   summaryValue: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: EnhancedColors.text,
   },
   totalRow: {
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: EnhancedColors.border,
     paddingTop: 8,
     marginTop: 4,
   },
   totalLabel: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: EnhancedColors.text,
   },
   totalValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: EnhancedColors.primary,
   },
   tipInput: {
     marginVertical: 8,
@@ -1300,32 +1300,32 @@ const styles = StyleSheet.create({
   tipButton: {
     flex: 1,
     minWidth: 80,
-    backgroundColor: Colors.background,
+    backgroundColor: EnhancedColors.background,
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: EnhancedColors.border,
   },
   tipButtonActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: EnhancedColors.primary,
+    borderColor: EnhancedColors.primary,
   },
   tipButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: EnhancedColors.text,
   },
   tipButtonTextActive: {
-    color: Colors.white,
+    color: EnhancedColors.white,
   },
   tipButtonAmount: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: EnhancedColors.lightText,
     marginTop: 2,
   },
   tipButtonAmountActive: {
-    color: Colors.white,
+    color: EnhancedColors.white,
   },
   tipActions: {
     flexDirection: 'row',
@@ -1341,14 +1341,14 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: Colors.background,
+    backgroundColor: EnhancedColors.background,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: EnhancedColors.primary,
   },
   customTipButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.primary,
+    color: EnhancedColors.primary,
   },
   noTipButton: {
     flex: 1,
@@ -1356,14 +1356,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: Colors.background,
+    backgroundColor: EnhancedColors.background,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: EnhancedColors.border,
   },
   noTipButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.darkGray,
+    color: EnhancedColors.darkGray,
   },
   customTipInput: {
     paddingHorizontal: 16,
@@ -1377,7 +1377,7 @@ const styles = StyleSheet.create({
   },
   splitPaymentText: {
     fontSize: 14,
-    color: Colors.secondary,
+    color: EnhancedColors.secondary,
     fontWeight: '500',
   },
   paymentMethods: {
@@ -1389,26 +1389,26 @@ const styles = StyleSheet.create({
   paymentMethod: {
     flex: 1,
     minWidth: 100,
-    backgroundColor: Colors.background,
+    backgroundColor: EnhancedColors.background,
     borderRadius: 12,
     paddingVertical: 20,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: EnhancedColors.border,
     position: 'relative',
   },
   paymentMethodActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: EnhancedColors.primary,
+    borderColor: EnhancedColors.primary,
   },
   paymentMethodName: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: EnhancedColors.text,
     marginTop: 8,
   },
   paymentMethodNameActive: {
-    color: Colors.white,
+    color: EnhancedColors.white,
   },
   authIcon: {
     position: 'absolute',
@@ -1420,7 +1420,7 @@ const styles = StyleSheet.create({
   },
   splitPaymentInfo: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: EnhancedColors.lightText,
     marginBottom: 16,
   },
   splitAmountRow: {
@@ -1433,12 +1433,12 @@ const styles = StyleSheet.create({
   splitAmountInput: {
     width: 120,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: EnhancedColors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 16,
-    color: Colors.text,
+    color: EnhancedColors.text,
     textAlign: 'right',
   },
   cancelSplitButton: {
@@ -1447,7 +1447,7 @@ const styles = StyleSheet.create({
   },
   cancelSplitText: {
     fontSize: 14,
-    color: Colors.danger,
+    color: EnhancedColors.danger,
     fontWeight: '500',
   },
 
@@ -1456,15 +1456,15 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Colors.white,
+    backgroundColor: EnhancedColors.white,
     paddingHorizontal: 16,
     paddingVertical: 16,
     paddingBottom: 32,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: EnhancedColors.border,
   },
   processButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: EnhancedColors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     flexDirection: 'row',
@@ -1473,12 +1473,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   processingButton: {
-    backgroundColor: Colors.mediumGray,
+    backgroundColor: EnhancedColors.mediumGray,
   },
   processButtonText: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.white,
+    color: EnhancedColors.white,
   },
   disabledButton: {
     opacity: 0.5,
@@ -1491,7 +1491,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cashModalContent: {
-    backgroundColor: Colors.white,
+    backgroundColor: EnhancedColors.white,
     borderRadius: 16,
     width: '90%',
     maxWidth: 400,
@@ -1502,12 +1502,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: EnhancedColors.border,
   },
   cashModalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.text,
+    color: EnhancedColors.text,
   },
   cashModalBody: {
     padding: 20,
@@ -1518,13 +1518,13 @@ const styles = StyleSheet.create({
   },
   amountDueLabel: {
     fontSize: 16,
-    color: Colors.lightText,
+    color: EnhancedColors.lightText,
     marginBottom: 8,
   },
   amountDueValue: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: EnhancedColors.primary,
   },
   cashInputSection: {
     marginBottom: 20,
@@ -1532,13 +1532,13 @@ const styles = StyleSheet.create({
 
   cashInput: {
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: EnhancedColors.border,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 24,
     fontWeight: '600',
-    color: Colors.text,
+    color: EnhancedColors.text,
     textAlign: 'center',
   },
   quickCashButtons: {
@@ -1549,39 +1549,39 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   quickCashButton: {
-    backgroundColor: Colors.background,
+    backgroundColor: EnhancedColors.background,
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: EnhancedColors.border,
   },
   quickCashButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: EnhancedColors.text,
   },
   changeSection: {
     alignItems: 'center',
     paddingVertical: 16,
-    backgroundColor: Colors.background,
+    backgroundColor: EnhancedColors.background,
     borderRadius: 8,
   },
   changeLabel: {
     fontSize: 16,
-    color: Colors.lightText,
+    color: EnhancedColors.lightText,
     marginBottom: 8,
   },
   changeValue: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: EnhancedColors.text,
   },
   changeValuePositive: {
-    color: Colors.success,
+    color: EnhancedColors.success,
   },
   cashConfirmButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: EnhancedColors.primary,
     borderRadius: 8,
     paddingVertical: 16,
     margin: 20,
@@ -1591,12 +1591,12 @@ const styles = StyleSheet.create({
   cashConfirmButtonText: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.white,
+    color: EnhancedColors.white,
   },
 
   // QR Modal Styles
   qrModalContent: {
-    backgroundColor: Colors.white,
+    backgroundColor: EnhancedColors.white,
     borderRadius: 16,
     width: '95%',
     maxWidth: 450,
@@ -1608,12 +1608,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: EnhancedColors.border,
   },
   qrModalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.text,
+    color: EnhancedColors.text,
   },
   qrModalBody: {
     padding: 20,
@@ -1634,40 +1634,40 @@ const styles = StyleSheet.create({
   qrCodePlaceholder: {
     width: 180,
     height: 180,
-    backgroundColor: Colors.background,
+    backgroundColor: EnhancedColors.background,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
     borderWidth: 2,
-    borderColor: Colors.primary,
+    borderColor: EnhancedColors.primary,
   },
   qrCodeText: {
     fontSize: 16,
-    color: Colors.text,
+    color: EnhancedColors.text,
     textAlign: 'center',
     marginBottom: 8,
   },
   qrOrderId: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: EnhancedColors.lightText,
     fontFamily: 'monospace',
   },
   qrStatusText: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: EnhancedColors.text,
     textAlign: 'center',
     marginTop: 16,
   },
   qrSubText: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: EnhancedColors.lightText,
     textAlign: 'center',
     marginTop: 8,
   },
   qrInstructions: {
-    backgroundColor: Colors.background,
+    backgroundColor: EnhancedColors.background,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -1676,17 +1676,17 @@ const styles = StyleSheet.create({
   instructionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: EnhancedColors.text,
     marginBottom: 12,
   },
   instructionText: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: EnhancedColors.lightText,
     marginBottom: 6,
     paddingLeft: 8,
   },
   paymentBenefits: {
-    backgroundColor: Colors.background,
+    backgroundColor: EnhancedColors.background,
     borderRadius: 12,
     padding: 16,
     width: '100%',
@@ -1694,7 +1694,7 @@ const styles = StyleSheet.create({
   benefitsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: EnhancedColors.text,
     marginBottom: 12,
   },
   benefitRow: {
@@ -1704,7 +1704,7 @@ const styles = StyleSheet.create({
   },
   benefitText: {
     fontSize: 14,
-    color: Colors.text,
+    color: EnhancedColors.text,
     marginLeft: 8,
   },
   qrErrorContainer: {
@@ -1716,7 +1716,7 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   regenerateButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: EnhancedColors.primary,
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 24,
@@ -1725,18 +1725,18 @@ const styles = StyleSheet.create({
   regenerateButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.white,
+    color: EnhancedColors.white,
   },
   qrModalFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: EnhancedColors.border,
   },
   qrCancelButton: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: EnhancedColors.background,
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
@@ -1745,11 +1745,11 @@ const styles = StyleSheet.create({
   qrCancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: EnhancedColors.text,
   },
   qrTestButton: {
     flex: 1,
-    backgroundColor: Colors.primary,
+    backgroundColor: EnhancedColors.primary,
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
@@ -1758,7 +1758,7 @@ const styles = StyleSheet.create({
   qrTestButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.white,
+    color: EnhancedColors.white,
   },
   // Customer form styles
   customerForm: {
@@ -1770,26 +1770,26 @@ const styles = StyleSheet.create({
   customerInput: {
     fontSize: 16,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: EnhancedColors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 12,
-    backgroundColor: Colors.white,
+    backgroundColor: EnhancedColors.white,
   },
   inputError: {
-    borderColor: Colors.danger,
+    borderColor: EnhancedColors.danger,
     borderWidth: 2,
   },
   validationError: {
     fontSize: 12,
-    color: Colors.danger,
+    color: EnhancedColors.danger,
     marginTop: 4,
     marginLeft: 4,
   },
   receiptNote: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.background,
+    backgroundColor: EnhancedColors.background,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -1797,7 +1797,7 @@ const styles = StyleSheet.create({
   },
   receiptNoteText: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: EnhancedColors.lightText,
     marginLeft: 8,
   },
   skipInfoContainer: {
@@ -1813,7 +1813,7 @@ const styles = StyleSheet.create({
   },
   skipInfoText: {
     fontSize: 13,
-    color: Colors.primary,
+    color: EnhancedColors.primary,
     marginLeft: 8,
     flex: 1,
   },
