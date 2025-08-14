@@ -422,7 +422,7 @@ const CustomersScreen: React.FC = () => {
                   <View style={styles.detailRow}>
                     <Icon name="calendar-today" size={20} color={theme.colors.darkGray} />
                     <Text style={[styles.detailText, { color: theme.colors.text }]}>
-                      Customer since {selectedCustomer.joinedDate.toLocaleDateString('en-GB')}
+                      Customer since {selectedCustomer.joinedDate ? selectedCustomer.joinedDate.toLocaleDateString('en-GB') : 'N/A'}
                     </Text>
                   </View>
                 </View>

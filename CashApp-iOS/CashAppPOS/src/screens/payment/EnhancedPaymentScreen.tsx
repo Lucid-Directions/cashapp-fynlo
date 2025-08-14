@@ -341,8 +341,9 @@ const EnhancedPaymentScreen: React.FC = () => {
   };
 
   const handleCardPayment = async () => {
-    // Validate customer info if provided
-    if (!isFormValid) {
+    // Customer info is optional for card payments
+    // Only validate if something was entered
+    if ((customerName && !isNameValid) || (customerEmail && !isEmailValid)) {
       const message = !isNameValid 
         ? 'Customer name is too long (maximum 60 characters).'
         : !isEmailValid
@@ -396,8 +397,9 @@ const EnhancedPaymentScreen: React.FC = () => {
   };
 
   const handleApplePayPayment = async () => {
-    // Validate customer info if provided
-    if (!isFormValid) {
+    // Customer info is optional for Apple Pay
+    // Only validate if something was entered
+    if ((customerName && !isNameValid) || (customerEmail && !isEmailValid)) {
       const message = !isNameValid 
         ? 'Customer name is too long (maximum 60 characters).'
         : !isEmailValid
@@ -552,7 +554,9 @@ const EnhancedPaymentScreen: React.FC = () => {
         return;
       }
 
-      if (!isFormValid) {
+      // Customer info is optional for all payment methods
+      // Only validate if something was entered
+      if ((customerName && !isNameValid) || (customerEmail && !isEmailValid)) {
         const message = !isNameValid 
           ? 'Customer name is too long (maximum 60 characters).'
           : !isEmailValid
@@ -1166,7 +1170,7 @@ const EnhancedPaymentScreen: React.FC = () => {
               Alert.alert('Select Payment Method', 'Please select a payment method to continue.');
             }
           }}
-          disabled={processing || (!selectedPaymentMethod && !splitPayment) || !isFormValid || showSumUpModal}
+          disabled={processing || (!selectedPaymentMethod && !splitPayment) || showSumUpModal}
         >
           {processing ? (
             <>
@@ -1191,7 +1195,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       <QRPaymentModal />
 
       {/* SumUp Payment Component - Native SDK only */}
-      {showSumUpModal && NativeSumUpService.isAvailable() && (
+      {showSumUpModal && (
         <NativeSumUpPayment
           amount={calculateGrandTotal()}
           currency="GBP"
