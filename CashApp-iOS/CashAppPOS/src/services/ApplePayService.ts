@@ -54,17 +54,10 @@ class ApplePayServiceClass {
     }
 
     try {
-      // In a real implementation, this would check:
-      // 1. Device capability (iPhone 6+ or iPad with Touch ID/Face ID)
-      // 2. User has cards set up in Wallet
-      // 3. Network availability
-      
-      // For now, we'll simulate availability check
-      logger.info('Checking Apple Pay availability...');
-      
-      // Check if we're on a real device (not simulator)
-      // In production, this would use native module to check actual availability
-      return true;
+      // Apple Pay is not yet implemented - return false to prevent misleading UI
+      // TODO: Implement real Apple Pay integration with native module
+      logger.info('Apple Pay not yet implemented - using SumUp Tap to Pay instead');
+      return false;
     } catch (error) {
       logger.error('Failed to check Apple Pay availability:', error);
       return false;
@@ -152,41 +145,18 @@ class ApplePayServiceClass {
       // 3. Process payment with payment processor
       // 4. Return payment result
 
-      // For now, show a simulated Apple Pay flow
+      // Apple Pay is not yet implemented - inform user
       return new Promise((resolve) => {
         Alert.alert(
-          'Apple Pay',
-          `Total: ${this.formatAmount(request.amount, request.currency)}\n\nAuthenticate with Face ID or Touch ID to complete payment`,
+          'Apple Pay Not Available',
+          'Apple Pay integration is coming soon. Please use SumUp Tap to Pay or card payment instead.',
           [
             {
-              text: 'Cancel',
-              style: 'cancel',
+              text: 'OK',
               onPress: () => resolve({
                 success: false,
-                error: 'User cancelled payment',
+                error: 'Apple Pay not yet implemented - use SumUp Tap to Pay',
               }),
-            },
-            {
-              text: 'Pay',
-              style: 'default',
-              onPress: () => {
-                // Simulate processing delay
-                setTimeout(() => {
-                  Alert.alert(
-                    'Payment Successful',
-                    'Your Apple Pay payment has been processed',
-                    [
-                      {
-                        text: 'Done',
-                        onPress: () => resolve({
-                          success: true,
-                          transactionId: `AP_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                        }),
-                      },
-                    ]
-                  );
-                }, 1500);
-              },
             },
           ]
         );

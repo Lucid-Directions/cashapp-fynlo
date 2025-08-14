@@ -30,7 +30,7 @@ import SplitBillModal from '../../components/cart/SplitBillModal';
 import { QuantityPill } from '../../components/inputs';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
-import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
+import NativeSumUpPayment from '../../components/payment/NativeSumUpPayment';
 import SumUpTestComponent from '../../components/payment/SumUpTestComponent';
 import CategorySearchBubble from '../../components/search/CategorySearchBubble';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
@@ -1394,12 +1394,14 @@ const POSScreen: React.FC = () => {
             '🔄 Rendering SumUpPaymentComponent with showSumUpPayment:',
             showSumUpPayment
           )}
-          <SumUpPaymentComponent
+          <NativeSumUpPayment
             amount={calculateCartTotal()}
             currency="GBP"
             title={`Order for ${customerName || 'Customer'}`}
+            visible={showSumUpPayment}
             onPaymentComplete={handleSumUpPaymentComplete}
             onPaymentCancel={handleSumUpPaymentCancel}
+            useTapToPay={true}
           />
         </>
       )}
