@@ -157,13 +157,13 @@ class SumUpServiceClass {
       }
 
       // Process the payment through native SDK
-      const result = await nativeService.checkout({
-        amount: request.amount,
-        title: request.description || 'Payment',
-        currencyCode: request.currency || 'GBP',
-        foreignTransactionID: request.orderId,
-        useTapToPay: true, // Enable Tap to Pay by default
-      });
+      const result = await nativeService.performCheckout(
+        request.amount,
+        request.currency || 'GBP',
+        request.description || 'Payment',
+        true, // Enable Tap to Pay by default
+        request.orderId || undefined
+      );
 
       const fee = this.calculateFee(request.amount);
 
@@ -214,13 +214,14 @@ class SumUpServiceClass {
       logger.info('🔄 Using Native SumUp SDK for contactless payment');
 
       // Use native SumUp SDK for contactless payment
-      const result = await SumUpNativeService.checkout({
+      const nativeService = SumUpNativeService.getInstance();
+      const result = await nativeService.performCheckout(
         amount,
-        title: description || 'Fynlo POS Contactless Payment',
         currency,
-        foreignTransactionID: paymentId,
-        useTapToPay: true,
-      });
+        description || 'Fynlo POS Contactless Payment',
+        true, // useTapToPay
+        paymentId
+      );
 
       if (result.success) {
         return {
@@ -228,10 +229,10 @@ class SumUpServiceClass {
           amount,
           currency,
           status: 'completed',
-          paymentMethod: result.usedTapToPay ? 'nfc' : 'apple_pay',
+          paymentMethod: result.transactionInfo?.entryMode === 'tap' ? 'nfc' : 'apple_pay',
         };
       } else {
-        throw new Error(result.message || 'Contactless payment failed');
+        throw new Error(result.error || 'Contactless payment failed');
       }
     } catch (error) {
       logger.error('Contactless payment failed:', error);
@@ -482,12 +483,14 @@ class SumUpServiceClass {
   /**
    * Detect payment method from SumUp result
    */
-  private detectPaymentMethod(result: unknown): 'nfc' | 'apple_pay' | 'google_pay' {
-    // This would analyze the payment result to determine method
-    // For now, default to NFC
-    if (result.paymentMethod?.includes('apple_pay')) {
+  private detectPaymentMethod(result: any): 'nfc' | 'apple_pay' | 'google_pay' {
+    // Analyze the payment result to determine method based on entryMode
+    const entryMode = result?.transactionInfo?.entryMode;
+    if (entryMode === 'tap' || entryMode === 'contactless') {
+      return 'nfc';
+    } else if (result?.transactionInfo?.cardType?.toLowerCase().includes('apple')) {
       return 'apple_pay';
-    } else if (result.paymentMethod?.includes('google_pay')) {
+    } else if (result?.transactionInfo?.cardType?.toLowerCase().includes('google')) {
       return 'google_pay';
     }
     return 'nfc';
