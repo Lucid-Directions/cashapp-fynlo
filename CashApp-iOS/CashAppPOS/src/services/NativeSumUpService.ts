@@ -60,9 +60,42 @@ class NativeSumUpService {
   private static instance: NativeSumUpService;
   private isSetup: boolean = false;
   private apiKey: string | null = null;
+  
+  // Diagnostic data
+  private diagnostics = {
+    moduleAvailable: false,
+    initializationAttempted: false,
+    initializationSucceeded: false,
+    lastError: null as string | null,
+    sdkVersion: 'unknown',
+    capabilities: [] as string[],
+    lastCheck: null as Date | null,
+  };
 
   private constructor() {
     logger.info('🔧 NativeSumUpService initialized');
+    this.runInitialDiagnostics();
+  }
+  
+  /**
+   * Run initial diagnostics on service creation
+   */
+  private runInitialDiagnostics() {
+    this.diagnostics.moduleAvailable = this.isAvailable();
+    this.diagnostics.lastCheck = new Date();
+    
+    if (!this.diagnostics.moduleAvailable) {
+      logger.error('🚨 CRITICAL: SumUp native module not found!');
+      logger.error('Available modules:', Object.keys(NativeModules).filter(m => 
+        m.toLowerCase().includes('sum') || 
+        m.toLowerCase().includes('pay') ||
+        m.toLowerCase().includes('tap')
+      ));
+      this.diagnostics.lastError = 'Native module not registered';
+    } else {
+      logger.info('✅ SumUp native module detected');
+      this.diagnostics.capabilities.push('Module Available');
+    }
   }
 
   static getInstance(): NativeSumUpService {
@@ -310,6 +343,65 @@ class NativeSumUpService {
       logger.error('❌ Failed to get merchant info:', error);
       return null;
     }
+  }
+
+  /**
+   * Get diagnostic information
+   */
+  async getDiagnostics(): Promise<{
+    moduleAvailable: boolean;
+    initializationAttempted: boolean;
+    initializationSucceeded: boolean;
+    lastError: string | null;
+    sdkVersion: string;
+    capabilities: string[];
+    timestamp: string;
+    platform: string;
+    platformVersion: string | number;
+    isLoggedIn?: boolean;
+    tapToPayAvailable?: boolean;
+    tapToPayActivated?: boolean;
+    merchantInfo?: MerchantInfo | null;
+  }> {
+    // Update diagnostics
+    this.diagnostics.moduleAvailable = this.isAvailable();
+    this.diagnostics.lastCheck = new Date();
+    
+    const result = {
+      ...this.diagnostics,
+      timestamp: new Date().toISOString(),
+      platform: Platform.OS,
+      platformVersion: Platform.Version,
+      isLoggedIn: undefined as boolean | undefined,
+      tapToPayAvailable: undefined as boolean | undefined,
+      tapToPayActivated: undefined as boolean | undefined,
+      merchantInfo: undefined as MerchantInfo | null | undefined,
+    };
+    
+    // Try to get additional info if module is available
+    if (this.diagnostics.moduleAvailable) {
+      try {
+        result.isLoggedIn = await this.isLoggedIn();
+      } catch (error) {
+        logger.warn('Could not check login status:', error);
+      }
+      
+      try {
+        const tapToPayStatus = await this.checkTapToPayAvailability();
+        result.tapToPayAvailable = tapToPayStatus.isAvailable;
+        result.tapToPayActivated = tapToPayStatus.isActivated;
+      } catch (error) {
+        logger.warn('Could not check Tap to Pay status:', error);
+      }
+      
+      try {
+        result.merchantInfo = await this.getCurrentMerchant();
+      } catch (error) {
+        logger.warn('Could not get merchant info:', error);
+      }
+    }
+    
+    return result;
   }
 
   /**
