@@ -87,6 +87,13 @@ const EnhancedPaymentScreen: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [sumUpAvailable, setSumUpAvailable] = useState<boolean | null>(null);
 
+  // Log when SumUp modal state changes
+  useEffect(() => {
+    if (showSumUpModal) {
+      logger.info('🎯 EnhancedPaymentScreen: Mounting NativeSumUpPayment component');
+    }
+  }, [showSumUpModal]);
+
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -1174,15 +1181,13 @@ const EnhancedPaymentScreen: React.FC = () => {
       {/* QR Payment Modal */}
       <QRPaymentModal />
 
-      {/* SumUp Payment Component - ALWAYS use native SDK */}
-      {showSumUpModal && (
-        <>
-          {logger.info('🎯 EnhancedPaymentScreen: Mounting NativeSumUpPayment component')}
-          <NativeSumUpPayment
+      {/* SumUp Payment Component - Native SDK only */}
+      {showSumUpModal && NativeSumUpService.isAvailable() && (
+        <NativeSumUpPayment
           amount={calculateGrandTotal()}
           currency="GBP"
           title={`Order #${Date.now()}`}
-          visible={showSumUpModal}
+          visible={true}
           onPaymentComplete={(success, transactionCode, error) => {
             if (success) {
               // Process successful payment
@@ -1201,6 +1206,16 @@ const EnhancedPaymentScreen: React.FC = () => {
           }}
           useTapToPay={true}
         />
+      )}
+      
+      {/* Show error if SumUp requested but not available */}
+      {showSumUpModal && !NativeSumUpService.isAvailable() && (
+        <>
+          {Alert.alert(
+            'SumUp Not Available',
+            'SumUp native module is not available on this device. Please ensure the app is properly configured.',
+            [{ text: 'OK', onPress: () => setShowSumUpModal(false) }]
+          )}
         </>
       )}
     </View>
