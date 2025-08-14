@@ -17,6 +17,7 @@ import { supabase } from './src/lib/supabase';
 import AppNavigator from './src/navigation/AppNavigator';
 import ErrorTrackingService from './src/services/ErrorTrackingService';
 import NativeSumUpService from './src/services/NativeSumUpService';
+import sumUpConfigService from './src/services/SumUpConfigService';
 import { useAuthStore } from './src/store/useAuthStore';
 import { ensureComponentsLoaded } from './src/utils/componentRegistry';
 import tokenManager from './src/utils/tokenManager';
@@ -61,15 +62,32 @@ const App: React.FC = () => {
         const errorTrackingService = ErrorTrackingService.getInstance();
         errorTrackingService.initialize();
 
-        // Initialize SumUp Native SDK (configuration will be fetched from backend when needed)
+        // Initialize SumUp Native SDK with proper setup
         console.log('🔧 Initializing SumUp Native SDK...');
-        // NativeSumUpService is already a singleton instance
-        const sumUpInitialized = await NativeSumUpService.initialize();
-
-        if (sumUpInitialized) {
-          console.log('✅ SumUp Native SDK initialized successfully');
-        } else {
-          console.warn('⚠️ SumUp Native SDK initialization failed - continuing without SumUp');
+        try {
+          // Check if native module is available
+          if (NativeSumUpService.isAvailable()) {
+            // Try to fetch config and setup SDK
+            const config = await sumUpConfigService.initializeAndGetConfig();
+            if (config.affiliateKey) {
+              await NativeSumUpService.setupSDK(config.affiliateKey);
+              console.log('✅ SumUp Native SDK setup completed with affiliate key');
+              
+              // Initialize after setup
+              const sumUpInitialized = await NativeSumUpService.initialize();
+              if (sumUpInitialized) {
+                console.log('✅ SumUp Native SDK initialized successfully');
+              } else {
+                console.warn('⚠️ SumUp initialization returned false - user may need to login');
+              }
+            } else {
+              console.warn('⚠️ No SumUp affiliate key available - SDK setup deferred');
+            }
+          } else {
+            console.warn('⚠️ SumUp native module not available on this device');
+          }
+        } catch (error) {
+          console.warn('⚠️ SumUp SDK initialization failed - continuing without SumUp:', error);
         }
 
         // Check Supabase auth state

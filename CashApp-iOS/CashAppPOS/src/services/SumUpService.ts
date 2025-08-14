@@ -11,6 +11,7 @@ import { logger } from '../utils/logger';
 
 import type { PaymentRequest, PaymentResult } from './PaymentService';
 import NativeSumUpService from './NativeSumUpService';
+import sumUpConfigService from './SumUpConfigService';
 
 export interface SumUpConfig {
   apiKey: string;
@@ -156,6 +157,30 @@ class SumUpServiceClass {
         throw new Error('SumUp native module not available on this device');
       }
 
+      // Ensure SDK is setup before attempting payment
+      if (!NativeSumUpService.isSDKSetup()) {
+        logger.info('🔧 SumUp SDK not setup, initializing...');
+        
+        // Fetch config from backend
+        const config = await sumUpConfigService.initializeAndGetConfig();
+        const affiliateKey = config.affiliateKey;
+        
+        if (!affiliateKey) {
+          throw new Error('SumUp configuration not available. Please ensure backend is accessible and properly configured.');
+        }
+        
+        // Setup the SDK
+        await NativeSumUpService.setupSDK(affiliateKey);
+        logger.info('✅ SumUp SDK setup completed');
+      }
+
+      // Check if user is logged in
+      const isLoggedIn = await NativeSumUpService.isLoggedIn();
+      if (!isLoggedIn) {
+        logger.warn('⚠️ User not logged in to SumUp. Payment will require login.');
+        // Note: The native SDK will handle login presentation if needed during checkout
+      }
+
       // Process the payment through native SDK
       const result = await NativeSumUpService.performCheckout(
         request.amount,
@@ -205,8 +230,32 @@ class SumUpServiceClass {
     description?: string
   ): Promise<SumUpContactlessPayment> {
     try {
-      if (!this.config) {
-        throw new Error('SumUp service not initialized');
+      // Check if native module is available
+      if (!NativeSumUpService.isAvailable()) {
+        throw new Error('SumUp native module not available on this device');
+      }
+
+      // Ensure SDK is setup before attempting payment
+      if (!NativeSumUpService.isSDKSetup()) {
+        logger.info('🔧 SumUp SDK not setup, initializing...');
+        
+        // Fetch config from backend
+        const config = await sumUpConfigService.initializeAndGetConfig();
+        const affiliateKey = config.affiliateKey;
+        
+        if (!affiliateKey) {
+          throw new Error('SumUp configuration not available. Please ensure backend is accessible and properly configured.');
+        }
+        
+        // Setup the SDK
+        await NativeSumUpService.setupSDK(affiliateKey);
+        logger.info('✅ SumUp SDK setup completed');
+      }
+
+      // Check if user is logged in
+      const isLoggedIn = await NativeSumUpService.isLoggedIn();
+      if (!isLoggedIn) {
+        logger.warn('⚠️ User not logged in to SumUp. Payment will require login.');
       }
 
       const paymentId = this.generatePaymentId();
@@ -223,12 +272,32 @@ class SumUpServiceClass {
       );
 
       if (result.success) {
+        // Determine payment method from transaction info
+        // Default to 'nfc' since we're using Tap to Pay
+        let paymentMethod: 'nfc' | 'apple_pay' | 'google_pay' = 'nfc';
+        
+        // Check if we have transaction info to determine actual method
+        if (result.transactionInfo) {
+          const entryMode = result.transactionInfo.entryMode?.toLowerCase();
+          const cardType = result.transactionInfo.cardType?.toLowerCase();
+          
+          if (entryMode === 'tap' || entryMode === 'contactless') {
+            paymentMethod = 'nfc';
+          } else if (cardType?.includes('apple')) {
+            paymentMethod = 'apple_pay';
+          } else if (cardType?.includes('google')) {
+            paymentMethod = 'google_pay';
+          }
+        }
+        
+        logger.info('💳 Payment completed with method:', paymentMethod);
+        
         return {
           id: paymentId,
           amount,
           currency,
           status: 'completed',
-          paymentMethod: result.transactionInfo?.entryMode === 'tap' ? 'nfc' : 'apple_pay',
+          paymentMethod,
         };
       } else {
         throw new Error(result.error || 'Contactless payment failed');
