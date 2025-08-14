@@ -87,10 +87,19 @@ const EnhancedPaymentScreen: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [sumUpAvailable, setSumUpAvailable] = useState<boolean | null>(null);
 
-  // Log when SumUp modal state changes
+  // Log when SumUp modal state changes and handle unavailable case
   useEffect(() => {
     if (showSumUpModal) {
       logger.info('🎯 EnhancedPaymentScreen: Mounting NativeSumUpPayment component');
+      
+      // Check if native module is available
+      if (!NativeSumUpService.isAvailable()) {
+        Alert.alert(
+          'SumUp Not Available',
+          'SumUp native module is not available on this device. Please ensure the app is properly configured.',
+          [{ text: 'OK', onPress: () => setShowSumUpModal(false) }]
+        );
+      }
     }
   }, [showSumUpModal]);
 
@@ -1206,17 +1215,6 @@ const EnhancedPaymentScreen: React.FC = () => {
           }}
           useTapToPay={true}
         />
-      )}
-      
-      {/* Show error if SumUp requested but not available */}
-      {showSumUpModal && !NativeSumUpService.isAvailable() && (
-        <>
-          {Alert.alert(
-            'SumUp Not Available',
-            'SumUp native module is not available on this device. Please ensure the app is properly configured.',
-            [{ text: 'OK', onPress: () => setShowSumUpModal(false) }]
-          )}
-        </>
       )}
     </View>
   );
