@@ -19,6 +19,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import DataService from '../../services/DataService'; // Added
 import type { CustomerData } from '../../types'; // Updated import path
+import { formatDateSafely, getRelativeTime } from '../../utils/dateValidation';
 
 const CustomersScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -116,17 +117,8 @@ const CustomersScreen: React.FC = () => {
   };
 
   const formatDate = (date: Date | string | undefined) => {
-    if (!date) return 'Never';
-    const dateObj = date instanceof Date ? date : new Date(date);
-    if (isNaN(dateObj.getTime())) return 'Never';
-
-    const days = Math.floor((Date.now() - dateObj.getTime()) / (1000 * 60 * 60 * 24));
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    if (days < 7) return `${days} days ago`;
-    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
-    if (days < 365) return `${Math.floor(days / 30)} months ago`;
-    return `${Math.floor(days / 365)} years ago`;
+    // Use the safe date validation utility
+    return getRelativeTime(date, 'Never');
   };
 
   const renderCustomer = ({ item }: { item: CustomerData }) => {
@@ -422,7 +414,7 @@ const CustomersScreen: React.FC = () => {
                   <View style={styles.detailRow}>
                     <Icon name="calendar-today" size={20} color={theme.colors.darkGray} />
                     <Text style={[styles.detailText, { color: theme.colors.text }]}>
-                      Customer since {selectedCustomer.joinedDate ? selectedCustomer.joinedDate.toLocaleDateString('en-GB') : 'N/A'}
+                      Customer since {formatDateSafely(selectedCustomer.joinedDate, 'N/A', 'en-GB')}
                     </Text>
                   </View>
                 </View>

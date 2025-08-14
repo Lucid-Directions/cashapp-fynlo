@@ -8,6 +8,7 @@ import { envBool, IS_DEV } from '../env';
 import { useAuthStore } from '../store/useAuthStore';
 import { logger } from '../utils/logger';
 import tokenManager from '../utils/tokenManager';
+import { validateCustomerData, validateEmployeeData, validateOrderData } from '../utils/dateValidation';
 
 import APITestingService from './APITestingService';
 import authInterceptor from './auth/AuthInterceptor';
@@ -975,12 +976,19 @@ class DataService {
 
       if (response.ok) {
         const result = await response.json();
-        const customers = result.data || result;
+        const rawCustomers = result.data || result;
         logger.info(
           '✅ API customers received:',
-          Array.isArray(customers) ? customers.length : 'not an array'
+          Array.isArray(rawCustomers) ? rawCustomers.length : 'not an array'
         );
-        return Array.isArray(customers) ? customers : [];
+        
+        // Validate and transform customer data with safe date parsing
+        if (Array.isArray(rawCustomers)) {
+          const validatedCustomers = rawCustomers.map(customer => validateCustomerData(customer));
+          logger.info('✅ Validated customers with safe dates:', validatedCustomers.length);
+          return validatedCustomers;
+        }
+        return [];
       } else {
         logger.error('❌ API error:', response.status, response.statusText);
         throw new Error(`API error: ${response.status}`);
@@ -1017,22 +1025,27 @@ class DataService {
 
       if (response.ok) {
         const result = await response.json();
-        const employees = result.data || result;
+        const rawEmployees = result.data || result;
         logger.info(
           '✅ API employees received:',
-          Array.isArray(employees) ? employees.length : 'not an array'
+          Array.isArray(rawEmployees) ? rawEmployees.length : 'not an array'
         );
 
-        // Apply compatibility transformation if needed
-        if (
-          Array.isArray(employees) &&
-          BackendCompatibilityService.needsEmployeeTransformation(employees)
-        ) {
-          logger.info('🔄 Applying employee compatibility transformation');
-          return BackendCompatibilityService.transformEmployees(employees);
+        if (!Array.isArray(rawEmployees)) {
+          return [];
         }
 
-        return Array.isArray(employees) ? employees : [];
+        // Validate and transform employee data with safe date parsing
+        let validatedEmployees = rawEmployees.map(employee => validateEmployeeData(employee));
+        logger.info('✅ Validated employees with safe dates:', validatedEmployees.length);
+
+        // Apply compatibility transformation if needed
+        if (BackendCompatibilityService.needsEmployeeTransformation(validatedEmployees)) {
+          logger.info('🔄 Applying employee compatibility transformation');
+          validatedEmployees = BackendCompatibilityService.transformEmployees(validatedEmployees);
+        }
+
+        return validatedEmployees;
       } else {
         logger.error('❌ API error:', response.status, response.statusText);
         throw new Error(`API error: ${response.status} - ${response.statusText}`);
