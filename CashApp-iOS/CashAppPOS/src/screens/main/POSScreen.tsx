@@ -43,7 +43,7 @@ import ErrorTrackingService from '../../services/ErrorTrackingService';
 import PlatformService from '../../services/PlatformService';
 import SharedDataStore from '../../services/SharedDataStore';
 import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
-import useAppStore from '../../store/useAppStore';
+import { useCartStore, isEnhancedCartEnabled } from '../../store/cartStoreAdapter';
 import useSettingsStore from '../../store/useSettingsStore';
 import useUIStore from '../../store/useUIStore';
 import type { MenuItem, OrderItem } from '../../types';
@@ -175,12 +175,23 @@ const POSScreen: React.FC = () => {
 
   // Create themed styles
 
-  // Zustand stores
+  // Zustand stores - Use enhanced cart store for persistence
+  const cartStore = useCartStore(isEnhancedCartEnabled());
   const { cart, addToCart, removeFromCart, updateCartItem, clearCart, cartTotal, cartItemCount } =
-    useAppStore();
+    cartStore;
 
   const { selectedCategory, setSelectedCategory, showPaymentModal, setShowPaymentModal } =
     useUIStore();
+
+  // Migrate cart if using enhanced store
+  useEffect(() => {
+    if (isEnhancedCartEnabled() && cartStore.migrateCartIfNeeded) {
+      cartStore.migrateCartIfNeeded();
+      // Also sync stores periodically for consistency during rollout
+      const { syncCartStores } = require('../../store/cartStoreAdapter');
+      syncCartStores();
+    }
+  }, [cartStore]);
 
   // For split bill integration - convert cart items to enhanced format
   // This MUST come after cart is defined from useAppStore()
@@ -352,6 +363,12 @@ const POSScreen: React.FC = () => {
   };
 
   const calculateServiceFee = (subtotal: number) => {
+    // Use enhanced cart store's service charge if enabled
+    if (isEnhancedCartEnabled() && cartStore.calculateServiceCharge) {
+      return cartStore.calculateServiceCharge();
+    }
+    
+    // Fall back to local config for old cart
     if (!serviceChargeConfig.enabled) return 0;
 
     const serviceFeeCalculation = calculatePercentageFee(subtotal, serviceChargeConfig.rate, {
@@ -1173,10 +1190,10 @@ const POSScreen: React.FC = () => {
                           </Text>
                         </View>
                       )}
-                      {serviceChargeConfig.enabled && (
+                      {(isEnhancedCartEnabled() ? cartStore.serviceChargePercentage > 0 : serviceChargeConfig.enabled) && (
                         <View style={styles.summaryRow}>
                           <Text style={styles.summaryLabel}>
-                            Service Fee ({serviceChargeConfig.rate}%)
+                            Service Fee ({isEnhancedCartEnabled() ? cartStore.serviceChargePercentage : serviceChargeConfig.rate}%)
                           </Text>
                           <Text style={styles.summaryValue}>
                             {formatPrice(calculateServiceFee(cartTotal()), '£', {

@@ -16,7 +16,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme } from '../../design-system/ThemeProvider';
-import useAppStore from '../../store/useAppStore';
+import { useCartStore, isEnhancedCartEnabled } from '../../store/cartStoreAdapter';
 import { formatPrice } from '../../utils/priceValidation';
 
 interface ServiceChargeOption {
@@ -38,14 +38,14 @@ const serviceChargeOptions: ServiceChargeOption[] = [
     percentage: 10,
     label: '10% Service Charge',
     description: 'Supports excellent service',
-    coversTransactionFee: '2.9% transaction fee + good tip',
+    coversTransactionFee: '2.9% + £0.30 transaction fee + good tip',
     recommended: true,
   },
   {
     percentage: 15,
     label: '15% Service Charge',
     description: 'Exceptional service appreciation',
-    coversTransactionFee: '2.9% transaction fee + generous tip',
+    coversTransactionFee: '2.9% + £0.30 transaction fee + generous tip',
   },
   {
     percentage: 0,
@@ -58,14 +58,15 @@ const serviceChargeOptions: ServiceChargeOption[] = [
 const ServiceChargeSelectionScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const cartStore = useCartStore(isEnhancedCartEnabled());
   const {
-    _cart,
+    cart: _cart,
     cartTotal,
     setServiceChargePercentage,
     setAddTransactionFee,
     serviceChargePercentage,
     addTransactionFee,
-  } = useAppStore();
+  } = cartStore;
 
   const [selectedOption, setSelectedOption] = useState<number>(serviceChargePercentage);
   const [showTransactionFeeToggle, setShowTransactionFeeToggle] = useState(false);
@@ -78,7 +79,8 @@ const ServiceChargeSelectionScreen: React.FC = () => {
   const calculateTotals = (servicePercent: number, includeTransactionFee: boolean = false) => {
     const subtotal = cartTotal();
     const serviceCharge = subtotal * (servicePercent / 100);
-    const transactionFee = includeTransactionFee ? subtotal * 0.029 : 0;
+    // Match the calculation in PaymentScreen and store: 2.9% + £0.30 on subtotal + service
+    const transactionFee = includeTransactionFee ? (subtotal + serviceCharge) * 0.029 + 0.3 : 0;
     const total = subtotal + serviceCharge + transactionFee;
 
     return {
@@ -107,7 +109,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
     if (selectedOption === 0 && !localAddTransactionFee) {
       Alert.alert(
         'Processing Costs',
-        'Without a service charge or transaction fee, the restaurant will cover all processing costs (2.9%). Continue anyway?',
+        'Without a service charge or transaction fee, the restaurant will cover all processing costs (2.9% + £0.30). Continue anyway?',
         [
           { text: 'Go Back', style: 'cancel' },
           {
@@ -209,7 +211,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
           <View style={styles.transactionFeeSection}>
             <Text style={styles.sectionTitle}>Processing Fees</Text>
             <Text style={styles.feeExplanationText}>
-              Payment processing requires a small fee (2.9%). You can choose to add this to your
+              Payment processing requires a small fee (2.9% + £0.30). You can choose to add this to your
               bill.
             </Text>
 
@@ -258,7 +260,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
 
           {totals.transactionFee > 0 && (
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Processing Fee (2.9%)</Text>
+              <Text style={styles.summaryLabel}>Processing Fee (2.9% + £0.30)</Text>
               <Text style={styles.summaryValue}>{formatPrice(totals.transactionFee, '£')}</Text>
             </View>
           )}
