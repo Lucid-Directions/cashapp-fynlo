@@ -18,7 +18,6 @@ import DecimalInput from '../../components/inputs/DecimalInput';
 import SimpleDecimalInput from '../../components/inputs/SimpleDecimalInput';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import NativeSumUpPayment from '../../components/payment/NativeSumUpPayment';
-import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
 import { useAuth } from '../../contexts/AuthContext';
 import ApplePayService from '../../services/ApplePayService';
 import NativeSumUpService from '../../services/NativeSumUpService';
@@ -87,6 +86,22 @@ const EnhancedPaymentScreen: React.FC = () => {
   const [customerEmail, setCustomerEmail] = useState('');
   const [processing, setProcessing] = useState(false);
   const [sumUpAvailable, setSumUpAvailable] = useState<boolean | null>(null);
+
+  // Log when SumUp modal state changes and handle unavailable case
+  useEffect(() => {
+    if (showSumUpModal) {
+      logger.info('🎯 EnhancedPaymentScreen: Mounting NativeSumUpPayment component');
+      
+      // Check if native module is available
+      if (!NativeSumUpService.isAvailable()) {
+        Alert.alert(
+          'SumUp Not Available',
+          'SumUp native module is not available on this device. Please ensure the app is properly configured.',
+          [{ text: 'OK', onPress: () => setShowSumUpModal(false) }]
+        );
+      }
+    }
+  }, [showSumUpModal]);
 
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -1175,13 +1190,13 @@ const EnhancedPaymentScreen: React.FC = () => {
       {/* QR Payment Modal */}
       <QRPaymentModal />
 
-      {/* SumUp Payment Component - Use native if available */}
-      {showSumUpModal && NativeSumUpService.isAvailable() ? (
+      {/* SumUp Payment Component - Native SDK only */}
+      {showSumUpModal && NativeSumUpService.isAvailable() && (
         <NativeSumUpPayment
           amount={calculateGrandTotal()}
           currency="GBP"
           title={`Order #${Date.now()}`}
-          visible={showSumUpModal}
+          visible={true}
           onPaymentComplete={(success, transactionCode, error) => {
             if (success) {
               // Process successful payment
@@ -1200,29 +1215,7 @@ const EnhancedPaymentScreen: React.FC = () => {
           }}
           useTapToPay={true}
         />
-      ) : showSumUpModal ? (
-        <SumUpPaymentComponent
-          amount={calculateGrandTotal()}
-          currency="GBP"
-          title={`Order #${Date.now()}`}
-          onPaymentComplete={(success, transactionCode, error) => {
-            if (success) {
-              // Process successful payment
-              logger.info('✅ SumUp payment successful', { transactionCode });
-              handleProcessPayment();
-            } else {
-              // Handle error
-              logger.error('❌ SumUp payment failed', { error });
-              Alert.alert('Payment Failed', error || 'Unable to process payment');
-            }
-            setShowSumUpModal(false);
-          }}
-          onPaymentCancel={() => {
-            logger.info('⚠️ SumUp payment cancelled by user');
-            setShowSumUpModal(false);
-          }}
-        />
-      ) : null}
+      )}
     </View>
   );
 };

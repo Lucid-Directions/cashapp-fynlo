@@ -20,7 +20,7 @@ import type { Theme } from '../../design-system/theme';
 
 // Components
 import PaymentStatusOverlay, { PaymentStatus } from '../../components/payment/PaymentStatusOverlay';
-import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
+import NativeSumUpPayment from '../../components/payment/NativeSumUpPayment';
 import QRCodePayment from '../../components/payment/QRCodePayment';
 
 // Services
@@ -429,16 +429,19 @@ const PaymentProcessingScreen: React.FC = () => {
   const renderPaymentContent = () => {
     switch (paymentMethod) {
       case 'sumup':
+        logger.info('🎯 PaymentProcessingScreen: Mounting NativeSumUpPayment component');
         return (
-          <SumUpPaymentComponent
+          <NativeSumUpPayment
             amount={amount}
             currency="GBP"
-            title="Payment for items"
-            onPaymentComplete={(success, transactionId, error) => {
-              if (success && transactionId) {
+            title={`Payment for ${orderData.customerName || 'Customer'}`}
+            visible={true}
+            onPaymentComplete={(success, transactionCode, error) => {
+              logger.info('💳 NativeSumUpPayment completed:', { success, transactionCode, error });
+              if (success && transactionCode) {
                 handlePaymentSuccess({
                   success: true,
-                  transactionId,
+                  transactionId: transactionCode,
                   provider: 'sumup',
                   amount,
                   fee: amount * 0.0069, // 0.69% fee
@@ -448,6 +451,7 @@ const PaymentProcessingScreen: React.FC = () => {
               }
             }}
             onPaymentCancel={handleCancelPayment}
+            useTapToPay={true}
           />
         );
 

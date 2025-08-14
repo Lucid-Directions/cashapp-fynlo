@@ -170,6 +170,9 @@ const POSScreen: React.FC = () => {
 
   // Debug showSumUpPayment state changes
   useEffect(() => {
+    if (showSumUpPayment) {
+      logger.info('🎯 POSScreen: Mounting NativeSumUpPayment component');
+    }
     logger.info('🔄 showSumUpPayment state changed to:', showSumUpPayment);
   }, [showSumUpPayment]);
 
@@ -1406,12 +1409,7 @@ const POSScreen: React.FC = () => {
 
       {/* SumUp Payment Component */}
       {showSumUpPayment && (
-        <>
-          {logger.info(
-            '🔄 Rendering SumUpPaymentComponent with showSumUpPayment:',
-            showSumUpPayment
-          )}
-          <NativeSumUpPayment
+        <NativeSumUpPayment
             amount={calculateCartTotal()}
             currency="GBP"
             title={`Order for ${customerName || 'Customer'}`}
@@ -1420,7 +1418,6 @@ const POSScreen: React.FC = () => {
             onPaymentCancel={handleSumUpPaymentCancel}
             useTapToPay={true}
           />
-        </>
       )}
 
       {/* Item Modification Modal */}
