@@ -1454,9 +1454,24 @@ const POSScreen: React.FC = () => {
           setSelectedItemForModification(null);
         }}
         onSave={(modifiedItem) => {
+          // Generate unique ID for modified items to prevent incorrect merging
+          const { generateCartItemId } = require('../../utils/cartItemHash');
+          const uniqueId = generateCartItemId(
+            modifiedItem.productId || modifiedItem.id,
+            modifiedItem.modifications,
+            modifiedItem.specialInstructions
+          );
+          
+          // Update the item with the unique ID
+          const itemWithUniqueId = {
+            ...modifiedItem,
+            id: uniqueId,
+            productId: modifiedItem.productId || modifiedItem.id,
+          };
+          
           // If this is a new item being added (not from cart)
-          if (selectedItemForModification && !enhancedCartStore.cart.find(item => item.id === selectedItemForModification.id)) {
-            enhancedCartStore.addToCart(modifiedItem);
+          if (selectedItemForModification && !enhancedCartStore.cart.find(item => item.productId === selectedItemForModification.id)) {
+            enhancedCartStore.addToCart(itemWithUniqueId);
           }
           // Otherwise the modal has already updated the cart via applyModifications
           setShowModificationModal(false);

@@ -30,6 +30,7 @@ import {
   validateCartIntegrity,
 } from '../utils/cartTypeGuards';
 import { calculateItemTotal, calculateSum } from '../utils/priceValidation';
+import { canMergeCartItems } from '../utils/cartItemHash';
 
 // Extend the base AppStore interface with enhanced cart features
 interface EnhancedAppStore extends Omit<AppState, 'cart'>, EnhancedCartState {
