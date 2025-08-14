@@ -187,6 +187,9 @@ const POSScreen: React.FC = () => {
   useEffect(() => {
     if (isEnhancedCartEnabled() && cartStore.migrateCartIfNeeded) {
       cartStore.migrateCartIfNeeded();
+      // Also sync stores periodically for consistency during rollout
+      const { syncCartStores } = require('../../store/cartStoreAdapter');
+      syncCartStores();
     }
   }, [cartStore]);
 
@@ -360,6 +363,12 @@ const POSScreen: React.FC = () => {
   };
 
   const calculateServiceFee = (subtotal: number) => {
+    // Use enhanced cart store's service charge if enabled
+    if (isEnhancedCartEnabled() && cartStore.calculateServiceCharge) {
+      return cartStore.calculateServiceCharge();
+    }
+    
+    // Fall back to local config for old cart
     if (!serviceChargeConfig.enabled) return 0;
 
     const serviceFeeCalculation = calculatePercentageFee(subtotal, serviceChargeConfig.rate, {
@@ -1181,10 +1190,10 @@ const POSScreen: React.FC = () => {
                           </Text>
                         </View>
                       )}
-                      {serviceChargeConfig.enabled && (
+                      {(isEnhancedCartEnabled() ? cartStore.serviceChargePercentage > 0 : serviceChargeConfig.enabled) && (
                         <View style={styles.summaryRow}>
                           <Text style={styles.summaryLabel}>
-                            Service Fee ({serviceChargeConfig.rate}%)
+                            Service Fee ({isEnhancedCartEnabled() ? cartStore.serviceChargePercentage : serviceChargeConfig.rate}%)
                           </Text>
                           <Text style={styles.summaryValue}>
                             {formatPrice(calculateServiceFee(cartTotal()), '£', {
