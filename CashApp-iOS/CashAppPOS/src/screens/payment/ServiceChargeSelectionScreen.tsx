@@ -81,7 +81,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
   const calculateTotals = (servicePercent: number, includeTransactionFee: boolean = false) => {
     const subtotal = cartTotal();
     const serviceCharge = subtotal * (servicePercent / 100);
-    const tax = taxConfiguration.vatEnabled ? subtotal * (taxConfiguration.vatRate / 100) : 0;
+    const tax = taxConfiguration?.vatEnabled ? subtotal * ((taxConfiguration?.vatRate || 0) / 100) : 0;
     // Match the calculation in PaymentScreen: 2.9% + £0.30 on (subtotal + tax + service)
     const baseTotal = subtotal + tax + serviceCharge;
     const transactionFee = includeTransactionFee ? baseTotal * 0.029 + 0.3 : 0;
@@ -265,7 +265,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
 
           {totals.tax > 0 && (
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>VAT ({taxConfiguration.vatRate}%)</Text>
+              <Text style={styles.summaryLabel}>VAT ({taxConfiguration?.vatRate || 0}%)</Text>
               <Text style={styles.summaryValue}>{formatPrice(totals.tax, '£')}</Text>
             </View>
           )}

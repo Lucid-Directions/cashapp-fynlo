@@ -123,7 +123,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
       price,
       quantity,
       emoji: selectedEmoji,
-      notes: notes || undefined,
+      notes: notes || '',
       // Add enhanced properties for the enhanced cart
       originalPrice: price,
       modifications: [],
