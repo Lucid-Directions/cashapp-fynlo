@@ -22,6 +22,7 @@ import type { Theme } from '../../design-system/theme';
 import PaymentStatusOverlay, { PaymentStatus } from '../../components/payment/PaymentStatusOverlay';
 import NativeSumUpPayment from '../../components/payment/NativeSumUpPayment';
 import QRCodePayment from '../../components/payment/QRCodePayment';
+import SumUpDiagnostics from '../../components/diagnostics/SumUpDiagnostics';
 
 // Services
 import PaymentService from '../../services/PaymentService';
@@ -94,6 +95,8 @@ const PaymentProcessingScreen: React.FC = () => {
   const [showPaymentOverlay, setShowPaymentOverlay] = useState(true);
   const [cashReceived, setCashReceived] = useState<number>(0);
   const [showCashModal, setShowCashModal] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
+  const [sumUpError, setSumUpError] = useState<string | null>(null);
   
   // Refs to prevent double processing
   const isProcessingRef = useRef(false);
@@ -430,6 +433,55 @@ const PaymentProcessingScreen: React.FC = () => {
     switch (paymentMethod) {
       case 'sumup':
         logger.info('🎯 PaymentProcessingScreen: Mounting NativeSumUpPayment component');
+        
+        // Check if module is available first
+        if (!sumUpService.isAvailable()) {
+          logger.error('❌ SumUp module not available');
+          setSumUpError('SumUp module not available');
+          setShowDiagnostics(true);
+          
+          return (
+            <View style={styles.errorContainer}>
+              <Icon name="error-outline" size={60} color={theme.colors.error} />
+              <Text style={styles.errorTitle}>SumUp Not Available</Text>
+              <Text style={styles.errorText}>
+                The SumUp payment module is not available on this device.
+                {'\n'}This may be due to:
+                {'\n'}• Native module not registered
+                {'\n'}• iOS configuration issue
+                {'\n'}• Device compatibility
+              </Text>
+              
+              <SumUpDiagnostics />
+              
+              <View style={styles.errorActions}>
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.retryButton]}
+                  onPress={() => {
+                    setSumUpError(null);
+                    setShowDiagnostics(false);
+                    initializePayment();
+                  }}
+                >
+                  <Icon name="refresh" size={20} color={theme.colors.onPrimary} />
+                  <Text style={styles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.alternativeButton]}
+                  onPress={() => {
+                    // Switch to QR code payment as fallback
+                    navigation.setParams({ ...route.params, paymentMethod: 'qr_code' });
+                  }}
+                >
+                  <Icon name="qr-code" size={20} color={theme.colors.primary} />
+                  <Text style={styles.alternativeButtonText}>Use QR Payment</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          );
+        }
+        
         return (
           <NativeSumUpPayment
             amount={amount}
@@ -447,6 +499,8 @@ const PaymentProcessingScreen: React.FC = () => {
                   fee: amount * 0.0069, // 0.69% fee
                 });
               } else {
+                setSumUpError(error || 'Payment failed');
+                setShowDiagnostics(true);
                 handlePaymentError(new Error(error || 'Payment failed'));
               }
             }}
@@ -832,7 +886,41 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     color: theme.colors.onPrimary,
     marginLeft: theme.spacing.sm,
   },
+  errorContainer: {
+    flex: 1,
+    padding: theme.spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: theme.colors.text,
+    marginTop: theme.spacing.lg,
+    marginBottom: theme.spacing.sm,
+  },
+  errorText: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: theme.spacing.xl,
+    lineHeight: 20,
+  },
+  errorActions: {
+    width: '100%',
+    marginTop: theme.spacing.xl,
+  },
+  alternativeButton: {
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+  },
+  alternativeButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.colors.primary,
+    marginLeft: theme.spacing.sm,
+  },
 });
 
 export default PaymentProcessingScreen;
-EOF < /dev/null
