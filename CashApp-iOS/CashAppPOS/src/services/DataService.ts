@@ -8,6 +8,7 @@ import { envBool, IS_DEV } from '../env';
 import { useAuthStore } from '../store/useAuthStore';
 import { logger } from '../utils/logger';
 import tokenManager from '../utils/tokenManager';
+import { retryWithBackoff, RetryProfiles, createRetryableFetch } from '../utils/retryWithBackoff';
 
 import APITestingService from './APITestingService';
 import authInterceptor from './auth/AuthInterceptor';
@@ -167,27 +168,49 @@ class DataService {
   }
 
   // Backend availability check - Enhanced with API testing support
-  private async checkBackendAvailability(): Promise<void> {
+  async checkBackendAvailability(): Promise<boolean> {
     if (!this.featureFlags.USE_REAL_API && !this.featureFlags.TEST_API_MODE) {
-      return;
+      this.isBackendAvailable = false;
+      return false;
     }
 
+    const wasAvailable = this.isBackendAvailable;
+
     try {
-      // Use AbortController for timeout instead of timeout property
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      // Use retry logic for health check with exponential backoff
+      await retryWithBackoff(
+        async () => {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 2000);
 
-      const response = await fetch(`${API_CONFIG.BASE_URL}/health`, {
-        method: 'GET',
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
+          try {
+            const response = await fetch(`${API_CONFIG.BASE_URL}/health`, {
+              method: 'GET',
+              signal: controller.signal,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              redirect: 'follow', // Follow 307 redirects from DigitalOcean
+            });
+
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+              throw new Error(`Health check failed: ${response.status}`);
+            }
+            
+            this.isBackendAvailable = true;
+          } finally {
+            clearTimeout(timeoutId);
+          }
         },
-      });
-
-      clearTimeout(timeoutId);
-      const wasAvailable = this.isBackendAvailable;
-      this.isBackendAvailable = response.ok;
+        {
+          ...RetryProfiles.QUICK,
+          onRetry: (error, attempt, nextDelay) => {
+            logger.info(`Health check attempt ${attempt} failed, retrying in ${nextDelay}ms...`);
+          },
+        }
+      );
 
       // Test health endpoint when in test mode
       if (this.featureFlags.TEST_API_MODE && this.isBackendAvailable) {
@@ -200,18 +223,24 @@ class DataService {
           `Backend status changed: ${this.isBackendAvailable ? 'Available' : 'Unavailable'}`
         );
       }
+      
+      return this.isBackendAvailable;
     } catch (_error) {
       this.isBackendAvailable = false;
-      logger.info('Backend not available, using mock data');
+      logger.info('Backend not available after retries, using mock data');
 
       // Still test the endpoint in test mode to record the failure
       if (this.featureFlags.TEST_API_MODE) {
         await this.testAPIEndpoint('/health');
       }
+      
+      // Log status change
+      if (wasAvailable !== this.isBackendAvailable) {
+        logger.info('Backend status changed: Unavailable');
+      }
+      
+      return false;
     }
-
-    // Recheck every 30 seconds
-    setTimeout(() => this.checkBackendAvailability(), 30000);
   }
 
   // Authentication methods - Updated to use Supabase
@@ -1013,7 +1042,32 @@ class DataService {
     logger.info('🌐 DataService.getEmployees - fetching from API');
 
     try {
-      const response = await authInterceptor.get(`${API_CONFIG.FULL_API_URL}/employees/`);
+      // Use retry logic for employee fetching
+      const response = await retryWithBackoff(
+        async () => {
+          const res = await authInterceptor.get(`${API_CONFIG.FULL_API_URL}/employees/`);
+          if (!res.ok) {
+            const error: any = new Error(`API error: ${res.status}`);
+            error.status = res.status;
+            throw error;
+          }
+          return res;
+        },
+        {
+          ...RetryProfiles.STANDARD,
+          shouldRetry: (error, attempt) => {
+            // Don't retry 404 or 401 errors
+            if (error.status === 404 || error.status === 401) {
+              return false;
+            }
+            // Retry 500 errors up to max attempts
+            return error.status >= 500 || !error.status;
+          },
+          onRetry: (error, attempt, nextDelay) => {
+            logger.warn(`Employee fetch attempt ${attempt} failed, retrying in ${nextDelay}ms...`);
+          },
+        }
+      );
 
       if (response.ok) {
         const result = await response.json();
