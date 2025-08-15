@@ -507,7 +507,7 @@ PODS:
     - StripeCore (= 23.27.6)
   - sumup-react-native (0.1.36):
     - React-Core
-  - SumUpSDK (4.3.5)
+  - SumUpSDK (6.1.1)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -570,7 +570,7 @@ DEPENDENCIES:
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - "stripe-react-native (from `../node_modules/@stripe/stripe-react-native`)"
   - sumup-react-native (from `../node_modules/sumup-react-native-alpha`)
-  - SumUpSDK (~> 4.0)
+  - SumUpSDK (~> 6.1.1)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -778,9 +778,9 @@ SPEC CHECKSUMS:
   StripePaymentsUI: 59ccddeacad592b09fa67e8d641340820ddb4751
   StripeUICore: 879bbf5889265db13f52fac8aad7a176ba62481f
   sumup-react-native: 2cc8eb2a1141785cdef09af64a06fc953b0a78dd
-  SumUpSDK: 4ab1160fef9ea5e0778c8ebed3a6f8e2370dbf05
+  SumUpSDK: d10627760709308f34ab9e093212c642cfff0bb7
   Yoga: ef534101bb891fb09bae657417f34d399c1efe38
 
-PODFILE CHECKSUM: fbb0189e5c567003ded755584e9a5b5cd2bad599
+PODFILE CHECKSUM: ede6df5fe64f3a5b16f37b4493bf692e89671e12
 
 COCOAPODS: 1.16.2
