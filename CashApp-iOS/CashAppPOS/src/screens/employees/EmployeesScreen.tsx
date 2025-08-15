@@ -23,6 +23,7 @@ import { useTheme } from '../../design-system/ThemeProvider';
 import DataService from '../../services/DataService'; // Added
 import type { EmployeeData } from '../../types'; // Updated import path
 import { logger } from '../../utils/logger';
+import { formatDateSafely } from '../../utils/dateValidation';
 
 const EmployeesScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -528,7 +529,7 @@ const EmployeesScreen: React.FC = () => {
                   <View style={styles.detailRow}>
                     <Icon name="calendar-today" size={20} color={Colors.darkGray} />
                     <Text style={styles.detailText}>
-                      Hired {selectedEmployee.hireDate ? selectedEmployee.hireDate.toLocaleDateString('en-GB') : 'N/A'}
+                      Hired {formatDateSafely(selectedEmployee.hireDate, 'N/A', 'en-GB')}
                     </Text>
                   </View>
                   <View style={styles.detailRow}>
