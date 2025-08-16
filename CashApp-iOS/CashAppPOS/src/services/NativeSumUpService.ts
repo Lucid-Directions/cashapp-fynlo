@@ -90,10 +90,25 @@ class NativeSumUpService {
       throw new Error('Native SumUp module is not available');
     }
 
-    // Check if already setup to avoid duplicate initialization
+    // Check if already setup locally
     if (this.isSetup) {
-      logger.info('[TAP_TO_PAY] SDK already setup, skipping re-initialization');
+      logger.info('[TAP_TO_PAY] SDK already setup locally, skipping re-initialization');
       return;
+    }
+
+    // Check if SDK was initialized early in AppDelegate
+    try {
+      const wasEarlyInit = await this.wasInitializedEarly();
+      if (wasEarlyInit) {
+        logger.info('[TAP_TO_PAY] SDK was initialized early in AppDelegate, marking as setup');
+        this.isSetup = true;
+        this.apiKey = apiKey;
+        // Still save the API key for future launches if not already saved
+        await NativeSumUp!.setupSDK(apiKey);
+        return;
+      }
+    } catch (error) {
+      logger.warn('[TAP_TO_PAY] Could not check early initialization, proceeding with setup');
     }
 
     try {

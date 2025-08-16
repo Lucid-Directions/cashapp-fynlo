@@ -21,6 +21,16 @@ class SumUpTapToPayModule: NSObject, RCTBridgeModule {
                   resolver: @escaping RCTPromiseResolveBlock,
                   rejecter: @escaping RCTPromiseRejectBlock) {
         DispatchQueue.main.async {
+            // Check if already initialized to avoid duplicate setup
+            if AppDelegate.isSumUpInitialized() {
+                print("[TAP_TO_PAY] SDK already initialized in AppDelegate, saving API key only")
+                // Just save the API key for future launches
+                UserDefaults.standard.set(apiKey, forKey: "sumup_api_key")
+                resolver(["success": true])
+                return
+            }
+            
+            // Setup SDK if not already initialized
             SMPSumUpSDK.setup(withAPIKey: apiKey)
             // Save API key to UserDefaults for early initialization
             UserDefaults.standard.set(apiKey, forKey: "sumup_api_key")
