@@ -1,9 +1,11 @@
 import UIKit
 import Foundation
+import SumUpSDK
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
   var window: UIWindow?
+  private var sumUpInitialized = false
 
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     // Comprehensive fix for SocketRocket priority inversion warnings
@@ -11,6 +13,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     // Suppress category conflicts at runtime
     suppressCategoryConflicts()
+    
+    // Initialize SumUp SDK early for tap to pay readiness
+    initializeSumUpSDKEarly()
     
     let jsCodeLocation: URL
 
@@ -118,5 +123,77 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     // Set environment variable to suppress category warnings
     setenv("OBJC_DISABLE_DUPLICATE_CATEGORY_WARNING", "YES", 1)
+  }
+  
+  // MARK: - SumUp SDK Initialization
+  
+  private func initializeSumUpSDKEarly() {
+    // Initialize SumUp SDK early in app lifecycle to ensure tap to pay is ready
+    // This prevents "Payment session not ready" errors
+    print("[TAP_TO_PAY] Starting early SDK initialization in AppDelegate")
+    
+    // Get API key from Info.plist or environment
+    if let apiKey = getSumUpAPIKey() {
+      DispatchQueue.main.async { [weak self] in
+        SMPSumUpSDK.setup(withAPIKey: apiKey)
+        self?.sumUpInitialized = true
+        print("[TAP_TO_PAY] ✅ SumUp SDK initialized early with API key")
+        
+        // Pre-check tap to pay availability to warm up the system
+        self?.preCheckTapToPayAvailability()
+      }
+    } else {
+      print("[TAP_TO_PAY] ⚠️ No SumUp API key found at app launch - will initialize later")
+    }
+  }
+  
+  private func getSumUpAPIKey() -> String? {
+    // Try to get API key from multiple sources
+    // WARNING: For production, DO NOT hardcode API key in Info.plist as it ships with the app binary
+    // The backend should provide the API key, which gets saved to UserDefaults for subsequent launches
+    
+    // 1. Info.plist (DEVELOPMENT ONLY - DO NOT USE IN PRODUCTION)
+    if let apiKey = Bundle.main.object(forInfoDictionaryKey: "SUMUP_API_KEY") as? String,
+       !apiKey.isEmpty {
+      print("[TAP_TO_PAY] ⚠️ Using API key from Info.plist - NOT RECOMMENDED FOR PRODUCTION")
+      return apiKey
+    }
+    
+    // 2. User defaults (RECOMMENDED - saved from backend config)
+    if let apiKey = UserDefaults.standard.string(forKey: "sumup_api_key"),
+       !apiKey.isEmpty {
+      print("[TAP_TO_PAY] ✅ Using API key from UserDefaults (saved from backend)")
+      return apiKey
+    }
+    
+    // 3. Environment variable (DEVELOPMENT ONLY)
+    if let apiKey = ProcessInfo.processInfo.environment["SUMUP_API_KEY"],
+       !apiKey.isEmpty {
+      print("[TAP_TO_PAY] Using API key from environment variable")
+      return apiKey
+    }
+    
+    return nil
+  }
+  
+  private func preCheckTapToPayAvailability() {
+    // Pre-check tap to pay to warm up the system
+    // This helps prevent initialization delays during first payment
+    SMPSumUpSDK.checkTapToPayAvailability { isAvailable, isActivated, error in
+      if let error = error {
+        print("[TAP_TO_PAY] Pre-check error: \(error.localizedDescription)")
+      } else {
+        print("[TAP_TO_PAY] Pre-check complete - Available: \(isAvailable), Activated: \(isActivated)")
+      }
+    }
+  }
+  
+  // Public method for JS to check if SDK was initialized early
+  @objc
+  static func isSumUpInitialized() -> Bool {
+    if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+      return appDelegate.sumUpInitialized
+    }
+    return false
   }
 }

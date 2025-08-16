@@ -27,6 +27,7 @@ interface SumUpTapToPayModule {
   presentCheckoutPreferences(): Promise<{ success: boolean }>;
   getCurrentMerchant(): Promise<MerchantInfo | null>;
   isLoggedIn(): Promise<{ isLoggedIn: boolean }>;
+  isSDKInitialized(): Promise<{ isInitialized: boolean }>;
 }
 
 interface TransactionResult {
@@ -89,19 +90,41 @@ class NativeSumUpService {
       throw new Error('Native SumUp module is not available');
     }
 
+    // Check if already setup locally
+    if (this.isSetup) {
+      logger.info('[TAP_TO_PAY] SDK already setup locally, skipping re-initialization');
+      return;
+    }
+
+    // Check if SDK was initialized early in AppDelegate
     try {
-      logger.info('🔧 Setting up SumUp SDK with API key');
+      const wasEarlyInit = await this.wasInitializedEarly();
+      if (wasEarlyInit) {
+        logger.info('[TAP_TO_PAY] SDK was initialized early in AppDelegate, marking as setup');
+        this.isSetup = true;
+        this.apiKey = apiKey;
+        // Still save the API key for future launches if not already saved
+        await NativeSumUp!.setupSDK(apiKey);
+        return;
+      }
+    } catch (error) {
+      logger.warn('[TAP_TO_PAY] Could not check early initialization, proceeding with setup');
+    }
+
+    try {
+      logger.info('[TAP_TO_PAY] Setting up SumUp SDK with API key');
       const result = await NativeSumUp!.setupSDK(apiKey);
       
       if (result.success) {
         this.isSetup = true;
         this.apiKey = apiKey;
-        logger.info('✅ SumUp SDK setup successful');
+        logger.info('[TAP_TO_PAY] ✅ SumUp SDK setup successful');
+        // API key is saved to UserDefaults by the native module for early initialization
       } else {
         throw new Error('SumUp SDK setup failed');
       }
     } catch (error) {
-      logger.error('❌ Failed to setup SumUp SDK:', error);
+      logger.error('[TAP_TO_PAY] ❌ Failed to setup SumUp SDK:', error);
       throw error;
     }
   }
@@ -111,6 +134,24 @@ class NativeSumUpService {
    */
   isSDKSetup(): boolean {
     return this.isSetup;
+  }
+
+  /**
+   * Check if SDK was initialized early in AppDelegate
+   */
+  async wasInitializedEarly(): Promise<boolean> {
+    if (!this.isAvailable()) {
+      return false;
+    }
+
+    try {
+      const result = await NativeSumUp!.isSDKInitialized();
+      logger.info('[TAP_TO_PAY] Early initialization status:', result.isInitialized);
+      return result.isInitialized;
+    } catch (error) {
+      logger.warn('[TAP_TO_PAY] Could not check early initialization status:', error);
+      return false;
+    }
   }
 
   /**

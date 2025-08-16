@@ -44,6 +44,9 @@ RCT_EXTERN_METHOD(getCurrentMerchant:(RCTPromiseResolveBlock)resolve
 RCT_EXTERN_METHOD(isLoggedIn:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(isSDKInitialized:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 + (BOOL)requiresMainQueueSetup
 {
   return YES;
