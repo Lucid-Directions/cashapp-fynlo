@@ -8,6 +8,7 @@
 
 import { NativeModules, Platform } from 'react-native';
 import { logger } from '../utils/logger';
+import TapToPayDiagnostics from './TapToPayDiagnostics';
 
 // Type definitions for the native module
 interface SumUpTapToPayModule {
@@ -87,7 +88,9 @@ class NativeSumUpService {
    */
   async setupSDK(apiKey: string): Promise<void> {
     if (!this.isAvailable()) {
-      throw new Error('Native SumUp module is not available');
+      const error = 'Native SumUp module is not available';
+      TapToPayDiagnostics.logEvent('SDK setup failed - module not available', { error }, 'error');
+      throw new Error(error);
     }
 
     // Check if already setup locally
@@ -101,6 +104,7 @@ class NativeSumUpService {
       const wasEarlyInit = await this.wasInitializedEarly();
       if (wasEarlyInit) {
         logger.info('[TAP_TO_PAY] SDK was initialized early in AppDelegate, marking as setup');
+        TapToPayDiagnostics.logEvent('SDK already initialized early in AppDelegate');
         this.isSetup = true;
         this.apiKey = apiKey;
         // Still save the API key for future launches if not already saved
@@ -113,18 +117,22 @@ class NativeSumUpService {
 
     try {
       logger.info('[TAP_TO_PAY] Setting up SumUp SDK with API key');
+      TapToPayDiagnostics.logEvent('SDK setup starting');
+      
       const result = await NativeSumUp!.setupSDK(apiKey);
       
       if (result.success) {
         this.isSetup = true;
         this.apiKey = apiKey;
         logger.info('[TAP_TO_PAY] ✅ SumUp SDK setup successful');
+        TapToPayDiagnostics.logEvent('SDK setup successful');
         // API key is saved to UserDefaults by the native module for early initialization
       } else {
         throw new Error('SumUp SDK setup failed');
       }
     } catch (error) {
       logger.error('[TAP_TO_PAY] ❌ Failed to setup SumUp SDK:', error);
+      TapToPayDiagnostics.logEvent('SDK setup failed', { error }, 'error');
       throw error;
     }
   }
@@ -301,6 +309,9 @@ class NativeSumUpService {
         foreignTransactionID,
       });
 
+      // Log payment attempt for diagnostics
+      TapToPayDiagnostics.logPaymentAttempt(amount, currency, useTapToPay);
+
       const result = await NativeSumUp!.checkout(
         amount,
         title,
@@ -310,9 +321,21 @@ class NativeSumUpService {
       );
 
       logger.info('💳 Checkout result:', result);
+      
+      // Log successful payment
+      TapToPayDiagnostics.logPaymentResult(
+        result.success,
+        result.transactionCode,
+        undefined
+      );
+      
       return result;
     } catch (error) {
       logger.error('❌ Checkout failed:', error);
+      
+      // Log failed payment
+      TapToPayDiagnostics.logPaymentResult(false, undefined, error);
+      
       throw error;
     }
   }
@@ -333,6 +356,17 @@ class NativeSumUpService {
       logger.error('❌ Failed to present checkout preferences:', error);
       throw error;
     }
+  }
+
+  /**
+   * Run comprehensive diagnostics
+   */
+  async runDiagnostics(): Promise<any> {
+    logger.info('🔍 Running tap to pay diagnostics');
+    const report = await TapToPayDiagnostics.generateReport();
+    const formatted = TapToPayDiagnostics.formatReportForDisplay(report);
+    logger.info('\n' + formatted);
+    return report;
   }
 
   /**
