@@ -4,8 +4,11 @@ import { Image, StyleSheet, View, Text, Platform } from 'react-native';
 
 import { logger } from '../utils/logger';
 
-// Import optimized logo versions - React Native will automatically pick the right one
-const fynloLogo = require('../assets/fynlo-logo.png');
+// For iOS, use the image from the asset catalog which is always available
+// For Android/Web, use the bundled asset
+const fynloLogo = Platform.OS === 'ios' 
+  ? { uri: 'FynloLogo' }  // This references Images.xcassets/FynloLogo
+  : require('../assets/fynlo-logo.png');
 
 interface LogoProps {
   size?: 'small' | 'medium' | 'large';
