@@ -95,7 +95,7 @@ class TapToPayDiagnostics {
   async generateReport(): Promise<DiagnosticReport> {
     this.logEvent('Generating diagnostic report');
     
-    const sumUpService = NativeSumUpService.getInstance();
+    const sumUpService = NativeSumUpService;
     const report: DiagnosticReport = {
       timestamp: new Date().toISOString(),
       platform: {

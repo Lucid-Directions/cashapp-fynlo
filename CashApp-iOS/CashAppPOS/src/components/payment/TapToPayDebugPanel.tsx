@@ -40,7 +40,7 @@ const TapToPayDebugPanel: React.FC<DebugPanelProps> = ({
   const runDiagnostics = async () => {
     setIsLoading(true);
     try {
-      const report = await NativeSumUpService.getInstance().runDiagnostics();
+      const report = await NativeSumUpService.runDiagnostics();
       setDiagnosticReport(report);
       setLastUpdate(new Date());
     } catch (error) {
@@ -53,7 +53,7 @@ const TapToPayDebugPanel: React.FC<DebugPanelProps> = ({
 
   const testTapToPay = async () => {
     try {
-      const service = NativeSumUpService.getInstance();
+      const service = NativeSumUpService;
       
       // Check availability
       const availability = await service.checkTapToPayAvailability();
