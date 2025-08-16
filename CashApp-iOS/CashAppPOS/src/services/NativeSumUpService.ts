@@ -7,6 +7,7 @@
  */
 
 import { NativeModules, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logger } from '../utils/logger';
 
 // Type definitions for the native module
@@ -89,19 +90,33 @@ class NativeSumUpService {
       throw new Error('Native SumUp module is not available');
     }
 
+    // Check if already setup to avoid duplicate initialization
+    if (this.isSetup) {
+      logger.info('[TAP_TO_PAY] SDK already setup, skipping re-initialization');
+      return;
+    }
+
     try {
-      logger.info('🔧 Setting up SumUp SDK with API key');
+      logger.info('[TAP_TO_PAY] Setting up SumUp SDK with API key');
       const result = await NativeSumUp!.setupSDK(apiKey);
       
       if (result.success) {
         this.isSetup = true;
         this.apiKey = apiKey;
-        logger.info('✅ SumUp SDK setup successful');
+        logger.info('[TAP_TO_PAY] ✅ SumUp SDK setup successful');
+        
+        // Save API key to UserDefaults for early initialization next time
+        try {
+          await AsyncStorage.setItem('sumup_api_key', apiKey);
+          logger.info('[TAP_TO_PAY] API key saved for future early initialization');
+        } catch (e) {
+          logger.warn('[TAP_TO_PAY] Could not save API key for future use:', e);
+        }
       } else {
         throw new Error('SumUp SDK setup failed');
       }
     } catch (error) {
-      logger.error('❌ Failed to setup SumUp SDK:', error);
+      logger.error('[TAP_TO_PAY] ❌ Failed to setup SumUp SDK:', error);
       throw error;
     }
   }

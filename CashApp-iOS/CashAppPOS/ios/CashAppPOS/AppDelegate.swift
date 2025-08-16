@@ -1,9 +1,11 @@
 import UIKit
 import Foundation
+import SumUpSDK
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
   var window: UIWindow?
+  private var sumUpInitialized = false
 
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     // Comprehensive fix for SocketRocket priority inversion warnings
@@ -12,16 +14,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Suppress category conflicts at runtime
     suppressCategoryConflicts()
     
+    // Initialize SumUp SDK early for tap to pay readiness
+    initializeSumUpSDKEarly()
+    
     let jsCodeLocation: URL
 
-    // TEMPORARY: Force use of bundled JS for debugging payment issue
-    // Use bundled JS instead of Metro to ensure changes are included
-    if let bundledURL = Bundle.main.url(forResource: "main", withExtension: "jsbundle") {
+    #if DEBUG
+      // Use Metro bundler in development for hot reloading
+      // Fallback to bundled JS if Metro server is not running
+      if let metroURL = RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index", fallbackExtension: nil) {
+        jsCodeLocation = metroURL
+        print("🔧 Using Metro bundler for development")
+      } else if let bundledURL = Bundle.main.url(forResource: "main", withExtension: "jsbundle") {
+        jsCodeLocation = bundledURL
+        print("⚠️ Metro server not running, using bundled JavaScript in DEBUG mode")
+      } else {
+        fatalError("❌ Neither Metro server nor bundled JavaScript file available")
+      }
+    #else
+      // Use bundled JS in release builds
+      guard let bundledURL = Bundle.main.url(forResource: "main", withExtension: "jsbundle") else {
+        fatalError("❌ Bundled JavaScript file not found in release build")
+      }
       jsCodeLocation = bundledURL
-      print("✅ Using bundled JavaScript for debug testing")
-    } else {
-      fatalError("❌ Bundled JavaScript file not found")
-    }
+      print("📦 Using bundled JavaScript for release")
+    #endif
 
     print("JS Code Location: \(jsCodeLocation)")
 
@@ -106,5 +123,74 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     // Set environment variable to suppress category warnings
     setenv("OBJC_DISABLE_DUPLICATE_CATEGORY_WARNING", "YES", 1)
+  }
+  
+  // MARK: - SumUp SDK Initialization
+  
+  private func initializeSumUpSDKEarly() {
+    // Initialize SumUp SDK early in app lifecycle to ensure tap to pay is ready
+    // This prevents "Payment session not ready" errors
+    print("[TAP_TO_PAY] Starting early SDK initialization in AppDelegate")
+    
+    // Get API key from Info.plist or environment
+    if let apiKey = getSumUpAPIKey() {
+      DispatchQueue.main.async { [weak self] in
+        SMPSumUpSDK.setup(withAPIKey: apiKey)
+        self?.sumUpInitialized = true
+        print("[TAP_TO_PAY] ✅ SumUp SDK initialized early with API key")
+        
+        // Pre-check tap to pay availability to warm up the system
+        self?.preCheckTapToPayAvailability()
+      }
+    } else {
+      print("[TAP_TO_PAY] ⚠️ No SumUp API key found at app launch - will initialize later")
+    }
+  }
+  
+  private func getSumUpAPIKey() -> String? {
+    // Try to get API key from multiple sources
+    // 1. Info.plist (for production)
+    if let apiKey = Bundle.main.object(forInfoDictionaryKey: "SUMUP_API_KEY") as? String,
+       !apiKey.isEmpty {
+      print("[TAP_TO_PAY] Using API key from Info.plist")
+      return apiKey
+    }
+    
+    // 2. User defaults (if saved from backend config)
+    if let apiKey = UserDefaults.standard.string(forKey: "sumup_api_key"),
+       !apiKey.isEmpty {
+      print("[TAP_TO_PAY] Using API key from UserDefaults")
+      return apiKey
+    }
+    
+    // 3. Environment variable (for development)
+    if let apiKey = ProcessInfo.processInfo.environment["SUMUP_API_KEY"],
+       !apiKey.isEmpty {
+      print("[TAP_TO_PAY] Using API key from environment")
+      return apiKey
+    }
+    
+    return nil
+  }
+  
+  private func preCheckTapToPayAvailability() {
+    // Pre-check tap to pay to warm up the system
+    // This helps prevent initialization delays during first payment
+    SMPSumUpSDK.checkTapToPayAvailability { isAvailable, isActivated, error in
+      if let error = error {
+        print("[TAP_TO_PAY] Pre-check error: \(error.localizedDescription)")
+      } else {
+        print("[TAP_TO_PAY] Pre-check complete - Available: \(isAvailable), Activated: \(isActivated)")
+      }
+    }
+  }
+  
+  // Public method for JS to check if SDK was initialized early
+  @objc
+  static func isSumUpInitialized() -> Bool {
+    if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+      return appDelegate.sumUpInitialized
+    }
+    return false
   }
 }
