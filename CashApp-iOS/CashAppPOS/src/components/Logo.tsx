@@ -4,6 +4,9 @@ import { Image, StyleSheet, View, Text, Platform } from 'react-native';
 
 import { logger } from '../utils/logger';
 
+// Import logo at the top level - if it doesn't exist, build will fail
+const fynloLogo = require('../assets/fynlo-logo.png');
+
 interface LogoProps {
   size?: 'small' | 'medium' | 'large';
   showText?: boolean;
@@ -62,9 +65,8 @@ const Logo: React.FC<LogoProps> = ({
 
   const sizeStyles = getSizeStyles();
 
-  // Use the actual Fynlo logo image - require() happens at build time
-  // If the image doesn't exist, the build will fail, so no try-catch needed
-  const logoSource = !imageError ? require('../assets/fynlo-logo.png') : null;
+  // Use the imported logo, or null if there was a runtime error loading it
+  const logoSource = !imageError ? fynloLogo : null;
 
   return (
     <View style={[styles.container, style]}>
