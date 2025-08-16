@@ -3,7 +3,7 @@ Orders Management API endpoints for Fynlo POS
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, status, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, desc
 from pydantic import BaseModel, EmailStr
@@ -11,9 +11,7 @@ from datetime import datetime, timedelta
 import uuid
 import logging
 
-logger = logging.getLogger(__name__)
-
-from app.core.database import get_db, Order, Product, Customer, User
+from app.core.database import get_db, Order, Product, Customer, User, Payment
 from app.core.auth import get_current_user
 from app.api.v1.endpoints.customers import (
     CustomerCreate as CustomerCreateSchema,
@@ -26,6 +24,7 @@ from app.core.exceptions import (
     FynloException,
 )
 from app.core.onboarding_helper import OnboardingHelper
+from app.core.tenant_security import TenantSecurity
 from app.core.websocket import (
     websocket_manager,
     notify_order_created,
@@ -45,9 +44,11 @@ from app.services.payment_factory import get_payment_provider  # Assuming you ha
 # from app.services.sumup_provider import SumUpProvider
 from app.models.refund import Refund, RefundLedger  # SQLAlchemy models
 from app.core.database import User as UserModel
-from app.services.email_service import EmailService  # Import the new EmailService
+from app.services.email_service import EmailService
+from app.services.receipt_helper import send_receipt_with_logging, serialize_order_for_background  # Import the new EmailService
 from decimal import Decimal  # Ensure Decimal is imported if used for amounts
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 email_service = EmailService()  # Instantiate EmailService globally or per request
 
@@ -537,6 +538,7 @@ async def create_order(
             payment_status="pending",
             special_instructions=order_data.special_instructions,
             created_by=str(current_user.id),
+            customer_email=order_data.customer_email,
         )
 
         db.add(new_order)
@@ -991,9 +993,9 @@ async def refund_order(
         "Manager",
         "Admin",
     ]:  # TODO: Confirm role names
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to perform refunds.",
+        raise FynloException(
+            message="Not authorized to perform refunds",
+            status_code=status.HTTP_403_FORBIDDEN
         )
 
     order = db.query(Order).filter(Order.id == order_id).first()
@@ -1274,3 +1276,98 @@ async def refund_order(
         gateway_refund_id=gateway_refund_id,
         created_at=new_refund.created_at.isoformat(),
     )
+
+
+@router.post("/{order_id}/email_receipt")
+async def send_email_receipt(
+    order_id: str,
+    background_tasks: BackgroundTasks,
+    current_restaurant_id: Optional[str] = Query(
+        None, description="Restaurant ID for multi-location owners"
+    ),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Send or resend email receipt for an order.
+    This endpoint is called by the frontend after payment completion or for manual resending.
+    """
+    # Validate restaurant access for multi-tenant
+    await TenantSecurity.validate_restaurant_access(
+        user=current_user,
+        restaurant_id=current_restaurant_id or current_user.restaurant_id,
+        operation="send_receipt",
+        resource_type="order",
+        resource_id=order_id,
+        db=db
+    )
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
+    
+    # Get the order
+    order = (
+        db.query(Order)
+        .filter(
+            Order.id == order_id,
+            Order.restaurant_id == restaurant_id
+        )
+        .first()
+    )
+    
+    if not order:
+        raise ResourceNotFoundException(
+            message=f"Order {order_id} not found"
+        )
+    
+    # Check if order has been paid
+    if order.payment_status != "completed":
+        raise ValidationException(
+            message="Cannot send receipt for unpaid order"
+        )
+    
+    # Check if customer email exists
+    if not order.customer_email:
+        raise ValidationException(
+            message="No customer email available for this order"
+        )
+    
+    # Get the payment amount
+    payment = (
+        db.query(Payment)
+        .filter(
+            Payment.order_id == order_id,
+            Payment.status == "completed"
+        )
+        .first()
+    )
+    
+    if not payment:
+        raise ValidationException(
+            message="No completed payment found for this order"
+        )
+    
+    # Send receipt asynchronously with proper session handling
+    try:
+        # Serialize order data for background task
+        order_data = serialize_order_for_background(order)
+        background_tasks.add_task(
+            send_receipt_with_logging,
+            order_dict=order_data,
+            type_="sale",
+            amount=float(payment.amount)
+        )
+        
+        logger.info(f"Receipt email queued for order {order.id} to {order.customer_email}")
+        
+        return APIResponseHelper.success(
+            data={
+                "message": f"Receipt will be sent to {order.customer_email}",
+                "order_id": str(order.id),
+                "email": order.customer_email
+            }
+        )
+    except Exception as e:
+        logger.error(f"Failed to queue receipt email for order {order.id}: {str(e)}")
+        raise FynloException(
+            message="Failed to send receipt email",
+            status_code=500
+        )

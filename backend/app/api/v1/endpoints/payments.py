@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Optional
 from decimal import Decimal
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
+from fastapi import APIRouter, Depends, status, Query, Request, BackgroundTasks
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import qrcode
@@ -29,8 +29,11 @@ from app.core.transaction_manager import transactional
 from app.core.tenant_security import TenantSecurity
 from app.services.payment_factory import payment_factory
 from app.services.audit_logger import AuditLoggerService
+from app.services.receipt_helper import send_receipt_with_logging, serialize_order_for_background
 from app.models.audit_log import AuditEventType, AuditEventStatus
+from app.services.payment_providers.base import PaymentStatus
 from app.middleware.rate_limit_middleware import limiter, PAYMENT_RATE
+from app.integration.websocket_events import emit_payment_completed
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -182,7 +185,7 @@ async def generate_qr_payment(
         #     commit=True
         # )
         raise ResourceNotFoundException(
-            resource="Order", resource_id=payment_request_data.order_id
+            resource="Order", resource_id=payment_request.order_id
         )
     # Calculate fees
     fee_amount = calculate_payment_fee(payment_request.amount, "qr_code")
@@ -257,6 +260,7 @@ async def generate_qr_payment(
 async def confirm_qr_payment(
     request: Request,
     qr_payment_id: str,
+    background_tasks: BackgroundTasks,
     current_restaurant_id: Optional[str] = Query(
         None, description="Restaurant ID for multi-location owners"
     ),
@@ -428,6 +432,24 @@ async def confirm_qr_payment(
         order.payment_status = "completed"
         order.status = "confirmed" if order.status == "pending" else order.status
 
+        # Send WebSocket notification for QR payment completion
+        try:
+            payment_data = {
+                "id": str(payment_record.id),
+                "order_id": str(order.id),
+                "order_number": order.order_number if hasattr(order, 'order_number') else None,
+                "restaurant_id": str(restaurant_id),
+                "amount": float(payment_record.amount),
+                "payment_method": "qr_code",
+                "transaction_id": str(qr_payment_id),
+            }
+            background_tasks.add_task(emit_payment_completed, payment_data)
+            logger.info(f"WebSocket notification queued for QR payment {payment_data['id']}")
+        except Exception as e:
+            logger.error(f"Failed to queue WebSocket notification for QR payment: {str(e)}")
+            # Don't fail the payment if WebSocket notification fails
+
+
         # Log success (commit=False due to @transactional)
         # The flush() within create_audit_log will assign an ID to payment_record
         await audit_service.create_audit_log(
@@ -447,6 +469,23 @@ async def confirm_qr_payment(
             },
             commit=False,
         )
+        
+        # Send receipt email asynchronously if customer email is available
+        if order.customer_email:
+            try:
+                # Serialize order data for background task
+                order_data = serialize_order_for_background(order)
+                background_tasks.add_task(
+                    send_receipt_with_logging,
+                    order_dict=order_data,
+                    type_="sale",
+                    amount=float(payment_record.amount)
+                )
+                logger.info(f"Receipt email queued for order {order.id} to {order.customer_email}")
+            except Exception as e:
+                logger.error(f"Failed to queue receipt email for order {order.id}: {str(e)}")
+                # Don't fail the payment if email fails
+        
         # Transaction will auto-commit due to @transactional decorator
 
     except Exception as e:
@@ -488,6 +527,7 @@ async def confirm_qr_payment(
 async def process_stripe_payment(
     payment_request_data: StripePaymentRequest,  # Renamed from 'request'
     request: Request,  # Added for rate limiter
+    background_tasks: BackgroundTasks,
     current_restaurant_id: Optional[str] = Query(
         None, description="Restaurant ID for multi-location owners"
     ),
@@ -612,6 +652,24 @@ async def process_stripe_payment(
             order.payment_status = "completed"
             order.status = "confirmed" if order.status == "pending" else order.status
 
+            # Send WebSocket notification for Stripe payment completion
+            try:
+                payment_data = {
+                    "id": str(payment_db_record.id),
+                    "order_id": str(order.id),
+                    "order_number": order.order_number if hasattr(order, 'order_number') else None,
+                    "restaurant_id": str(restaurant_id),
+                    "amount": float(payment_db_record.amount),
+                    "payment_method": "stripe",
+                    "transaction_id": payment_db_record.external_id,
+                }
+                background_tasks.add_task(emit_payment_completed, payment_data)
+                logger.info(f"WebSocket notification queued for Stripe payment {payment_data['id']}")
+            except Exception as e:
+                logger.error(f"Failed to queue WebSocket notification for Stripe payment: {str(e)}")
+                # Don't fail the payment if WebSocket notification fails
+
+
             await audit_service.create_audit_log(
                 event_type=AuditEventType.PAYMENT_SUCCESS,
                 event_status=AuditEventStatus.SUCCESS,
@@ -629,6 +687,22 @@ async def process_stripe_payment(
                 },
                 commit=False,
             )
+            
+            # Send receipt email asynchronously if customer email is available
+            if order.customer_email:
+                try:
+                    # Serialize order data for background task
+                    order_data = serialize_order_for_background(order)
+                    background_tasks.add_task(
+                        send_receipt_with_logging,
+                        order_dict=order_data,
+                        type_="sale",
+                        amount=float(payment_db_record.amount)
+                    )
+                    logger.info(f"Receipt email queued for order {order.id} to {order.customer_email}")
+                except Exception as e:
+                    logger.error(f"Failed to queue receipt email for order {order.id}: {str(e)}")
+                    # Don't fail the payment if email fails
         else:
             payment_db_record.status = "failed"
             logger.warning(
@@ -714,6 +788,7 @@ async def process_stripe_payment(
 async def process_cash_payment(
     payment_request_data: CashPaymentRequest,  # Renamed from 'request'
     request: Request,
+    background_tasks: BackgroundTasks,
     current_restaurant_id: Optional[str] = Query(
         None, description="Restaurant ID for multi-location owners"
     ),
@@ -809,6 +884,40 @@ async def process_cash_payment(
         f"Cash payment processed: {payment_db_record.id} for order {payment_request_data.order_id}"
     )
 
+    # Send WebSocket notification for cash payment completion
+    try:
+        payment_data = {
+            "id": str(payment_db_record.id),
+            "order_id": str(order.id),
+            "order_number": order.order_number if hasattr(order, 'order_number') else None,
+            "restaurant_id": str(restaurant_id),
+            "amount": float(payment_db_record.amount),
+            "payment_method": "cash",
+            "transaction_id": None,
+        }
+        background_tasks.add_task(emit_payment_completed, payment_data)
+        logger.info(f"WebSocket notification queued for cash payment {payment_data['id']}")
+    except Exception as e:
+        logger.error(f"Failed to queue WebSocket notification for cash payment: {str(e)}")
+        # Don't fail the payment if WebSocket notification fails
+
+
+    # Send receipt email asynchronously if customer email is available
+    if order.customer_email:
+        try:
+            # Serialize order data for background task
+            order_data = serialize_order_for_background(order)
+            background_tasks.add_task(
+                send_receipt_with_logging,
+                order_dict=order_data,
+                type_="sale",
+                amount=float(payment_db_record.amount)
+            )
+            logger.info(f"Receipt email queued for order {order.id} to {order.customer_email}")
+        except Exception as e:
+            logger.error(f"Failed to queue receipt email for order {order.id}: {str(e)}")
+            # Don't fail the payment if email fails
+
     return PaymentResponse(
         payment_id=str(payment_db_record.id),
         status=payment_db_record.status,
@@ -890,6 +999,7 @@ async def check_qr_payment_status(qr_payment_id: str, db: Session = Depends(get_
 async def process_payment(
     payment_data_req: PaymentRequest,  # Renamed from payment_data to avoid confusion
     request: Request,
+    background_tasks: BackgroundTasks,
     provider_query: Optional[str] = Query(
         None, alias="provider", description="Force specific provider"
     ),  # Renamed provider
@@ -1075,6 +1185,39 @@ async def process_payment(
             if result["status"] == "success":
                 db.refresh(order)
 
+            # Send WebSocket notification for payment completion
+            try:
+                payment_data = {
+                    "id": str(payment_db_record.id),
+                    "order_id": str(order.id),
+                    "order_number": order.order_number if hasattr(order, 'order_number') else None,
+                    "restaurant_id": str(restaurant_id),
+                    "amount": float(payment_db_record.amount),
+                    "payment_method": payment_db_record.payment_method,
+                    "transaction_id": payment_db_record.external_id,
+                }
+                background_tasks.add_task(emit_payment_completed, payment_data)
+                logger.info(f"WebSocket notification queued for payment {payment_data['id']}")
+            except Exception as e:
+                logger.error(f"Failed to queue WebSocket notification: {str(e)}")
+                # Don't fail the payment if WebSocket notification fails
+
+            # Send receipt email asynchronously if payment was successful and customer has email
+            if result["status"] == "success" and order.customer_email:
+                try:
+                    # Serialize order data for background task
+                    order_data = serialize_order_for_background(order)
+                    background_tasks.add_task(
+                        send_receipt_with_logging,
+                        order_dict=order_data,
+                        type_="sale",
+                        amount=float(payment_db_record.amount)
+                    )
+                    logger.info(f"Receipt email queued for order {order.id} to {order.customer_email}")
+                except Exception as e:
+                    logger.error(f"Failed to queue receipt email for order {order.id}: {str(e)}")
+                    # Don't fail the payment if email fails
+
             return APIResponseHelper.success(
                 message=f"Payment processed successfully with {result['provider']}",
                 data={
@@ -1190,7 +1333,7 @@ async def refund_payment(
             },
             commit=True,
         )
-        raise ResourceNotFoundException(resource="Payment", resource_id=payment_id)
+        raise ResourceNotFoundException(resource="Payment", resource_id=transaction_id)
     provider_name_from_meta = payment_db_record.payment_metadata.get(
         "provider", payment_db_record.payment_method
     )
@@ -1469,9 +1612,9 @@ async def square_create_payment_endpoint(
             "square", db_session=db
         )
         if not square_provider:
-            raise HTTPException(
+            raise FynloException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Square provider not available.",
+                message="Square provider not available.",
             )
 
         # Validate order if order_id is provided
@@ -1501,9 +1644,9 @@ async def square_create_payment_endpoint(
                     },
                     commit=True,
                 )
-                raise HTTPException(
+                raise FynloException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Order {payment_create_req.order_id} not found.",
+                    message=f"Order {payment_create_req.order_id} not found.",
                 )
             if order.payment_status == "completed":
                 await audit_service.create_audit_log(
@@ -1519,9 +1662,9 @@ async def square_create_payment_endpoint(
                     details={"reason": "Order already marked as paid."},
                     commit=True,
                 )
-                raise HTTPException(
+                raise FynloException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Order already paid.",
+                    message="Order already paid.",
                 )
 
         await audit_service.create_audit_log(
@@ -1548,7 +1691,7 @@ async def square_create_payment_endpoint(
 
         internal_payment_id = None
         if provider_response.get("status") in [
-            PaymentStatus.SUCCESS.value,
+            PaymentStatus.COMPLETED.value,
             PaymentStatus.PENDING.value,
         ] and provider_response.get("transaction_id"):
             # Create Payment record in our DB
@@ -1587,7 +1730,7 @@ async def square_create_payment_endpoint(
                 external_id=provider_response["transaction_id"],
                 processed_at=(
                     datetime.utcnow()
-                    if provider_response["status"] == PaymentStatus.SUCCESS.value
+                    if provider_response["status"] == PaymentStatus.COMPLETED.value
                     else None
                 ),
                 payment_metadata={
@@ -1598,7 +1741,7 @@ async def square_create_payment_endpoint(
                 },
             )
             db.add(payment_db)
-            if order and provider_response["status"] == PaymentStatus.SUCCESS.value:
+            if order and provider_response["status"] == PaymentStatus.COMPLETED.value:
                 order.payment_status = "completed"
                 order.status = (
                     "confirmed" if order.status == "pending" else order.status
@@ -1607,12 +1750,12 @@ async def square_create_payment_endpoint(
             await audit_service.create_audit_log(
                 event_type=(
                     AuditEventType.PAYMENT_SUCCESS
-                    if provider_response["status"] == PaymentStatus.SUCCESS.value
+                    if provider_response["status"] == PaymentStatus.COMPLETED.value
                     else AuditEventType.PAYMENT_PENDING
                 ),
                 event_status=(
                     AuditEventStatus.SUCCESS
-                    if provider_response["status"] == PaymentStatus.SUCCESS.value
+                    if provider_response["status"] == PaymentStatus.COMPLETED.value
                     else AuditEventStatus.PENDING
                 ),
                 action_performed=f"Square payment status: {provider_response['status']}.",
@@ -1649,9 +1792,9 @@ async def square_create_payment_endpoint(
                 commit=True,
             )
             # db.commit() # Commit only audit log for failure
-            raise HTTPException(
+            raise FynloException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=provider_response.get("error", "Square payment creation failed"),
+                message=provider_response.get("error", "Square payment creation failed"),
             )
 
         return SquarePaymentResponseData(
@@ -1677,8 +1820,8 @@ async def square_create_payment_endpoint(
             raw_response=provider_response.get("raw_response"),
         )
 
-    except HTTPException:
-        raise  # Re-raise HTTPException to preserve status code and detail
+    except FynloException:
+        raise  # Re-raise FynloException to preserve status code and detail
     except Exception as e:
         logger.error(f"Square payment creation error: {str(e)}", exc_info=True)
         await audit_service.create_audit_log(
@@ -1693,7 +1836,7 @@ async def square_create_payment_endpoint(
             commit=True,
         )
         # db.commit() # Commit audit log
-        raise HTTPException(
+        raise FynloException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
 
@@ -1728,9 +1871,9 @@ async def square_process_payment_endpoint(
             "square", db_session=db
         )
         if not square_provider:
-            raise HTTPException(
+            raise FynloException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Square provider not available.",
+                message="Square provider not available.",
             )
 
         # Find the original payment record in our DB by external_id (Square Payment ID)
@@ -1757,12 +1900,12 @@ async def square_process_payment_endpoint(
                 details={"external_payment_id": payment_process_req.payment_id},
                 commit=True,
             )
-            raise HTTPException(
+            raise FynloException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Payment with Square ID {payment_process_req.payment_id} not found in local records.",
+                message=f"Payment with Square ID {payment_process_req.payment_id} not found in local records.",
             )
 
-        if payment_db.status == PaymentStatus.SUCCESS.value:  # Already completed
+        if payment_db.status == PaymentStatus.COMPLETED.value:  # Already completed
             await audit_service.create_audit_log(
                 event_type=AuditEventType.PAYMENT_INFO,
                 event_status=AuditEventStatus.INFO,
@@ -1808,7 +1951,7 @@ async def square_process_payment_endpoint(
             "process_response": provider_response.get("raw_response"),
         }
 
-        if current_provider_status == PaymentStatus.SUCCESS.value:
+        if current_provider_status == PaymentStatus.COMPLETED.value:
             payment_db.processed_at = datetime.utcnow()
             if payment_db.order_id:
                 order = db.query(Order).filter(Order.id == payment_db.order_id).first()
@@ -1884,7 +2027,7 @@ async def square_process_payment_endpoint(
             raw_response=provider_response.get("raw_response"),
         )
 
-    except HTTPException:
+    except FynloException:
         raise
     except Exception as e:
         logger.error(f"Square payment processing error: {str(e)}", exc_info=True)
@@ -1902,7 +2045,7 @@ async def square_process_payment_endpoint(
             },
             commit=True,
         )
-        raise HTTPException(
+        raise FynloException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
 
@@ -1937,9 +2080,9 @@ async def square_get_payment_status_endpoint(
             "square", db_session=db
         )
         if not square_provider:
-            raise HTTPException(
+            raise FynloException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Square provider not available.",
+                message="Square provider not available.",
             )
 
         # Optional: Log audit for status check initiation
@@ -1980,9 +2123,9 @@ async def square_get_payment_status_endpoint(
                 },
                 commit=True,
             )
-            raise HTTPException(
+            raise FynloException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Square payment with ID {payment_id} not found by provider.",
+                message=f"Square payment with ID {payment_id} not found by provider.",
             )
 
         return SquarePaymentResponseData(
@@ -2007,7 +2150,7 @@ async def square_get_payment_status_endpoint(
             ),
             raw_response=provider_response.get("raw_response"),
         )
-    except HTTPException:
+    except FynloException:
         raise
     except Exception as e:
         logger.error(f"Square payment status retrieval error: {str(e)}", exc_info=True)
@@ -2022,7 +2165,7 @@ async def square_get_payment_status_endpoint(
             details={"external_payment_id": payment_id, "error": str(e)},
             commit=True,
         )
-        raise HTTPException(
+        raise FynloException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
 
@@ -2061,7 +2204,7 @@ async def stripe_webhook_endpoint(
             details={"reason": "STRIPE_WEBHOOK_SECRET not set in environment."},
             commit=True,
         )
-        raise HTTPException(
+        raise FynloException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Webhook secret not configured.",
         )
@@ -2085,7 +2228,7 @@ async def stripe_webhook_endpoint(
             },
             commit=True,
         )
-        raise HTTPException(
+        raise FynloException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid payload"
         )
     except stripe.error.SignatureVerificationError as e:  # Invalid signature
@@ -2100,7 +2243,7 @@ async def stripe_webhook_endpoint(
             details={"error": str(e), "signature_header": sig_header},
             commit=True,
         )
-        raise HTTPException(
+        raise FynloException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid signature"
         )
     except Exception as e:  # Other construction errors
@@ -2115,7 +2258,7 @@ async def stripe_webhook_endpoint(
             details={"error": str(e)},
             commit=True,
         )
-        raise HTTPException(
+        raise FynloException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Webhook event construction error",
         )
@@ -2164,9 +2307,9 @@ async def stripe_webhook_endpoint(
             )
             if payment:
                 if (
-                    payment.status != PaymentStatus.SUCCESS.value
+                    payment.status != PaymentStatus.COMPLETED.value
                 ):  # Avoid reprocessing if already success
-                    payment.status = PaymentStatus.SUCCESS.value
+                    payment.status = PaymentStatus.COMPLETED.value
                     payment.processed_at = datetime.utcnow()
                     payment.payment_metadata = {
                         **payment.payment_metadata,
