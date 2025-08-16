@@ -218,6 +218,14 @@ class SumUpTapToPayModule: NSObject, RCTBridgeModule {
         }
     }
     
+    @objc
+    func isSDKInitialized(_ resolver: @escaping RCTPromiseResolveBlock,
+                          rejecter: @escaping RCTPromiseRejectBlock) {
+        // Check if SDK was initialized early in AppDelegate
+        let isInitialized = AppDelegate.isSumUpInitialized()
+        resolver(["isInitialized": isInitialized])
+    }
+    
     // MARK: - Helper Methods
     
     private func getRootViewController() -> UIViewController? {

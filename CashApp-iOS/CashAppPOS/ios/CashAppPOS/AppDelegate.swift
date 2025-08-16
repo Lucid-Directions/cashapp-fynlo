@@ -149,24 +149,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   
   private func getSumUpAPIKey() -> String? {
     // Try to get API key from multiple sources
-    // 1. Info.plist (for production)
+    // WARNING: For production, DO NOT hardcode API key in Info.plist as it ships with the app binary
+    // The backend should provide the API key, which gets saved to UserDefaults for subsequent launches
+    
+    // 1. Info.plist (DEVELOPMENT ONLY - DO NOT USE IN PRODUCTION)
     if let apiKey = Bundle.main.object(forInfoDictionaryKey: "SUMUP_API_KEY") as? String,
        !apiKey.isEmpty {
-      print("[TAP_TO_PAY] Using API key from Info.plist")
+      print("[TAP_TO_PAY] ⚠️ Using API key from Info.plist - NOT RECOMMENDED FOR PRODUCTION")
       return apiKey
     }
     
-    // 2. User defaults (if saved from backend config)
+    // 2. User defaults (RECOMMENDED - saved from backend config)
     if let apiKey = UserDefaults.standard.string(forKey: "sumup_api_key"),
        !apiKey.isEmpty {
-      print("[TAP_TO_PAY] Using API key from UserDefaults")
+      print("[TAP_TO_PAY] ✅ Using API key from UserDefaults (saved from backend)")
       return apiKey
     }
     
-    // 3. Environment variable (for development)
+    // 3. Environment variable (DEVELOPMENT ONLY)
     if let apiKey = ProcessInfo.processInfo.environment["SUMUP_API_KEY"],
        !apiKey.isEmpty {
-      print("[TAP_TO_PAY] Using API key from environment")
+      print("[TAP_TO_PAY] Using API key from environment variable")
       return apiKey
     }
     

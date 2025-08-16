@@ -27,6 +27,7 @@ interface SumUpTapToPayModule {
   presentCheckoutPreferences(): Promise<{ success: boolean }>;
   getCurrentMerchant(): Promise<MerchantInfo | null>;
   isLoggedIn(): Promise<{ isLoggedIn: boolean }>;
+  isSDKInitialized(): Promise<{ isInitialized: boolean }>;
 }
 
 interface TransactionResult {
@@ -118,6 +119,24 @@ class NativeSumUpService {
    */
   isSDKSetup(): boolean {
     return this.isSetup;
+  }
+
+  /**
+   * Check if SDK was initialized early in AppDelegate
+   */
+  async wasInitializedEarly(): Promise<boolean> {
+    if (!this.isAvailable()) {
+      return false;
+    }
+
+    try {
+      const result = await NativeSumUp!.isSDKInitialized();
+      logger.info('[TAP_TO_PAY] Early initialization status:', result.isInitialized);
+      return result.isInitialized;
+    } catch (error) {
+      logger.warn('[TAP_TO_PAY] Could not check early initialization status:', error);
+      return false;
+    }
   }
 
   /**
