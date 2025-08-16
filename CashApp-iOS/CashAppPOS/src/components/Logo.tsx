@@ -4,7 +4,7 @@ import { Image, StyleSheet, View, Text, Platform } from 'react-native';
 
 import { logger } from '../utils/logger';
 
-// Import logo at the top level - if it doesn't exist, build will fail
+// Import optimized logo versions - React Native will automatically pick the right one
 const fynloLogo = require('../assets/fynlo-logo.png');
 
 interface LogoProps {
