@@ -62,16 +62,9 @@ const Logo: React.FC<LogoProps> = ({
 
   const sizeStyles = getSizeStyles();
 
-  // Use the actual Fynlo logo image
-  let logoSource = null;
-  try {
-    if (!imageError) {
-      logoSource = require('../assets/fynlo-logo.png');
-    }
-  } catch (error) {
-    logger.info('Logo image not found, falling back to text');
-    setImageError(true);
-  }
+  // Use the actual Fynlo logo image - require() happens at build time
+  // If the image doesn't exist, the build will fail, so no try-catch needed
+  const logoSource = !imageError ? require('../assets/fynlo-logo.png') : null;
 
   return (
     <View style={[styles.container, style]}>
