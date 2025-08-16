@@ -8,8 +8,12 @@
 
 import { Platform } from 'react-native';
 import { logger } from '../utils/logger';
-import NativeSumUpService from './NativeSumUpService';
 import DeviceInfo from 'react-native-device-info';
+
+// Lazy import to avoid circular dependency
+// NativeSumUpService imports TapToPayDiagnostics for logging,
+// so we need to import it lazily here
+const getNativeSumUpService = () => require('./NativeSumUpService').default;
 
 interface DiagnosticReport {
   timestamp: string;
@@ -95,7 +99,8 @@ class TapToPayDiagnostics {
   async generateReport(): Promise<DiagnosticReport> {
     this.logEvent('Generating diagnostic report');
     
-    const sumUpService = NativeSumUpService;
+    // Get service lazily to avoid circular dependency
+    const sumUpService = getNativeSumUpService();
     const report: DiagnosticReport = {
       timestamp: new Date().toISOString(),
       platform: {
