@@ -16,8 +16,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     #if DEBUG
       // Use Metro bundler in development for hot reloading
-      jsCodeLocation = RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index", fallbackExtension: nil)!
-      print("🔧 Using Metro bundler for development")
+      // Fallback to bundled JS if Metro server is not running
+      if let metroURL = RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index", fallbackExtension: nil) {
+        jsCodeLocation = metroURL
+        print("🔧 Using Metro bundler for development")
+      } else if let bundledURL = Bundle.main.url(forResource: "main", withExtension: "jsbundle") {
+        jsCodeLocation = bundledURL
+        print("⚠️ Metro server not running, using bundled JavaScript in DEBUG mode")
+      } else {
+        fatalError("❌ Neither Metro server nor bundled JavaScript file available")
+      }
     #else
       // Use bundled JS in release builds
       guard let bundledURL = Bundle.main.url(forResource: "main", withExtension: "jsbundle") else {
