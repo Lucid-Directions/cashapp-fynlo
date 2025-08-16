@@ -4,6 +4,12 @@ import { Image, StyleSheet, View, Text, Platform } from 'react-native';
 
 import { logger } from '../utils/logger';
 
+// For iOS, use the image from the asset catalog which is always available
+// For Android/Web, use the bundled asset
+const fynloLogo = Platform.OS === 'ios' 
+  ? { uri: 'FynloLogo' }  // This references Images.xcassets/FynloLogo
+  : require('../assets/fynlo-logo.png');
+
 interface LogoProps {
   size?: 'small' | 'medium' | 'large';
   showText?: boolean;
@@ -31,27 +37,29 @@ const Logo: React.FC<LogoProps> = ({
   imageStyle,
   textStyle,
 }) => {
+  const [imageError, setImageError] = React.useState(false);
+  
   const getSizeStyles = () => {
     switch (size) {
       case 'small':
         return {
-          width: 40,
-          height: 40,
+          width: 60,
+          height: 60,
           fontSize: 20,
           subFontSize: 12,
         };
       case 'large':
         return {
-          width: 120,
-          height: 120,
+          width: 180,
+          height: 180,
           fontSize: 56,
           subFontSize: 16,
         };
       case 'medium':
       default:
         return {
-          width: 80,
-          height: 80,
+          width: 120,
+          height: 120,
           fontSize: 32,
           subFontSize: 14,
         };
@@ -60,8 +68,8 @@ const Logo: React.FC<LogoProps> = ({
 
   const sizeStyles = getSizeStyles();
 
-  // For now, always use the text fallback since image loading is problematic
-  const logoSource = null;
+  // Use the imported logo, or null if there was a runtime error loading it
+  const logoSource = !imageError ? fynloLogo : null;
 
   return (
     <View style={[styles.container, style]}>
@@ -77,9 +85,13 @@ const Logo: React.FC<LogoProps> = ({
             imageStyle,
           ]}
           resizeMode="contain"
-          onError={() => logger.info('Logo failed to load')}
+          onError={() => {
+            logger.info('Logo image failed to load, falling back to text');
+            setImageError(true);
+          }}
         />
       ) : (
+        // Fallback to text if image fails to load
         <View style={styles.logoTextContainer}>
           <Text style={[styles.logoMainText, { fontSize: sizeStyles.fontSize }]}>
             fynl
@@ -89,19 +101,7 @@ const Logo: React.FC<LogoProps> = ({
           </Text>
         </View>
       )}
-      {showText && logoSource && (
-        <View style={styles.textContainer}>
-          <Text style={[styles.logoText, { fontSize: sizeStyles.fontSize }, textStyle]}>
-            Fynl
-            <Text style={[styles.logoText, styles.orangeO, { fontSize: sizeStyles.fontSize }]}>
-              o
-            </Text>
-          </Text>
-          <Text style={[styles.logoSubtext, { fontSize: sizeStyles.subFontSize }]}>
-            Point of Sale
-          </Text>
-        </View>
-      )}
+      {/* Don't show text below logo since the image already contains the text */}
     </View>
   );
 };
