@@ -1,0 +1,22 @@
+diff --git a/node_modules/react-native-camera/ios/RCT/RCTCameraManager.m b/node_modules/react-native-camera/ios/RCT/RCTCameraManager.m
+index 829992d..82827b4 100644
+--- a/node_modules/react-native-camera/ios/RCT/RCTCameraManager.m
++++ b/node_modules/react-native-camera/ios/RCT/RCTCameraManager.m
+@@ -14,7 +14,7 @@
+ @interface RCTCameraManager ()
+ 
+ @property (strong, nonatomic) RCTSensorOrientationChecker * sensorOrientationChecker;
+-@property (assign, nonatomic) NSInteger* flashMode;
++@property (assign, nonatomic) NSInteger flashMode;
+ 
+ @end
+ 
+@@ -275,7 +275,7 @@ - (void)setFlashMode {
+ 
+ RCT_CUSTOM_VIEW_PROPERTY(torchMode, NSInteger, RCTCamera) {
+   dispatch_async(self.sessionQueue, ^{
+-    NSInteger *torchMode = [RCTConvert NSInteger:json];
++    NSInteger torchMode = [RCTConvert NSInteger:json];
+     AVCaptureDevice *device = [self.videoCaptureDeviceInput device];
+     NSError *error = nil;
+ 

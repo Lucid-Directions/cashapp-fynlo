@@ -7,6 +7,9 @@ import { logger } from '../utils/logger';
 // Import logo at the top level - if it doesn't exist, build will fail
 const fynloLogo = require('../assets/fynlo-logo.png');
 
+// Debug: Log the actual asset info
+console.log('Fynlo Logo Asset:', Image.resolveAssetSource(fynloLogo));
+
 interface LogoProps {
   size?: 'small' | 'medium' | 'large';
   showText?: boolean;
@@ -67,6 +70,15 @@ const Logo: React.FC<LogoProps> = ({
 
   // Use the imported logo, or null if there was a runtime error loading it
   const logoSource = !imageError ? fynloLogo : null;
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('Logo Component Debug:', {
+      imageError,
+      logoSource: logoSource ? 'Image loaded' : 'Using text fallback',
+      fynloLogo: fynloLogo ? 'Asset exists' : 'Asset missing'
+    });
+  }, [imageError]);
 
   return (
     <View style={[styles.container, style]}>
