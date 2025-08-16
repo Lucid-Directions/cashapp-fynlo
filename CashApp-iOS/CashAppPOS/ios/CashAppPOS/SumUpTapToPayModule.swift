@@ -22,6 +22,8 @@ class SumUpTapToPayModule: NSObject, RCTBridgeModule {
                   rejecter: @escaping RCTPromiseRejectBlock) {
         DispatchQueue.main.async {
             SMPSumUpSDK.setup(withAPIKey: apiKey)
+            // Save API key to UserDefaults for early initialization
+            UserDefaults.standard.set(apiKey, forKey: "sumup_api_key")
             resolver(["success": true])
         }
     }
